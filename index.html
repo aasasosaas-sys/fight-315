@@ -30,6 +30,11 @@
 		var f=d.getElementsByTagName(s)[0],
 		j=d.createElement(s);j.async=true;j.src='/gk7x/';
 		f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer');</script><script>(function(w,i,g){w[g]=w[g]||[];if(typeof w[g].push=='function')w[g].push(i)})
+(window,'GTM-K3QN3TWK','google_tags_first_party');</script><script>(function(w,d,s,l){w[l]=w[l]||[];(function(){w[l].push(arguments);})('set', 'developer_id.dY2E1Nz', true);
+		var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s);j.async=true;j.src='/gk7x/';
+		f.parentNode.insertBefore(j,f);
 		})(window,document,'script','dataLayer');</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -928,7 +933,7 @@
                 <h3 class="font-mincho text-base md:text-lg font-bold gold-gradient-text"><i class="fa-solid fa-arrow-right-arrow-left mr-2"></i>データ移行（引継ぎ）</h3>
                 <button onclick="closeModal('dataTransferModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <p class="text-[11px] text-gray-300 mb-2">移行できるのは「所持キャラ・ステージ進行度・お金（銭）・宝石（宝玉）」のみです。出力したコードを別端末の同じ欄に貼り付けて読み込みしてください。</p>
+            <p class="text-[11px] text-gray-300 mb-2">移行できるのは「所持キャラ・キャラのレベル（ステータス/必殺技強化）・編成・ステージ進行度・お金（銭）・宝石（宝玉）」です。出力したコードを別端末の同じ欄に貼り付けて読み込みしてください。</p>
             <textarea id="dataTransferText" class="w-full h-28 bg-black/70 border border-heian-gold/40 rounded-lg p-2 text-[10px] font-mono text-yellow-200 focus:outline-none focus:border-heian-gold" placeholder="ここに移行コードが入ります"></textarea>
             <div class="mt-3 pt-2 border-t border-heian-purple/60 flex flex-wrap justify-center gap-2">
                 <button onclick="exportDataTransfer()" class="bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded text-xs text-gray-200"><i class="fa-solid fa-file-export mr-1"></i>出力（現在のデータ）</button>
@@ -1064,7 +1069,7 @@
 
             // Category 4: 説話・軍記・評論・日記
             { id: "so_001", name: "和尚／聖", gender: "男性", rarity: "R", icon: "fa-hands-praying", description: "説話に登場する高僧。", skill: { name: "説話のオチ役", effect: "被撃時確率で敵を混乱" }, special_move: { name: "かいもちひの誘惑", effect: "自身を回復（時折失敗）" }, gaugePerCorrect: 12, gaugeNeedsVotes: 8, synergies: [{ target_id: "so_002", title: "師弟（知恵比べ）", effect: "スキル再使用時間短縮" }] },
-            { id: "so_002", name: "稚児", gender: "男性", rarity: "R", icon: "fa-child", description: "寺院の少年。『ぼたもち』の説話。", skill: { name: "寝たふり", effect: "開戦時1度だけダメージ無効" }, special_move: { name: "いざ、おどろかされん", effect: "敵単体に不意打ち物理ダメージ" }, gaugePerCorrect: 13, gaugeNeedsVotes: 7, synergies: [{ target_id: "so_001", title: "師弟（知恵比べ）", effect: "回避率上昇" }] },
+            { id: "so_002", name: "稚児", gender: "男性", rarity: "R", icon: "fa-child", description: "寺院の少年。『ぼたもち』の説話。", skill: { name: "寝たふり", effect: "10%の確率で味方全員の受けるダメージを0にする" }, special_move: { name: "いざ、おどろかされん", effect: "敵単体に不意打ち物理ダメージ" }, gaugePerCorrect: 13, gaugeNeedsVotes: 7, synergies: [{ target_id: "so_001", title: "師弟（知恵比べ）", effect: "回避率上昇" }] },
             { id: "so_003", name: "阿倍晴明", gender: "男性", rarity: "SSR", icon: "fa-hat-wizard", description: "伝説の陰陽師。式神を操る。", skill: { name: "陰陽の道", effect: "本人は常時デバフ・状態異常を無効化" }, special_move: { name: "急々如律令（式神召喚）", effect: "式神召喚で敵全体連続属性攻撃" }, gaugePerCorrect: 26, gaugeNeedsVotes: 3, synergies: [] },
             { id: "so_004", name: "藤原保昌", gender: "男性", rarity: "SR", icon: "fa-user-ninja", description: "『今昔物語集』の風流武者。", skill: { name: "隙なき歩み", effect: "敵の攻撃回避率上昇" }, special_move: { name: "月下の笛の音", effect: "敵全体の攻撃判定をミスに" }, gaugePerCorrect: 18, gaugeNeedsVotes: 5, synergies: [] },
             { id: "so_005", name: "平清盛", gender: "男性", rarity: "SSR", icon: "fa-fire", description: "『平家物語』平家の絶対権力者。", skill: { name: "おごれる者", effect: "序盤30秒間の攻撃爆発上昇" }, special_move: { name: "あつちの怪異（熱病の猛火）", effect: "敵全火属性超絶ダメ＋自傷" }, gaugePerCorrect: 24, gaugeNeedsVotes: 4, synergies: [{ target_id: "so_008", title: "父娘", effect: "攻撃力アップ" }] },
@@ -3260,6 +3265,14 @@
             };
         }
 
+        // ⑤ キャラの性別を一目で分かるマーク（男性=♂ / 女性=♀）
+        function genderMark(unit) {
+            if (!unit || !unit.gender) return "";
+            return unit.gender === "女性"
+                ? '<span class="text-pink-400 font-black" title="女性">♀</span>'
+                : '<span class="text-sky-400 font-black" title="男性">♂</span>';
+        }
+
         function getActiveSynergiesForDeck(deckIds) {
             const activeSynergies = [];
             deckIds.forEach(id => {
@@ -3477,7 +3490,7 @@
                 return;
             }
             list.forEach((f, idx) => {
-                const names = (f.units || []).map(uid => { const u = getUnit(uid); return u ? u.name : "?"; }).join("・");
+                const names = (f.units || []).map(uid => { const u = getUnit(uid); return u ? (u.gender === '女性' ? '♀' : u.gender === '男性' ? '♂' : '') + u.name : "?"; }).join("・");
                 const card = document.createElement("div");
                 card.className = "bg-heian-purple/30 border border-heian-gold/40 rounded-lg p-2 flex flex-col gap-1";
                 card.innerHTML = `
@@ -3600,7 +3613,7 @@
                         <div class="w-10 h-10 rounded-full bg-heian-purple border border-heian-gold flex items-center justify-center text-heian-gold text-lg mb-1">
                             <i class="fa-solid ${unit.icon}"></i>
                         </div>
-                        <div class="font-mincho text-xs font-bold text-yellow-100 truncate w-full">${unit.name}</div>
+                        <div class="font-mincho text-xs font-bold text-yellow-100 truncate w-full">${unit.name} ${genderMark(unit)}</div>
                         <div class="text-[9px] text-gray-300 font-mono mt-0.5">HP ${st.hp} / ATK ${st.atk}</div>
                         <div class="text-[8px] text-cyan-300 font-bold mt-1 bg-black/60 p-1 rounded w-full text-left border border-cyan-500/20">
                             <div class="truncate text-cyan-300 font-bold"><i class="fa-solid fa-sparkles mr-0.5"></i>${unit.skill ? unit.skill.name : 'スキルなし'}</div>
@@ -3672,7 +3685,7 @@
                     <div class="w-10 h-10 rounded-full bg-heian-purple border border-heian-gold flex items-center justify-center text-heian-gold text-lg mb-1">
                         <i class="fa-solid ${unit.icon}"></i>
                     </div>
-                    <div class="font-mincho text-xs font-bold text-yellow-100 truncate w-full">${unit.name}</div>
+                    <div class="font-mincho text-xs font-bold text-yellow-100 truncate w-full">${unit.name} ${genderMark(unit)}</div>
                     <div class="text-[9px] text-gray-300 font-mono mt-0.5">HP ${st.hp} / ATK ${st.atk}</div>
                     <div class="text-[8px] text-cyan-300 mt-1 w-full bg-black/50 p-1 rounded text-left border border-cyan-500/20">
                         <div class="font-bold truncate"><i class="fa-solid fa-sparkles mr-0.5"></i>${unit.skill ? unit.skill.name : 'スキルなし'}</div>
@@ -3797,7 +3810,7 @@
                     <div>
                         <div class="flex justify-between items-start mb-1">
                             <span class="font-mincho font-bold text-yellow-100 text-sm flex items-center gap-1.5">
-                                <i class="fa-solid ${unit.icon} text-amber-400"></i> ${unit.name}
+                                <i class="fa-solid ${unit.icon} text-amber-400"></i> ${unit.name} ${genderMark(unit)}
                             </span>
                             <span class="text-[10px] bg-amber-500 text-black font-black px-1.5 py-0.5 rounded">${unit.rarity}</span>
                         </div>
@@ -4114,7 +4127,7 @@ ${draw[0].msg}
                         <div class="w-12 h-12 rounded-full bg-heian-purple border border-heian-gold flex items-center justify-center text-heian-gold text-2xl my-1">
                             <i class="fa-solid ${unit.icon}"></i>
                         </div>
-                        <div class="font-mincho font-bold text-xs text-yellow-100">${unit.name}</div>
+                        <div class="font-mincho font-bold text-xs text-yellow-100">${unit.name} ${genderMark(unit)}</div>
                     `;
                     cardsGrid.appendChild(card);
                 });
@@ -4130,14 +4143,16 @@ ${draw[0].msg}
         let _explainDungeonId = null;
 
         // ============================================================
-        // ③ 敵の難易度係数（ダンジョン10以降の上昇率を大幅強化）
-        // 1〜9: 従来通り / 10〜14: 1.22 乗で急上昇 / 15以降: 1.24 乗でさらに急上昇
+        // ③ 敵の難易度係数（ダンジョン5以降の上昇幅を大幅強化）
+        // 1〜4: 従来通り / 5〜9: 1.22 乗 / 10〜14: 1.26 乗 / 15〜19: 1.30 乗 / 20以降: 1.34 乗
         // ============================================================
         function getEnemyDiffMult(dungNum, stageNum) {
             const stageFactor = (1 + stageNum * 0.12);
-            if (dungNum < 10) return Math.pow(1.18, dungNum - 1) * stageFactor * 0.88;
-            if (dungNum < 15) return Math.pow(1.22, dungNum - 1) * stageFactor;
-            return Math.pow(1.24, dungNum - 1) * stageFactor;
+            if (dungNum < 5) return Math.pow(1.18, dungNum - 1) * stageFactor * 0.88;
+            if (dungNum < 10) return Math.pow(1.22, dungNum - 1) * stageFactor;
+            if (dungNum < 15) return Math.pow(1.26, dungNum - 1) * stageFactor;
+            if (dungNum < 20) return Math.pow(1.30, dungNum - 1) * stageFactor;
+            return Math.pow(1.34, dungNum - 1) * stageFactor;
         }
         function openStageExplain(dung, stgObj) {
             closeModal("stageSelectModal");
@@ -4287,6 +4302,7 @@ ${draw[0].msg}
             if (partyIds.includes('so_003')) skillAnnounce.push('阿倍晴明: 本人のみ状態異常無効');
             if (partyIds.includes('so_007')) skillAnnounce.push(`在原業平: 女性スキル無効の代わりに攻撃力×${femaleCount}`);
             if (partyIds.includes('so_010')) skillAnnounce.push(hasYarihei ? '右大将道綱母: 在原業平優先のため無効' : '右大将道綱母: 男性の味方HP1.3倍');
+            if (partyIds.includes('so_002')) skillAnnounce.push('稚児: 10%の確率で味方全員の被ダメージを0にする');
             if (skillAnnounce.length) {
                 setTimeout(() => {
                     createFloatingText(skillAnnounce.join(' / '), document.getElementById("playerSideBox"), "text-cyan-300 text-[9px] font-bold");
@@ -4423,11 +4439,24 @@ ${draw[0].msg}
                 return;
             }
 
+            // ② 稚児「寝たふり」(改): 10%の確率で味方全員の受けるダメージを0にする
+            if (battleState.party.some(p => p.id === 'so_002' && p.sealedSeconds <= 0) && Math.random() < 0.10) {
+                createFloatingText("🙏 稚児の寝たふり！被ダメージ0！", playerBox, "text-cyan-300 text-sm font-black");
+                updateBattleUI();
+                return;
+            }
+
             // 敵攻撃力DOWNデバフ・味方防御UPバフを反映
             let atk = battleState.enemyAtk;
             if (battleState.debuffs.eAtk) atk = Math.floor(atk * (1 - battleState.debuffs.eAtk.pct / 100));
             const defPct = buffPct("def");
             if (defPct > 0) atk = Math.floor(atk * 100 / (100 + defPct));
+
+            // ④ ダンジョン20以降: 敵が攻撃するたびに30%の確率で受けるダメージを1/10に軽減
+            if (battleState.dungeonNum >= 20 && Math.random() < 0.30) {
+                atk = Math.floor(atk / 10);
+                createFloatingText("🛡️ 必殺技ガード！受けるダメージ1/10", playerBox, "text-cyan-300 text-sm font-black");
+            }
 
             battleState.playerHp = Math.max(0, battleState.playerHp - atk);
             AudioFX.playHurt();
@@ -4666,6 +4695,12 @@ ${draw[0].msg}
                 } else if (battleState.shieldSec > 0) {
                     counterAtk = 0;
                     createFloatingText("🔰 バリアで防いだ！", playerBox, "text-cyan-300 text-sm font-bold");
+                } else if (battleState.party.some(p => p.id === 'so_002' && p.sealedSeconds <= 0) && Math.random() < 0.10) {
+                    counterAtk = 0;
+                    createFloatingText("🙏 稚児の寝たふり！被ダメージ0！", playerBox, "text-cyan-300 text-sm font-black");
+                } else if (battleState.dungeonNum >= 20 && Math.random() < 0.30) {
+                    counterAtk = Math.floor(counterAtk / 10);
+                    createFloatingText("🛡️ 必殺技ガード！受けるダメージ1/10", playerBox, "text-cyan-300 text-sm font-black");
                 }
                 battleState.playerHp = Math.max(0, battleState.playerHp - counterAtk);
                 if (counterAtk > 0) AudioFX.playHurt();
@@ -5107,7 +5142,7 @@ ${draw[0].msg}
                     <div class="w-8 h-8 rounded-full bg-heian-purple border border-heian-gold flex items-center justify-center text-heian-gold text-xs my-0.5">
                         <i class="fa-solid ${p.unit.icon}"></i>
                     </div>
-                    <span class="text-[9px] font-bold font-mincho text-yellow-100 truncate w-full">${p.unit.name}</span>
+                    <span class="text-[9px] font-bold font-mincho text-yellow-100 truncate w-full">${p.unit.name} ${genderMark(p.unit)}</span>
                     <div class="text-[6px] text-cyan-300 truncate w-full leading-tight" title="${p.unit.skill ? p.unit.skill.effect : ''}">${p.unit.skill ? p.unit.skill.name : ''}</div>
                     ${isSealed ? `<span class="text-[9px] font-black text-red-400 font-mono">停止 ${Math.ceil(p.sealedSeconds)}s</span>` : `
                     <div class="w-full my-1">
@@ -5337,9 +5372,12 @@ ${draw[0].msg}
         function exportDataTransfer() {
             try {
                 const data = {
-                    v: 1,
+                    v: 2,
                     ownedUnits: state.ownedUnits || [],
                     permanentOwned: state.permanentOwned || [],
+                    unitLevels: state.unitLevels || {},
+                    unitSpecialLevels: state.unitSpecialLevels || {},
+                    formations: state.formations || [],
                     clearedStages: state.clearedStages || {},
                     coins: state.coins,
                     gems: state.gems
@@ -5378,6 +5416,27 @@ ${draw[0].msg}
                 const importedUnits = data.ownedUnits.filter(id => !!getUnit(id));
                 state.ownedUnits = importedUnits;
                 if (Array.isArray(data.permanentOwned)) state.permanentOwned = data.permanentOwned.filter(id => id === 'butsu_001' || !!getUnit(id));
+                // (①) キャラのレベル（ステータス/必殺技強化）と編成フォーメーションを引き継ぐ（v2以降。旧形式v1はレベル無し→Lv1扱いで従来互換）
+                if (data.v >= 2 || data.unitLevels) {
+                    const mergedLevels = {};
+                    const mergedSpecLevels = {};
+                    const mergedFormations = [];
+                    importedUnits.forEach(id => {
+                        const lv = (data.unitLevels && typeof data.unitLevels[id] === 'number') ? data.unitLevels[id] : 1;
+                        mergedLevels[id] = Math.max(1, Math.floor(lv));
+                        const slv = (data.unitSpecialLevels && typeof data.unitSpecialLevels[id] === 'number') ? data.unitSpecialLevels[id] : 1;
+                        mergedSpecLevels[id] = Math.max(1, Math.floor(slv));
+                    });
+                    (Array.isArray(data.formations) ? data.formations : []).forEach(f => {
+                        if (f && Array.isArray(f.units)) {
+                            const validUnits = f.units.filter(id => importedUnits.includes(id));
+                            if (validUnits.length > 0) mergedFormations.push(Object.assign({}, f, { units: validUnits }));
+                        }
+                    });
+                    state.unitLevels = mergedLevels;
+                    state.unitSpecialLevels = mergedSpecLevels;
+                    if (mergedFormations.length > 0) state.formations = mergedFormations;
+                }
                 state.clearedStages = (data.clearedStages && typeof data.clearedStages === 'object') ? data.clearedStages : {};
                 if (typeof data.coins === 'number' && data.coins >= 0) state.coins = data.coins;
                 if (typeof data.gems === 'number' && data.gems >= 0) state.gems = data.gems;
@@ -5389,7 +5448,7 @@ ${draw[0].msg}
                 renderDeckView();
                 renderDungeonsView();
                 closeModal("dataTransferModal");
-                showCustomAlert("読み込みが完了しました", "移行データ（キャラ・進行度・お金・宝石）を読み込みました！");
+                showCustomAlert("読み込みが完了しました", "移行データ（キャラ・レベル・編成・進行度・お金・宝石）を読み込みました！");
             } catch (e) {
                 showCustomAlert("読み込みに失敗しました", "コードが正しくありません: " + e.message);
             }
@@ -5526,5 +5585,6 @@ ${draw[0].msg}
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925" integrity="sha512-d9sL6GJLXn6fInD1+TVXhTcQOsmxeHfmHAvwGDIxp5TO+uo1fiWW7mHomMj4MLRlCsJDTqXzWLHJFFlPCEIj/A==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 </body>
 </html>
