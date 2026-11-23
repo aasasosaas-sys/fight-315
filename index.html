@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>戦って覚える315 - 平安絵巻風タワーディフェンス</title>
+    <meta name="theme-color" content="#120D1A">
+    <meta name="description" content="古文単語・古典常識をクイズで覚える平安絵巻風バトル。170体以上の古典の人物を集めて部隊を組もう。">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23201138'/%3E%3Cpath d='M8 16 Q32 10 56 16 L54 22 Q32 17 10 22Z' fill='%23C8392B'/%3E%3Crect x='12' y='26' width='40' height='5' fill='%23C8392B'/%3E%3Crect x='17' y='20' width='6' height='36' fill='%23C8392B'/%3E%3Crect x='41' y='20' width='6' height='36' fill='%23C8392B'/%3E%3Crect x='29' y='22' width='6' height='6' fill='%23D4AF37'/%3E%3C/svg%3E">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- ★軽量改修: PeerJS は「ネット対戦」タブを初めて開いた時のみ動的読込（オフライン/単機では一切取得しない） -->
@@ -13,7 +16,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;600;700&display=swap" rel="stylesheet">
     
     <script>
-        tailwind.config = {
+        // オフライン等で Tailwind CDN が読めなくても後続スクリプトを止めない
+        if (window.tailwind) tailwind.config = {
             theme: {
                 extend: {
                     colors: {
@@ -752,6 +756,175 @@
     .pvp-step{background:rgba(0,0,0,.42);border:1px solid rgba(212,175,55,.3);border-radius:.8rem;padding:.55rem .6rem;text-align:center;}
     .pvp-step b{display:block;color:#f5d27a;font-size:.85rem;margin-bottom:.2rem;}
     .pvp-step span{font-size:.65rem;color:#c9c2d4;line-height:1.5;}
+        /* ============ キャラ肖像アイコン ============ */
+        .uport { position: relative; display: block; width: 100%; height: 100%; container-type: size; flex-shrink: 0; }
+        .uport > img { width: 100%; height: 100%; display: block; border-radius: 9999px; object-fit: cover; -webkit-user-drag: none; }
+        .uport-badge {
+            position: absolute; right: -8%; bottom: -8%; width: 40%; height: 40%; border-radius: 9999px;
+            background: radial-gradient(circle at 35% 30%, #3a2650, #140c1e); border: 1px solid rgba(212,175,55,.85);
+            display: flex; align-items: center; justify-content: center; color: #fde68a; line-height: 1;
+            font-size: 21cqw; box-shadow: 0 1px 3px rgba(0,0,0,.6);
+        }
+        .uport-badge i { font-size: inherit; }
+        .uport-dim > img { filter: grayscale(.85) brightness(.55); }
+        .uport-dim .uport-badge { filter: grayscale(1) brightness(.7); }
+        .uport-god > img { box-shadow: 0 0 10px rgba(255,236,170,.65); }
+        /* ============ 必殺技カットイン＆属性エフェクト ============ */
+        .uport-ready { box-shadow: 0 0 0 2px #fde047, 0 0 14px 3px rgba(253,224,71,.75); animation: uport-ready-pulse 1s ease-in-out infinite; }
+        @keyframes uport-ready-pulse { 0%,100% { box-shadow: 0 0 0 2px #fde047, 0 0 8px 2px rgba(253,224,71,.5); } 50% { box-shadow: 0 0 0 2px #fff7d6, 0 0 18px 6px rgba(253,224,71,.9); } }
+        .spec-root .sp-layer { position: absolute; inset: 0; z-index: 1; overflow: hidden; }
+        .sp-dim { position: absolute; inset: 0; z-index: 0; background: rgba(0,0,0,.45); animation: sp-dim var(--sp-total) ease forwards; }
+        @keyframes sp-dim { 0% { opacity: 0; } 10%, 82% { opacity: 1; } 100% { opacity: 0; } }
+        .spec-root .spec-flash { z-index: 4; }
+        .sp-band {
+            position: absolute; left: -5%; right: -5%; top: 50%; height: clamp(120px, 26vh, 210px); z-index: 3;
+            transform: translateY(-50%) skewY(-6deg) scaleY(0);
+            background: linear-gradient(90deg, var(--sp-c2) 0%, color-mix(in srgb, var(--sp-c2) 60%, var(--sp-c1)) 45%, var(--sp-c2) 100%);
+            border-top: 3px solid var(--sp-c1); border-bottom: 3px solid var(--sp-c1);
+            box-shadow: 0 0 40px color-mix(in srgb, var(--sp-c1) 70%, transparent), inset 0 0 50px rgba(0,0,0,.55);
+            animation: sp-band-in var(--sp-total) cubic-bezier(.2,.9,.25,1) forwards; overflow: hidden;
+        }
+        @keyframes sp-band-in {
+            0% { transform: translateY(-50%) skewY(-6deg) scaleY(0); opacity: 1; }
+            9% { transform: translateY(-50%) skewY(-6deg) scaleY(1.08); }
+            14%, 70% { transform: translateY(-50%) skewY(-6deg) scaleY(1); opacity: 1; }
+            84% { transform: translateY(-50%) skewY(-6deg) scaleY(.06); opacity: 1; }
+            100% { transform: translateY(-50%) skewY(-6deg) scaleY(0); opacity: 0; }
+        }
+        .sp-band-lines { position: absolute; inset: 0; opacity: .35;
+            background: repeating-linear-gradient(90deg, transparent 0 34px, color-mix(in srgb, var(--sp-c1) 70%, transparent) 34px 36px, transparent 36px 90px, rgba(255,255,255,.5) 90px 91px);
+            animation: sp-lines .35s linear infinite; }
+        @keyframes sp-lines { to { background-position: -180px 0; } }
+        .sp-portrait { position: absolute; left: 8%; top: 50%; width: clamp(120px, 24vh, 200px); height: clamp(120px, 24vh, 200px);
+            transform: translate(-60vw, -50%) skewY(6deg); animation: sp-portrait-in var(--sp-total) cubic-bezier(.15,.85,.3,1) forwards; }
+        .sp-portrait img { width: 100%; height: 100%; border-radius: 9999px; display: block;
+            box-shadow: 0 0 0 3px var(--sp-c1), 0 0 30px 6px color-mix(in srgb, var(--sp-c1) 80%, transparent); }
+        @keyframes sp-portrait-in {
+            0%, 6% { transform: translate(-60vw, -50%) skewY(6deg) scale(1.2); }
+            18% { transform: translate(0, -50%) skewY(6deg) scale(1); }
+            72% { transform: translate(3vw, -50%) skewY(6deg) scale(1.04); opacity: 1; }
+            86%, 100% { transform: translate(70vw, -50%) skewY(6deg) scale(1.1); opacity: 0; }
+        }
+        .sp-textbox { position: absolute; left: calc(8% + clamp(120px, 24vh, 200px) + 4vw); right: 4%; top: 50%;
+            transform: translate(60vw, -50%) skewY(6deg); animation: sp-text-in var(--sp-total) cubic-bezier(.15,.85,.3,1) forwards; color: var(--sp-text); }
+        @keyframes sp-text-in {
+            0%, 9% { transform: translate(60vw, -50%) skewY(6deg); opacity: 0; }
+            21% { transform: translate(0, -50%) skewY(6deg); opacity: 1; }
+            72% { transform: translate(-2vw, -50%) skewY(6deg); opacity: 1; }
+            86%, 100% { transform: translate(-70vw, -50%) skewY(6deg); opacity: 0; }
+        }
+        .sp-who { font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: clamp(12px, 2.2vw, 18px); letter-spacing: .2em; opacity: .92; display: flex; align-items: center; gap: .5em; }
+        .sp-rar { font-family: 'Zen Kaku Gothic New', sans-serif; font-size: .75em; letter-spacing: 0; padding: .05em .5em; border-radius: 4px; background: var(--sp-c1); color: var(--sp-c2); font-weight: 900; }
+        .sp-name { font-family: 'Shippori Mincho', serif; font-weight: 800; line-height: 1.15; font-size: clamp(22px, 5.4vw, 54px); letter-spacing: .06em;
+            text-shadow: 0 0 14px var(--sp-c1), 0 0 34px color-mix(in srgb, var(--sp-c1) 70%, transparent), 0 3px 0 rgba(0,0,0,.6);
+            overflow-wrap: anywhere; }
+        .sp-sub { font-family: 'Shippori Mincho', serif; font-size: clamp(11px, 1.8vw, 16px); opacity: .85; margin-top: .2em; }
+        .sp-stamp { position: absolute; right: 8%; bottom: 10%; width: clamp(48px, 9vh, 76px); height: clamp(48px, 9vh, 76px);
+            display: flex; align-items: center; justify-content: center; border: 3px solid #fca5a5; border-radius: 10px; background: rgba(185,28,28,.88);
+            color: #fff1f2; font-family: 'Shippori Mincho', serif; font-weight: 900; font-size: clamp(28px, 5.4vh, 46px);
+            box-shadow: 0 0 18px rgba(239,68,68,.7); transform: skewY(6deg) rotate(-8deg) scale(3); opacity: 0;
+            animation: sp-stamp var(--sp-total) ease-out forwards; }
+        @keyframes sp-stamp { 0%, 22% { opacity: 0; transform: skewY(6deg) rotate(-8deg) scale(3); } 30% { opacity: 1; transform: skewY(6deg) rotate(-8deg) scale(.9); } 34%, 74% { opacity: 1; transform: skewY(6deg) rotate(-8deg) scale(1); } 86%, 100% { opacity: 0; } }
+        .sp-ougi { position: absolute; left: 50%; top: 14%; z-index: 5; transform: translateX(-50%); font-family: 'Shippori Mincho', serif; font-weight: 900;
+            font-size: clamp(34px, 8vw, 80px); letter-spacing: .5em; padding-left: .5em; color: #fff7d6;
+            text-shadow: 0 0 20px #fde68a, 0 0 50px #f59e0b, 0 3px 0 #7c2d12; opacity: 0; animation: sp-ougi var(--sp-total) ease-out forwards; }
+        @keyframes sp-ougi { 0%, 4% { opacity: 0; transform: translateX(-50%) scale(2.4); filter: blur(6px); } 14% { opacity: 1; transform: translateX(-50%) scale(1); filter: blur(0); } 74% { opacity: 1; } 90%, 100% { opacity: 0; transform: translateX(-50%) scale(1.15); } }
+
+        /* --- 属性エフェクト共通 --- */
+        .sp-layer > * { position: absolute; pointer-events: none; }
+        .sp-tint { inset: 0; opacity: 0; animation: sp-tint 1.5s ease forwards; }
+        @keyframes sp-tint { 0% { opacity: 0; } 20%, 70% { opacity: 1; } 100% { opacity: 0; } }
+        .sp-whiteflash { inset: 0; background: #fff; opacity: 0; animation: sp-wf .22s ease-out forwards; }
+        @keyframes sp-wf { 0% { opacity: .85; } 100% { opacity: 0; } }
+        .sp-flame { bottom: -60px; border-radius: 50% 50% 46% 46% / 62% 62% 38% 38%; filter: blur(2px); mix-blend-mode: screen; opacity: 0;
+            background: radial-gradient(ellipse at 50% 75%, #fff7ae 0%, #fbbf24 25%, #f97316 50%, rgba(220,38,38,.75) 72%, transparent 76%);
+            animation: sp-flame 1.2s ease-out forwards; }
+        @keyframes sp-flame { 0% { opacity: 0; transform: translateY(0) scale(.6); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(-62vh) scale(1.2, .7); } }
+        .sp-ember { bottom: 0; width: 5px; height: 5px; border-radius: 9999px; background: #fde047; box-shadow: 0 0 8px #f97316; opacity: 0; animation: sp-ember 1.2s ease-out forwards; }
+        @keyframes sp-ember { 0% { opacity: 1; transform: translate(0,0); } 100% { opacity: 0; transform: translate(40px, -80vh); } }
+        .sp-moon { right: 10%; top: 6%; width: clamp(110px, 22vw, 220px); aspect-ratio: 1; border-radius: 9999px;
+            background: radial-gradient(circle at 38% 35%, #fffbea, #f5e9c0 55%, #d9c78e);
+            box-shadow: 0 0 60px 20px rgba(255,248,214,.6), 0 0 140px 60px rgba(199,210,254,.35); opacity: 0; animation: sp-moon 1.6s ease-out forwards; }
+        @keyframes sp-moon { 0% { opacity: 0; transform: translateY(80px) scale(.7); } 35%, 75% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; } }
+        .sp-twinkle { width: 4px; height: 4px; border-radius: 9999px; background: #e0e7ff; box-shadow: 0 0 8px #fff; opacity: 0; animation: sp-twinkle 1s ease-in-out forwards; }
+        @keyframes sp-twinkle { 0%, 100% { opacity: 0; transform: scale(.4); } 50% { opacity: 1; transform: scale(1.6); } }
+        .sp-moonbeam { top: -10%; width: 3px; height: 120%; background: linear-gradient(180deg, rgba(224,231,255,.9), transparent); opacity: 0; transform: rotate(14deg); animation: sp-tint 1s ease forwards; }
+        .sp-rays { left: 50%; top: 45%; width: 220vmax; height: 220vmax; margin: -110vmax 0 0 -110vmax; opacity: 0;
+            background: conic-gradient(from 0deg, rgba(255,247,214,.45) 0 8deg, transparent 8deg 22deg, rgba(253,230,138,.4) 22deg 30deg, transparent 30deg 45deg, rgba(255,247,214,.45) 45deg 53deg, transparent 53deg 67deg, rgba(253,230,138,.4) 67deg 75deg, transparent 75deg 90deg);
+            animation: sp-rays 1.6s ease-out forwards; }
+        @keyframes sp-rays { 0% { opacity: 0; transform: rotate(0); } 25%, 70% { opacity: 1; } 100% { opacity: 0; transform: rotate(40deg); } }
+        .sp-sundisc { left: 50%; top: 45%; width: 30vmin; height: 30vmin; margin: -15vmin 0 0 -15vmin; border-radius: 9999px; background: radial-gradient(circle, #fff, #fde68a 45%, rgba(253,230,138,0) 70%); opacity: 0; animation: sp-moon 1.5s ease-out forwards; }
+        .sp-snow { top: -20px; border-radius: 9999px; background: #fff; box-shadow: 0 0 6px #e0f2fe; opacity: 0; animation: sp-snow 1.5s linear forwards; }
+        @keyframes sp-snow { 0% { opacity: 0; transform: translate(0, 0); } 10%, 80% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), 105vh); } }
+        .sp-frost { inset: 0; box-shadow: inset 0 0 120px 30px rgba(224,242,254,.65); opacity: 0; animation: sp-tint 1.5s ease forwards; }
+        .sp-ripple { left: 50%; top: 70%; width: 30vw; height: 9vw; margin: -4.5vw 0 0 -15vw; border-radius: 50%; border: 3px solid rgba(186,230,253,.9); opacity: 0; animation: sp-ripple 1s ease-out forwards; }
+        @keyframes sp-ripple { 0% { opacity: 1; transform: scale(.2); } 100% { opacity: 0; transform: scale(3.2); } }
+        .sp-rain { top: -15%; width: 2px; height: 14vh; background: linear-gradient(180deg, transparent, rgba(186,230,253,.9)); transform: rotate(18deg); opacity: 0; animation: sp-rain .7s linear forwards; }
+        @keyframes sp-rain { 0% { opacity: 0; transform: rotate(18deg) translateY(0); } 15% { opacity: 1; } 100% { opacity: 0; transform: rotate(18deg) translateY(120vh); } }
+        .sp-wave { left: -10%; right: -10%; bottom: -30px; height: 28vh; opacity: 0;
+            background: radial-gradient(ellipse 60px 34px at 30px 0, transparent 30px, rgba(56,189,248,.65) 31px, rgba(8,47,73,.85) 70%) repeat-x; background-size: 60px 100%;
+            animation: sp-wave 1.4s ease-out forwards; }
+        @keyframes sp-wave { 0% { opacity: 0; transform: translateY(100%); } 30%, 70% { opacity: 1; transform: translateY(0); background-position-x: 120px; } 100% { opacity: 0; transform: translateY(40%); } }
+        .sp-wind { left: 110%; height: 3px; border-radius: 9999px; background: linear-gradient(90deg, transparent, rgba(236,253,245,.95), transparent); opacity: 0; animation: sp-wind .6s ease-in forwards; }
+        @keyframes sp-wind { 0% { opacity: 0; transform: translateX(0); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateX(-180vw); } }
+        .sp-leaf { left: 105%; width: 16px; height: 9px; border-radius: 0 100% 0 100%; background: #4ade80; opacity: 0; animation: sp-leaf 1s ease-in forwards; }
+        @keyframes sp-leaf { 0% { opacity: 0; transform: translate(0, 0) rotate(0); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(-120vw, var(--dy)) rotate(900deg); } }
+        .sp-petal { top: -24px; width: 14px; height: 11px; border-radius: 80% 10% 80% 10%; opacity: 0; animation: sp-petal 1.6s ease-in forwards; box-shadow: 0 0 4px rgba(255,255,255,.5); }
+        .sp-maple { width: 18px; height: 18px; border-radius: 0; clip-path: polygon(50% 0, 60% 30%, 90% 18%, 72% 48%, 100% 58%, 66% 66%, 70% 100%, 50% 78%, 30% 100%, 34% 66%, 0 58%, 28% 48%, 10% 18%, 40% 30%); }
+        @keyframes sp-petal { 0% { opacity: 0; transform: translate(0, 0) rotate(0); } 10%, 80% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), 108vh) rotate(var(--r)); } }
+        .sp-arrow { left: -20%; width: 18vw; height: 3px; background: linear-gradient(90deg, rgba(255,255,255,0), #e7d3a8 30%, #a16207); transform: rotate(-8deg); opacity: 0; animation: sp-arrow .45s cubic-bezier(.5,0,1,1) forwards; }
+        .sp-arrow::after { content: ''; position: absolute; right: -10px; top: -5px; border-left: 12px solid #e5e7eb; border-top: 6.5px solid transparent; border-bottom: 6.5px solid transparent; }
+        .sp-arrow::before { content: ''; position: absolute; left: 6%; top: -4px; width: 14px; height: 11px; background: linear-gradient(90deg, #fff, #c8392b); clip-path: polygon(0 0, 100% 50%, 0 100%, 30% 50%); }
+        @keyframes sp-arrow { 0% { opacity: 0; transform: rotate(-8deg) translateX(0); } 15% { opacity: 1; } 100% { opacity: .9; transform: rotate(-8deg) translateX(150vw); } }
+        .sp-target { right: 8%; top: 38%; width: 18vmin; height: 18vmin; border-radius: 9999px; opacity: 0;
+            background: radial-gradient(circle, #c8392b 0 18%, #fff 18% 36%, #c8392b 36% 54%, #fff 54% 72%, #c8392b 72% 90%, transparent 90%); animation: sp-moon 1.4s ease-out forwards; }
+        .sp-slash { left: -10%; width: 120%; height: 10px; border-radius: 9999px; transform-origin: center;
+            background: linear-gradient(90deg, transparent, #fff 20%, #fff 80%, transparent); box-shadow: 0 0 22px 6px rgba(255,255,255,.85), 0 0 50px 14px rgba(239,68,68,.55);
+            opacity: 0; animation: sp-slash .5s ease-out forwards; }
+        @keyframes sp-slash { 0% { opacity: 1; transform: rotate(var(--rot)) scaleX(0); } 40% { opacity: 1; transform: rotate(var(--rot)) scaleX(1); } 100% { opacity: 0; transform: rotate(var(--rot)) scaleX(1) scaleY(.2); } }
+        .sp-spark { left: 50%; top: 50%; width: 6px; height: 6px; border-radius: 9999px; background: #fff; box-shadow: 0 0 10px #fde047; opacity: 0; animation: sp-spark .6s ease-out forwards; }
+        @keyframes sp-spark { 0% { opacity: 1; transform: translate(0,0); } 100% { opacity: 0; transform: translate(var(--tx), var(--ty)); } }
+        .sp-smoke { width: 30vmin; height: 30vmin; margin: -15vmin 0 0 -15vmin; border-radius: 9999px; background: radial-gradient(circle, rgba(88,28,135,.85), rgba(26,5,38,.6) 50%, transparent 70%);
+            filter: blur(10px); opacity: 0; animation: sp-smoke 1.4s ease-out forwards; }
+        @keyframes sp-smoke { 0% { opacity: 0; transform: scale(.3); } 40% { opacity: 1; } 100% { opacity: 0; transform: scale(1.8) translateY(-40px); } }
+        .sp-glyph { font-family: 'Shippori Mincho', serif; font-weight: 800; opacity: 0; animation: sp-glyph 1.2s ease-out forwards; }
+        .sp-glyph-curse { font-size: 44px; color: #e9d5ff; text-shadow: 0 0 16px #a855f7, 0 0 30px #581c87; }
+        .sp-glyph-poem { color: #fff7d6; text-shadow: 0 0 12px #f59e0b, 0 0 26px rgba(245,158,11,.6); writing-mode: vertical-rl; }
+        @keyframes sp-glyph { 0% { opacity: 0; transform: translateY(20px) scale(.6); } 30%, 70% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-50px) scale(1.1); } }
+        .sp-tanzaku { top: -40%; width: 46px; height: 34vh; border-radius: 3px; background: linear-gradient(180deg, #fef3c7, #fde68a); border: 2px solid #b45309;
+            box-shadow: 0 0 14px rgba(253,230,138,.6); opacity: 0; animation: sp-tanzaku 1.3s ease-out forwards; }
+        @keyframes sp-tanzaku { 0% { opacity: 0; transform: translateY(0) rotate(var(--r)); } 30%, 70% { opacity: .9; transform: translateY(58vh) rotate(var(--r)); } 100% { opacity: 0; transform: translateY(66vh) rotate(var(--r)); } }
+        .sp-seal-circle { left: 50%; top: 50%; width: 70vmin; height: 70vmin; margin: -35vmin 0 0 -35vmin; color: #ddd6fe; filter: drop-shadow(0 0 10px #a78bfa); opacity: 0; animation: sp-seal 1.5s ease-out forwards; }
+        .sp-seal-circle svg { width: 100%; height: 100%; }
+        @keyframes sp-seal { 0% { opacity: 0; transform: scale(.3) rotate(-90deg); } 30%, 70% { opacity: 1; transform: scale(1) rotate(0); } 100% { opacity: 0; transform: scale(1.2) rotate(40deg); } }
+        .sp-ofuda { left: 50%; top: 50%; width: 22px; height: 58px; margin: -29px 0 0 -11px; background: #fffbeb; border: 1px solid #b45309;
+            background-image: linear-gradient(180deg, transparent 12%, #c8392b 12% 16%, transparent 16% 80%, #c8392b 80% 84%, transparent 84%);
+            box-shadow: 0 0 8px rgba(255,255,255,.7); opacity: 0; animation: sp-ofuda .9s ease-out forwards; }
+        @keyframes sp-ofuda { 0% { opacity: 1; transform: translate(0,0) rotate(0) scale(.4); } 100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(var(--r)) scale(1.1); } }
+        .sp-soundring { left: 50%; top: 50%; width: 30vmin; height: 30vmin; margin: -15vmin 0 0 -15vmin; border-radius: 9999px; border: 3px solid rgba(251,207,232,.9); opacity: 0; animation: sp-ripple 1s ease-out forwards; }
+        .sp-note { bottom: -40px; font-size: 34px; font-weight: 900; text-shadow: 0 0 12px currentColor; opacity: 0; animation: sp-note 1.3s ease-out forwards; }
+        @keyframes sp-note { 0% { opacity: 0; transform: translate(0,0) rotate(-10deg); } 20% { opacity: 1; } 50% { transform: translate(24px, -45vh) rotate(10deg); } 100% { opacity: 0; transform: translate(-10px, -90vh) rotate(-8deg); } }
+        .sp-heal { bottom: 4%; width: 12px; height: 12px; border-radius: 9999px; background: #6ee7b7; box-shadow: 0 0 12px #34d399; color: #ecfdf5; font-size: 18px; line-height: 12px; text-align: center; font-weight: 900; opacity: 0; animation: spec-rise 1.1s ease-out forwards; }
+        .sp-healglow { left: 0; right: 0; bottom: 0; height: 45vh; background: linear-gradient(0deg, rgba(52,211,153,.4), transparent); opacity: 0; animation: sp-tint 1.4s ease forwards; }
+        .sp-barrier { left: 50%; bottom: 4%; width: min(90vw, 640px); margin-left: calc(min(90vw, 640px) / -2); filter: drop-shadow(0 0 14px #22d3ee); opacity: 0; animation: sp-barrier 1.3s ease-out forwards; }
+        .sp-barrier svg { width: 100%; height: auto; display: block; }
+        @keyframes sp-barrier { 0% { opacity: 0; transform: scale(.6, .2); transform-origin: 50% 100%; } 35%, 70% { opacity: 1; transform: scale(1); } 100% { opacity: 0; } }
+        .sp-chev { bottom: 6%; font-size: 30px; font-weight: 900; color: #fde047; text-shadow: 0 0 12px #f59e0b; opacity: 0; animation: spec-rise 1.1s ease-out forwards; }
+        .sp-chev-down { top: 6%; bottom: auto; color: #c4b5fd; text-shadow: 0 0 12px #7c3aed; animation: sp-fall 1s ease-in forwards; }
+        @keyframes sp-fall { 0% { opacity: 0; transform: translateY(0); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(180px); } }
+        .sp-stunring { left: 50%; top: 72%; transform: translateX(-50%); font-size: 26px; letter-spacing: .1em; white-space: nowrap; color: #fde047; text-shadow: 0 0 10px #f59e0b; opacity: 0; animation: sp-stun 1.2s ease-out forwards; }
+        @keyframes sp-stun { 0% { opacity: 0; transform: translateX(-50%) rotate(0) scale(.5); } 30%, 75% { opacity: 1; transform: translateX(-50%) rotate(8deg) scale(1); } 100% { opacity: 0; transform: translateX(-50%) rotate(-6deg) scale(1.1); } }
+        .sp-grand .sp-band { border-width: 4px; box-shadow: 0 0 60px color-mix(in srgb, var(--sp-c1) 85%, transparent), 0 0 120px rgba(253,230,138,.45), inset 0 0 50px rgba(0,0,0,.55); }
+        @media (max-width: 640px) {
+            .sp-portrait { left: 3%; width: 96px; height: 96px; }
+            .sp-textbox { left: calc(3% + 96px + 12px); }
+            .sp-band { height: 150px; }
+            .sp-stamp { width: 44px; height: 44px; font-size: 26px; bottom: 6%; right: 7%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .sp-band-lines { animation: none; }
+            .uport-ready { animation: none; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col bg-heian-bg text-gray-100 overflow-x-hidden">
@@ -1522,6 +1695,314 @@
     </div>
 
     <script>
+        // ============================================================
+        // キャラ肖像アイコン（全キャラ自動生成・平安絵巻風SVG）
+        // 名前・性別・レア度・既存アイコンから「帝/公卿/武者/僧/陰陽師/女房/尼/白拍子/神仏」等を判定し、
+        // 装束・髪型・冠物・配色をキャラごとに描き分ける。生成結果は data URL としてキャッシュ。
+        // ============================================================
+        (function () {
+            // FontAwesome Free に存在しない（Pro限定）アイコンの置き換え
+            const FA_FIX = { 'fa-flower': 'fa-spa', 'fa-pen-fancier': 'fa-pen-fancy', 'fa-person-dancing': 'fa-person-walking', 'fa-sparkles': 'fa-wand-magic-sparkles', 'fa-sunset': 'fa-cloud-sun' };
+            const fixIcon = (ic) => FA_FIX[ic] || ic || 'fa-user';
+            window.fixFaIcon = fixIcon;
+
+            // 襲（かさね）の色目
+            const ROBES = ['#8B1E3F', '#2E4A7D', '#5B3A8C', '#2F6B4F', '#A35A1F', '#7A2E2E', '#1F5C6B', '#6B4C9A', '#9C2F2F', '#3D5A3A', '#8A4B2A', '#4B3B6B', '#B03A5B', '#2C5E8A'];
+            const INNERS = ['#F4B6C8', '#F2D27A', '#9FD3C7', '#C9A0DC', '#F4A261', '#E9C46A', '#B5E48C', '#FFC8DD', '#A2D2FF', '#FFD6A5', '#F7E1A0', '#E5989B'];
+            const BG_HUES = [[42, 28, 66], [30, 40, 58], [20, 46, 50], [60, 28, 40], [36, 26, 70], [18, 50, 44], [64, 24, 48], [28, 44, 36]];
+            const RARITY_RING = { N: ['#6b7280', '#9ca3af'], R: ['#3b82f6', '#93c5fd'], SR: ['#a855f7', '#e9d5ff'], SSR: ['#f59e0b', '#fde68a'], UR: ['#ef4444', '#fde047'], '神': ['#fff7d6', '#7dd3fc'] };
+
+            function hash(s) { let h = 2166136261; for (const c of String(s)) { h ^= c.codePointAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+            const pick = (arr, h, salt) => arr[((h >>> (salt || 0)) + (salt || 0) * 7) % arr.length];
+
+            const WARRIOR_ICONS = ['fa-horse', 'fa-shield-halved', 'fa-shield', 'fa-bullseye', 'fa-khanda', 'fa-user-ninja', 'fa-person-rifle', 'fa-fire', 'fa-dragon'];
+            function archetype(u) {
+                const n = u.name || '', id = u.id || '', ic = u.icon || '', f = u.gender === '女性';
+                if (id === 'ch_000') return f ? 'lady' : 'noble';
+                if (id === 'butsu_001') return 'buddha';
+                if (id === 'kaguya_001') return 'kaguya';
+                if (u.rarity === '神') {
+                    if (/観世音|菩薩/.test(n)) return 'bodhisattva';
+                    if (/不動/.test(n)) return 'fudo';
+                    if (/毘沙門/.test(n)) return 'bishamon';
+                    return f ? 'goddess' : 'god';
+                }
+                if (/翁/.test(n)) return 'oldman';
+                if (/嫗/.test(n)) return 'oldwoman';
+                if (/稚児/.test(n) || ic === 'fa-child') return f ? 'girl' : 'boy';
+                if (f) {
+                    if (/北条政子|建礼門院（大原）|尼/.test(n)) return 'nun';
+                    if (/静御前/.test(n)) return 'dancer';
+                    if (/巴御前|千手前/.test(n)) return 'onnabushi';
+                    if (/天探女|竜田姫/.test(n)) return 'goddess';
+                    if (/定子|彰子|藤壺|女御|女三宮|朧月夜|葵の上|建礼門院|姫/.test(n)) return 'empress';
+                    return 'lady';
+                }
+                if (/法師|僧|和尚|聖|西行|一遍|契沖|顕昭|頓阿|入道|遍昭|喜撰/.test(n)) return 'monk';
+                if (ic === 'fa-hat-wizard' || /晴明|泰親|保憲/.test(n)) return 'onmyoji';
+                if (/天皇|帝|院$|院（|皇子/.test(n)) return 'emperor';
+                if (/本居|賀茂真淵|荷田|上田秋成/.test(n)) return 'scholar';
+                if (/敦盛|知康|宗盛|維盛|頼朝|将門|清盛|義経|知盛|義仲|為朝|範頼|高綱|景時|実盛|重衡|頼信|頼義|秀郷|貞盛|仲綱|貞光|藤太|綱$|与一|直実|保昌/.test(n)) return 'warrior';
+                if (WARRIOR_ICONS.includes(ic) && !/夕霧|大伴御行|実方|伊周/.test(n)) return 'warrior';
+                return 'noble';
+            }
+
+            // ---- パーツ描画 ----
+            const S = (d, fill, extra) => `<path d="${d}" fill="${fill}" ${extra || ''}/>`;
+            const L = (d, stroke, w, extra) => `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" ${extra || ''}/>`;
+
+            function face(o) {
+                const { skin, female, h, cy = 30, rx = 9.5, ry = 11, fierce, old, child, closedEyes } = o;
+                let s = '';
+                // 耳
+                if (!female) s += `<ellipse cx="${32 - rx - 0.6}" cy="${cy + 1}" rx="1.8" ry="2.6" fill="${skin}" stroke="#0003" stroke-width=".4"/><ellipse cx="${32 + rx + 0.6}" cy="${cy + 1}" rx="1.8" ry="2.6" fill="${skin}" stroke="#0003" stroke-width=".4"/>`;
+                s += `<ellipse cx="32" cy="${cy}" rx="${rx}" ry="${ry}" fill="${skin}"/>`;
+                s += `<ellipse cx="32" cy="${cy + ry * 0.55}" rx="${rx * 0.8}" ry="${ry * 0.35}" fill="#000" opacity=".05"/>`;
+                // 頬紅
+                if (female || child) s += `<ellipse cx="26.4" cy="${cy + 3.6}" rx="2.2" ry="1.3" fill="#f28da0" opacity=".45"/><ellipse cx="37.6" cy="${cy + 3.6}" rx="2.2" ry="1.3" fill="#f28da0" opacity=".45"/>`;
+                const ey = cy + 0.4;
+                // 眉
+                if (female) {
+                    s += `<ellipse cx="27.6" cy="${cy - 7.6}" rx="1.7" ry="1" fill="#2b2b2b" opacity=".65"/><ellipse cx="36.4" cy="${cy - 7.6}" rx="1.7" ry="1" fill="#2b2b2b" opacity=".65"/>`;
+                } else if (fierce) {
+                    s += L(`M25.2 ${ey - 4.4} L30 ${ey - 2.2}`, '#1a1a1a', 1.4) + L(`M38.8 ${ey - 4.4} L34 ${ey - 2.2}`, '#1a1a1a', 1.4);
+                } else {
+                    s += L(`M25.6 ${ey - 3.2} Q27.8 ${ey - 4.2} 30 ${ey - 3.3}`, old ? '#e5e5e5' : '#1f1f1f', old ? 1.3 : 0.8) + L(`M34 ${ey - 3.3} Q36.2 ${ey - 4.2} 38.4 ${ey - 3.2}`, old ? '#e5e5e5' : '#1f1f1f', old ? 1.3 : 0.8);
+                }
+                // 目（引目）
+                const style = closedEyes ? 1 : (h % 3);
+                if (fierce) {
+                    s += `<ellipse cx="28" cy="${ey}" rx="1.9" ry="1.2" fill="#fff"/><circle cx="28.3" cy="${ey}" r=".9" fill="#111"/><ellipse cx="36" cy="${ey}" rx="1.9" ry="1.2" fill="#fff"/><circle cx="35.7" cy="${ey}" r=".9" fill="#111"/>`;
+                } else if (style === 1) {
+                    s += L(`M26.4 ${ey - 0.3} Q28 ${ey + 1.1} 29.6 ${ey - 0.3}`, '#1a1a1a', 0.9) + L(`M34.4 ${ey - 0.3} Q36 ${ey + 1.1} 37.6 ${ey - 0.3}`, '#1a1a1a', 0.9);
+                } else if (style === 2 || child) {
+                    s += `<ellipse cx="28" cy="${ey}" rx="1.1" ry="1.3" fill="#1a1a1a"/><ellipse cx="36" cy="${ey}" rx="1.1" ry="1.3" fill="#1a1a1a"/><circle cx="28.4" cy="${ey - 0.5}" r=".35" fill="#fff"/><circle cx="36.4" cy="${ey - 0.5}" r=".35" fill="#fff"/>`;
+                } else {
+                    s += L(`M26.2 ${ey} Q28 ${ey - 0.9} 29.8 ${ey}`, '#1a1a1a', 1) + L(`M34.2 ${ey} Q36 ${ey - 0.9} 37.8 ${ey}`, '#1a1a1a', 1);
+                }
+                // 鼻（鉤鼻）
+                s += L(`M32.3 ${cy + 1.6} Q33 ${cy + 3.6} 31.6 ${cy + 3.9}`, '#00000055', 0.7);
+                // 口
+                if (female || child) s += `<ellipse cx="32" cy="${cy + 6.6}" rx="1.25" ry=".8" fill="#c0392b"/>`;
+                else if (fierce) s += L(`M29.6 ${cy + 7} Q32 ${cy + 5.8} 34.4 ${cy + 7}`, '#7a2b20', 1.1);
+                else s += L(`M30.4 ${cy + 6.6} Q32 ${cy + 7.4} 33.6 ${cy + 6.6}`, '#8a3b2b', 0.8);
+                if (old) s += L(`M25 ${cy + 2} Q26 ${cy + 3} 25.6 ${cy + 4.4}`, '#0003', 0.5) + L(`M39 ${cy + 2} Q38 ${cy + 3} 38.4 ${cy + 4.4}`, '#0003', 0.5);
+                return s;
+            }
+            const mustache = (cy, col) => L(`M28.6 ${cy + 5.2} Q30.6 ${cy + 4.4} 32 ${cy + 5.1} Q33.4 ${cy + 4.4} 35.4 ${cy + 5.2}`, col || '#1a1a1a', 0.7);
+            const goatee = (cy, col) => S(`M30.6 ${cy + 9.4} Q32 ${cy + 13} 33.4 ${cy + 9.4}Z`, col || '#1a1a1a');
+
+            function robeMale(robe, inner, collar) {
+                return S('M4 66 Q6 47 32 44.5 Q58 47 60 66Z', robe) +
+                    S('M4 66 Q6 47 32 44.5 Q58 47 60 66Z', 'url(#robeShade)') +
+                    L('M23.5 45.4 Q32 52.5 40.5 45.4', collar || inner, 3) +
+                    L('M18 52 Q20 60 19 66 M46 52 Q44 60 45 66', '#00000033', 0.8);
+            }
+            function robeFemale(robe, i1, i2, i3) {
+                return S('M3 66 Q5 47 32 45 Q59 47 61 66Z', robe) +
+                    S('M3 66 Q5 47 32 45 Q59 47 61 66Z', 'url(#robeShade)') +
+                    S('M21 45.5 L32 61 L43 45.5 L40 45 L32 56 L24 45Z', i1) +
+                    S('M24 45 L32 56 L40 45 L37.6 44.8 L32 52.4 L26.4 44.8Z', i2) +
+                    S('M26.4 44.8 L32 52.4 L37.6 44.8Z', i3);
+            }
+            const neck = (skin, w) => `<rect x="${32 - (w || 3.6)}" y="37" width="${(w || 3.6) * 2}" height="9" fill="${skin}"/><rect x="${32 - (w || 3.6)}" y="37" width="${(w || 3.6) * 2}" height="9" fill="#000" opacity=".08"/>`;
+            const hairMaleTop = (col) => S('M22.4 29 Q21.6 17.6 32 17 Q42.4 17.6 41.6 29 Q40.4 22.4 32 22 Q23.6 22.4 22.4 29Z', col || '#151515');
+            const eboshi = (col) => S('M22.6 22 Q21.4 9 29 3.4 Q37 0 41 7.6 Q42.6 14 41.6 22Z', col || '#141414') + L('M27 8 Q30 4.6 35 4.4', '#ffffff22', 1.2) + S('M22.4 20.6 L41.8 20.6 L41.6 23 L22.6 23Z', '#000');
+            const kanmuri = (tall) => S('M23.4 22 Q23.4 13.4 32 12.8 Q40.6 13.4 40.6 22Z', '#141414') + `<rect x="28.4" y="6.6" width="7.2" height="8" rx="2.4" fill="#141414"/>` +
+                (tall ? L('M34.4 8 Q40 -1 37 -7', '#141414', 3.2) : L('M34 14 Q44 16 48 26', '#141414', 2.6)) + S('M23 20.6 L41 20.6 L40.8 23 L23.2 23Z', '#000');
+            const hairFemaleBack = (col) => S('M17.6 31 Q16 12.6 32 11.6 Q48 12.6 46.4 31 L52 66 L12 66Z', col || '#0f0f12');
+            const hairFemaleFront = (col) => S('M21.4 33 Q20 16.4 32 16 Q44 16.4 42.6 33 Q42 22.6 36 20.4 Q33 19.6 32 21.6 Q31 19.6 28 20.4 Q22 22.6 21.4 33Z', col || '#0f0f12') +
+                S('M21.4 30 Q20.4 44 17 66 L22.6 66 Q24 48 23.6 34Z', col || '#0f0f12') + S('M42.6 30 Q43.6 44 47 66 L41.4 66 Q40 48 40.4 34Z', col || '#0f0f12') +
+                L('M24.6 22 Q22.6 30 23 38', '#ffffff18', 0.8) + L('M39.4 22 Q41.4 30 41 38', '#ffffff18', 0.8);
+            const halo = (c1, c2, r) => `<circle cx="32" cy="27" r="${r || 22}" fill="url(#haloG)"/><circle cx="32" cy="27" r="${(r || 22) - 2}" fill="none" stroke="${c1}" stroke-width="1.4" opacity=".9"/>` +
+                Array.from({ length: 16 }, (_, i) => { const a = i * Math.PI / 8; const r1 = (r || 22) + 1, r2 = (r || 22) + 6; return L(`M${32 + Math.cos(a) * r1} ${27 + Math.sin(a) * r1} L${32 + Math.cos(a) * r2} ${27 + Math.sin(a) * r2}`, c2, 1.2, 'opacity=".75"'); }).join('');
+            const flameHalo = () => { let d = ''; const n = 14; for (let i = 0; i <= n; i++) { const a = -Math.PI + i * (2 * Math.PI / n); const r = i % 2 ? 30 : 22; d += (i ? 'L' : 'M') + (32 + Math.cos(a) * r).toFixed(1) + ' ' + (30 + Math.sin(a) * r).toFixed(1) + ' '; } return S(d + 'Z', '#ef4444', 'opacity=".9"') + `<circle cx="32" cy="30" r="20" fill="#f97316" opacity=".85"/><circle cx="32" cy="30" r="15" fill="#fbbf24" opacity=".6"/>`; };
+            const star = (x, y, r, col) => S(`M${x} ${y - r} L${x + r * .28} ${y - r * .28} L${x + r} ${y} L${x + r * .28} ${y + r * .28} L${x} ${y + r} L${x - r * .28} ${y + r * .28} L${x - r} ${y} L${x - r * .28} ${y - r * .28}Z`, col);
+            const crownGold = (tall) => tall
+                ? S('M23.6 18 L25.4 8.6 L28.8 14 L32 4.4 L35.2 14 L38.6 8.6 L40.4 18Z', '#f5c542', 'stroke="#8a6a12" stroke-width=".6"') + `<circle cx="32" cy="12" r="1.4" fill="#ef4444"/>`
+                : S('M27 17 L28.6 12.6 L32 15.4 L35.4 12.6 L37 17Z', '#f5c542', 'stroke="#8a6a12" stroke-width=".5"') + `<circle cx="32" cy="14.6" r=".9" fill="#ef4444"/>`;
+
+            function draw(u) {
+                const h = hash((u.id || '') + (u.name || ''));
+                const arch = archetype(u);
+                const f = u.gender === '女性';
+                const rar = RARITY_RING[u.rarity] ? u.rarity : 'N';
+                let robe = pick(ROBES, h, 0), i1 = pick(INNERS, h, 3), i2 = pick(INNERS, h, 7), i3 = pick(INNERS, h, 11);
+                if (i2 === i1) i2 = INNERS[(INNERS.indexOf(i1) + 4) % INNERS.length];
+                let skin = f ? '#fff3e8' : '#f6dcc2';
+                const bgh = pick(BG_HUES, h, 5);
+                let bg1 = `hsl(${bgh[0] * 6},${bgh[1]}%,${Math.min(32, bgh[2] / 2)}%)`, bg2 = `hsl(${bgh[0] * 6},${bgh[1] + 10}%,8%)`;
+                if (rar === '神') { bg1 = '#fff6d8'; bg2 = '#d9a441'; }
+                else if (rar === 'UR') { bg1 = '#7f1d1d'; bg2 = '#1c0606'; }
+                let back = '', body = '', head = '', front = '', deco = '';
+                const cy = 30;
+                const mus = !f && (h % 5 < 3);
+
+                switch (arch) {
+                    case 'noble':
+                        body = robeMale(robe, i1); head = hairMaleTop() + face({ skin, h, cy }) + (mus ? mustache(cy) : '') + eboshi();
+                        front = h % 2 ? S('M47 66 L50 50 L53 50 L51 66Z', '#e9d8a6', 'stroke="#7a5c2e" stroke-width=".5"') : '';
+                        break;
+                    case 'emperor':
+                        robe = '#a8741a'; body = robeMale(robe, '#f6e7b0', '#6b3f0f') + S('M29 52 l3 -2 3 2 -3 2Z', '#f5c542');
+                        head = hairMaleTop() + face({ skin, h, cy, closedEyes: true }) + mustache(cy) + kanmuri(true);
+                        break;
+                    case 'scholar':
+                        robe = pick(['#3b2f2a', '#2f3b46', '#3a3a2a'], h); body = robeMale(robe, '#d6cbb5');
+                        head = hairMaleTop('#222') + face({ skin, h, cy }) + S('M22 23 Q21.6 11.6 32 11 Q42.4 11.6 42 23 Q32 19.6 22 23Z', '#4a3728') + L('M24 18 Q32 15 40 18', '#ffffff1f', 1);
+                        break;
+                    case 'monk':
+                        robe = pick(['#3a3a3a', '#4a4036', '#2c2c38'], h);
+                        body = robeMale(robe, '#e5e0d6') + S('M9 66 L42 45.6 L47 47.6 L17 66Z', pick(['#b5651d', '#c9a227', '#8b1e3f'], h, 4)) + L('M12 66 L44 46.4', '#00000033', 0.6);
+                        head = `<ellipse cx="32" cy="${cy - 1}" rx="10.2" ry="12.6" fill="${skin}"/><ellipse cx="29" cy="${cy - 9}" rx="4" ry="2" fill="#fff" opacity=".35"/><ellipse cx="32" cy="${cy - 4}" rx="10" ry="8" fill="#6b7280" opacity=".08"/>` + face({ skin, h, cy, closedEyes: h % 2 === 0 });
+                        break;
+                    case 'onmyoji':
+                        robe = '#f1f1f4'; body = robeMale(robe, '#5b3a8c', '#5b3a8c') + star(32, 56, 3.6, '#c8392b');
+                        head = hairMaleTop() + face({ skin, h, cy, closedEyes: true }) + eboshi('#101018');
+                        deco = `<g opacity=".55">${L('M8 10 L14 6 L12 14', '#a78bfa', 0.8)}${star(10, 50, 2, '#c4b5fd')}${star(54, 14, 2.4, '#c4b5fd')}</g>`;
+                        break;
+                    case 'warrior': {
+                        const odoshi = pick(['#c8392b', '#1f4e8c', '#2f6b4f', '#7a2e2e', '#6b4c9a', '#b5651d'], h, 2);
+                        const old = /実盛/.test(u.name);
+                        body = S('M4 66 Q6 47 32 44.5 Q58 47 60 66Z', '#2b2522') +
+                            [50, 54.5, 59, 63.5].map((y, i) => L(`M${7 - i * .4} ${y + 1} Q32 ${y - 4} ${57 + i * .4} ${y + 1}`, i % 2 ? odoshi : '#e9d8a6', 2.2)).join('') +
+                            S('M8 49 Q12 45 20 45 L18 56 Q12 54 8 52Z', odoshi) + S('M56 49 Q52 45 44 45 L46 56 Q52 54 56 52Z', odoshi);
+                        back = S('M16.6 23 L47.4 23 L52 40 L12 40Z', '#2b2522') + [27, 31, 35, 38.6].map(y => L(`M${16 - (y - 25) * .3} ${y} L${48 + (y - 25) * .3} ${y}`, odoshi, 1.8)).join('');
+                        head = face({ skin, h, cy: cy + 1, fierce: h % 2 === 0, old }) + (old ? mustache(cy + 1, '#eee') + goatee(cy + 1, '#eee') : mus ? mustache(cy + 1) : '') +
+                            S('M19.6 24 Q19.6 9.6 32 9 Q44.4 9.6 44.4 24Z', '#33302c') + L('M24 14 Q32 10 40 14', '#ffffff30', 1) + S('M18.6 22.6 L45.4 22.6 L45 25 L19 25Z', '#1b1917') +
+                            L('M30 13 Q24 6 19 -1', '#f5c542', 2.4) + L('M34 13 Q40 6 45 -1', '#f5c542', 2.4) + `<circle cx="32" cy="14.6" r="2.2" fill="#f5c542" stroke="#8a6a12" stroke-width=".5"/>`;
+                        break;
+                    }
+                    case 'boy':
+                        body = robeMale(pick(['#f4b6c8', '#a2d2ff', '#f2d27a'], h), '#fff');
+                        head = `<circle cx="32" cy="13.4" r="4.2" fill="#151515"/>` + S('M21 33 Q20 16 32 16 Q44 16 43 33 L43 36 Q41.6 23.6 32 22.6 Q22.4 23.6 21 36Z', '#151515') + face({ skin: '#fde9d6', h, cy: 32, rx: 9, ry: 10, child: true }) + L('M26 13.6 Q32 10.4 38 13.6', '#c8392b', 1.2);
+                        head = `<g>${head}</g>`;
+                        break;
+                    case 'girl':
+                        back = hairFemaleBack(); body = robeFemale(pick(['#f4b6c8', '#e5989b', '#ffc8dd'], h), '#fff', i2, i3);
+                        head = face({ skin, female: true, h, cy: 32, rx: 9, ry: 10, child: true }) + hairFemaleFront() + `<circle cx="40" cy="20" r="2" fill="#ef4444"/><circle cx="24" cy="20" r="2" fill="#ef4444"/>`;
+                        break;
+                    case 'oldman':
+                        body = robeMale('#6b5a45', '#d6cbb5');
+                        head = `<ellipse cx="32" cy="${cy - 1}" rx="10" ry="12.4" fill="${skin}"/>` + S('M21.6 33 Q20.6 24 23.4 21 L24 30Z', '#eee') + S('M42.4 33 Q43.4 24 40.6 21 L40 30Z', '#eee') +
+                            face({ skin, h, cy, old: true, closedEyes: true }) + S(`M25.6 ${cy + 5} Q32 ${cy + 22} 38.4 ${cy + 5} Q32 ${cy + 9} 25.6 ${cy + 5}Z`, '#f2f2f2') + mustache(cy, '#ddd');
+                        break;
+                    case 'oldwoman':
+                        back = hairFemaleBack('#d9d9d9'); body = robeFemale('#6b5a45', '#d6cbb5', '#a3977f', '#efe7d6');
+                        head = face({ skin, female: true, h, cy, old: true, closedEyes: true }) + hairFemaleFront('#d9d9d9');
+                        break;
+                    case 'lady':
+                    case 'empress':
+                        back = hairFemaleBack(); body = robeFemale(robe, i1, i2, i3);
+                        head = face({ skin, female: true, h, cy }) + hairFemaleFront() + (arch === 'empress' ? crownGold(false) : '');
+                        front = h % 3 === 0 ? `<g transform="translate(46 50) rotate(-18)">${S('M0 0 L-7 -12 Q0 -15 7 -12Z', i1, 'stroke="#7a5c2e" stroke-width=".5"')}${L('M0 0 L-4 -12 M0 0 L0 -13.4 M0 0 L4 -12', '#7a5c2e', .4)}</g>` : '';
+                        break;
+                    case 'onnabushi': {
+                        back = hairFemaleBack();
+                        body = S('M3 66 Q5 47 32 45 Q59 47 61 66Z', '#2b2522') + [51, 56, 61].map((y, i) => L(`M${6} ${y} Q32 ${y - 4} 58 ${y}`, i % 2 ? '#c8392b' : '#f4b6c8', 2.2)).join('') + S('M26 45 L32 52 L38 45Z', '#fff');
+                        head = face({ skin, female: true, h, cy }) + hairFemaleFront() + `<rect x="20.6" y="19.6" width="22.8" height="2.8" rx="1" fill="#fafafa"/>` + L('M43 21 Q47 22 49 27 M43 21 Q47 19 50 22', '#fafafa', 1.1);
+                        front = L('M54 66 L60 14', '#6b4a2b', 1.6) + S('M60 14 Q63 6 61 2 Q58 8 58.6 14Z', '#d1d5db');
+                        break;
+                    }
+                    case 'dancer':
+                        back = hairFemaleBack(); body = robeFemale('#f7f7f2', '#c8392b', '#f2d27a', '#fff');
+                        head = face({ skin, female: true, h, cy }) + hairFemaleFront() + S('M23.6 19 Q22.6 7 29.6 2 Q37 0 40.4 7 Q41.6 13 40.6 19Z', '#141414') + `<circle cx="32" cy="10" r="1.6" fill="#f5c542"/>`;
+                        break;
+                    case 'nun':
+                        body = robeFemale(pick(['#5b3a8c', '#4b4b5a', '#3d3550'], h), '#e7e5e4', '#cbd5e1', '#fff');
+                        back = S('M18.4 36 Q16.6 13.4 32 12.6 Q47.4 13.4 45.6 36 L48 47 L16 47Z', '#f2f0ea') + L('M20 40 Q32 44 44 40', '#00000018', 1);
+                        head = face({ skin, female: true, h, cy, closedEyes: true });
+                        break;
+                    case 'kaguya':
+                        back = `<circle cx="32" cy="24" r="21" fill="#fff8d6" opacity=".95"/><circle cx="24" cy="18" r="3.6" fill="#e8d9a0" opacity=".6"/><circle cx="41" cy="31" r="2.4" fill="#e8d9a0" opacity=".55"/>` + hairFemaleBack();
+                        body = robeFemale('#f7d6e0', '#fff', '#c9a0dc', '#a2d2ff') + L('M4 52 Q20 46 32 56 Q44 64 62 54', '#fde68a', 1.4, 'opacity=".9"');
+                        head = face({ skin: '#fff8f0', female: true, h, cy }) + hairFemaleFront() + crownGold(false);
+                        deco = L('M6 64 L10 34 M10 40 L4 36 M9 46 L14 42', '#4ade80', 1.4, 'opacity=".8"') + L('M58 64 L55 30 M55.6 38 L61 34', '#4ade80', 1.4, 'opacity=".8"');
+                        break;
+                    case 'goddess':
+                        back = halo('#fde68a', '#fbbf24', 21) + hairFemaleBack();
+                        body = robeFemale('#fbf7ee', '#c8392b', '#f2d27a', '#a2d2ff') + L('M2 50 Q16 42 24 52 Q32 62 42 52 Q50 44 63 50', '#f9a8d4', 2, 'opacity=".9"');
+                        head = face({ skin, female: true, h, cy }) + hairFemaleFront() + crownGold(true);
+                        break;
+                    case 'bodhisattva':
+                        back = halo('#fde68a', '#fff', 22) + S('M17 36 Q15 12 32 10.6 Q49 12 47 36 L52 66 L12 66Z', '#fbfaf5', 'opacity=".96"');
+                        body = robeFemale('#f6efe0', '#e9c46a', '#fbfaf5', '#fde68a');
+                        head = face({ skin: '#fbe7c6', female: true, h, cy, closedEyes: true }) + `<circle cx="32" cy="${cy - 5.4}" r=".9" fill="#f5c542"/>` + crownGold(true);
+                        break;
+                    case 'god': {
+                        const storm = /須佐之男/.test(u.name), moon = /月読/.test(u.name);
+                        back = halo(moon ? '#c7d2fe' : '#fde68a', moon ? '#a5b4fc' : '#fbbf24', 21);
+                        if (storm) back += L('M6 8 L12 18 L9 19 L15 30', '#fde047', 1.6) + L('M58 6 L52 16 L55 17 L49 28', '#fde047', 1.6);
+                        body = robeMale(moon ? '#1e2a5a' : storm ? '#23324a' : '#f7f3e8', '#fbf7ee') + [24, 28.6, 33, 37.4, 42].map((x, i) => `<path d="M${x} ${48 + Math.abs(i - 2) * -0.8} q1.6 1.4 0 3.4 q-2.4 -1.2 0 -3.4Z" fill="#22c55e" stroke="#14532d" stroke-width=".3"/>`).join('');
+                        head = S('M21.6 30 Q20.6 15.6 32 15 Q43.4 15.6 42.4 30 Q41.6 21 32 20.4 Q22.4 21 21.6 30Z', '#151515') +
+                            `<ellipse cx="19.4" cy="33" rx="3.2" ry="4.6" fill="#151515"/><ellipse cx="44.6" cy="33" rx="3.2" ry="4.6" fill="#151515"/>` + L('M17 31.4 L21.8 31.4 M42.2 31.4 L47 31.4', '#f5c542', 1) +
+                            face({ skin, h, cy, fierce: storm }) + (storm ? mustache(cy) + goatee(cy) : '') + (moon ? S('M36 10 A6 6 0 1 1 30 4 A4.6 4.6 0 1 0 36 10Z', '#e0e7ff') : '');
+                        break;
+                    }
+                    case 'bishamon':
+                        back = flameHalo();
+                        body = S('M4 66 Q6 47 32 44.5 Q58 47 60 66Z', '#b8860b') + [52, 57, 62].map(y => L(`M8 ${y} Q32 ${y - 4} 56 ${y}`, '#7a5410', 1.6)).join('') + `<circle cx="32" cy="55" r="4" fill="#f5c542" stroke="#7a5410" stroke-width=".8"/>`;
+                        head = face({ skin, h, cy: cy + 1, fierce: true }) + mustache(cy + 1) + S('M19 25 Q19 9 32 8.4 Q45 9 45 25Z', '#d4a017') + S('M18 23.4 L46 23.4 L45.6 26 L18.4 26Z', '#8a6a12') + star(32, 13.6, 4, '#fff7d6');
+                        break;
+                    case 'fudo':
+                        skin = '#5f86c6';
+                        back = flameHalo();
+                        body = robeMale('#c8392b', '#f2d27a') + L('M14 66 L42 45', '#f2d27a', 3);
+                        head = S('M21.6 30 Q20.6 15.6 32 15 Q43.4 15.6 42.4 30 Q41.6 21 32 20.4 Q22.4 21 21.6 30Z', '#1f1f1f') + face({ skin, h, cy, fierce: true }) + L('M42 26 Q48 34 46 46', '#1f1f1f', 2.4) +
+                            `<path d="M29.6 ${cy + 6.4} l1 1.6 M34.4 ${cy + 6.4} l-1 1.6" stroke="#fff" stroke-width=".8"/>`;
+                        break;
+                    case 'buddha':
+                        skin = '#efc566';
+                        back = halo('#fff7d6', '#fde68a', 23);
+                        body = robeMale('#c8392b', '#f2d27a') + S('M6 66 L44 45.6 L50 48 L16 66Z', '#a6331f');
+                        head = face({ skin, h, cy, closedEyes: true }) + `<ellipse cx="22" cy="${cy + 3}" rx="1.6" ry="4.4" fill="${skin}"/><ellipse cx="42" cy="${cy + 3}" rx="1.6" ry="4.4" fill="${skin}"/>` +
+                            `<ellipse cx="32" cy="15.4" rx="5" ry="4" fill="#1e3a8a"/>` + S('M22 26 Q21.6 17 32 16.6 Q42.4 17 42 26 Q32 22 22 26Z', '#1e3a8a') +
+                            Array.from({ length: 14 }, (_, i) => `<circle cx="${23.6 + (i % 7) * 2.8}" cy="${i < 7 ? 20 : 23}" r="1.1" fill="#3b5bb5"/>`).join('') + `<circle cx="32" cy="${cy - 5.6}" r="1" fill="#fff7d6"/>`;
+                        break;
+                }
+                const ring = RARITY_RING[rar];
+                const isHigh = rar === 'SSR' || rar === 'UR' || rar === '神';
+                const sparkles = isHigh ? [[9, 14, 2.2], [55, 12, 1.8], [52, 42, 1.4], [11, 40, 1.2]].map(([x, y, r]) => star(x, y, r, rar === '神' ? '#fff' : '#fde68a')).join('') : '';
+                const seigaiha = [0, 1, 2].map(i => `<circle cx="${10 + i * 22}" cy="66" r="13" fill="none" stroke="#ffffff" stroke-opacity=".07" stroke-width="2"/><circle cx="${10 + i * 22}" cy="66" r="8" fill="none" stroke="#ffffff" stroke-opacity=".07" stroke-width="2"/>`).join('');
+                const neckPart = /boy|girl/.test(arch) ? neck('#fde9d6', 3.2) : neck(skin);
+                return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">` +
+                    `<defs><radialGradient id="bg" cx="50%" cy="38%" r="70%"><stop offset="0" stop-color="${bg1}"/><stop offset="1" stop-color="${bg2}"/></radialGradient>` +
+                    `<linearGradient id="robeShade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>` +
+                    `<radialGradient id="haloG"><stop offset=".55" stop-color="#fff7d6" stop-opacity=".0"/><stop offset=".85" stop-color="#fde68a" stop-opacity=".55"/><stop offset="1" stop-color="#fde68a" stop-opacity="0"/></radialGradient>` +
+                    `<linearGradient id="ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${ring[1]}"/><stop offset=".5" stop-color="${ring[0]}"/><stop offset="1" stop-color="${ring[1]}"/></linearGradient>` +
+                    `<clipPath id="c"><circle cx="32" cy="32" r="31"/></clipPath></defs>` +
+                    `<g clip-path="url(#c)"><rect width="64" height="64" fill="url(#bg)"/>${seigaiha}${sparkles}${deco}${back}${body}${neckPart}${head}${front}</g>` +
+                    `<circle cx="32" cy="32" r="30.6" fill="none" stroke="url(#ring)" stroke-width="${isHigh ? 2.6 : 1.8}"/>` +
+                    (rar === 'UR' || rar === '神' ? `<circle cx="32" cy="32" r="28.4" fill="none" stroke="${ring[1]}" stroke-opacity=".55" stroke-width=".6"/>` : '') +
+                    `</svg>`;
+            }
+
+            const SILHOUETTE = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="31" fill="#1a1424"/><path d="M6 66 Q8 47 32 44.5 Q56 47 58 66Z" fill="#000"/><ellipse cx="32" cy="29" rx="10" ry="12" fill="#000"/><text x="32" y="36" text-anchor="middle" font-size="18" font-weight="900" fill="#d4af37" font-family="serif">?</text><circle cx="32" cy="32" r="30.6" fill="none" stroke="#6b7280" stroke-width="1.8"/></svg>`);
+            const cache = new Map();
+            function unitPortraitURL(u) {
+                if (!u) return SILHOUETTE;
+                const key = (u.id || u.name) + '|' + (u.gender || '') + '|' + (u.rarity || '');
+                let url = cache.get(key);
+                if (!url) {
+                    try { url = 'data:image/svg+xml,' + encodeURIComponent(draw(u)); } catch (e) { url = SILHOUETTE; }
+                    cache.set(key, url);
+                }
+                return url;
+            }
+            // opts: { hidden: 神キャラ秘匿時のシルエット, dim: 未所持のグレー表示, badge: false でアイコン紋章を非表示 }
+            function unitIconHTML(u, opts) {
+                opts = opts || {};
+                if (opts.hidden) return `<span class="uport"><img src="${SILHOUETTE}" alt="？？？" draggable="false"></span>`;
+                const badge = opts.badge === false ? '' : `<span class="uport-badge"><i class="fa-solid ${fixIcon(u && u.icon)}"></i></span>`;
+                const alt = u && u.name ? String(u.name).replace(/"/g, '') : '';
+                return `<span class="uport${opts.dim ? ' uport-dim' : ''}${u && u.rarity === '神' ? ' uport-god' : ''}"><img src="${unitPortraitURL(u)}" alt="${alt}" draggable="false">${badge}</span>`;
+            }
+            window.unitPortraitURL = unitPortraitURL;
+            window.unitIconHTML = unitIconHTML;
+            window.unitArchetype = archetype;
+        })();
+    </script>
+    <script>
         // =========================================================================
         // WEB AUDIO SYNTHESIZER FOR SOUND EFFECTS
         // =========================================================================
@@ -1688,7 +2169,7 @@
             { id: "so_003", name: "阿倍晴明", gender: "男性", rarity: "SSR", icon: "fa-hat-wizard", description: "伝説の陰陽師。式神を操る。", skill: { name: "陰陽の道", effect: "本人は常時デバフ・状態異常を無効化" }, special_move: { name: "急々如律令（式神召喚）", effect: "式神召喚で敵全体連続属性攻撃" }, gaugePerCorrect: 26, gaugeNeedsVotes: 3, synergies: [] },
             { id: "so_004", name: "藤原保昌", gender: "男性", rarity: "SR", icon: "fa-user-ninja", description: "『今昔物語集』の風流武者。", skill: { name: "隙なき歩み", effect: "敵の攻撃回避率上昇" }, special_move: { name: "月下の笛の音", effect: "敵全体の攻撃判定をミスに" }, gaugePerCorrect: 18, gaugeNeedsVotes: 5, synergies: [] },
             { id: "so_005", name: "平清盛", gender: "男性", rarity: "SSR", icon: "fa-fire", description: "『平家物語』平家の絶対権力者。", skill: { name: "おごれる者", effect: "序盤30秒間の攻撃爆発上昇" }, special_move: { name: "あつちの怪異（熱病の猛火）", effect: "敵全火属性超絶ダメ＋自傷" }, gaugePerCorrect: 24, gaugeNeedsVotes: 4, synergies: [{ target_id: "so_008", title: "父娘", effect: "攻撃力アップ" }] },
-            { id: "so_006", name: "藤原定家", gender: "男性", rarity: "SR", icon: "fa-pen-fancier", description: "『新古今和歌集』の選者。", skill: { name: "美の選者", effect: "正解時必殺ゲージ追加獲得" }, special_move: { name: "毎月抄の指南", effect: "味方のスキル威力を恒久アップ" }, gaugePerCorrect: 17, gaugeNeedsVotes: 5, synergies: [] },
+            { id: "so_006", name: "藤原定家", gender: "男性", rarity: "SR", icon: "fa-pen-fancy", description: "『新古今和歌集』の選者。", skill: { name: "美の選者", effect: "正解時必殺ゲージ追加獲得" }, special_move: { name: "毎月抄の指南", effect: "味方のスキル威力を恒久アップ" }, gaugePerCorrect: 17, gaugeNeedsVotes: 5, synergies: [] },
             { id: "so_007", name: "在原業平", gender: "男性", rarity: "SSR", icon: "fa-heart", description: "『伊勢物語』の昔男。絶世の伊達男。", skill: { name: "昔男の情熱", effect: "パーティの総攻撃力をバフ（女性キャラ1人につき攻撃力+50%）。女性キャラのスキル・シナジーは無効化しない" }, special_move: { name: "ちはやぶる神代も聞かず", effect: "単体に超大クリティカル攻撃" }, gaugePerCorrect: 25, gaugeNeedsVotes: 4, synergies: [{ target_id: "so_009", title: "六歌仙の共鳴", effect: "会心ダメージアップ" }] },
             { id: "so_008", name: "建礼門院", gender: "女性", rarity: "SR", icon: "fa-water", description: "平清盛の娘。『平家物語』ヒロイン。", skill: { name: "諸行無常の祈り", effect: "味方倒れた時HP1踏みとどまり" }, special_move: { name: "大原御幸の落飾", effect: "味方HP回復＋リジェネ付与" }, gaugePerCorrect: 17, gaugeNeedsVotes: 5, synergies: [{ target_id: "so_005", title: "父娘", effect: "被ダメージ軽減" }] },
             { id: "so_009", name: "小野小町", gender: "女性", rarity: "SR", icon: "fa-seedling", description: "絶世の美女歌人。六歌仙の一人。", skill: { name: "移ろふ色", effect: "敵全体の防御力を少しずつ低下" }, special_move: { name: "花の色は移りにけりな", effect: "敵全体を確率で混乱デバフ" }, synergies: [{ target_id: "so_007", title: "六歌仙の共鳴", effect: "すばやさアップ" }] },
@@ -1705,7 +2186,7 @@
                 ['紀貫之','男性','UR','fa-feather-pointed'],['在原業平（歌仙）','男性','SSR','fa-heart'],['伊勢','女性','SSR','fa-scroll'],['大伴家持','男性','SSR','fa-pen-nib'],['和泉式部','女性','SSR','fa-heart'],['赤染衛門','女性','SR','fa-pen'],['伊勢大輔','女性','SR','fa-fan'],['相模','女性','SR','fa-seedling'],['菅原孝標女','女性','SR','fa-book-open'],['道綱母','女性','SR','fa-scroll'],['清原元輔','男性','SR','fa-feather'],['大江千里','男性','SR','fa-music'],['凡河内躬恒','男性','R','fa-feather-pointed'],['壬生忠岑','男性','R','fa-pen'],['坂上是則','男性','R','fa-mountain-sun'],['源重之','男性','R','fa-wind'],['藤原敏行','男性','R','fa-feather'],['文屋康秀','男性','R','fa-leaf'],['僧正遍昭','男性','R','fa-hands-praying'],['喜撰法師','男性','R','fa-scroll'],['大中臣頼基','男性','R','fa-pen-nib'],['源順','男性','R','fa-book'],['紀友則','男性','R','fa-feather'],['藤原興風','男性','R','fa-music'],['清原深養父','男性','R','fa-mountain'],['藤原道信','男性','R','fa-envelope'],['藤原実方','男性','SR','fa-horse'],['藤原公任（歌壇）','男性','SSR','fa-crown'],['紫式部（若紫）','女性','SSR','fa-book-open'],['清少納言（春暁）','女性','SSR','fa-pen-nib'],['大弐三位','女性','SR','fa-fan'],['藤原道長（望月）','男性','UR','fa-crown']
             ],
             d20: [
-                ['源義経','男性','UR','fa-horse'],['平知盛','男性','UR','fa-shield-halved'],['源頼朝','男性','SSR','fa-landmark'],['北条政子','女性','SSR','fa-crown'],['巴御前','女性','SSR','fa-person-rifle'],['平敦盛','男性','SSR','fa-music'],['熊谷直実','男性','SR','fa-shield'],['那須与一','男性','SR','fa-bullseye'],['木曾義仲','男性','SR','fa-horse'],['静御前','女性','SR','fa-music'],['建礼門院（大原）','女性','SR','fa-water'],['後鳥羽院','男性','SSR','fa-landmark'],['鴨長明','男性','SR','fa-house'],['兼好法師','男性','SR','fa-scroll'],['西行','男性','SSR','fa-person-walking'],['一遍','男性','R','fa-hands-praying'],['安倍泰親','男性','R','fa-hat-wizard'],['源博雅','男性','SR','fa-music'],['渡辺綱','男性','SSR','fa-dragon'],['安倍晴明','男性','SSR','fa-hat-wizard'],['小野小町（歌仙）','女性','SSR','fa-seedling'],['在原行平','男性','R','fa-ship'],['紀長谷雄','男性','R','fa-feather'],['宇治の大君','女性','R','fa-fan'],['浮舟','女性','SR','fa-water'],['薫','男性','SR','fa-wind'],['匂宮','男性','SR','fa-sparkles'],['夕霧（源氏）','男性','SR','fa-shield-halved'],['藤原定家（新古今）','男性','SSR','fa-pen-fancier'],['西行法師','男性','SR','fa-person-walking'],['源俊頼','男性','R','fa-book'],['藤原俊成','男性','SSR','fa-feather-pointed']
+                ['源義経','男性','UR','fa-horse'],['平知盛','男性','UR','fa-shield-halved'],['源頼朝','男性','SSR','fa-landmark'],['北条政子','女性','SSR','fa-crown'],['巴御前','女性','SSR','fa-person-rifle'],['平敦盛','男性','SSR','fa-music'],['熊谷直実','男性','SR','fa-shield'],['那須与一','男性','SR','fa-bullseye'],['木曾義仲','男性','SR','fa-horse'],['静御前','女性','SR','fa-music'],['建礼門院（大原）','女性','SR','fa-water'],['後鳥羽院','男性','SSR','fa-landmark'],['鴨長明','男性','SR','fa-house'],['兼好法師','男性','SR','fa-scroll'],['西行','男性','SSR','fa-person-walking'],['一遍','男性','R','fa-hands-praying'],['安倍泰親','男性','R','fa-hat-wizard'],['源博雅','男性','SR','fa-music'],['渡辺綱','男性','SSR','fa-dragon'],['安倍晴明','男性','SSR','fa-hat-wizard'],['小野小町（歌仙）','女性','SSR','fa-seedling'],['在原行平','男性','R','fa-ship'],['紀長谷雄','男性','R','fa-feather'],['宇治の大君','女性','R','fa-fan'],['浮舟','女性','SR','fa-water'],['薫','男性','SR','fa-wind'],['匂宮','男性','SR','fa-wand-magic-sparkles'],['夕霧（源氏）','男性','SR','fa-shield-halved'],['藤原定家（新古今）','男性','SSR','fa-pen-fancy'],['西行法師','男性','SR','fa-person-walking'],['源俊頼','男性','R','fa-book'],['藤原俊成','男性','SSR','fa-feather-pointed']
             ]
         };
 
@@ -1937,7 +2418,7 @@
 
         // 曜日ガチャ: 月〜日の独立ポイント・独立10体（各キャラは通常ガチャと同じ戦闘フィールド）
         const WEEKDAY_GACHA_SPEC = {
-            mon: [['末摘花','女性','UR','fa-fan'],['朧月夜','女性','SSR','fa-moon'],['六条御息所','女性','SSR','fa-mask'],['明石の君','女性','SSR','fa-water'],['空蝉','女性','SR','fa-feather'],['夕顔','女性','SR','fa-seedling'],['花散里','女性','SR','fa-flower'],['朝顔の姫君','女性','R','fa-sun'],['女三宮','女性','R','fa-crown'],['明石の姫君','女性','R','fa-child']],
+            mon: [['末摘花','女性','UR','fa-fan'],['朧月夜','女性','SSR','fa-moon'],['六条御息所','女性','SSR','fa-mask'],['明石の君','女性','SSR','fa-water'],['空蝉','女性','SR','fa-feather'],['夕顔','女性','SR','fa-seedling'],['花散里','女性','SR','fa-spa'],['朝顔の姫君','女性','R','fa-sun'],['女三宮','女性','R','fa-crown'],['明石の姫君','女性','R','fa-child']],
             tue: [['源為朝','男性','UR','fa-bullseye'],['平重衡','男性','SSR','fa-fire'],['千手前','女性','SSR','fa-person-rifle'],['斎藤実盛','男性','SSR','fa-horse'],['源範頼','男性','SR','fa-bullseye'],['佐々木高綱','男性','SR','fa-horse'],['梶原景時','男性','SR','fa-shield-halved'],['平宗盛','男性','R','fa-landmark'],['平維盛','男性','R','fa-feather'],['平知康','男性','R','fa-drum']],
             wed: [['石作皇子','男性','UR','fa-gem'],['車持皇子','男性','SSR','fa-cart-shopping'],['阿倍御主人','男性','SSR','fa-coins'],['大伴御行','男性','SSR','fa-dragon'],['石上麻呂','男性','SR','fa-mountain'],['竜田姫','女性','SR','fa-leaf'],['天探女','女性','SR','fa-eye'],['翁（竹取）','男性','R','fa-person'],['嫗（竹取）','女性','R','fa-house'],['帝（竹取）','男性','R','fa-landmark']],
             thu: [['本居宣長','男性','UR','fa-book-open-reader'],['契沖','男性','SSR','fa-book'],['荷田春満','男性','SSR','fa-scroll'],['賀茂真淵','男性','SSR','fa-pen-nib'],['上田秋成','男性','SR','fa-feather-pointed'],['大江匡房','男性','SR','fa-graduation-cap'],['源経信','男性','SR','fa-music'],['藤原清輔','男性','R','fa-pen'],['顕昭','男性','R','fa-hands-praying'],['頓阿','男性','R','fa-book']],
@@ -2049,7 +2530,7 @@
                 id: "d01_s07",
                 name: "ステージ7: 文月（7月）",
                 recommendedPower: "2,100",
-                icon: "fa-pen-fancier",
+                icon: "fa-pen-fancy",
                 description: "【文月（ふみづき）の深掘り解説】旧暦7月。7月7日の七夕行事（乞巧奠：きっこうでん）で、詩歌や文字の上達を祈って梶の葉に和歌を書いた「書文（ふみ）」が語源。初秋の訪れを告げる月であり、七夕における織女・牽牛の星の逢瀬は王朝恋歌の重要なモチーフ。"
             },
             {
@@ -2254,7 +2735,7 @@
                 id: "d03_s10",
                 name: "ステージ10: 酉の刻（18時頃）",
                 recommendedPower: "5,950",
-                icon: "fa-sunset",
+                icon: "fa-cloud-sun",
                 description: "【酉の刻（とりのこく）：午後5時〜午後7時頃】日没の時刻。昼と夜の境界。宮中では「点灯（ともしび）」の儀が行われ、灯籠に火が点される。通い婚の男たちが意中の女性のもとへ出発する時間帯。"
             },
             {
@@ -2830,7 +3311,7 @@
                 id: "d13_s04",
                 name: "ステージ4: 五節の舞姫",
                 recommendedPower: "20,300",
-                icon: "fa-person-dancing",
+                icon: "fa-person-walking",
                 description: "【五節の舞姫（ごせちのまいひめ：11月）】新嘗祭（にいなめさい）の際、貴族の令嬢（未婚の少女）4〜5名が選ばれて宮中で舞（天女の舞）を披露する夢の舞台。選び抜かれた舞姫の美しさは絶大な話題となった。"
             },
             {
@@ -6515,12 +6996,12 @@
                     slot.innerHTML = `
                         <span class="text-[9px] ${unit.rarity === '神' ? 'rarity-god' : 'bg-amber-500 text-black'} font-extrabold px-1 rounded mb-1">${unit.rarity}</span>
                         <div class="w-10 h-10 rounded-full bg-heian-purple border border-heian-gold flex items-center justify-center text-heian-gold text-lg mb-1">
-                            <i class="fa-solid ${unit.icon}"></i>
+                            ${unitIconHTML(unit)}
                         </div>
                         <div class="font-mincho text-xs font-bold text-yellow-100 truncate w-full">${unit.name} ${genderMark(unit)}</div>
                         <div class="text-[9px] text-gray-300 font-mono mt-0.5">HP ${st.hp} / ATK ${st.atk}</div>
                         <div class="text-[8px] text-cyan-300 font-bold mt-1 bg-black/60 p-1 rounded w-full text-left border border-cyan-500/20">
-                            <div class="truncate text-cyan-300 font-bold"><i class="fa-solid fa-sparkles mr-0.5"></i>${unit.skill ? unit.skill.name : 'スキルなし'}</div>
+                            <div class="truncate text-cyan-300 font-bold"><i class="fa-solid fa-wand-magic-sparkles mr-0.5"></i>${unit.skill ? unit.skill.name : 'スキルなし'}</div>
                             <div class="text-[7px] text-gray-300 line-clamp-2 leading-tight mt-0.5 font-normal">${unit.skill ? unit.skill.effect : '効果なし'}</div>
                         </div>
                         <div class="text-[8px] text-amber-300 font-bold mt-1 bg-black/60 p-1 rounded w-full text-left border border-amber-500/20">
@@ -6557,7 +7038,7 @@
                         sslot.innerHTML = `
                             <span class="text-[9px] ${unit.rarity === '神' ? 'rarity-god' : 'bg-purple-700 text-purple-100'} font-extrabold px-1 rounded mb-1">${unit.rarity}<i class="fa-solid fa-eye-slash ml-1"></i></span>
                             <div class="w-9 h-9 rounded-full bg-heian-purple border border-heian-purple flex items-center justify-center text-heian-gold text-base mb-1">
-                                <i class="fa-solid ${unit.icon}"></i>
+                                ${unitIconHTML(unit)}
                             </div>
                             <div class="font-mincho text-[11px] font-bold text-yellow-100 truncate w-full">${unit.name}</div>
                             <div class="text-[9px] text-gray-300 font-mono mt-0.5">HP ${st.hp} / ATK ${st.atk}</div>
@@ -6628,12 +7109,12 @@
                     ${hasDeckSynergy ? '<span class="absolute top-1 right-1 text-amber-300 font-extrabold text-xs" title="デッキ内キャラとシナジー発生">⚡</span>' : ''}
                     <span class="text-[9px] ${unit.rarity === '神' ? 'rarity-god' : 'bg-amber-500 text-black'} font-extrabold px-1 rounded mb-1">${unit.rarity}</span>
                     <div class="w-10 h-10 rounded-full bg-heian-purple border border-heian-gold flex items-center justify-center text-heian-gold text-lg mb-1">
-                        <i class="fa-solid ${unit.icon}"></i>
+                        ${unitIconHTML(unit)}
                     </div>
                     <div class="font-mincho text-xs font-bold text-yellow-100 truncate w-full">${unit.name} ${genderMark(unit)}</div>
                     <div class="text-[9px] text-gray-300 font-mono mt-0.5">HP ${st.hp} / ATK ${st.atk}</div>
                     <div class="text-[8px] text-cyan-300 mt-1 w-full bg-black/50 p-1 rounded text-left border border-cyan-500/20">
-                        <div class="font-bold truncate"><i class="fa-solid fa-sparkles mr-0.5"></i>${unit.skill ? unit.skill.name : 'スキルなし'}</div>
+                        <div class="font-bold truncate"><i class="fa-solid fa-wand-magic-sparkles mr-0.5"></i>${unit.skill ? unit.skill.name : 'スキルなし'}</div>
                         <div class="text-[7px] text-gray-300 line-clamp-2 leading-tight mt-0.5">${unit.skill ? unit.skill.effect : '効果なし'}</div>
                     </div>
                     <div class="text-[8px] text-amber-300 mt-1 w-full bg-black/50 p-1 rounded text-left border border-amber-500/20">
@@ -6923,7 +7404,7 @@
                     <div>
                         <div class="flex justify-between items-start mb-1">
                             <span class="font-mincho font-bold text-yellow-100 text-sm flex items-center gap-1.5">
-                                <i class="fa-solid ${unit.icon} text-amber-400"></i> ${unit.name} ${genderMark(unit)}
+                                <span class="inline-block w-7 h-7 shrink-0">${unitIconHTML(unit, { badge: false })}</span> ${unit.name} ${genderMark(unit)}
                             </span>
                             <span class="text-[10px] ${unit.rarity === '神' ? 'rarity-god' : 'bg-amber-500 text-black'} font-black px-1.5 py-0.5 rounded">${unit.rarity}</span>
                         </div>
@@ -7029,7 +7510,7 @@
                     card.innerHTML = `
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-full bg-heian-purple border border-heian-gold flex items-center justify-center text-heian-gold text-lg shrink-0">
-                                <i class="fa-solid ${unit.icon}"></i>
+                                ${unitIconHTML(unit, { hidden: unit.rarity === '神' && !state.ownedUnits.includes(unit.id) })}
                             </div>
                             <div>
                                 <div class="font-mincho font-bold text-sm text-yellow-100">
@@ -7149,7 +7630,7 @@
                     const genderS = isGodHidden ? '' : genderMark(u);
                     html += '<div class="dex-card ' + (isOwned ? 'dex-owned' : 'dex-unowned') + ' rar-' + rarity + '">';
                     html += '<div class="flex items-start justify-between gap-1 mb-1">';
-                    html += '<div class="w-9 h-9 rounded-full bg-black/50 border ' + (isOwned ? 'border-yellow-300/60' : 'border-gray-500/50') + ' flex items-center justify-center text-base shrink-0"><i class="fa-solid ' + (u.icon || 'fa-user') + ' ' + (isOwned ? 'text-amber-300' : 'text-gray-400') + '"></i></div>';
+                    html += '<div class="w-12 h-12 rounded-full bg-black/50 border ' + (isOwned ? 'border-yellow-300/60' : 'border-gray-500/50') + ' flex items-center justify-center text-base shrink-0">' + unitIconHTML(u, { hidden: isGodHidden, dim: !isOwned }) + '</div>';
                     html += '<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gradient-to-r ' + (badgeCls[rarity] || badgeCls.N) + '">' + rarity + '</span>';
                     html += '</div>';
                     html += '<div class="font-mincho font-bold text-sm leading-tight ' + (isOwned ? 'text-yellow-100' : 'text-gray-400') + '">' + nameShow + genderS + '</div>';
@@ -7257,7 +7738,7 @@ ${draw[0].msg}
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto mb-6">
                         ${featured.map(u=>`<div class="gacha-featured-card ${featCls(u.rarity)}">
                             <span class="text-[10px] ${badgeCls(u.rarity)} font-bold px-2 py-0.5 rounded-full shadow">${u.rarity==='UR'?'最強 UR':u.rarity}</span>
-                            <div class="w-10 h-10 mx-auto mt-1.5 rounded-full bg-gradient-to-br from-purple-500/40 to-amber-400/30 border border-amber-400/70 flex items-center justify-center text-amber-200 text-lg"><i class="fa-solid ${u.icon}"></i></div>
+                            <div class="w-10 h-10 mx-auto mt-1.5 rounded-full bg-gradient-to-br from-purple-500/40 to-amber-400/30 border border-amber-400/70 flex items-center justify-center text-amber-200 text-lg">${unitIconHTML(u)}</div>
                             <div class="font-mincho font-bold text-amber-300 text-sm mt-1">${u.name}</div>
                             <div class="text-[10px] text-gray-300 leading-snug">${short(u.skill.effect)}</div>
                         </div>`).join('')}
@@ -7307,7 +7788,7 @@ ${draw[0].msg}
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto mb-6">
                         ${featured.map(u=>`<div class="gacha-featured-card ${featCls(u.rarity)}">
                             <span class="text-[10px] ${badgeCls(u.rarity)} font-bold px-2 py-0.5 rounded-full shadow">${u.rarity==='UR'?'最強 UR':u.rarity}</span>
-                            <div class="w-10 h-10 mx-auto mt-1.5 rounded-full bg-gradient-to-br from-purple-500/40 to-amber-400/30 border border-amber-400/70 flex items-center justify-center text-amber-200 text-lg"><i class="fa-solid ${u.icon}"></i></div>
+                            <div class="w-10 h-10 mx-auto mt-1.5 rounded-full bg-gradient-to-br from-purple-500/40 to-amber-400/30 border border-amber-400/70 flex items-center justify-center text-amber-200 text-lg">${unitIconHTML(u)}</div>
                             <div class="font-mincho font-bold text-amber-300 text-sm mt-1">${u.name}</div>
                             <div class="text-[10px] text-gray-300 leading-snug">${short(u.skill.effect)}</div>
                         </div>`).join('')}
@@ -7655,8 +8136,8 @@ ${draw[0].msg}
                     card.className = "p-3 rounded-xl bg-black/70 border-2 border-heian-gold flex flex-col items-center text-center shadow-lg animate-bounce";
                     card.innerHTML = `
                         <span class="text-[10px] bg-red-600 text-white font-black px-1.5 py-0.5 rounded mb-1">${unit.rarity}</span>
-                        <div class="w-12 h-12 rounded-full bg-heian-purple border border-heian-gold flex items-center justify-center text-heian-gold text-2xl my-1">
-                            <i class="fa-solid ${unit.icon}"></i>
+                        <div class="w-16 h-16 rounded-full bg-heian-purple border border-heian-gold flex items-center justify-center text-heian-gold text-2xl my-1">
+                            ${unitIconHTML(unit)}
                         </div>
                         <div class="font-mincho font-bold text-xs text-yellow-100">${unit.name} ${genderMark(unit)}</div>
                     `;
@@ -7935,7 +8416,7 @@ ${draw[0].msg}
             const old=document.getElementById('fridayEnemyRosterPanel'); if(old) old.remove();
             if(!roster || !roster.length) return;
             const panel=document.createElement('div'); panel.id='fridayEnemyRosterPanel'; panel.className='mt-2 p-2 rounded-xl bg-black/50 border border-red-400/40';
-            panel.innerHTML=`<div class="text-[10px] text-red-200 font-bold mb-1"><i class="fa-solid fa-users mr-1"></i>敵編成（${roster.length}体）</div><div class="grid grid-cols-5 gap-1">${roster.map(r=>`<div class="text-center bg-red-950/60 rounded p-1 border border-red-400/30" title="${r.unit.name} / Lv.${r.level}"><div class="w-8 h-8 mx-auto rounded-full bg-red-900 border border-red-300/60 flex items-center justify-center text-red-200"><i class="fa-solid ${r.unit.icon}"></i></div><div class="text-[8px] text-red-100 truncate mt-0.5">${r.unit.name}</div></div>`).join('')}</div>`;
+            panel.innerHTML=`<div class="text-[10px] text-red-200 font-bold mb-1"><i class="fa-solid fa-users mr-1"></i>敵編成（${roster.length}体）</div><div class="grid grid-cols-5 gap-1">${roster.map(r=>`<div class="text-center bg-red-950/60 rounded p-1 border border-red-400/30" title="${r.unit.name} / Lv.${r.level}"><div class="w-8 h-8 mx-auto rounded-full bg-red-900 border border-red-300/60 flex items-center justify-center text-red-200">${unitIconHTML(r.unit, { badge: false })}</div><div class="text-[8px] text-red-100 truncate mt-0.5">${r.unit.name}</div></div>`).join('')}</div>`;
             box.appendChild(panel);
         }
 
@@ -10005,93 +10486,217 @@ ${draw[0].msg}
 
         // ============================================================
         // 必殺技演出（ゲームバランス非干渉・視覚演出のみ）
-        // 回復系=緑の粒子が上昇 / 雷撃系=落雷 / 攻撃系=閃光＋爆発 / 支援系=金色
+        // ① カットイン：キャラ肖像＋必殺技名＋属性の「印」
+        // ② 必殺技の名前・効果文から属性（雷/炎/月/日輪/雪/水/風/花/矢/斬/呪/法/楽/歌）を判定し、専用エフェクトを再生
+        // ③ 効果種別（回復/結界/強化/弱体/行動不能）の補助エフェクトを重ねる
         // ============================================================
+        const SPECIAL_THEMES = [
+            ['thunder', /雷|稲妻|天神|東風|霹靂|鳴神|判詞/, { seal: '雷', c1: '#fde047', c2: '#1e1b4b', text: '#fef9c3' }],
+            ['fire', /火|炎|焔|猛火|紅蓮|焼|熱病|不動|火生|焦/, { seal: '炎', c1: '#f97316', c2: '#450a0a', text: '#ffedd5' }],
+            ['moon', /月|宵|朧|かぐや|満ち欠け/, { seal: '月', c1: '#c7d2fe', c2: '#0b1640', text: '#e0e7ff' }],
+            ['sun', /日輪|天照|岩戸|黎明|神光|朝日|高天原|陽光|光の|極楽/, { seal: '陽', c1: '#fde68a', c2: '#78350f', text: '#fffbeb' }],
+            ['snow', /雪|冷気|氷|霜|白妙/, { seal: '雪', c1: '#e0f2fe', c2: '#0c4a6e', text: '#f0f9ff' }],
+            ['water', /水|波|海|雨|時雨|川|滝|涙|浮舟|潮|壇ノ浦|龍|竜|鏡/, { seal: '水', c1: '#38bdf8', c2: '#082f49', text: '#e0f2fe' }],
+            ['wind', /風|嵐|あけぼの|颯|吹/, { seal: '風', c1: '#86efac', c2: '#052e16', text: '#ecfdf5' }],
+            ['petal', /花|桜|梅|紅葉|色|錦|散|若紫|八重/, { seal: '花', c1: '#f9a8d4', c2: '#500724', text: '#fdf2f8' }],
+            ['arrow', /矢|弓|射|扇の的|与一|一矢/, { seal: '矢', c1: '#fcd34d', c2: '#3f2a0a', text: '#fffbeb' }],
+            ['curse', /呪|怨|物の怪|生霊|毒|百足|嘆|恨|妬|嫉|怪異|憑/, { seal: '呪', c1: '#a855f7', c2: '#1a0526', text: '#f3e8ff' }],
+            ['magic', /式神|陰陽|急々如律令|律令|祝詞|祈|法華|念仏|往生|仏|菩薩|出家|落飾|悟/, { seal: '法', c1: '#c4b5fd', c2: '#1e1240', text: '#ede9fe' }],
+            ['blade', /刃|斬|太刀|薙刀|一閃|一騎|合戦|陣|討|鬼|腕|剣|槍|変|罠|撃|焼討/, { seal: '斬', c1: '#f1f5f9', c2: '#3b0a0a', text: '#ffffff' }],
+            ['music', /笛|琵琶|管弦|雅楽|調べ|鼓|舞|歌合|今様|楽|酒宴|神楽/, { seal: '楽', c1: '#fbcfe8', c2: '#3b0764', text: '#fdf4ff' }],
+            ['poem', /歌|詠|筆|物語|日記|書|記|抄|集|草子|学|をかし|あはれ|言霊|撰|思|心|譲位|即位|謀/, { seal: '歌', c1: '#fde68a', c2: '#2a1606', text: '#fffbeb' }]
+        ];
+        const SPECIAL_FALLBACK = {
+            heal: { seal: '癒', c1: '#6ee7b7', c2: '#022c22', text: '#ecfdf5' },
+            barrier: { seal: '護', c1: '#67e8f9', c2: '#083344', text: '#ecfeff' },
+            buff: { seal: '昂', c1: '#fde047', c2: '#422006', text: '#fefce8' },
+            blade: SPECIAL_THEMES.find(t => t[0] === 'blade')[2]
+        };
+        function resolveSpecialTheme(unit, fx) {
+            const sp = (unit && unit.special_move) || {};
+            const txt = `${sp.name || ''} ${unit && unit.specialEffectText || ''} ${sp.effect || ''}`;
+            for (const [key, re, cfg] of SPECIAL_THEMES) if (re.test(sp.name || '')) return { key, ...cfg };
+            for (const [key, re, cfg] of SPECIAL_THEMES) if (re.test(txt)) return { key, ...cfg };
+            if (fx.healPct || fx.healFull || fx.regen) return { key: 'heal', ...SPECIAL_FALLBACK.heal };
+            if (fx.shield && !fx.dmg) return { key: 'barrier', ...SPECIAL_FALLBACK.barrier };
+            if (!fx.dmg && (fx.buffAtk || fx.buffDef || fx.buffAll || fx.buffSpeed || fx.buffSpecGain || fx.buffDmgUp || fx.specPowerUp)) return { key: 'buff', ...SPECIAL_FALLBACK.buff };
+            return { key: 'blade', ...SPECIAL_FALLBACK.blade };
+        }
+
+        function specEl(root, cls, css, html) {
+            const d = document.createElement('div');
+            d.className = cls;
+            if (css) Object.assign(d.style, css);
+            if (html) d.innerHTML = html;
+            root.appendChild(d);
+            return d;
+        }
+
+        const SPECIAL_FX_SPAWNERS = {
+            thunder(root) {
+                specEl(root, 'sp-tint', { background: 'radial-gradient(circle at 50% 30%, rgba(253,224,71,.25), rgba(30,27,75,.55) 75%)' });
+                for (let i = 0; i < 5; i++) specEl(root, 'spec-thunder', { left: `${10 + i * 19 + rnd(-4, 4)}%`, animationDelay: `${0.15 + i * 0.12}s`, width: `${rnd(12, 22)}px` });
+                for (let i = 0; i < 3; i++) specEl(root, 'sp-whiteflash', { animationDelay: `${0.18 + i * 0.22}s` });
+            },
+            fire(root) {
+                specEl(root, 'sp-tint', { background: 'radial-gradient(circle at 50% 100%, rgba(249,115,22,.55), rgba(69,10,10,.45) 70%, transparent)' });
+                for (let i = 0; i < 26; i++) specEl(root, 'sp-flame', { left: `${rnd(-5, 100)}%`, width: `${rnd(40, 110)}px`, height: `${rnd(70, 160)}px`, animationDelay: `${rnd(0.1, 0.7)}s`, animationDuration: `${rnd(0.9, 1.4)}s` });
+                for (let i = 0; i < 18; i++) specEl(root, 'sp-ember', { left: `${rnd(0, 100)}%`, animationDelay: `${rnd(0.2, 1)}s` });
+            },
+            moon(root) {
+                specEl(root, 'sp-tint', { background: 'radial-gradient(circle at 70% 25%, rgba(199,210,254,.35), rgba(11,22,64,.7) 70%)' });
+                specEl(root, 'sp-moon');
+                for (let i = 0; i < 26; i++) specEl(root, 'sp-twinkle', { left: `${rnd(0, 100)}%`, top: `${rnd(0, 70)}%`, animationDelay: `${rnd(0, 1)}s` });
+                for (let i = 0; i < 8; i++) specEl(root, 'sp-moonbeam', { left: `${rnd(5, 95)}%`, animationDelay: `${rnd(0.2, 0.8)}s` });
+            },
+            sun(root) {
+                specEl(root, 'sp-tint', { background: 'radial-gradient(circle at 50% 45%, rgba(255,251,235,.75), rgba(253,230,138,.35) 40%, rgba(120,53,15,.35) 80%)' });
+                specEl(root, 'sp-rays');
+                specEl(root, 'sp-sundisc');
+                for (let i = 0; i < 20; i++) specEl(root, 'sp-twinkle', { left: `${rnd(0, 100)}%`, top: `${rnd(0, 100)}%`, background: '#fff7d6', animationDelay: `${rnd(0, 1)}s` });
+            },
+            snow(root) {
+                specEl(root, 'sp-tint', { background: 'linear-gradient(180deg, rgba(224,242,254,.4), rgba(12,74,110,.45))' });
+                for (let i = 0; i < 46; i++) { const sz = rnd(4, 11); specEl(root, 'sp-snow', { left: `${rnd(0, 100)}%`, width: `${sz}px`, height: `${sz}px`, animationDelay: `${rnd(0, 0.9)}s`, animationDuration: `${rnd(1.1, 1.8)}s`, '--dx': `${rnd(-60, 60)}px` }); }
+                specEl(root, 'sp-frost');
+            },
+            water(root) {
+                specEl(root, 'sp-tint', { background: 'linear-gradient(180deg, rgba(8,47,73,.25), rgba(14,116,144,.55))' });
+                for (let i = 0; i < 4; i++) specEl(root, 'sp-ripple', { animationDelay: `${0.2 + i * 0.18}s` });
+                for (let i = 0; i < 30; i++) specEl(root, 'sp-rain', { left: `${rnd(0, 110)}%`, animationDelay: `${rnd(0, 0.9)}s` });
+                specEl(root, 'sp-wave');
+            },
+            wind(root) {
+                specEl(root, 'sp-tint', { background: 'linear-gradient(90deg, rgba(5,46,22,.35), rgba(134,239,172,.2), rgba(5,46,22,.35))' });
+                for (let i = 0; i < 18; i++) specEl(root, 'sp-wind', { top: `${rnd(5, 95)}%`, width: `${rnd(20, 50)}vw`, animationDelay: `${rnd(0.05, 0.8)}s` });
+                for (let i = 0; i < 14; i++) specEl(root, 'sp-leaf', { top: `${rnd(10, 90)}%`, animationDelay: `${rnd(0.1, 0.9)}s`, '--dy': `${rnd(-120, 120)}px` });
+            },
+            petal(root, unit) {
+                const nm = (unit.special_move && unit.special_move.name) || '';
+                const maple = /紅葉|竜田|錦|秋/.test(nm + unit.name);
+                const plum = /梅/.test(nm);
+                const cols = maple ? ['#ef4444', '#f97316', '#f59e0b', '#b91c1c'] : plum ? ['#f43f5e', '#fb7185', '#fecdd3'] : ['#fbcfe8', '#f9a8d4', '#fce7f3', '#f472b6'];
+                specEl(root, 'sp-tint', { background: maple ? 'radial-gradient(circle, rgba(249,115,22,.2), rgba(69,10,10,.5))' : 'radial-gradient(circle, rgba(249,168,212,.25), rgba(80,7,36,.45))' });
+                for (let i = 0; i < 44; i++) specEl(root, maple ? 'sp-petal sp-maple' : 'sp-petal', { left: `${rnd(-10, 100)}%`, background: cols[i % cols.length], animationDelay: `${rnd(0, 1)}s`, animationDuration: `${rnd(1.2, 1.9)}s`, '--dx': `${rnd(40, 160)}px`, '--r': `${rnd(240, 720)}deg` });
+            },
+            arrow(root) {
+                specEl(root, 'sp-tint', { background: 'linear-gradient(120deg, rgba(63,42,10,.45), rgba(252,211,77,.15), rgba(63,42,10,.45))' });
+                for (let i = 0; i < 14; i++) specEl(root, 'sp-arrow', { top: `${rnd(15, 85)}%`, animationDelay: `${0.15 + i * 0.06}s` });
+                specEl(root, 'sp-target');
+            },
+            blade(root) {
+                specEl(root, 'sp-tint', { background: 'radial-gradient(circle, rgba(255,255,255,.1), rgba(59,10,10,.55))' });
+                [[-28, 0.25, 46], [22, 0.4, 54], [-8, 0.55, 50]].forEach(([deg, dl, top]) => specEl(root, 'sp-slash', { top: `${top}%`, transform: `rotate(${deg}deg)`, '--rot': `${deg}deg`, animationDelay: `${dl}s` }));
+                specEl(root, 'sp-whiteflash', { animationDelay: '0.62s' });
+                for (let i = 0; i < 16; i++) { const a = rnd(0, Math.PI * 2); specEl(root, 'sp-spark', { '--tx': `${Math.cos(a) * rnd(20, 45)}vw`, '--ty': `${Math.sin(a) * rnd(20, 40)}vh`, animationDelay: `${rnd(0.5, 0.7)}s` }); }
+            },
+            curse(root) {
+                specEl(root, 'sp-tint', { background: 'radial-gradient(circle, rgba(26,5,38,.35), rgba(26,5,38,.85))' });
+                for (let i = 0; i < 12; i++) specEl(root, 'sp-smoke', { left: `${rnd(0, 90)}%`, top: `${rnd(20, 80)}%`, animationDelay: `${rnd(0, 0.6)}s` });
+                const glyphs = '怨呪祟憑妬恨';
+                for (let i = 0; i < 10; i++) specEl(root, 'sp-glyph sp-glyph-curse', { left: `${rnd(5, 90)}%`, top: `${rnd(15, 85)}%`, animationDelay: `${rnd(0.2, 0.9)}s` }, glyphs[i % glyphs.length]);
+            },
+            magic(root) {
+                specEl(root, 'sp-tint', { background: 'radial-gradient(circle, rgba(196,181,253,.25), rgba(30,18,64,.65))' });
+                specEl(root, 'sp-seal-circle', null, `<svg viewBox="-50 -50 100 100"><circle r="46" fill="none" stroke="currentColor" stroke-width="1.6"/><circle r="40" fill="none" stroke="currentColor" stroke-width=".8"/><path d="M0 -38 L22.3 30.7 L-36.1 -11.7 L36.1 -11.7 L-22.3 30.7Z" fill="none" stroke="currentColor" stroke-width="2"/>${Array.from({ length: 12 }, (_, i) => `<text x="${Math.cos(i * Math.PI / 6) * 43}" y="${Math.sin(i * Math.PI / 6) * 43 + 2}" font-size="5" text-anchor="middle" fill="currentColor">${'子丑寅卯辰巳午未申酉戌亥'[i]}</text>`).join('')}</svg>`);
+                for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6 + rnd(-.2, .2); specEl(root, 'sp-ofuda', { '--tx': `${Math.cos(a) * rnd(28, 46)}vw`, '--ty': `${Math.sin(a) * rnd(24, 40)}vh`, '--r': `${rnd(-200, 200)}deg`, animationDelay: `${0.35 + rnd(0, 0.3)}s` }); }
+            },
+            music(root) {
+                specEl(root, 'sp-tint', { background: 'radial-gradient(circle, rgba(251,207,232,.2), rgba(59,7,100,.55))' });
+                for (let i = 0; i < 3; i++) specEl(root, 'sp-soundring', { animationDelay: `${0.2 + i * 0.25}s` });
+                const notes = '♪♫♩♬';
+                for (let i = 0; i < 22; i++) specEl(root, 'sp-note', { left: `${rnd(2, 95)}%`, animationDelay: `${rnd(0.1, 1)}s`, color: ['#fbcfe8', '#fde68a', '#c4b5fd', '#a5f3fc'][i % 4] }, notes[i % 4]);
+            },
+            poem(root, unit) {
+                specEl(root, 'sp-tint', { background: 'radial-gradient(circle, rgba(253,230,138,.18), rgba(42,22,6,.6))' });
+                const nm = ((unit.special_move && unit.special_move.name) || '').replace(/[（）()・、。！!？\s]/g, '');
+                const chars = (nm.length >= 4 ? nm : 'いろはにほへとちりぬるを').split('');
+                for (let i = 0; i < 22; i++) specEl(root, 'sp-glyph sp-glyph-poem', { left: `${rnd(4, 92)}%`, top: `${rnd(10, 90)}%`, animationDelay: `${rnd(0.15, 1)}s`, fontSize: `${rnd(22, 48)}px` }, chars[i % chars.length]);
+                for (let i = 0; i < 3; i++) specEl(root, 'sp-tanzaku', { left: `${18 + i * 30 + rnd(-5, 5)}%`, animationDelay: `${0.2 + i * 0.15}s`, '--r': `${rnd(-12, 12)}deg` });
+            },
+            heal(root) { SPECIAL_FX_OVERLAYS.heal(root, 1.6); },
+            barrier(root) { SPECIAL_FX_OVERLAYS.barrier(root); },
+            buff(root) { SPECIAL_FX_OVERLAYS.buff(root, 1.5); }
+        };
+        const SPECIAL_FX_OVERLAYS = {
+            heal(root, k) {
+                for (let i = 0; i < Math.round(16 * (k || 1)); i++) specEl(root, 'sp-heal', { left: `${rnd(5, 95)}%`, animationDelay: `${rnd(0.4, 1.1)}s` }, i % 3 ? '' : '✚');
+                specEl(root, 'sp-healglow');
+            },
+            barrier(root) { specEl(root, 'sp-barrier', null, `<svg viewBox="0 0 200 110"><defs><pattern id="sphex" width="14" height="12" patternUnits="userSpaceOnUse"><path d="M3.5 0 L10.5 0 L14 6 L10.5 12 L3.5 12 L0 6Z" fill="none" stroke="#a5f3fc" stroke-width=".8"/></pattern></defs><path d="M6 108 A94 100 0 0 1 194 108Z" fill="rgba(103,232,249,.18)" stroke="#67e8f9" stroke-width="2"/><path d="M6 108 A94 100 0 0 1 194 108Z" fill="url(#sphex)" opacity=".8"/></svg>`); },
+            buff(root, k) { for (let i = 0; i < Math.round(12 * (k || 1)); i++) specEl(root, 'sp-chev', { left: `${rnd(5, 95)}%`, animationDelay: `${rnd(0.4, 1.1)}s` }, '︽'); },
+            debuff(root) { for (let i = 0; i < 10; i++) specEl(root, 'sp-chev sp-chev-down', { left: `${rnd(5, 95)}%`, animationDelay: `${rnd(0.5, 1.1)}s` }, '︾'); },
+            stun(root) { specEl(root, 'sp-stunring', null, '★　☆　★　☆　★'); }
+        };
+
         function playSpecialMoveShow(p, fx) {
-            const isHeal = !!(fx.healPct || fx.healFull || fx.regen);
-            const isShield = !!fx.shield && !fx.dmg;
-            const isDmg = !!fx.dmg;
-            const isThunder = p.id === 'ok_001';
-            const isBuff = !!(fx.buffAtk || fx.buffDef || fx.buffAll || fx.buffSpeed || fx.buffSpecGain || fx.buffDmgUp) && !isDmg;
+            fx = fx || {};
+            let full = null;
+            try { full = (p && p.id && typeof getUnit === 'function') ? getUnit(p.id) : null; } catch (e) { full = null; }
+            const unit = Object.assign({}, full || {}, (p && p.unit) || {});
+            if (!unit.icon && full) unit.icon = full.icon;
+            if (!unit.id) unit.id = p && p.id;
+            const theme = resolveSpecialTheme(unit, fx);
+            const reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+            const grand = unit.rarity === '神' || unit.rarity === 'UR';
+            const total = reduce ? 1100 : (grand ? 2300 : 1900);
 
             document.querySelectorAll('.spec-root').forEach(el => el.remove());
             const root = document.createElement('div');
-            root.className = 'spec-root';
+            root.className = `spec-root sp-theme-${theme.key}${grand ? ' sp-grand' : ''}`;
+            root.style.setProperty('--sp-c1', theme.c1);
+            root.style.setProperty('--sp-c2', theme.c2);
+            root.style.setProperty('--sp-text', theme.text);
+            root.style.setProperty('--sp-total', `${total}ms`);
             document.body.appendChild(root);
 
-            // フラッシュ（種別で色を変える）
-            const flash = document.createElement('div');
-            flash.className = 'spec-flash';
-            if (isThunder) flash.style.background = 'rgba(255,255,255,.95)';
-            else if (isHeal) flash.style.background = 'radial-gradient(circle at 50% 55%, rgba(74,222,128,.5), transparent 72%)';
-            else if (isShield) flash.style.background = 'radial-gradient(circle at 50% 55%, rgba(103,232,249,.45), transparent 72%)';
-            else if (isBuff) flash.style.background = 'radial-gradient(circle at 50% 55%, rgba(250,204,21,.5), transparent 72%)';
-            else flash.style.background = 'radial-gradient(circle at 50% 55%, rgba(255,215,0,.65), rgba(220,38,38,.4) 55%, transparent 78%)';
-            root.appendChild(flash);
+            const fxLayer = specEl(root, 'sp-layer');
+            specEl(root, 'sp-dim');
+            specEl(root, 'spec-flash', { background: theme.key === 'thunder' ? 'rgba(255,255,255,.95)' : `radial-gradient(circle at 50% 50%, ${theme.c1}cc, transparent 72%)` });
 
-            // 必殺技名タイトル（（）内の注記は省略して大きく表示）
-            const rawName = (p.unit.special_move && p.unit.special_move.name) || '奥義';
+            // ① カットイン帯
+            const rawName = (unit.special_move && unit.special_move.name) || '奥義';
             const specName = rawName.split('（')[0];
-            const title = document.createElement('div');
-            title.className = 'spec-title';
-            title.style.color = isHeal ? '#a7f3d0' : isShield ? '#a5f3fc' : '#FFE9A8';
-            title.textContent = `${p.unit.name}・${specName}!!`;
-            root.appendChild(title);
+            const sub = rawName.includes('（') ? rawName.slice(rawName.indexOf('（')) : '';
+            const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const band = specEl(root, 'sp-band');
+            band.innerHTML = `
+                <div class="sp-band-lines"></div>
+                <div class="sp-portrait"><img src="${typeof unitPortraitURL === 'function' ? unitPortraitURL(unit) : ''}" alt=""></div>
+                <div class="sp-textbox">
+                    <div class="sp-who">${unit.rarity ? `<span class="sp-rar">${esc(unit.rarity)}</span>` : ''}${esc(unit.name || '')}</div>
+                    <div class="sp-name">${esc(specName)}</div>
+                    ${sub ? `<div class="sp-sub">${esc(sub)}</div>` : ''}
+                </div>
+                <div class="sp-stamp">${theme.seal}</div>`;
+            if (grand) specEl(root, 'sp-ougi', null, '奥義');
 
-            // エネルギーリング
-            const ringCol = isHeal ? '#6ee7b7' : isShield ? '#67e8f9' : isBuff ? '#fde047' : '#fbbf24';
-            const ring = document.createElement('div');
-            ring.className = 'spec-burst';
-            ring.style.background = `radial-gradient(circle, ${ringCol}, transparent 70%)`;
-            ring.style.border = `3px solid ${ringCol}`;
-            root.appendChild(ring);
-
-            // パーティクル（回復・支援系は下から上へ、攻撃系は中心から放射）
-            const colors = isHeal
-                ? ['#6ee7b7', '#34d399', '#a7f3d0', '#86efac']
-                : isShield ? ['#67e8f9', '#a5f3fc', '#22d3ee']
-                : isBuff ? ['#fde047', '#fbbf24', '#fff7cc']
-                : ['#fbbf24', '#f87171', '#fde047', '#fb923c'];
-            const pCount = isDmg ? 26 : 20;
-            for (let i = 0; i < pCount; i++) {
-                const pt = document.createElement('div');
-                pt.className = 'spec-particle';
-                pt.style.background = colors[i % colors.length];
-                pt.style.boxShadow = `0 0 10px ${colors[i % colors.length]}`;
-                if (isHeal || isShield || isBuff) {
-                    pt.style.left = `${8 + Math.random() * 84}%`;
-                    pt.style.top = `${82 + Math.random() * 12}%`;
-                    pt.style.animation = 'spec-rise 1.1s ease-out forwards';
-                    pt.style.animationDelay = `${Math.random() * 0.25}s`;
-                    pt.style.width = pt.style.height = `${5 + Math.random() * 9}px`;
-                } else {
-                    const ang = Math.random() * Math.PI * 2;
-                    const dist = 12 + Math.random() * 30;
-                    pt.style.left = `calc(50% + ${Math.cos(ang) * dist}vw)`;
-                    pt.style.top = `calc(50% + ${Math.sin(ang) * dist}vh)`;
-                }
-                root.appendChild(pt);
+            // ② 属性エフェクト（カットインの後半から）
+            if (!reduce) {
+                setTimeout(() => {
+                    if (!root.isConnected) return;
+                    try { (SPECIAL_FX_SPAWNERS[theme.key] || SPECIAL_FX_SPAWNERS.blade)(fxLayer, unit, fx); } catch (e) { }
+                    // ③ 効果種別の補助エフェクト
+                    try {
+                        if ((fx.healPct || fx.healFull || fx.regen) && theme.key !== 'heal') SPECIAL_FX_OVERLAYS.heal(fxLayer, 0.8);
+                        if (fx.shield && theme.key !== 'barrier') SPECIAL_FX_OVERLAYS.barrier(fxLayer);
+                        if ((fx.buffAtk || fx.buffDef || fx.buffAll || fx.buffSpeed || fx.buffSpecGain || fx.buffDmgUp) && theme.key !== 'buff') SPECIAL_FX_OVERLAYS.buff(fxLayer, 0.7);
+                        if (fx.enemyAtkDown || fx.enemySpeedDown || fx.dot) SPECIAL_FX_OVERLAYS.debuff(fxLayer);
+                        if (fx.stun || fx.confuse || fx.miss) SPECIAL_FX_OVERLAYS.stun(fxLayer);
+                    } catch (e) { }
+                }, grand ? 520 : 380);
             }
 
-            // 雷撃（菅原道真「東風吹かば」）
-            if (isThunder) {
-                for (let i = 0; i < 3; i++) {
-                    const th = document.createElement('div');
-                    th.className = 'spec-thunder';
-                    th.style.left = `${28 + i * 22}%`;
-                    th.style.animationDelay = `${i * 0.1}s`;
-                    root.appendChild(th);
-                }
-            }
-
-            // 戦闘フィールドのシェイク
+            // 戦闘フィールドのシェイク（攻撃系のみ強く）
             const arena = document.getElementById('battleArena');
-            if (arena) {
-                arena.classList.add('animate-shake-intense');
-                setTimeout(() => arena.classList.remove('animate-shake-intense'), 500);
+            if (arena && !reduce) {
+                setTimeout(() => {
+                    arena.classList.add(fx.dmg ? 'animate-shake-intense' : 'animate-shake-light');
+                    setTimeout(() => arena.classList.remove('animate-shake-intense', 'animate-shake-light'), 500);
+                }, grand ? 700 : 520);
             }
 
-            setTimeout(() => root.remove(), 1250);
+            setTimeout(() => root.remove(), total);
         }
 
         function updateBattleUI() {
@@ -10163,8 +10768,8 @@ ${draw[0].msg}
                 }`;
 
                 card.innerHTML = `
-                    <div class="w-8 h-8 rounded-full bg-heian-purple border border-heian-gold flex items-center justify-center text-heian-gold text-xs my-0.5">
-                        <i class="fa-solid ${p.unit.icon}"></i>
+                    <div class="w-10 h-10 rounded-full bg-heian-purple border border-heian-gold flex items-center justify-center text-heian-gold text-xs my-0.5 ${isReady && !isSealed && !p.defected ? 'uport-ready' : ''}" title="${p.unit.special_move ? '必殺：' + p.unit.special_move.name : ''}">
+                        ${unitIconHTML(p.unit)}
                     </div>
                     <span class="text-[9px] font-bold font-mincho text-yellow-100 truncate w-full">${p.unit.name} ${genderMark(p.unit)}</span>
                     ${hideSkills ? '' : `<div class="${isSPhone ? 'text-[7px]' : 'text-[6px]'} text-cyan-300 truncate w-full leading-tight" title="${p.unit.skill ? p.unit.skill.effect : ''}">${p.unit.skill ? p.unit.skill.name : ''}</div>`}
@@ -10933,7 +11538,7 @@ ${weekdayPointName}: +${weekdayReward.toLocaleString()}`
                     charCardsHtml += `
                         <div class="bg-black/60 p-2 rounded border border-heian-purple/40 flex items-center gap-2">
                             <div class="w-7 h-7 rounded-full bg-heian-purple border border-heian-gold flex items-center justify-center text-heian-gold text-xs shrink-0">
-                                <i class="fa-solid ${c.icon}"></i>
+                                ${unitIconHTML(c)}
                             </div>
                             <div class="flex-1 min-w-0 text-left">
                                 <div class="font-mincho font-bold text-xs text-yellow-100 truncate">${c.name}</div>
@@ -14168,7 +14773,7 @@ ${weekdayPointName}: +${weekdayReward.toLocaleString()}`
         btn = '<div class="w-full bg-gray-900 rounded-full h-1.5 border border-amber-500/40 overflow-hidden"><div class="pvp-gauge-bar bg-gradient-to-r from-amber-500 to-yellow-300 h-full transition-all duration-200" style="width:' + g.toFixed(1) + '%"></div></div><span class="text-[7px] text-amber-300 font-mono font-bold pvp-gauge-text">' + Math.floor(g) + '%</span>';
       }
       return '<div class="p-1.5 rounded-lg border flex flex-col items-center justify-between relative text-center transition bg-black/60 border-heian-gold/40">' +
-        '<div class="w-8 h-8 rounded-full bg-heian-purple border border-heian-gold flex items-center justify-center text-heian-gold text-xs my-0.5"><i class="fa-solid ' + (u.icon || 'fa-user') + '"></i></div>' +
+        '<div class="w-8 h-8 rounded-full bg-heian-purple border border-heian-gold flex items-center justify-center text-heian-gold text-xs my-0.5">' + unitIconHTML(u) + '</div>' +
         '<span class="text-[9px] font-bold font-mincho text-yellow-100 truncate w-full">' + esc(u.name) + '</span>' +
         (hideSkills ? '' : '<div class="text-[6px] text-cyan-300 truncate w-full leading-tight" title="' + (u.skill ? esc(u.skill.effect || '') : '') + '">' + (u.skill ? esc(u.skill.name) : '') + '</div>') +
         '<div class="w-full my-1">' + btn + '</div></div>';
@@ -14181,7 +14786,7 @@ ${weekdayPointName}: +${weekdayReward.toLocaleString()}`
     return party2.map(function (u, i) {
       var g = (gauges && gauges[i] !== undefined) ? Math.max(0, Math.min(100, gauges[i])) : 0;
       return '<div class="text-center bg-red-950/60 rounded p-1 border border-red-400/30" title="' + esc(u.name) + ' / Lv.' + (u.lvl || 1) + '">' +
-        '<div class="w-8 h-8 mx-auto rounded-full bg-red-900 border border-red-300/60 flex items-center justify-center text-red-200"><i class="fa-solid ' + (u.icon || 'fa-user') + '"></i></div>' +
+        '<div class="w-8 h-8 mx-auto rounded-full bg-red-900 border border-red-300/60 flex items-center justify-center text-red-200">' + unitIconHTML(u, { badge: false }) + '</div>' +
         '<div class="text-[8px] text-red-100 truncate mt-0.5">' + esc(u.name) + '</div>' +
         '<div class="w-full bg-gray-900 rounded-full h-1 border border-amber-500/40 overflow-hidden mt-0.5"><div class="pvp-gauge-bar bg-gradient-to-r from-amber-500 to-yellow-300 h-full" style="width:' + g.toFixed(1) + '%"></div></div>' +
         '<div class="text-[7px] text-amber-300 font-mono font-bold pvp-gauge-text">' + Math.floor(g) + '%</div></div>';
@@ -14777,19 +15382,6 @@ ${weekdayPointName}: +${weekdayReward.toLocaleString()}`
             _runDeferred(0);
         };
     </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925" integrity="sha512-d9sL6GJLXn6fInD1+TVXhTcQOsmxeHfmHAvwGDIxp5TO+uo1fiWW7mHomMj4MLRlCsJDTqXzWLHJFFlPCEIj/A==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
