@@ -245,8 +245,10 @@ static func standing(db: HistoryDB, eras: Dictionary, world: Dictionary, acts: A
 		var flist: Array = []
 		for f in s.get("facts", []):
 			if int(f.get("from", 0)) <= y and int(world.get(str(f["q"]), -1)) == int(f["choice"]):
-				facts += float(f["points"])
-				flist.append([f.get("note", ""), float(f["points"])])
+				# 続いた交易や制度は年とともに効いてくる（事業と同じ複利）
+				var fv := float(f["points"]) * minf(gc, pow(gb, float(y - int(f.get("from", y))) / 100.0))
+				facts += fv
+				flist.append([f.get("note", ""), fv])
 		var score := clampf(float(cp["base"]) + proj + vars_part + facts, 0.0, 100.0)
 		pts.append({"year": y, "score": score, "tier": standing_tier(s, score), "base": float(cp["base"]),
 			"base_tier": standing_tier(s, float(cp["base"])), "basis": cp.get("basis", ""), "projects": plist, "vars": vars_part, "facts": flist})
