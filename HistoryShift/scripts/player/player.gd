@@ -242,7 +242,9 @@ static func apply_hit(tree: SceneTree, hit: Dictionary, dir: Vector3, dmg: float
 	var pos: Vector3 = hit["position"]
 	var nrm: Vector3 = hit["normal"]
 	var target: Node = Effects.find_target(col as Node) if col is Node else null
-	if target and target.has_method("panic") and not target.has_method("is_enemy"):
+	if target and target.has_method("civil_hit") and target.civil_hit(dmg, team, pos, dir):
+		Effects.spark(tree, pos, nrm, Color.WHITE)   # 民間人への危害（設定オンのときだけ。血は出さない。scripts/core/civil_harm.gd）
+	elif target and target.has_method("panic") and not target.has_method("is_enemy"):
 		target.panic(pos)  # 町人は倒れない：伏せて逃げる
 		Effects.spark(tree, pos, nrm, Color.WHITE)
 	elif target and target.has_method("take_hit"):

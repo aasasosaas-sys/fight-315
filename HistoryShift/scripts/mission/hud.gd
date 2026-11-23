@@ -573,6 +573,8 @@ func _process(dt: float) -> void:
 		_tool.text = "" if p.in_vehicle() else p.tools.hud_text()
 	var dm = Destruction.current
 	_destr.text = dm.summary_text() if dm != null and is_instance_valid(dm) and (is_free_roam or int(dm.stats["units"]) > 0) else ""
+	if Wanted.civil_count > 0:   # 民間人への危害（設定オン時のみ）：数は誇示せず、静かに記す
+		_destr.text += ("\n" if _destr.text != "" else "") + "犠牲者 %d人" % Wanted.civil_count
 	var s := Wanted.stars()
 	_stars.text = "★".repeat(s) + "☆".repeat(5 - s) if s > 0 else ""
 	_hit_t = maxf(0.0, _hit_t - dt)

@@ -759,6 +759,18 @@ func _show_skills() -> void:
 		list.add_child(JSUI.label("なし（素手）。過去で奪う・買う・譲ってもらう・作る", 19, JSUI.MUTED))
 	for w in prof.weapons():
 		list.add_child(JSUI.label("・%s　%s" % [prof.item_label(w), Crafting.stats_text(w)], 18, Crafting.grade_color(float(w.get("q", 0.5)))))
+	list.add_child(JSUI.gap(8))
+	list.add_child(JSUI.label("知識の木：原理 %d / %d" % [Knowledge.known_count(prof), Knowledge.ids().size()], 24, JSUI.GOLD, JSUI.sans_bold()))
+	var kparts: PackedStringArray = []
+	for nid in Knowledge.ids():
+		if Knowledge.mastery(prof, nid) >= 1.0:
+			kparts.append("%s %d" % [Knowledge.node_name(nid), int(Knowledge.mastery(prof, nid))])
+	list.add_child(JSUI.label("習熟：" + ("、".join(kparts) if not kparts.is_empty() else "まだない（現代の常識で原理だけは知っている）"), 18, JSUI.TEXT, null, true))
+	if not prof.buildings.is_empty():
+		var bparts: PackedStringArray = []
+		for br in prof.buildings:
+			bparts.append("%s（%s）" % [Knowledge.building(str(br["type"])).get("name", ""), Game.db.get_era(str(br.get("era", ""))).get("eraName", "")])
+		list.add_child(JSUI.label("建てた施設：" + "、".join(bparts), 18, JSUI.TEXT, null, true))
 	var parts: PackedStringArray = []
 	for id in prof.stacks:
 		parts.append("%s×%d" % [CraftDB.item_name(id), int(prof.stacks[id])])

@@ -29,19 +29,29 @@ func _init(d: Dictionary, p_dry := false) -> void:
 	shell_floors = String(d.get("type", "")) in ["machiya", "chaya", "nagaya", "castle"]
 
 
+
+
+## 屋内では金属の金が白く飛ぶので、ベタ塗りの濃い金にする
+static func _gm(mat: String) -> String:
+	return "flat" if mat == "gold" else mat
+
+
+static func _gc(mat: String, colr: Color) -> Color:
+	return colr * Color(0.92, 0.8, 0.52) if mat == "gold" else colr
+
 # ================================================================ 基本図形（dry なら何もしない）
 func box(mat: String, c: Vector3, s: Vector3, colr := Color.WHITE, yaw := 0.0, collide := false, bottom := false) -> void:
 	if collide:
 		cols.append([Transform3D(Basis(Vector3.UP, yaw), c), s])
 	if dry:
 		return
-	kit.box(mat, Transform3D(Basis(Vector3.UP, yaw), c), s, colr, not bottom)
+	kit.box(_gm(mat), Transform3D(Basis(Vector3.UP, yaw), c), s, _gc(mat, colr), not bottom)
 
 
 func boxt(mat: String, t: Transform3D, s: Vector3, colr := Color.WHITE, bottom := false) -> void:
 	if dry:
 		return
-	kit.box(mat, t, s, colr, not bottom)
+	kit.box(_gm(mat), t, s, _gc(mat, colr), not bottom)
 
 
 func cyl(mat: String, base: Vector3, r0: float, r1: float, h: float, segs := 8, colr := Color.WHITE, collide := false) -> void:
@@ -50,19 +60,19 @@ func cyl(mat: String, base: Vector3, r0: float, r1: float, h: float, segs := 8, 
 		cols.append([Transform3D(Basis(), base + Vector3(0, h * 0.5, 0)), Vector3(r * 1.6, h, r * 1.6)])
 	if dry:
 		return
-	kit.cylinder(mat, Transform3D(Basis(), base), r0, r1, h, segs, colr)
+	kit.cylinder(_gm(mat), Transform3D(Basis(), base), r0, r1, h, segs, _gc(mat, colr))
 
 
 func cylt(mat: String, t: Transform3D, r0: float, r1: float, h: float, segs := 8, colr := Color.WHITE) -> void:
 	if dry:
 		return
-	kit.cylinder(mat, t, r0, r1, h, segs, colr)
+	kit.cylinder(_gm(mat), t, r0, r1, h, segs, _gc(mat, colr))
 
 
 func sph(mat: String, c: Vector3, r: float, colr := Color.WHITE, segs := 8, rings := 5, sc := Vector3.ONE) -> void:
 	if dry:
 		return
-	kit.sphere(mat, Transform3D(Basis().scaled(sc), c), r, segs, rings, colr)
+	kit.sphere(_gm(mat), Transform3D(Basis().scaled(sc), c), r, segs, rings, _gc(mat, colr))
 
 
 func rod(mat: String, a: Vector3, b: Vector3, r: float, colr := Color.WHITE, segs := 5) -> void:

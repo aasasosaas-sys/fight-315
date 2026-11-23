@@ -5,6 +5,9 @@ extends Node
 static var heat := 0.0
 static var _last_report := -99.0
 static var enabled := true
+## 民間人の犠牲（scripts/core/civil_harm.gd。設定オンのときだけ増える）。1人でも出たこの時空跳躍では警戒度が下がりきらない
+static var civil_count := 0
+const CIVIL_FLOOR := 4.0
 
 var era_id := ""
 var _spawn_t := 0.0
@@ -29,7 +32,20 @@ static func report(_pos: Vector3, amount: float) -> void:
 
 
 static func clear() -> void:
-	heat = 0.0
+	heat = CIVIL_FLOOR if civil_count > 0 else 0.0
+
+
+## 民間人が倒れた：警戒度は最大に跳ね上がる
+static func civil_casualty(_pos: Vector3) -> void:
+	civil_count += 1
+	if not enabled:
+		return
+	heat = 5.99
+	_last_report = Time.get_ticks_msec() / 1000.0
+
+
+func _ready() -> void:
+	civil_count = 0   # 時空跳躍（Session）ごとに数え直す
 
 
 func _process(dt: float) -> void:
@@ -38,7 +54,7 @@ func _process(dt: float) -> void:
 	_air = _air.filter(func(e): return is_instance_valid(e) and not e.dead)
 	# 一定時間おとなしくしていると下がる
 	if now - _last_report > 12.0:
-		heat = maxf(0.0, heat - dt * 0.12)
+		heat = maxf(CIVIL_FLOOR if civil_count > 0 else 0.0, heat - dt * 0.12)
 	var s := stars()
 	if s == 0:
 		for e in _pursuers:
@@ -49,7 +65,7 @@ func _process(dt: float) -> void:
 	if _spawn_t > 0.0 or Game.player == null or Game.world == null:
 		return
 	_spawn_t = 6.0
-	var want := s * 2
+	var want := s * 2 + (3 if civil_count > 0 else 0)   # 民間人の犠牲が出ると追手が増える
 	if _pursuers.size() < want:
 		var p: Node3D = Game.player.vehicle if Game.player.in_vehicle() else Game.player
 		var rng := RandomNumberGenerator.new()
@@ -64,10 +80,12 @@ func _process(dt: float) -> void:
 		for i in n:
 			var e := Enemy.spawn(get_parent(), pos + Vector3(i * 1.5, 0.5, 0), label, era_id)
 			e.aggro_range = 140.0
+			if civil_count > 0:
+				e.hp *= 1.5   # 民間人の犠牲が出ると、より手ごわい追手（精鋭）が来る
 			_pursuers.append(e)
 		var hud = get_tree().get_first_node_in_group("hud")
 		if hud:
-			hud.toast("%sが追ってくる！" % label)
+			hud.toast(("民を害した者として%sが総出で追ってくる" if civil_count > 0 else "%sが追ってくる！") % label)
 	if s >= 5 and era_id == "showa" and _air.size() < 2:
 		var p2: Node3D = Game.player
 		_air.append(AirEnemy.spawn(get_parent(), p2.global_position + Vector3(300, 180, 300), "修正力の飛行隊"))

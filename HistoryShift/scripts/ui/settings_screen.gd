@@ -50,6 +50,10 @@ static func open(parent: Control, on_close: Callable = Callable()) -> Control:
 	sa.toggled.connect(func(on: bool): UISfx.play("click"); sa.text = "オン" if on else "オフ"; GameSettings.set_value("start_armed", on))
 	v.add_child(_row("最初から武装", "時空跳躍のたびに「時空銃」（弾は尽きない）と焙烙玉などを貸与する", sa))
 
+	# 成人向け：民間人への危害（教育版・未所有では行ごと出さない。scripts/core/civil_harm.gd）
+	if MatureContent.is_unlocked():
+		v.add_child(_civil_harm_row(parent))
+
 	v.add_child(JSUI.gap(6))
 	var row := JSUI.hbox()
 	row.alignment = BoxContainer.ALIGNMENT_END
@@ -64,6 +68,39 @@ static func open(parent: Control, on_close: Callable = Callable()) -> Control:
 	v.add_child(row)
 	close.call_deferred("grab_focus")
 	return overlay
+
+
+const CIVIL_WARNING := "【注意・成人向け】オンにすると、名もない町人（農民・職人・商人・町人・漁民）が、あなたの攻撃・爆発・火事・瓦礫・乗り物で倒れるようになります（流血や遺体の描写はなく、倒れて消えます）。名のある人物は倒れません。史実の虐殺・戦災に重なる場面では無効です。\n犠牲は手配度を最大にし、その時代の民心離反・一揆や打ちこわしを招き、歴史に「犠牲」として刻まれます。"
+
+
+static func _civil_harm_row(parent: Control) -> Control:
+	var ch := CheckButton.new()
+	ch.button_pressed = bool(GameSettings.values.get("civil_harm", false))
+	ch.text = "オン" if ch.button_pressed else "オフ"
+	ch.toggled.connect(func(on: bool):
+		UISfx.play("click")
+		if not on:
+			ch.text = "オフ"
+			GameSettings.set_value("civil_harm", false)
+			return
+		ch.set_pressed_no_signal(false)
+		JSUI.confirm(parent, "民間人への危害（成人向け）", CIVIL_WARNING + "\n\n本当にオンにしますか？", "オンにする", "やめる", func():
+			ch.set_pressed_no_signal(true)
+			ch.text = "オン"
+			GameSettings.set_value("civil_harm", true), true))
+	var p := JSUI.panel(JSUI.sb(Color(JSUI.SHU, 0.06), 12, 1, Color(JSUI.SHU, 0.35), 0, 16))
+	var h := JSUI.hbox(20)
+	p.add_child(h)
+	var tv := JSUI.vbox(4)
+	tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tv.add_child(JSUI.label("民間人への危害（成人向け）", 27, Color.WHITE, JSUI.sans_bold()))
+	var warn := JSUI.label(CIVIL_WARNING, 18, JSUI.MUTED, null, true)
+	warn.custom_minimum_size = Vector2(620, 0)
+	tv.add_child(warn)
+	h.add_child(tv)
+	ch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	h.add_child(ch)
+	return p
 
 
 static func _row(title: String, desc: String, ctl: Control) -> Control:

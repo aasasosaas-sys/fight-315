@@ -9,6 +9,7 @@ extends RefCounted
 signal changed
 signal skill_up(id: String, old_level: float, new_level: float)
 signal item_added(text: String)
+signal knowledge_up(id: String, old_mastery: float, new_mastery: float, learned: bool)
 
 const SAVE_PATH := "user://profile.json"
 static var save_path := SAVE_PATH    # テストは別のファイルに差し替える
@@ -23,6 +24,9 @@ var equipped := -1                    # 手にしている個体の uid（-1 = �
 var lessons: Dictionary = {}          # 工房 id -> 稽古の回数
 var loan_stacks: Dictionary = {}      # 貸与した束の数（返すとき差し引く）
 var next_uid := 1
+var knowledge: Dictionary = {}        # 知識の木 id -> {p: 原理を知る, m: 習熟 0〜100}（scripts/core/knowledge.gd）
+var permits: Dictionary = {}          # eraId -> true（支配者から殖産の許しを得た）
+var buildings: Array = []             # 過去に建てた施設 [{id, type, era, at, pos[x,y,z], yaw, workers, skill, scale, power, stock{}, money, last}]
 var autosave := true
 var _dirty := false
 var _last_save := -100000
@@ -47,8 +51,22 @@ func reset() -> void:
 	money = START_MONEY
 	equipped = -1
 	next_uid = 1
+	knowledge.clear()
+	permits.clear()
+	buildings.clear()
 	add("smartphone", 1, 0.5)
+	add("kyokasho", 1, 0.5)
+	# 現代の常識：原理だけは知っている（手を動かした習熟は 0）
+	for nid in Knowledge.modern_pool():
+		knowledge[nid] = {"p": true, "m": 0.0}
 	autosave = was
+
+
+## 知識が増えた（Knowledge から呼ばれる）
+func knowledge_changed(id: String, old: float, nv: float, learned: bool) -> void:
+	if learned or floorf(nv / 10.0) != floorf(old / 10.0):
+		knowledge_up.emit(id, old, nv, learned)
+	_changed(learned)
 
 
 # ------------------------------------------------------------------ モード
@@ -263,7 +281,8 @@ func to_dict() -> Dictionary:
 		if int(st[id]) <= 0:
 			st.erase(id)
 	var eq := equipped if not get_instance(equipped).get("loan", false) else -1
-	return {"skills": skills, "items": its, "stacks": st, "stack_q": stack_q, "money": money, "equipped": eq, "lessons": lessons, "next_uid": next_uid, "v": 1}
+	return {"skills": skills, "items": its, "stacks": st, "stack_q": stack_q, "money": money, "equipped": eq, "lessons": lessons, "next_uid": next_uid,
+		"knowledge": knowledge, "permits": permits, "buildings": buildings, "v": 2}
 
 
 func from_dict(d: Dictionary) -> void:
@@ -289,6 +308,14 @@ func from_dict(d: Dictionary) -> void:
 	money = int(d.get("money", START_MONEY))
 	equipped = int(d.get("equipped", -1))
 	lessons = d.get("lessons", {})
+	if d.has("knowledge"):
+		knowledge.clear()
+		for k in d["knowledge"]:
+			var kv: Variant = d["knowledge"][k]
+			if kv is Dictionary:
+				knowledge[k] = {"p": bool(kv.get("p", false)), "m": float(kv.get("m", 0.0))}
+	permits = d.get("permits", {})
+	buildings = d.get("buildings", [])
 	next_uid = maxi(int(d.get("next_uid", 1)), 1)
 	for it in items:
 		next_uid = maxi(next_uid, int(it["uid"]) + 1)

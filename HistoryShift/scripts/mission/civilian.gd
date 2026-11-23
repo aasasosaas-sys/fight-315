@@ -1,6 +1,8 @@
 class_name Civilian
 extends CharacterBody3D
 ## 町人。通りを歩き、銃声や爆発で逃げ惑い、車が来ると飛びのく。攻撃しても倒れない（伏せて逃げる）。
+## 例外：設定「民間人への危害（成人向け）」がオンで、史実の虐殺・戦災に重なる場面でなければ、プレイヤーが原因の被害で倒れる
+## （scripts/core/civil_harm.gd）。流血・遺体は出さない：アニメ調に倒れ、数秒で薄れて消える。
 
 var points: Array = []
 var era_id := ""
@@ -11,6 +13,11 @@ var _flee_from := Vector3.ZERO
 var _wait := 0.0
 var _dodge := Vector3.ZERO
 static var _scream_t := 0.0
+var hp := 35.0
+var down := false
+var _harm_t := 0.0
+var _intact := {}             # 前回見たとき崩れていなかった近くの建物（新しく崩れたものだけ瓦礫の被害にする）
+var _last_cause := "shot"
 
 
 static func spawn(parent: Node, pos: Vector3, p_era: String, pts: Array) -> Civilian:
@@ -49,7 +56,73 @@ func panic(from: Vector3) -> void:
 
 
 func take_hit(_a: float, _t: int, point := Vector3.ZERO, _d := Vector3.ZERO) -> void:
+	if civil_hit(_a, _t, point, _d):
+		return
 	panic(point)
+
+
+## 民間人への危害（設定オンのときだけ）。被害を受けたら true（呼び出し側は panic の代わりにこれで済ませる）。
+## オフ・除外の場面・プレイヤーが原因でない被害では false（従来どおり逃げるだけ）
+func civil_hit(amount: float, team: int, point := Vector3.ZERO, _dir := Vector3.ZERO, unit_cause := "") -> bool:
+	if down:
+		return true
+	if not CivilHarm.player_caused(team, unit_cause):
+		return false
+	if not CivilHarm.allowed_here(get_tree(), era_id, global_position):
+		return false
+	_last_cause = {-2: "fire", -3: "debris"}.get(team, "shot" if team == 0 else "explosion")
+	panic(point if point != Vector3.ZERO else global_position + Vector3.FORWARD)
+	hp -= amount
+	if _rig and _rig.has_method("hurt"):
+		_rig.call("hurt")
+	if hp <= 0.0:
+		_fall()
+	return true
+
+
+## 倒れる：アニメ調に倒れ、少しして薄れて消える（血・遺体・部位の欠損はない）
+func _fall() -> void:
+	down = true
+	remove_from_group("civilian")
+	collision_layer = 0
+	collision_mask = Game.COLLISION_WORLD
+	velocity = Vector3.ZERO
+	if _rig and _rig.has_method("die"):
+		_rig.call("die")
+	CivilHarm.on_casualty(era_id, global_position, _last_cause)
+	get_tree().call_group("civilian", "panic", global_position)
+	var tw := create_tween()
+	tw.tween_interval(2.2)
+	tw.tween_method(_set_fade, 0.0, 1.0, 1.6)
+	tw.tween_callback(queue_free)
+
+
+func _set_fade(a: float) -> void:
+	for n in find_children("*", "GeometryInstance3D", true, false):
+		(n as GeometryInstance3D).transparency = a
+
+
+## 火・崩れた建物・乗り物（設定オンのときだけ。0.4 秒ごと）
+func _harm_check() -> void:
+	var d = Destruction.current
+	if d != null and is_instance_valid(d):
+		var near: Array = d.units_near(global_position, 3.0)
+		for u in d.units_near(global_position, 6.0):
+			if not u.destroyed:
+				_intact[u.id] = true
+				if u.burning and u in near and civil_hit(12.0, -2, global_position, Vector3.ZERO, str(u.fire_cause)):
+					return
+			elif _intact.has(u.id):
+				_intact.erase(u.id)
+				if u in near and civil_hit(60.0, -3, global_position, Vector3.ZERO, str(u.last_cause)):
+					return
+	for v in get_tree().get_nodes_in_group("vehicle"):
+		if v.get("driver") == null or v.get("driver") != Game.player:
+			continue
+		var vv: Vector3 = v.get_velocity_vec() if v.has_method("get_velocity_vec") else Vector3.ZERO
+		if vv.length() > 7.0 and (v as Node3D).global_position.distance_to(global_position) < 2.4:
+			civil_hit(vv.length() * 5.0, 0, global_position, vv.normalized())
+			return
 
 
 func _pick_goal() -> void:
@@ -66,6 +139,20 @@ func _pick_goal() -> void:
 
 
 func _physics_process(dt: float) -> void:
+	if down:
+		velocity = Vector3(0, -1.0 if is_on_floor() else velocity.y - 22.0 * dt, 0)
+		move_and_slide()
+		return
+	if CivilHarm.enabled():
+		_harm_t -= dt
+		if _harm_t <= 0.0:
+			_harm_t = 0.4
+			_harm_check()
+			if down:
+				return
+		# 民心離反：犠牲が出た時代では、町人はあなたを見るだけで逃げる
+		if CivilHarm.unrest_level() >= 1 and Game.player and _panic <= 0.0 and (Game.player as Node3D).global_position.distance_to(global_position) < 8.0 + 6.0 * CivilHarm.unrest_level():
+			panic((Game.player as Node3D).global_position)
 	var move := Vector3.ZERO
 	var spd := 1.4
 	_panic = maxf(0.0, _panic - dt)

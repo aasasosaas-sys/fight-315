@@ -54,7 +54,8 @@ func _ready() -> void:
 	_rt.add_theme_font_size_override("bold_font_size", 32)
 	_rt.add_theme_color_override("default_color", JSUI.TEXT)
 	_rt.add_theme_constant_override("line_separation", 6)
-	_rt.text = _to_bbcode(ending[1])
+	var civil_note := CivilHarm.ending_note()   # 民間人の犠牲（設定オン時のみ）。悲劇・代償として添える
+	_rt.text = _to_bbcode(ending[1] + ("\n\n" + civil_note if civil_note != "" else ""))
 	_rt.visible_characters = 0
 	_scroll.add_child(_rt)
 	# 統計 + ボタン
@@ -67,6 +68,10 @@ func _ready() -> void:
 	stats.add_child(_stat("改変数", str(Game.state.alterations)))
 	stats.add_child(_stat("修復数", str(Game.state.restorations)))
 	stats.add_child(_stat("最終得点", "%d点" % Game.state.score()))
+	if CivilHarm.total() > 0:
+		var cs := _stat("犠牲者", "%d人" % CivilHarm.total())
+		cs.modulate = Color(0.72, 0.72, 0.78)   # 金色の「成果」には見せない
+		stats.add_child(cs)
 	_bottom.add_child(stats)
 	var row := JSUI.hbox(18)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER

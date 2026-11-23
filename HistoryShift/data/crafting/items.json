@@ -1,76 +1,809 @@
 {
-  "_doc": "持ち物の定義。type: melee/bow/gun/ammo/bomb/heavy/material/med/tool/valuable。era = 史実でその品が日本で手に入るようになった時代（それより前の時代へ持ち込むと「時代錯誤の品」）。price は文（1両=4貫=4000文、1871年の新貨条例で1両=1円とした換算で円も同じ）。tech は時代錯誤の品が過去に残ったときの歴史パラメータの変化（actors.gd の anachronism）。",
-  "items": {
-    "fists":      {"name": "素手", "type": "melee", "skill": "kenjutsu", "era": "jomon_kofun", "damage": 10, "speed": 0.34, "reach": 1.7, "dur": 0, "weight": 0.2, "price": 0, "desc": "殴る（左クリック）・溜めて蹴る（長押し）。現代の高校生の唯一の武器。"},
-    "tekken":     {"name": "鉄剣", "type": "melee", "skill": "kenjutsu", "era": "jomon_kofun", "year": 300, "damage": 30, "speed": 0.5, "reach": 1.9, "dur": 70, "weight": 1.0, "price": 6000, "desc": "古墳に副葬された両刃の鉄の剣。", "basis": "稲荷山古墳出土の金錯銘鉄剣（471年）など、古墳時代の鉄剣は朝鮮半島から得た鉄素材を鍛えて作られた。"},
-    "chokuto":    {"name": "直刀", "type": "melee", "skill": "kenjutsu", "era": "asuka_nara", "year": 700, "damage": 36, "speed": 0.48, "reach": 2.0, "dur": 90, "weight": 1.0, "price": 9000, "desc": "反りのない片刃の大刀（たち）。", "basis": "正倉院に伝わる大刀や四天王寺の丙子椒林剣など、奈良時代までの刀は反りのない直刀だった。"},
-    "tachi":      {"name": "太刀", "type": "melee", "skill": "kenjutsu", "era": "heian", "year": 1000, "damage": 46, "speed": 0.5, "reach": 2.2, "dur": 110, "weight": 1.2, "price": 24000, "desc": "反りの深い騎馬武者の刀。刃を下に佩く。", "basis": "平安時代中期に反りのある日本刀（太刀）が成立した。馬上で斬りやすいよう反りが深い。"},
-    "uchigatana": {"name": "打刀", "type": "melee", "skill": "kenjutsu", "era": "kamakura_muromachi", "year": 1450, "damage": 50, "speed": 0.42, "reach": 2.1, "dur": 120, "weight": 1.1, "price": 30000, "desc": "刃を上にして腰に差す、抜き打ちの速い刀。", "basis": "室町時代中期以降、徒歩の集団戦に向いた打刀が太刀に代わって主流になった。"},
-    "wakizashi":  {"name": "脇差", "type": "melee", "skill": "kenjutsu", "era": "kamakura_muromachi", "year": 1500, "damage": 32, "speed": 0.32, "reach": 1.6, "dur": 100, "weight": 0.7, "price": 12000, "desc": "短く軽い刀。速いが届かない。"},
-    "naginata":   {"name": "薙刀", "type": "melee", "skill": "sojutsu", "era": "heian", "year": 1100, "damage": 52, "speed": 0.62, "reach": 2.9, "dur": 110, "weight": 1.6, "price": 20000, "desc": "長い柄に反りのある刃。僧兵・武者が振るった。"},
-    "yari":       {"name": "槍", "type": "melee", "skill": "sojutsu", "era": "kamakura_muromachi", "year": 1350, "damage": 48, "speed": 0.55, "reach": 3.3, "dur": 100, "weight": 1.5, "price": 15000, "desc": "突きの長柄武器。足軽の主力。", "basis": "南北朝時代から槍が広まり、戦国時代には足軽の長槍隊（三間半＝約6.4m の長柄も）が合戦の主力になった。"},
-    "jutte":      {"name": "十手", "type": "melee", "skill": "kenjutsu", "era": "edo", "year": 1650, "damage": 16, "speed": 0.3, "reach": 1.4, "dur": 220, "weight": 0.6, "price": 3000, "desc": "捕り方の鉄の棒。刀を受け止める鉤がある（受けが強い）。", "block": 0.2},
-    "guntou":     {"name": "軍刀", "type": "melee", "skill": "kenjutsu", "era": "meiji_taisho", "year": 1875, "damage": 44, "speed": 0.45, "reach": 2.0, "dur": 110, "weight": 1.1, "price": 40000, "desc": "将校の刀。明治の初めは洋式のサーベル拵だった。"},
-    "tankyu":     {"name": "短弓", "type": "bow", "skill": "kyujutsu", "era": "jomon_kofun", "year": -3000, "damage": 18, "draw": 0.55, "arrow_speed": 40, "dur": 80, "ammo": "ya", "price": 2000, "desc": "縄文・弥生の狩りの弓。"},
-    "wakyu":      {"name": "和弓", "type": "bow", "skill": "kyujutsu", "era": "heian", "year": 1000, "damage": 32, "draw": 0.8, "arrow_speed": 58, "dur": 120, "ammo": "ya", "price": 9000, "desc": "竹と木を張り合わせた長弓（七尺三寸＝約2.2m）。", "basis": "平安時代後期に木と竹を張り合わせた伏竹弓が生まれ、威力と射程が増した。"},
-    "hinawaju":   {"name": "火縄銃", "type": "gun", "skill": "shageki", "era": "sengoku", "year": 1543, "damage": 95, "fire_rate": 1.0, "mag": 1, "reload": 6.5, "spread": 0.006, "misfire": 0.12, "recoil": 3.0, "dur": 150, "ammo": "hayago", "price": 40000, "desc": "火縄で点火する前装銃。一発ごとに銃口から弾と火薬を込める。雨に弱く不発も多い。", "basis": "1543年に種子島へ伝来し、翌年から国友・堺・根来で国産化。熟練の射手でも1発に20〜30秒かかった（ゲームでは短縮）。"},
-    "murataju":   {"name": "村田銃", "type": "gun", "skill": "shageki", "era": "meiji_taisho", "year": 1880, "damage": 80, "fire_rate": 1.2, "mag": 1, "reload": 2.2, "spread": 0.004, "misfire": 0.03, "recoil": 2.2, "dur": 200, "ammo": "murata_dan", "price": 120000, "desc": "初の国産制式小銃（十三年式）。単発のボルトアクション。", "basis": "村田経芳が設計し1880年（明治13年）に採用。1889年に8連発の二十二年式（村田連発銃）が続いた。"},
-    "arisaka38":  {"name": "三八式歩兵銃", "type": "gun", "skill": "shageki", "era": "meiji_taisho", "year": 1905, "damage": 75, "fire_rate": 1.3, "mag": 5, "reload": 3.0, "spread": 0.003, "misfire": 0.01, "recoil": 2.0, "dur": 260, "ammo": "dan38", "price": 300000, "desc": "6.5mm 弾の5連発ボルトアクション小銃。", "basis": "有坂成章の三十年式を改良し1905年（明治38年）に採用。太平洋戦争まで陸軍の主力小銃だった。"},
-    "pistol14":   {"name": "十四年式拳銃", "type": "gun", "skill": "shageki", "era": "meiji_taisho", "year": 1925, "damage": 30, "fire_rate": 4.0, "mag": 8, "reload": 1.6, "spread": 0.012, "misfire": 0.02, "recoil": 1.0, "dur": 200, "ammo": "pistol_dan", "price": 160000, "desc": "8mm 南部弾の自動拳銃。", "basis": "南部麒次郎の設計で1925年（大正14年）に採用された陸軍の制式拳銃。"},
-    "lmg96":      {"name": "九六式軽機関銃", "type": "gun", "skill": "shageki", "era": "showa", "year": 1936, "damage": 26, "fire_rate": 8.0, "mag": 30, "reload": 3.5, "spread": 0.012, "misfire": 0.01, "recoil": 0.7, "dur": 300, "ammo": "dan38", "auto": true, "price": 900000, "desc": "三八式と同じ6.5mm 弾を使う軽機関銃。", "basis": "1936年（昭和11年）採用。30発の箱形弾倉を上から差し込む。"},
-    "jikuju":     {"name": "時空銃", "type": "gun", "skill": "shageki", "era": "showa", "year": 2100, "damage": 26, "fire_rate": 9.0, "mag": 30, "reload": 1.3, "spread": 0.008, "misfire": 0.0, "recoil": 0.5, "dur": 0, "ammo": "", "infinite": true, "auto": true, "loan_only": true, "price": 0, "desc": "時空管理局の貸与品（設定「最初から武装」）。弾は尽きない。"},
-    "ya":         {"name": "矢", "type": "ammo", "era": "jomon_kofun", "price": 40, "desc": "竹の矢柄・鉄の鏃・矢羽根。"},
-    "hayago":     {"name": "早合（火縄銃の弾）", "type": "ammo", "era": "sengoku", "price": 200, "desc": "一発分の黒色火薬と鉛玉を紙筒に詰めたもの。込めるのが速くなる。", "basis": "早合は弾と火薬を一包みにした紙の薬包で、戦国末期から使われた。"},
-    "murata_dan": {"name": "村田銃の実包", "type": "ammo", "era": "meiji_taisho", "price": 300, "desc": "11mm の金属薬莢の弾（黒色火薬）。"},
-    "dan38":      {"name": "三八式実包", "type": "ammo", "era": "meiji_taisho", "price": 250, "desc": "6.5mm の小銃弾（無煙火薬）。三八式・九六式で共用。"},
-    "pistol_dan": {"name": "拳銃弾", "type": "ammo", "era": "meiji_taisho", "price": 200, "desc": "8mm 南部弾。"},
-    "hodan":      {"name": "砲弾", "type": "ammo", "era": "sengoku", "price": 2000, "desc": "大筒・野砲の弾。"},
-    "horoku":     {"name": "焙烙玉", "type": "bomb", "bomb": "horoku", "era": "kamakura_muromachi", "year": 1274, "price": 1500, "desc": "素焼きの壺に火薬を詰めた手投げ弾。割れると爆ぜて火の粉を撒く。", "basis": "1274年の文永の役で元軍が「てつはう」を使った。戦国時代には村上水軍などが焙烙火矢・焙烙玉を用いた。"},
-    "grenade":    {"name": "手榴弾", "type": "bomb", "bomb": "grenade", "era": "showa", "year": 1937, "price": 3000, "desc": "九七式手榴弾。信管を叩いて約4〜5秒で炸裂する。"},
-    "keg":        {"name": "火薬樽", "type": "bomb", "bomb": "keg", "era": "sengoku", "price": 8000, "desc": "置いて導火線に火をつける樽詰めの黒色火薬。"},
-    "dynamite":   {"name": "ダイナマイト", "type": "bomb", "bomb": "dynamite", "era": "meiji_taisho", "year": 1866, "price": 5000, "desc": "ニトログリセリンを珪藻土に染み込ませた爆薬。", "basis": "1866〜67年にノーベルが発明。日本では明治期に鉱山・トンネル工事で使われた。"},
-    "hiya":       {"name": "棒火矢", "type": "bomb", "bomb": "hiya", "era": "sengoku", "year": 1580, "price": 4000, "desc": "火薬の推進で飛ぶ火矢。当たると必ず燃え広がる。", "basis": "戦国末から江戸時代にかけ、和流砲術で大筒から撃つ棒火矢が工夫された。"},
-    "taihou":     {"name": "大筒", "type": "heavy", "era": "sengoku", "year": 1576, "price": 200000, "ammo": "hodan", "desc": "据え置きの大砲（設置→砲撃）。明治以降は野砲として扱う。", "basis": "1576年に大友宗麟がポルトガルから仏郎機砲（国崩し）を得た。大坂の陣（1614年）では徳川方が大筒・石火矢で大坂城を砲撃した。"},
-    "satetsu":    {"name": "砂鉄", "type": "material", "era": "jomon_kofun", "price": 60, "desc": "川砂・山砂から集める鉄の原料。"},
-    "mokutan":    {"name": "木炭", "type": "material", "era": "jomon_kofun", "price": 40, "desc": "鍛冶・たたら・火薬に欠かせない。"},
-    "tamahagane": {"name": "玉鋼", "type": "material", "era": "asuka_nara", "price": 1500, "desc": "たたら製鉄でできる良質の鋼。日本刀の材料。", "basis": "たたら製鉄は砂鉄と木炭を三昼夜燃やし続けて鉧（けら）を得る。その中の最良の部分が玉鋼。"},
-    "tetsu":      {"name": "鉄", "type": "material", "era": "jomon_kofun", "price": 400, "desc": "釘・鏃・銃身などに使う鉄。"},
-    "hagane":     {"name": "洋鋼", "type": "material", "era": "edo", "year": 1850, "price": 1200, "desc": "反射炉・転炉でつくる均質な鋼。近代の銃や機械の材料。"},
-    "dou":        {"name": "銅", "type": "material", "era": "asuka_nara", "price": 300, "desc": "薬莢・砲身・飾り金具に。"},
-    "namari":     {"name": "鉛", "type": "material", "era": "kamakura_muromachi", "price": 200, "desc": "弾丸の材料。"},
-    "shoseki":    {"name": "硝石", "type": "material", "era": "sengoku", "price": 600, "desc": "火薬の主成分（硝酸カリウム）。日本には鉱床がなく、輸入か培養でつくった。"},
-    "iou":        {"name": "硫黄", "type": "material", "era": "jomon_kofun", "price": 150, "desc": "火山の多い日本では豊富で、宋・明へ輸出された。"},
-    "mokuzai":    {"name": "木材", "type": "material", "era": "jomon_kofun", "price": 50, "desc": "柄・台木・鞘・樽に。"},
-    "take":       {"name": "竹", "type": "material", "era": "jomon_kofun", "price": 30, "desc": "矢柄・弓・火矢に。"},
-    "nuno":       {"name": "布", "type": "material", "era": "jomon_kofun", "price": 80, "desc": "包帯・薬包・弦に。"},
-    "nendo":      {"name": "粘土", "type": "material", "era": "jomon_kofun", "price": 20, "desc": "焙烙の壺・土置き（焼き入れ）・培養土に。"},
-    "yakusou":    {"name": "薬草", "type": "material", "era": "jomon_kofun", "price": 60, "desc": "傷薬・薬の材料。"},
-    "abura":      {"name": "油", "type": "material", "era": "asuka_nara", "price": 120, "desc": "灯明の油。グリセリンの原料にもなる。"},
-    "wata":       {"name": "綿", "type": "material", "era": "sengoku", "price": 100, "desc": "木綿。無煙火薬（綿火薬）の原料にもなる。"},
-    "shousan":    {"name": "硝酸", "type": "material", "era": "edo", "year": 1830, "price": 900, "desc": "硝石と硫酸からつくる強い酸。無煙火薬・ダイナマイトに。"},
-    "kokushoku":  {"name": "黒色火薬", "type": "material", "era": "kamakura_muromachi", "year": 1274, "price": 500, "desc": "硝石・硫黄・木炭の混合物。", "basis": "黒色火薬は硝石75・硫黄10・木炭15（重さの比）がよく知られた配合。"},
-    "muen":       {"name": "無煙火薬", "type": "material", "era": "meiji_taisho", "year": 1890, "price": 1500, "desc": "綿火薬（ニトロセルロース）を固めた煙の少ない火薬。黒色火薬の約3倍の力。", "basis": "1884年にフランスのヴィエイユが無煙火薬を発明し、日本でも明治20年代から小銃弾に使った。"},
-    "kizugusuri": {"name": "傷薬", "type": "med", "heal": 60, "era": "jomon_kofun", "price": 300, "desc": "使うと体力を回復する（医術で効き目が上がる）。"},
-    "tokkouyaku": {"name": "特効薬", "type": "med", "heal": 150, "era": "showa", "year": 1944, "price": 50000, "desc": "感染症に効く未来の薬。病に倒れるはずの人物に渡せば命を救える。", "basis": "フレミングが1928年にペニシリンを発見し、日本でも1944年に「碧素」として国産化が試みられた。"},
-    "toishi":     {"name": "砥石", "type": "tool", "era": "jomon_kofun", "price": 500, "desc": "使うと手にした刃物の耐久を回復する（刀鍛冶の技で回復量が上がる）。"},
-    "shuri":      {"name": "修理道具", "type": "tool", "era": "kamakura_muromachi", "price": 2000, "desc": "使うと近くの車・飛行機を修理する（機械工作の技で回復量が上がる）。"},
-    "smartphone": {"name": "スマートフォン", "type": "tool", "era": "showa", "year": 2010, "price": 0, "keep": true, "desc": "電波は届かないが地図とメモは使える。過去に置いていくと大ごとに。"},
-    "senryobako": {"name": "千両箱", "type": "valuable", "era": "edo", "money": 4000000, "price": 4000000, "desc": "小判千両。使うと所持金になる。渡せば商業が動く。"},
-    "koban":      {"name": "小判", "type": "valuable", "era": "edo", "money": 4000, "price": 4000, "desc": "一両小判。"},
-    "zenitaba":   {"name": "銭束", "type": "valuable", "era": "asuka_nara", "money": 1000, "price": 1000, "desc": "一貫文（銭千枚）の束。"},
-    "komedawara": {"name": "米俵", "type": "valuable", "era": "jomon_kofun", "price": 1500, "desc": "四斗俵。売ればお金になる。"}
+ "_doc": "持ち物の定義。type: melee/bow/gun/ammo/bomb/heavy/material/med/tool/valuable。era = 史実でその品が日本で手に入るようになった時代（それより前の時代へ持ち込むと「時代錯誤の品」）。price は文（1両=4貫=4000文、1871年の新貨条例で1両=1円とした換算で円も同じ）。tech は時代錯誤の品が過去に残ったときの歴史パラメータの変化（actors.gd の anachronism）。",
+ "items": {
+  "fists": {
+   "name": "素手",
+   "type": "melee",
+   "skill": "kenjutsu",
+   "era": "jomon_kofun",
+   "damage": 10,
+   "speed": 0.34,
+   "reach": 1.7,
+   "dur": 0,
+   "weight": 0.2,
+   "price": 0,
+   "desc": "殴る（左クリック）・溜めて蹴る（長押し）。現代の高校生の唯一の武器。"
   },
-  "tech": {
-    "_doc": "時代錯誤の品が過去に残ったとき（渡した・落とした・職人の前で作った）の歴史パラメータ。era_gap（その品の時代 − 今の時代）1つごとに 1 倍、上限 3 倍。",
-    "gun": {"tech": 4, "militarism": 3, "warrior": 2},
-    "bow": {"warrior": 1},
-    "melee": {"warrior": 2, "tech": 1},
-    "bomb": {"militarism": 3, "tech": 2},
-    "heavy": {"militarism": 5, "tech": 3},
-    "ammo": {"tech": 1},
-    "material": {"tech": 2, "economy": 1},
-    "med": {"commoners": 3, "education": 2},
-    "tool": {"tech": 5, "education": 4, "open_west": 2},
-    "valuable": {"commerce": 2}
+  "tekken": {
+   "name": "鉄剣",
+   "type": "melee",
+   "skill": "kenjutsu",
+   "era": "jomon_kofun",
+   "year": 300,
+   "damage": 30,
+   "speed": 0.5,
+   "reach": 1.9,
+   "dur": 70,
+   "weight": 1.0,
+   "price": 6000,
+   "desc": "古墳に副葬された両刃の鉄の剣。",
+   "basis": "稲荷山古墳出土の金錯銘鉄剣（471年）など、古墳時代の鉄剣は朝鮮半島から得た鉄素材を鍛えて作られた。"
+  },
+  "chokuto": {
+   "name": "直刀",
+   "type": "melee",
+   "skill": "kenjutsu",
+   "era": "asuka_nara",
+   "year": 700,
+   "damage": 36,
+   "speed": 0.48,
+   "reach": 2.0,
+   "dur": 90,
+   "weight": 1.0,
+   "price": 9000,
+   "desc": "反りのない片刃の大刀（たち）。",
+   "basis": "正倉院に伝わる大刀や四天王寺の丙子椒林剣など、奈良時代までの刀は反りのない直刀だった。"
+  },
+  "tachi": {
+   "name": "太刀",
+   "type": "melee",
+   "skill": "kenjutsu",
+   "era": "heian",
+   "year": 1000,
+   "damage": 46,
+   "speed": 0.5,
+   "reach": 2.2,
+   "dur": 110,
+   "weight": 1.2,
+   "price": 24000,
+   "desc": "反りの深い騎馬武者の刀。刃を下に佩く。",
+   "basis": "平安時代中期に反りのある日本刀（太刀）が成立した。馬上で斬りやすいよう反りが深い。"
+  },
+  "uchigatana": {
+   "name": "打刀",
+   "type": "melee",
+   "skill": "kenjutsu",
+   "era": "kamakura_muromachi",
+   "year": 1450,
+   "damage": 50,
+   "speed": 0.42,
+   "reach": 2.1,
+   "dur": 120,
+   "weight": 1.1,
+   "price": 30000,
+   "desc": "刃を上にして腰に差す、抜き打ちの速い刀。",
+   "basis": "室町時代中期以降、徒歩の集団戦に向いた打刀が太刀に代わって主流になった。"
+  },
+  "wakizashi": {
+   "name": "脇差",
+   "type": "melee",
+   "skill": "kenjutsu",
+   "era": "kamakura_muromachi",
+   "year": 1500,
+   "damage": 32,
+   "speed": 0.32,
+   "reach": 1.6,
+   "dur": 100,
+   "weight": 0.7,
+   "price": 12000,
+   "desc": "短く軽い刀。速いが届かない。"
+  },
+  "naginata": {
+   "name": "薙刀",
+   "type": "melee",
+   "skill": "sojutsu",
+   "era": "heian",
+   "year": 1100,
+   "damage": 52,
+   "speed": 0.62,
+   "reach": 2.9,
+   "dur": 110,
+   "weight": 1.6,
+   "price": 20000,
+   "desc": "長い柄に反りのある刃。僧兵・武者が振るった。"
+  },
+  "yari": {
+   "name": "槍",
+   "type": "melee",
+   "skill": "sojutsu",
+   "era": "kamakura_muromachi",
+   "year": 1350,
+   "damage": 48,
+   "speed": 0.55,
+   "reach": 3.3,
+   "dur": 100,
+   "weight": 1.5,
+   "price": 15000,
+   "desc": "突きの長柄武器。足軽の主力。",
+   "basis": "南北朝時代から槍が広まり、戦国時代には足軽の長槍隊（三間半＝約6.4m の長柄も）が合戦の主力になった。"
+  },
+  "jutte": {
+   "name": "十手",
+   "type": "melee",
+   "skill": "kenjutsu",
+   "era": "edo",
+   "year": 1650,
+   "damage": 16,
+   "speed": 0.3,
+   "reach": 1.4,
+   "dur": 220,
+   "weight": 0.6,
+   "price": 3000,
+   "desc": "捕り方の鉄の棒。刀を受け止める鉤がある（受けが強い）。",
+   "block": 0.2
+  },
+  "guntou": {
+   "name": "軍刀",
+   "type": "melee",
+   "skill": "kenjutsu",
+   "era": "meiji_taisho",
+   "year": 1875,
+   "damage": 44,
+   "speed": 0.45,
+   "reach": 2.0,
+   "dur": 110,
+   "weight": 1.1,
+   "price": 40000,
+   "desc": "将校の刀。明治の初めは洋式のサーベル拵だった。"
+  },
+  "tankyu": {
+   "name": "短弓",
+   "type": "bow",
+   "skill": "kyujutsu",
+   "era": "jomon_kofun",
+   "year": -3000,
+   "damage": 18,
+   "draw": 0.55,
+   "arrow_speed": 40,
+   "dur": 80,
+   "ammo": "ya",
+   "price": 2000,
+   "desc": "縄文・弥生の狩りの弓。"
+  },
+  "wakyu": {
+   "name": "和弓",
+   "type": "bow",
+   "skill": "kyujutsu",
+   "era": "heian",
+   "year": 1000,
+   "damage": 32,
+   "draw": 0.8,
+   "arrow_speed": 58,
+   "dur": 120,
+   "ammo": "ya",
+   "price": 9000,
+   "desc": "竹と木を張り合わせた長弓（七尺三寸＝約2.2m）。",
+   "basis": "平安時代後期に木と竹を張り合わせた伏竹弓が生まれ、威力と射程が増した。"
+  },
+  "hinawaju": {
+   "name": "火縄銃",
+   "type": "gun",
+   "skill": "shageki",
+   "era": "sengoku",
+   "year": 1543,
+   "damage": 95,
+   "fire_rate": 1.0,
+   "mag": 1,
+   "reload": 6.5,
+   "spread": 0.006,
+   "misfire": 0.12,
+   "recoil": 3.0,
+   "dur": 150,
+   "ammo": "hayago",
+   "price": 40000,
+   "desc": "火縄で点火する前装銃。一発ごとに銃口から弾と火薬を込める。雨に弱く不発も多い。",
+   "basis": "1543年に種子島へ伝来し、翌年から国友・堺・根来で国産化。熟練の射手でも1発に20〜30秒かかった（ゲームでは短縮）。"
+  },
+  "murataju": {
+   "name": "村田銃",
+   "type": "gun",
+   "skill": "shageki",
+   "era": "meiji_taisho",
+   "year": 1880,
+   "damage": 80,
+   "fire_rate": 1.2,
+   "mag": 1,
+   "reload": 2.2,
+   "spread": 0.004,
+   "misfire": 0.03,
+   "recoil": 2.2,
+   "dur": 200,
+   "ammo": "murata_dan",
+   "price": 120000,
+   "desc": "初の国産制式小銃（十三年式）。単発のボルトアクション。",
+   "basis": "村田経芳が設計し1880年（明治13年）に採用。1889年に8連発の二十二年式（村田連発銃）が続いた。"
+  },
+  "arisaka38": {
+   "name": "三八式歩兵銃",
+   "type": "gun",
+   "skill": "shageki",
+   "era": "meiji_taisho",
+   "year": 1905,
+   "damage": 75,
+   "fire_rate": 1.3,
+   "mag": 5,
+   "reload": 3.0,
+   "spread": 0.003,
+   "misfire": 0.01,
+   "recoil": 2.0,
+   "dur": 260,
+   "ammo": "dan38",
+   "price": 300000,
+   "desc": "6.5mm 弾の5連発ボルトアクション小銃。",
+   "basis": "有坂成章の三十年式を改良し1905年（明治38年）に採用。太平洋戦争まで陸軍の主力小銃だった。"
+  },
+  "pistol14": {
+   "name": "十四年式拳銃",
+   "type": "gun",
+   "skill": "shageki",
+   "era": "meiji_taisho",
+   "year": 1925,
+   "damage": 30,
+   "fire_rate": 4.0,
+   "mag": 8,
+   "reload": 1.6,
+   "spread": 0.012,
+   "misfire": 0.02,
+   "recoil": 1.0,
+   "dur": 200,
+   "ammo": "pistol_dan",
+   "price": 160000,
+   "desc": "8mm 南部弾の自動拳銃。",
+   "basis": "南部麒次郎の設計で1925年（大正14年）に採用された陸軍の制式拳銃。"
+  },
+  "lmg96": {
+   "name": "九六式軽機関銃",
+   "type": "gun",
+   "skill": "shageki",
+   "era": "showa",
+   "year": 1936,
+   "damage": 26,
+   "fire_rate": 8.0,
+   "mag": 30,
+   "reload": 3.5,
+   "spread": 0.012,
+   "misfire": 0.01,
+   "recoil": 0.7,
+   "dur": 300,
+   "ammo": "dan38",
+   "auto": true,
+   "price": 900000,
+   "desc": "三八式と同じ6.5mm 弾を使う軽機関銃。",
+   "basis": "1936年（昭和11年）採用。30発の箱形弾倉を上から差し込む。"
+  },
+  "jikuju": {
+   "name": "時空銃",
+   "type": "gun",
+   "skill": "shageki",
+   "era": "showa",
+   "year": 2100,
+   "damage": 26,
+   "fire_rate": 9.0,
+   "mag": 30,
+   "reload": 1.3,
+   "spread": 0.008,
+   "misfire": 0.0,
+   "recoil": 0.5,
+   "dur": 0,
+   "ammo": "",
+   "infinite": true,
+   "auto": true,
+   "loan_only": true,
+   "price": 0,
+   "desc": "時空管理局の貸与品（設定「最初から武装」）。弾は尽きない。"
+  },
+  "ya": {
+   "name": "矢",
+   "type": "ammo",
+   "era": "jomon_kofun",
+   "price": 40,
+   "desc": "竹の矢柄・鉄の鏃・矢羽根。"
+  },
+  "hayago": {
+   "name": "早合（火縄銃の弾）",
+   "type": "ammo",
+   "era": "sengoku",
+   "price": 200,
+   "desc": "一発分の黒色火薬と鉛玉を紙筒に詰めたもの。込めるのが速くなる。",
+   "basis": "早合は弾と火薬を一包みにした紙の薬包で、戦国末期から使われた。"
+  },
+  "murata_dan": {
+   "name": "村田銃の実包",
+   "type": "ammo",
+   "era": "meiji_taisho",
+   "price": 300,
+   "desc": "11mm の金属薬莢の弾（黒色火薬）。"
+  },
+  "dan38": {
+   "name": "三八式実包",
+   "type": "ammo",
+   "era": "meiji_taisho",
+   "price": 250,
+   "desc": "6.5mm の小銃弾（無煙火薬）。三八式・九六式で共用。"
+  },
+  "pistol_dan": {
+   "name": "拳銃弾",
+   "type": "ammo",
+   "era": "meiji_taisho",
+   "price": 200,
+   "desc": "8mm 南部弾。"
+  },
+  "hodan": {
+   "name": "砲弾",
+   "type": "ammo",
+   "era": "sengoku",
+   "price": 2000,
+   "desc": "大筒・野砲の弾。"
+  },
+  "horoku": {
+   "name": "焙烙玉",
+   "type": "bomb",
+   "bomb": "horoku",
+   "era": "kamakura_muromachi",
+   "year": 1274,
+   "price": 1500,
+   "desc": "素焼きの壺に火薬を詰めた手投げ弾。割れると爆ぜて火の粉を撒く。",
+   "basis": "1274年の文永の役で元軍が「てつはう」を使った。戦国時代には村上水軍などが焙烙火矢・焙烙玉を用いた。"
+  },
+  "grenade": {
+   "name": "手榴弾",
+   "type": "bomb",
+   "bomb": "grenade",
+   "era": "showa",
+   "year": 1937,
+   "price": 3000,
+   "desc": "九七式手榴弾。信管を叩いて約4〜5秒で炸裂する。"
+  },
+  "keg": {
+   "name": "火薬樽",
+   "type": "bomb",
+   "bomb": "keg",
+   "era": "sengoku",
+   "price": 8000,
+   "desc": "置いて導火線に火をつける樽詰めの黒色火薬。"
+  },
+  "dynamite": {
+   "name": "ダイナマイト",
+   "type": "bomb",
+   "bomb": "dynamite",
+   "era": "meiji_taisho",
+   "year": 1866,
+   "price": 5000,
+   "desc": "ニトログリセリンを珪藻土に染み込ませた爆薬。",
+   "basis": "1866〜67年にノーベルが発明。日本では明治期に鉱山・トンネル工事で使われた。"
+  },
+  "hiya": {
+   "name": "棒火矢",
+   "type": "bomb",
+   "bomb": "hiya",
+   "era": "sengoku",
+   "year": 1580,
+   "price": 4000,
+   "desc": "火薬の推進で飛ぶ火矢。当たると必ず燃え広がる。",
+   "basis": "戦国末から江戸時代にかけ、和流砲術で大筒から撃つ棒火矢が工夫された。"
+  },
+  "taihou": {
+   "name": "大筒",
+   "type": "heavy",
+   "era": "sengoku",
+   "year": 1576,
+   "price": 200000,
+   "ammo": "hodan",
+   "desc": "据え置きの大砲（設置→砲撃）。明治以降は野砲として扱う。",
+   "basis": "1576年に大友宗麟がポルトガルから仏郎機砲（国崩し）を得た。大坂の陣（1614年）では徳川方が大筒・石火矢で大坂城を砲撃した。"
+  },
+  "satetsu": {
+   "name": "砂鉄",
+   "type": "material",
+   "era": "jomon_kofun",
+   "price": 60,
+   "desc": "川砂・山砂から集める鉄の原料。"
+  },
+  "mokutan": {
+   "name": "木炭",
+   "type": "material",
+   "era": "jomon_kofun",
+   "price": 40,
+   "desc": "鍛冶・たたら・火薬に欠かせない。"
+  },
+  "tamahagane": {
+   "name": "玉鋼",
+   "type": "material",
+   "era": "asuka_nara",
+   "price": 1500,
+   "desc": "たたら製鉄でできる良質の鋼。日本刀の材料。",
+   "basis": "たたら製鉄は砂鉄と木炭を三昼夜燃やし続けて鉧（けら）を得る。その中の最良の部分が玉鋼。"
+  },
+  "tetsu": {
+   "name": "鉄",
+   "type": "material",
+   "era": "jomon_kofun",
+   "price": 400,
+   "desc": "釘・鏃・銃身などに使う鉄。"
+  },
+  "hagane": {
+   "name": "洋鋼",
+   "type": "material",
+   "era": "edo",
+   "year": 1850,
+   "price": 1200,
+   "desc": "反射炉・転炉でつくる均質な鋼。近代の銃や機械の材料。"
+  },
+  "dou": {
+   "name": "銅",
+   "type": "material",
+   "era": "asuka_nara",
+   "price": 300,
+   "desc": "薬莢・砲身・飾り金具に。"
+  },
+  "namari": {
+   "name": "鉛",
+   "type": "material",
+   "era": "kamakura_muromachi",
+   "price": 200,
+   "desc": "弾丸の材料。"
+  },
+  "shoseki": {
+   "name": "硝石",
+   "type": "material",
+   "era": "sengoku",
+   "price": 600,
+   "desc": "火薬の主成分（硝酸カリウム）。日本には鉱床がなく、輸入か培養でつくった。"
+  },
+  "iou": {
+   "name": "硫黄",
+   "type": "material",
+   "era": "jomon_kofun",
+   "price": 150,
+   "desc": "火山の多い日本では豊富で、宋・明へ輸出された。"
+  },
+  "mokuzai": {
+   "name": "木材",
+   "type": "material",
+   "era": "jomon_kofun",
+   "price": 50,
+   "desc": "柄・台木・鞘・樽に。"
+  },
+  "take": {
+   "name": "竹",
+   "type": "material",
+   "era": "jomon_kofun",
+   "price": 30,
+   "desc": "矢柄・弓・火矢に。"
+  },
+  "nuno": {
+   "name": "布",
+   "type": "material",
+   "era": "jomon_kofun",
+   "price": 80,
+   "desc": "包帯・薬包・弦に。"
+  },
+  "nendo": {
+   "name": "粘土",
+   "type": "material",
+   "era": "jomon_kofun",
+   "price": 20,
+   "desc": "焙烙の壺・土置き（焼き入れ）・培養土に。"
+  },
+  "yakusou": {
+   "name": "薬草",
+   "type": "material",
+   "era": "jomon_kofun",
+   "price": 60,
+   "desc": "傷薬・薬の材料。"
+  },
+  "abura": {
+   "name": "油",
+   "type": "material",
+   "era": "asuka_nara",
+   "price": 120,
+   "desc": "灯明の油。グリセリンの原料にもなる。"
+  },
+  "wata": {
+   "name": "綿",
+   "type": "material",
+   "era": "sengoku",
+   "price": 100,
+   "desc": "木綿。無煙火薬（綿火薬）の原料にもなる。"
+  },
+  "shousan": {
+   "name": "硝酸",
+   "type": "material",
+   "era": "edo",
+   "year": 1830,
+   "price": 900,
+   "desc": "硝石と硫酸からつくる強い酸。無煙火薬・ダイナマイトに。"
+  },
+  "kokushoku": {
+   "name": "黒色火薬",
+   "type": "material",
+   "era": "kamakura_muromachi",
+   "year": 1274,
+   "price": 500,
+   "desc": "硝石・硫黄・木炭の混合物。",
+   "basis": "黒色火薬は硝石75・硫黄10・木炭15（重さの比）がよく知られた配合。"
+  },
+  "muen": {
+   "name": "無煙火薬",
+   "type": "material",
+   "era": "meiji_taisho",
+   "year": 1890,
+   "price": 1500,
+   "desc": "綿火薬（ニトロセルロース）を固めた煙の少ない火薬。黒色火薬の約3倍の力。",
+   "basis": "1884年にフランスのヴィエイユが無煙火薬を発明し、日本でも明治20年代から小銃弾に使った。"
+  },
+  "kizugusuri": {
+   "name": "傷薬",
+   "type": "med",
+   "heal": 60,
+   "era": "jomon_kofun",
+   "price": 300,
+   "desc": "使うと体力を回復する（医術で効き目が上がる）。"
+  },
+  "tokkouyaku": {
+   "name": "特効薬",
+   "type": "med",
+   "heal": 150,
+   "era": "showa",
+   "year": 1944,
+   "price": 50000,
+   "desc": "感染症に効く未来の薬。病に倒れるはずの人物に渡せば命を救える。",
+   "basis": "フレミングが1928年にペニシリンを発見し、日本でも1944年に「碧素」として国産化が試みられた。"
+  },
+  "toishi": {
+   "name": "砥石",
+   "type": "tool",
+   "era": "jomon_kofun",
+   "price": 500,
+   "desc": "使うと手にした刃物の耐久を回復する（刀鍛冶の技で回復量が上がる）。"
+  },
+  "shuri": {
+   "name": "修理道具",
+   "type": "tool",
+   "era": "kamakura_muromachi",
+   "price": 2000,
+   "desc": "使うと近くの車・飛行機を修理する（機械工作の技で回復量が上がる）。"
+  },
+  "smartphone": {
+   "name": "スマートフォン",
+   "type": "tool",
+   "era": "showa",
+   "year": 2010,
+   "price": 0,
+   "keep": true,
+   "desc": "電波は届かないが地図とメモは使える。過去に置いていくと大ごとに。"
+  },
+  "senryobako": {
+   "name": "千両箱",
+   "type": "valuable",
+   "era": "edo",
+   "money": 4000000,
+   "price": 4000000,
+   "desc": "小判千両。使うと所持金になる。渡せば商業が動く。"
+  },
+  "koban": {
+   "name": "小判",
+   "type": "valuable",
+   "era": "edo",
+   "money": 4000,
+   "price": 4000,
+   "desc": "一両小判。"
+  },
+  "zenitaba": {
+   "name": "銭束",
+   "type": "valuable",
+   "era": "asuka_nara",
+   "money": 1000,
+   "price": 1000,
+   "desc": "一貫文（銭千枚）の束。"
+  },
+  "komedawara": {
+   "name": "米俵",
+   "type": "valuable",
+   "era": "jomon_kofun",
+   "price": 1500,
+   "desc": "四斗俵。売ればお金になる。"
+  },
+  "sekitan": {
+   "name": "石炭",
+   "type": "material",
+   "era": "edo",
+   "price": 150,
+   "desc": "蒸気機関・反射炉・高炉の燃料。鉱山で掘るか、明治以降は店で買える。"
+  },
+  "tekkoseki": {
+   "name": "鉄鉱石",
+   "type": "material",
+   "era": "edo",
+   "price": 120,
+   "desc": "高炉の原料。"
+  },
+  "renga": {
+   "name": "耐火煉瓦",
+   "type": "material",
+   "era": "edo",
+   "year": 1850,
+   "price": 300,
+   "desc": "反射炉・高炉・工場の炉に使う焼き物の煉瓦。",
+   "basis": "韮山反射炉の耐火煉瓦は伊豆の土で焼かれた。"
+  },
+  "kikai_buhin": {
+   "name": "機械部品",
+   "type": "material",
+   "era": "edo",
+   "year": 1850,
+   "price": 1500,
+   "desc": "歯車・軸・ねじ。工場の建材にも蒸気機関にも要る。"
+  },
+  "jouki": {
+   "name": "蒸気機関",
+   "type": "material",
+   "era": "edo",
+   "year": 1855,
+   "price": 150000,
+   "desc": "蒸気の工場・発電所・鉄道の心臓部。"
+  },
+  "rail": {
+   "name": "レール",
+   "type": "material",
+   "era": "meiji_taisho",
+   "year": 1872,
+   "price": 2000,
+   "desc": "鉄道の線路（1本）。"
+  },
+  "dousen": {
+   "name": "銅線",
+   "type": "material",
+   "era": "edo",
+   "year": 1849,
+   "price": 400,
+   "desc": "電信・発電に使う。"
+  },
+  "denchi": {
+   "name": "電池",
+   "type": "material",
+   "era": "edo",
+   "year": 1849,
+   "price": 2500,
+   "desc": "銅と亜鉛と酸の電池。電信に使う。"
+  },
+  "ryusan": {
+   "name": "硫酸",
+   "type": "material",
+   "era": "meiji_taisho",
+   "year": 1872,
+   "price": 800,
+   "desc": "化学工業の基本の薬品。"
+  },
+  "hiryo": {
+   "name": "化学肥料",
+   "type": "material",
+   "era": "meiji_taisho",
+   "year": 1888,
+   "price": 1200,
+   "desc": "過燐酸石灰。売れば農村が豊かになる。"
+  },
+  "menshi": {
+   "name": "綿糸",
+   "type": "valuable",
+   "era": "meiji_taisho",
+   "year": 1883,
+   "price": 900,
+   "desc": "紡績工場の綿糸。店で売れる。"
+  },
+  "mayu": {
+   "name": "繭",
+   "type": "material",
+   "era": "asuka_nara",
+   "price": 200,
+   "desc": "生糸の原料。農村で買える。"
+  },
+  "kiito": {
+   "name": "生糸",
+   "type": "valuable",
+   "era": "edo",
+   "price": 2400,
+   "desc": "明治の最大の輸出品。高く売れる。"
+  },
+  "kyokasho": {
+   "name": "未来の教科書",
+   "type": "book",
+   "era": "showa",
+   "year": 2020,
+   "keep": false,
+   "price": 0,
+   "desc": "高校の教科書と資料集。読むと前提のそろった知識の原理がわかる。渡せば相手の時代が動く。"
+  },
+  "hon_tekkou": {
+   "name": "『鉄熕全書』（蘭書の訳）",
+   "type": "book",
+   "era": "edo",
+   "year": 1850,
+   "node": "m_hansharo",
+   "price": 20000,
+   "desc": "反射炉と大砲の鋳造の書。"
+  },
+  "hon_kikou": {
+   "name": "『機巧図彙』",
+   "type": "book",
+   "era": "edo",
+   "year": 1796,
+   "node": "k_karakuri",
+   "price": 6000,
+   "desc": "からくりの仕組みの図解。"
+  },
+  "hon_seimi": {
+   "name": "『舎密開宗』",
+   "type": "book",
+   "era": "edo",
+   "year": 1837,
+   "node": "c_ryusan",
+   "price": 15000,
+   "desc": "西洋の化学書の訳。"
+  },
+  "hon_hatsubi": {
+   "name": "『発微算法』",
+   "type": "book",
+   "era": "edo",
+   "year": 1674,
+   "node": "s_wasan",
+   "price": 5000,
+   "desc": "関孝和の算法書。"
+  },
+  "hon_kaitai": {
+   "name": "『解体新書』",
+   "type": "book",
+   "era": "edo",
+   "year": 1774,
+   "node": "i_ranpo",
+   "price": 12000,
+   "desc": "人体の解剖書の訳。"
   }
+ },
+ "tech": {
+  "_doc": "時代錯誤の品が過去に残ったとき（渡した・落とした・職人の前で作った）の歴史パラメータ。era_gap（その品の時代 − 今の時代）1つごとに 1 倍、上限 3 倍。",
+  "gun": {
+   "tech": 4,
+   "militarism": 3,
+   "warrior": 2
+  },
+  "bow": {
+   "warrior": 1
+  },
+  "melee": {
+   "warrior": 2,
+   "tech": 1
+  },
+  "bomb": {
+   "militarism": 3,
+   "tech": 2
+  },
+  "heavy": {
+   "militarism": 5,
+   "tech": 3
+  },
+  "ammo": {
+   "tech": 1
+  },
+  "material": {
+   "tech": 2,
+   "economy": 1
+  },
+  "med": {
+   "commoners": 3,
+   "education": 2
+  },
+  "tool": {
+   "tech": 5,
+   "education": 4,
+   "open_west": 2
+  },
+  "valuable": {
+   "commerce": 2
+  },
+  "book": {
+   "education": 6,
+   "tech": 4
+  }
+ }
 }

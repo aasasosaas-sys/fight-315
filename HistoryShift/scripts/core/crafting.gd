@@ -101,7 +101,7 @@ static func can_craft(prof, r: Dictionary, era_id: String, station: String) -> A
 	if st != "any" and st != station:
 		return [false, "%sで作る" % CraftDB.station_name(st), false]
 	var anach := CraftDB.era_index(era_id) < CraftDB.era_index(str(r.get("era", "jomon_kofun")))
-	if anach:
+	if anach and not r.has("know"):   # 知識で作る品は、知識そのものが「未来の技術」の関門
 		var need: Dictionary = r.get("anachro", {})
 		if need.is_empty():
 			return [false, "この時代にはまだ作り方がない", true]
@@ -111,6 +111,9 @@ static func can_craft(prof, r: Dictionary, era_id: String, station: String) -> A
 	for k in r.get("skill", {}):
 		if prof.level(k) < float(r["skill"][k]):
 			return [false, "%s %d が要る" % [Skills.skill_name(k), int(r["skill"][k])], anach]
+	for k in r.get("know", {}):
+		if Knowledge.mastery(prof, k) < float(r["know"][k]):
+			return [false, "知識：%s 習熟 %d が要る" % [Knowledge.node_name(k), int(r["know"][k])], anach]
 	var mats: Dictionary = r.get("mats", {})
 	for m in mats:
 		if prof.count(m) < int(mats[m]):

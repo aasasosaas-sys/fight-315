@@ -1,0 +1,112 @@
+{
+ "eraId": "meiji_taisho",
+ "roles": {
+  "capital": "町人",
+  "village": "農民",
+  "temple": "商人",
+  "port": "商人",
+  "castle": "町人",
+  "battlefield": "町人",
+  "mountain": "農民",
+  "town": "町人"
+ },
+ "rules": [
+  {
+   "id": "cv_mt_silk",
+   "title": "養蚕の村が傷つく",
+   "trigger": {
+    "kind": "casualty",
+    "at": "village",
+    "min": 8
+   },
+   "vars": {
+    "economy": -10
+   },
+   "year": 1885,
+   "text": "武蔵野の養蚕農家が命を落とし、繭を出す村が減った。輸出の柱の生糸がまず細った。",
+   "basis": "1872年に官営の富岡製糸場が開業した。明治前半の日本の輸出のうち、3〜4割は生糸だった。",
+   "recover": 30
+  },
+  {
+   "id": "cv_mt_silk2",
+   "title": "生糸の産地が衰える",
+   "trigger": {
+    "kind": "casualty",
+    "at": "village",
+    "min": 20
+   },
+   "vars": {
+    "economy": -15
+   },
+   "year": 1905,
+   "text": "繭を育てる人手が戻らず、製糸の工場は原料を集められなくなった。生糸輸出で稼いだ外貨が減った。",
+   "basis": "1909年、日本の生糸輸出量は清を抜いて世界一になった。生糸は外貨を稼ぐ最大の輸出品だった。",
+   "recover": 30
+  },
+  {
+   "id": "cv_mt_yokohama",
+   "title": "横浜の生糸商人が失われる",
+   "trigger": {
+    "kind": "casualty",
+    "at": "port",
+    "min": 8
+   },
+   "vars": {
+    "commerce": -10,
+    "economy": -5
+   },
+   "year": 1895,
+   "text": "横浜の生糸問屋や荷役の人々が倒れ、輸出の窓口が細った。",
+   "basis": "1859年の開港以来、横浜は生糸輸出のほとんどを扱った。八王子などの産地から生糸が横浜へ運ばれた（「絹の道」）。",
+   "recover": 30
+  },
+  {
+   "id": "cv_mt_yokohama2",
+   "title": "横浜港、さびれる",
+   "trigger": {
+    "kind": "casualty",
+    "at": "port",
+    "min": 20
+   },
+   "vars": {
+    "commerce": -8
+   },
+   "year": 1910,
+   "text": "港の町が人を失い、外国商館との取引は神戸などへ流れていった。",
+   "basis": "横浜の生糸売込商は、外国商館に生糸を売る仲立ちとして明治の輸出を支えた（原善三郎・茂木惣兵衛ら、1870〜1900年代）。",
+   "recover": 30
+  },
+  {
+   "id": "cv_mt_unrest",
+   "title": "民衆騒擾と戒厳",
+   "trigger": {
+    "kind": "casualty",
+    "min": 15
+   },
+   "vars": {
+    "militarism": 5,
+    "democracy": -5
+   },
+   "year": 1906,
+   "text": "罪のない市民が殺される騒ぎに東京の群衆が怒り、交番や役所が焼かれた。政府は戒厳令を敷き、新聞を差し止めた。",
+   "basis": "1905年の日比谷焼打事件で、政府は東京に戒厳令（行政戒厳）を敷き、新聞・雑誌の発行を差し止めた。",
+   "unrest": true
+  },
+  {
+   "id": "cv_mt_unrest2",
+   "title": "騒動、内閣を倒す",
+   "trigger": {
+    "kind": "casualty",
+    "min": 40
+   },
+   "vars": {
+    "democracy": 8,
+    "commoners": 5
+   },
+   "year": 1918,
+   "text": "犠牲が重なり、民衆の怒りは全国に広がった。責任を問われた内閣は倒れ、政党の内閣が生まれた。",
+   "basis": "1918年の米騒動は全国に広がり、責任をとって寺内正毅内閣が総辞職し、原敬の政党内閣が成立した。",
+   "unrest": true
+  }
+ ]
+}

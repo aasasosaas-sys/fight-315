@@ -42,6 +42,7 @@ var _battle_kills: Dictionary = {}    # "合戦id/側" -> 倒した数
 var _battle_done: Dictionary = {}
 var _taught: Dictionary = {}          # 今回教えた「人物/技能」
 var _anachro: Dictionary = {}         # 今回過去に残した時代錯誤の品
+var civil_events: Array = []          # 今回の民間人の犠牲 [{at, role, count, cause}]（設定オン時のみ。scripts/core/civil_harm.gd）
 
 
 func _init(p_db: HistoryDB, p_state: HistoryState, dir := DIR) -> void:
@@ -109,6 +110,7 @@ func begin_session(era_id: String, p_world: Node = null) -> void:
 	_battle_done.clear()
 	_taught.clear()
 	_anachro.clear()
+	civil_events.clear()
 
 
 func end_session() -> Array:
@@ -134,6 +136,8 @@ func record(kind: String, id: String, info: Dictionary = {}) -> Array:
 	var era := str(info.get("era", active_era))
 	if era != "" and era != active_era:
 		return []
+	if kind == "casualty":
+		return _record_casualty(id, info)
 	if db.actor_name(id) != "":
 		id = db.actor_name(id)
 		# 一度倒れた人物はもう倒れない（同じ人物の死で二重に歴史を揺らさない）
@@ -174,6 +178,67 @@ func record(kind: String, id: String, info: Dictionary = {}) -> Array:
 	if kind == "kill" and str(info.get("type", "")) == "soldier":
 		hits.append_array(_battle_kill(id))
 	return hits
+
+
+## 民間人の犠牲（kind "casualty"）。data/chaos_civil/<era>.json のルールだけで解決する（一般則・既存の data/chaos は使わない）。
+## 教育版・未所有ではルールを読まないので何も起きない。史実の虐殺・戦災に重なる場面（exclusions.json）は数えない
+func _record_casualty(id: String, info: Dictionary) -> Array:
+	if not MatureContent.is_unlocked():
+		return []
+	var lm := str(info.get("landmark", id if id != "" else "town"))
+	if CivilHarm.excluded(active_era, lm):
+		return []
+	var ev := {"kind": "casualty", "at": lm, "role": str(info.get("role", CivilHarm.role_for(active_era, lm))),
+		"count": maxi(1, int(info.get("count", 1))), "cause": str(info.get("cause", ""))}
+	civil_events.append(ev)
+	tally["casualty"] = int(tally.get("casualty", 0)) + int(ev["count"])
+	var hits: Array = []
+	for r in CivilHarm.rules_for(active_era):
+		var rid := str(r.get("id", ""))
+		if rid == "" or fired.has(rid) or not civil_satisfied(r.get("trigger", {}), civil_events):
+			continue
+		fired[rid] = true
+		if state.chaos_in_effect(r):
+			continue
+		_add_recovery(r)
+		var hit := _apply(r)
+		if not hit.is_empty():
+			hit["civil"] = true
+			hit["unrest"] = bool(r.get("unrest", false))
+			hits.append(hit)
+	return hits
+
+
+## 人の数・職人の技の損失は一、二世代で戻る（rule.recover 年後に vars を打ち消す変化を積む）。制度の変化（徳政令・刀狩など）は戻らない
+func _add_recovery(r: Dictionary) -> void:
+	if not r.has("recover"):
+		return
+	var rid2 := str(r["id"]) + "_rec"
+	for m in state.chaos_mods:
+		if m.get("rule", "") == rid2:
+			return
+	var neg := {}
+	for k in (r.get("vars", {}) as Dictionary):
+		neg[k] = -float(r["vars"][k])
+	var ry := int(r.get("year", 0)) + int(r["recover"])
+	state.chaos_mods.append({"rule": rid2, "era": db.era_of_year(ry), "year": ry, "effects": neg, "title": "（回復）" + str(r.get("title", ""))})
+
+
+## 犠牲の出来事が trigger（辞書か「どれか1つ」の配列：at・role・min）を満たすか。min は人数の合計
+static func civil_satisfied(t: Variant, evs: Array) -> bool:
+	for c in (t if t is Array else [t]):
+		if not (c is Dictionary) or str(c.get("kind", "casualty")) != "casualty":
+			continue
+		var n := 0
+		for ev in evs:
+			if c.has("at") and not (str(ev["at"]) in (c["at"] if c["at"] is Array else [c["at"]]).map(func(x): return str(x))):
+				continue
+			if c.has("role") and not (str(ev["role"]) in (c["role"] if c["role"] is Array else [c["role"]]).map(func(x): return str(x))):
+				continue
+			n += int(ev["count"])
+		if n >= int(c.get("min", 1)):
+			return true
+	return false
 
 
 ## 手作りルールに当たらなかった出来事を一般則（HistoryActors）で解決する
@@ -226,9 +291,15 @@ func _generic(kind: String, id: String, info: Dictionary, ev: Dictionary) -> Arr
 			# 技術を教える（actor_interact の「技術を教える」）：人物がいればその人に、いなければその土地の職人に伝わる
 			var sk := str(info.get("skill", ""))
 			var tkey := (nm if nm != "" else id) + "/" + sk
-			if sk != "" and not _taught.has(tkey):
+			if sk != "" and not _taught.has(tkey) and not _done_before("teach", nm if nm != "" else id, {"skill": sk}):
 				_taught[tkey] = true
 				out.append(_act({"verb": "teach", "target": nm if nm != "" else id, "skill": sk, "level": int(info.get("level", 0))}))
+		"industry":
+			# 主人公が過去に建てた施設（工場・高炉・鉄道・学校…）。id = 施設の種類。同じ名所の同じ規模は一度だけ
+			var sc := int(info.get("scale", 1))
+			var lm := str(info.get("landmark", ev.get("at", "")))
+			if not _done_before("industry", id, {"landmark": lm, "scale": sc}):
+				out.append(_act({"verb": "industry", "target": id, "landmark": lm, "scale": sc, "mult": float(info.get("mult", 1.0)), "bonus": bool(info.get("bonus", false))}))
 		"anachronism":
 			# 時代錯誤の品が過去に残った（渡した・落とした・職人の前で作った）。同じ品は一度の自由探索で一度だけ
 			var item := str(info.get("item", id))
@@ -242,6 +313,20 @@ func _generic(kind: String, id: String, info: Dictionary, ev: Dictionary) -> Arr
 			if db.projects.has(id) and WarModel.available(db, state.actions, state.war.get("pillars", {}), id)[0]:
 				out.append(_act({"verb": "project", "target": id}))
 	return out.filter(func(h): return not h.is_empty())
+
+
+## 同じ時代で同じ行動（同じ相手・同じ中身）をもう記録したか（教えた技・建てた施設は二重に効かない）
+func _done_before(verb: String, target: String, keys: Dictionary) -> bool:
+	for a in state.actions:
+		if str(a.get("verb", "")) != verb or str(a.get("era", "")) != active_era or str(a.get("target", "")) != target:
+			continue
+		var same := true
+		for k in keys:
+			if str(a.get(k, "")) != str(keys[k]):
+				same = false
+		if same:
+			return true
+	return false
 
 
 ## 手作りルールに当たった人物への行動も記録だけはする（ruled: true）。効果はルールに任せ、一般則の効果は出さないが、

@@ -35,6 +35,8 @@ func _ready() -> void:
 	ui.course_requested.connect(start_course)
 	if Game.profile and not Game.profile.skill_up.is_connected(_on_skill_up):
 		Game.profile.skill_up.connect(_on_skill_up)
+	if Game.profile and not Game.profile.knowledge_up.is_connected(_on_knowledge_up):
+		Game.profile.knowledge_up.connect(_on_knowledge_up)
 	if session and str(session.get("mode")) == "free":
 		spawn_stations()
 
@@ -42,6 +44,16 @@ func _ready() -> void:
 func _exit_tree() -> void:
 	if Game.profile and Game.profile.skill_up.is_connected(_on_skill_up):
 		Game.profile.skill_up.disconnect(_on_skill_up)
+	if Game.profile and Game.profile.knowledge_up.is_connected(_on_knowledge_up):
+		Game.profile.knowledge_up.disconnect(_on_knowledge_up)
+
+
+func _on_knowledge_up(id: String, old: float, nv: float, learned: bool) -> void:
+	if hud == null or not is_instance_valid(hud):
+		return
+	var txt := ("◆ 知識「%s」の原理を知った" % Knowledge.node_name(id)) if learned else ("◆ 知識「%s」習熟 %d → %d" % [Knowledge.node_name(id), int(old), int(nv)])
+	if hud.has_method("skill_toast"):
+		hud.skill_toast(txt, true)
 
 
 func _on_skill_up(id: String, old: float, nv: float) -> void:
@@ -72,6 +84,130 @@ func spawn_stations() -> void:
 		_place("shop", d, w, rng, used)
 	for d in CraftDB.loot_for(era_id):
 		_place("loot", d, w, rng, used)
+	for d in Knowledge.school_workshops(era_id):
+		_place("workshop", d, w, rng, used)
+	spawn_facilities()
+
+
+## この時代に主人公が建てた施設
+func spawn_facilities() -> void:
+	if Game.profile == null:
+		return
+	for rec in Game.profile.buildings:
+		if str(rec.get("era", "")) == era_id:
+			var f := Facility.spawn_rec(session, rec)
+			stations.append(f)
+			if hud and "compass_points" in hud:
+				hud.compass_points["▣" + f.display_name + str(rec.get("id", ""))] = f.global_position
+
+
+## いまいる名所（RANGE_BUILD 以内）。無ければ ""
+const RANGE_BUILD := 90.0
+
+
+func current_landmark() -> String:
+	var w = Game.world
+	var p = Game.player
+	if w == null or p == null:
+		return ""
+	var best := ""
+	var bd := RANGE_BUILD
+	for k in HistoryDB.LANDMARK_KEYS:
+		var d: float = (w.landmark_pos(k) as Vector3).distance_to((p as Node3D).global_position)
+		if d < bd:
+			bd = d
+			best = k
+	return best
+
+
+## 施設を建てる。戻り値 {ok, reason, facility}
+func build(type: String) -> Dictionary:
+	var prof := Game.profile
+	var b := Knowledge.building(type)
+	var at := current_landmark()
+	var chk := Knowledge.can_build(prof, b, era_id, at)
+	if not chk[0]:
+		return {"ok": false, "reason": chk[1]}
+	var mats := Knowledge.build_mats(b, at)
+	for m in mats:
+		prof.take(m, int(mats[m]))
+	prof.spend(int(b.get("money", 0)))
+	var p: Node3D = Game.player
+	var cam := CameraRig.I
+	var fwd := cam.flat_forward() if cam else -p.global_basis.z
+	var pos := p.global_position + fwd * 10.0
+	var w = Game.world
+	if w and w.has_method("height_at"):
+		pos.y = w.height_at(pos.x, pos.z)
+	var rec := {"id": "%s_%d" % [type, prof.next_uid], "type": type, "era": era_id, "at": at, "pos": [pos.x, pos.y, pos.z],
+		"yaw": atan2(-fwd.x, -fwd.z) + PI, "workers": 0, "skill": 10.0, "scale": 1, "power": Knowledge.power_mode(b, at),
+		"stock": {}, "money": 0, "last": Time.get_unix_time_from_system()}
+	prof.next_uid += 1
+	if b.get("line", false):
+		var bestk := ""
+		var bd := INF
+		for k in HistoryDB.LANDMARK_KEYS:
+			if k == at:
+				continue
+			var d: float = (w.landmark_pos(k) as Vector3).distance_to(w.landmark_pos(at))
+			if d < bd:
+				bd = d
+				bestk = k
+		rec["to"] = bestk
+	prof.buildings.append(rec)
+	prof.save()
+	var f := Facility.spawn_rec(session, rec)
+	stations.append(f)
+	_industry_event(rec)
+	Sfx.play(get_tree(), Sfx.success(), -6.0)
+	return {"ok": true, "reason": "", "facility": f}
+
+
+## 歴史への知らせ：Game.chaos.act("industry", 種類, {era, landmark, scale, mult, bonus})（自由探索の間だけ歴史に効く）
+func _industry_event(rec: Dictionary) -> Dictionary:
+	if Game.chaos == null or not Game.chaos.is_active():
+		return {}
+	var b := Knowledge.building(str(rec["type"]))
+	var bonus: Dictionary = b.get("bonus", {})
+	var has_bonus: bool = bonus.has("vars") and Knowledge.mastery(Game.profile, str(bonus.get("know", ""))) >= float(bonus.get("need", 40))
+	return Game.chaos.act("industry", str(rec["type"]), {"landmark": str(rec.get("at", "")), "scale": int(rec.get("scale", 1)),
+		"mult": Knowledge.industry_scale(Game.profile, rec) / (1.0 + 0.5 * (int(rec.get("scale", 1)) - 1)), "bonus": has_bonus})
+
+
+## 拡張（規模 +1、最大 3）
+func expand(f: Facility) -> Dictionary:
+	var prof := Game.profile
+	var rec := f.rec
+	if int(rec.get("scale", 1)) >= 3:
+		return {"ok": false, "reason": "これ以上は広げられない"}
+	var cost := int(float(f.bdef.get("money", 0)) * 0.6)
+	if not prof.spend(cost):
+		return {"ok": false, "reason": "お金が足りない（%s）" % CraftDB.money_text(cost, era_id)}
+	rec["scale"] = int(rec.get("scale", 1)) + 1
+	prof.save()
+	var hit := _industry_event(rec)
+	return {"ok": true, "reason": "", "hit": hit}
+
+
+## 働き手を雇う（1人の支度金）
+func wage() -> int:
+	return 2000 + CraftDB.era_index(era_id) * 1000
+
+
+## 職人に知識を教える（腕が上がる・知識が広まる＝歴史が動く）
+func teach_workers(f: Facility, nid: String) -> Dictionary:
+	var prof := Game.profile
+	var m := Knowledge.mastery(prof, nid)
+	if m < 30.0:
+		return {"ok": false, "reason": "自分の習熟が足りない（30 以上）"}
+	var old := float(f.rec.get("skill", 10))
+	f.rec["skill"] = maxf(old, minf(m, old + 20.0))
+	prof.practice("rhetoric", 0.3)
+	prof.save()
+	var hit := {}
+	if Game.chaos and Game.chaos.is_active():
+		hit = Game.chaos.act("teach", str(f.rec.get("at", "")), {"skill": nid, "level": int(m)})
+	return {"ok": true, "old": old, "new": float(f.rec["skill"]), "hit": hit}
 
 
 func _place(kind: String, d: Dictionary, w, rng: RandomNumberGenerator, used: Array) -> CraftStation:
@@ -161,6 +297,8 @@ func _unhandled_input(ev: InputEvent) -> void:
 
 func open_station(st: CraftStation) -> void:
 	match st.kind:
+		"factory":
+			ui.open_factory(st as Facility)
 		"workshop":
 			ui.open_workshop(st)
 		"shop":

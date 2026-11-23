@@ -376,8 +376,11 @@ func _main_page(msg := "") -> void:
 	if not f.questions.is_empty():
 		_button("未来を語る", _steer_page)
 	_button("未来の品を渡す", _give_page)
-	if Game.profile and not Game.profile.skills_summary(30.0).is_empty():
+	if Game.profile and (not Game.profile.skills_summary(30.0).is_empty() or Knowledge.known_count(Game.profile) > 0):
 		_button("技術を教える", _teach_page)
+	var tags: Array = a.get("tags", []) if not a.is_empty() else []
+	if Game.profile and ("ruler" in tags or "official" in tags or "reformer" in tags) and not Game.profile.permits.get(str(f.era_id), false):
+		_button("殖産の許しを請う（工場・鉄道などを建てる許し：話術）", _ask_permit, not _gifted.has("permit:" + f.figure_name))
 	_button("武器を譲ってもらう（話術）", _ask_weapon, not _gifted.has(f.figure_name))
 	if "protect" in verbs:
 		_button("守る（刺客から命を救う）", _start_protect, _protect_fig == null)
@@ -430,7 +433,7 @@ func _give_page() -> void:
 ## 持ち物の品を渡す。時空鞄の「未来の品」と同じ品（鉄砲・特効薬・千両箱）ならその効き目、
 ## この時代にまだない品なら「時代錯誤」（anachronism）として歴史を揺らす。どちらでもなければ贈り物（信頼）
 const INV_TO_ITEMS := {"hinawaju": "鉄砲", "murataju": "鉄砲", "arisaka38": "鉄砲", "pistol14": "鉄砲", "lmg96": "鉄砲",
-	"tokkouyaku": "特効薬", "senryobako": "千両箱"}
+	"tokkouyaku": "特効薬", "senryobako": "千両箱", "kyokasho": "未来の教科書"}
 
 
 func _give_inv(id: String, uid: int) -> void:
@@ -475,7 +478,30 @@ func _teach_page() -> void:
 		var sid := str(s["id"])
 		var lv := float(s["level"])
 		_button("%s（%s %d）" % [s["name"], s["rank"], int(lv)], func(): _do("teach", {"skill": sid, "level": int(lv)}))
+	var n := 0
+	for nid in Knowledge.ids():
+		var m := Knowledge.mastery(Game.profile, nid)
+		if m >= 30.0 and n < 8:
+			n += 1
+			var n2 := str(nid)
+			_button("知識：%s（習熟 %d）" % [Knowledge.node_name(nid), int(m)], func(): _do("teach", {"skill": n2, "level": int(m)}))
 	_button("戻る", _main_page)
+
+
+func _ask_permit() -> void:
+	var f: Variant = _menu_fig
+	if f == null:
+		return
+	_gifted["permit:" + f.figure_name] = true
+	var tr := Game.chaos.trust(Game.db.actor_name(f.figure_name)) if Game.chaos else 0
+	var p := clampf(Skills.gift_success(Game.profile.level("rhetoric"), tr) + 0.1, 0.05, 0.95)
+	Game.profile.practice("rhetoric", 0.6)
+	if randf() < p:
+		Game.profile.permits[str(f.era_id)] = true
+		Game.profile.save()
+		_main_page("%s「国が富むなら、よかろう。好きに建てるがよい」――殖産の許しを得た" % f.figure_name)
+	else:
+		_main_page("%s「得体の知れぬ工夫で世を乱すな」（成功 %d%%：話術・信頼で上がる。冥加金を納める道もある）" % [f.figure_name, roundi(p * 100)])
 
 
 # ------------------------------------------------------------------ 武器を譲ってもらう

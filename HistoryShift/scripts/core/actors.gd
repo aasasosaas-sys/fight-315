@@ -19,7 +19,9 @@ extends RefCounted
 
 const VIOLENT := ["assassinated", "killed", "suicide", "executed", "accident", "poisoned"]
 const NOKILL_TAGS := ["sacred", "woman", "foreigner", "commoner", "religious", "scholar", "artist"]
-const VERBS := ["kill", "escort", "protect", "persuade", "give", "steal", "forge", "steer", "delay", "sabotage", "battle", "project", "teach", "anachronism"]
+const VERBS := ["kill", "escort", "protect", "persuade", "give", "steal", "forge", "steer", "delay", "sabotage", "battle", "project", "teach", "anachronism", "industry"]
+##   industry 主人公が過去に施設を建てた（target = 施設の種類 data/crafting/buildings.json、scale = 規模、mult = 学校なら知っている原理の数で増える）。
+##            施設の vars × (1 + 0.5·(scale−1)) × mult。教える（teach）のは技能 id か知識の木の id（knowledge.json の vars）
 ##   teach    技術を教えた（skill = 技能 id、level = 教えた者の技能）。TEACH の変化 × level/100 × 影響力（人物がいなければ 0.5）
 ##   anachronism 時代錯誤の品が過去に残った（item、gap = 何時代ぶん未来の品か、cause = give/lost/craft）。
 ##            data/crafting/items.json の tech[品の種類] × gap（上限3）× 原因の重み
@@ -345,11 +347,24 @@ static func resolve(db: HistoryDB, actions: Array) -> Dictionary:
 					out.append({"vars": pv, "year": int(pr["year"]), "era": str(pr["era"]), "note": str(pr.get("text", ""))})
 			"teach":
 				var sk := str(a.get("skill", ""))
-				if TEACH.has(sk):
+				var tv0: Dictionary = TEACH.get(sk, Knowledge.vars_for(sk))
+				if not tv0.is_empty():
 					var kt := clampf(float(a.get("level", 0)) / 100.0, 0.0, 1.0) * (influence(ad) if not ad.is_empty() else 0.5)
 					var who := nm if nm != "" else "%sの職人" % HistoryDB.landmark_name(db.get_era(era), str(a.get("target", "")))
-					out.append({"vars": _scale(TEACH[sk], kt), "year": yr, "era": aera,
-						"note": "%sは未来から来た若者に%sの技を教わり、その工夫を広めた" % [who, Skills.skill_name(sk)]})
+					var skn := Skills.skill_name(sk) if TEACH.has(sk) else Knowledge.node_name(sk)
+					out.append({"vars": _scale(tv0, kt), "year": yr, "era": aera,
+						"note": "%sは未来から来た若者に%sを教わり、その工夫を広めた" % [who, skn]})
+			"industry":
+				var bdef := Knowledge.building(str(a.get("target", "")))
+				if not bdef.is_empty():
+					var ki := (1.0 + 0.5 * (float(a.get("scale", 1)) - 1.0)) * float(a.get("mult", 1.0))
+					var bv: Dictionary = (bdef.get("vars", {}) as Dictionary).duplicate()
+					var bonus: Dictionary = bdef.get("bonus", {})
+					if bonus.has("vars") and bool(a.get("bonus", false)):
+						_add(bv, bonus["vars"])
+					var place := HistoryDB.landmark_name(db.get_era(era), str(a.get("landmark", "")))
+					out.append({"vars": _scale(bv, ki), "year": _era_mid(db, era), "era": era,
+						"note": "%sに%sができ、人々はその仕組みを学んで各地に広めた" % [place, bdef.get("name", "")]})
 			"anachronism":
 				var tv := CraftDB.tech_vars(str(a.get("type", "")))
 				if not tv.is_empty():
@@ -443,7 +458,12 @@ static func headline(db: HistoryDB, a: Dictionary) -> String:
 		"battle":
 			return "%sで%sに加勢した" % [a.get("battle_name", a.get("target", "")), a.get("side", "")]
 		"teach":
-			return "%sに%sの技を教えた" % [nm, Skills.skill_name(str(a.get("skill", "")))]
+			var sk2 := str(a.get("skill", ""))
+			return "%sに%sを教えた" % [nm, Skills.skill_name(sk2) if TEACH.has(sk2) else Knowledge.node_name(sk2)]
+		"industry":
+			var bd2 := Knowledge.building(str(a.get("target", "")))
+			return "%sに%sを建てた%s" % [HistoryDB.landmark_name(db.get_era(str(a.get("era", ""))), str(a.get("landmark", ""))), bd2.get("name", a.get("target", "")),
+				"（規模 %d）" % int(a.get("scale", 1)) if int(a.get("scale", 1)) > 1 else ""]
 		"anachronism":
 			return "時代錯誤の品「%s」が%sの世に残った" % [CraftDB.item_name(str(a.get("item", ""))), db.get_era(str(a.get("era", ""))).get("eraName", "")]
 		"project":

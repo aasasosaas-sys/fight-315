@@ -1,0 +1,80 @@
+{
+ "eraId": "showa",
+ "roles": {
+  "capital": "町人",
+  "village": "町人",
+  "temple": "町人",
+  "port": "町人",
+  "castle": "町人",
+  "battlefield": "町人",
+  "mountain": "農民",
+  "town": "町人"
+ },
+ "rules": [
+  {
+   "id": "cv_sh_unrest",
+   "title": "取り締まりが強まる",
+   "trigger": {
+    "kind": "casualty",
+    "min": 15
+   },
+   "vars": {
+    "militarism": 8,
+    "democracy": -8
+   },
+   "year": 1928,
+   "text": "市民が殺される事件が続くと、政府は治安を名目に取り締まりを強め、言論や集会への締めつけが厳しくなった。",
+   "basis": "1928年、治安維持法が緊急勅令で改正されて最高刑が死刑となり、特別高等警察（特高）が全国の道府県に置かれた。",
+   "unrest": true
+  },
+  {
+   "id": "cv_sh_fuji",
+   "title": "開拓の村が傷つく",
+   "trigger": {
+    "kind": "casualty",
+    "at": "mountain",
+    "min": 8
+   },
+   "vars": {
+    "commoners": -8,
+    "economy": -5
+   },
+   "year": 1946,
+   "text": "富士山麓の開拓地で入植した農民が命を落とし、原野を田畑に変える仕事が止まった。",
+   "basis": "1945年11月に緊急開拓事業が始まり、1946年の自作農創設特別措置法と並んで、富士山麓などの原野にも開拓農民が入植した。",
+   "recover": 25
+  },
+  {
+   "id": "cv_sh_port",
+   "title": "港の働き手が失われる",
+   "trigger": {
+    "kind": "casualty",
+    "at": "port",
+    "min": 8
+   },
+   "vars": {
+    "economy": -10
+   },
+   "year": 1951,
+   "text": "横浜港の港湾労働者が倒れ、荷役が滞った。戦後の復興を支えた港の動きが鈍った。",
+   "basis": "1950〜53年の朝鮮戦争の特需で、横浜港は米軍の物資の積み出しなどで活気づいた。",
+   "recover": 25
+  },
+  {
+   "id": "cv_sh_unrest2",
+   "title": "治安立法が生まれる",
+   "trigger": {
+    "kind": "casualty",
+    "min": 40
+   },
+   "vars": {
+    "democracy": -5,
+    "unity": -5
+   },
+   "year": 1952,
+   "text": "相次ぐ犠牲に社会は不安に包まれ、政府は治安を守る新しい法律を急いだ。",
+   "basis": "1952年5月の血のメーデー事件のあと、同年7月に破壊活動防止法が制定され、公安調査庁が置かれた。",
+   "unrest": true
+  }
+ ]
+}

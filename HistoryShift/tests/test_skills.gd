@@ -38,7 +38,9 @@ func _run() -> void:
 	_persistence()
 	_master()
 	_history()
+	_knowledge()
 	await _integration()
+	await _industry()
 	PlayerProfile.delete_save()
 	HistoryState.delete_save()
 	GameSettings.values["master_mode"] = false
@@ -150,7 +152,7 @@ func _crafting() -> void:
 func _persistence() -> void:
 	var p := PlayerProfile.new()
 	p.autosave = false
-	_check(p.weapons().is_empty() and p.count("smartphone") == 1, "starts unarmed with a smartphone")
+	_check(p.weapons().is_empty() and p.count("smartphone") == 1 and p.count("kyokasho") == 1, "starts unarmed with a smartphone and a textbook")
 	p.skills["kenjutsu"] = 42.5
 	var it := p.add_instance(Crafting.make_item("tachi", 0.7, "あなた", "heian"))
 	it["dur"] = 50.0
@@ -430,3 +432,230 @@ func _integration() -> void:
 	G.profile = saved_prof
 	G.remove_meta("force_fallback_world")
 	G.state.reset_all()
+
+
+
+# ------------------------------------------------------------------ 7. 知識の木
+func _knowledge() -> void:
+	Knowledge.ensure()
+	_check(Knowledge.ids().size() >= 35, "knowledge tree has %d nodes" % Knowledge.ids().size())
+	var all_ids := Knowledge.ids()
+	for nid in all_ids:
+		var nd := Knowledge.node(nid)
+		_check(Knowledge.domains().has(str(nd.get("domain", ""))), "node %s domain" % nid)
+		_check(str(nd.get("basis", "")) != "", "node %s has basis" % nid)
+		_check(str(nd.get("era", "")) in HistoryDB.ERA_ORDER, "node %s era" % nid)
+		for pr in nd.get("prereq", []):
+			_check(pr in all_ids, "node %s prereq %s exists" % [nid, pr])
+		for sid in nd.get("schools", []):
+			_check(Knowledge.schools().has(sid) or not CraftDB.workshop(sid).is_empty(), "node %s school %s exists" % [nid, sid])
+		if nd.has("book"):
+			_check(CraftDB.has_item(str(nd["book"])), "node %s book exists" % nid)
+		_check(not Knowledge.vars_for(nid).is_empty(), "node %s has history vars" % nid)
+	for b in Knowledge.buildings():
+		for k in b.get("know", {}):
+			_check(k in all_ids, "building %s knowledge %s" % [b.get("id"), k])
+		for m in b.get("mats", {}):
+			_check(CraftDB.has_item(m), "building %s material %s" % [b.get("id"), m])
+		for m in b.get("inputs", {}):
+			_check(CraftDB.has_item(m), "building %s input %s" % [b.get("id"), m])
+		for m in b.get("outputs", {}):
+			_check(CraftDB.has_item(m), "building %s output %s" % [b.get("id"), m])
+		_check(not (b.get("vars", {}) as Dictionary).is_empty(), "building %s vars" % b.get("id"))
+	# 前提のない循環が無いこと（どのノードも前提をたどると根に着く）
+	for nid in all_ids:
+		var seen := {}
+		var stack: Array = [nid]
+		var ok := true
+		while not stack.is_empty():
+			var x: String = stack.pop_back()
+			if seen.has(x):
+				continue
+			seen[x] = true
+			for pr in Knowledge.node(x).get("prereq", []):
+				if pr == nid:
+					ok = false
+				stack.append(pr)
+		_check(ok, "no prerequisite cycle through %s" % nid)
+	var p := PlayerProfile.new()
+	p.autosave = false
+	_check(Knowledge.knows(p, "p_jouki") and Knowledge.mastery(p, "p_jouki") == 0.0, "modern common sense: steam principle known, no hands-on mastery")
+	_check(not Knowledge.knows(p, "m_hansharo"), "reverberatory furnace is not common knowledge")
+	_check(not Knowledge.learn(p, "m_koro"), "cannot learn the blast furnace without prerequisites")
+	# 実験は 60 まで、前提 +30 まで
+	for i in 60:
+		Knowledge.train(p, "p_suisha", 7.0, Knowledge.CAP_EXPERIMENT)
+	_check(absf(Knowledge.mastery(p, "p_suisha") - 60.0) < 0.01, "experiments cap at 60 (%.1f)" % Knowledge.mastery(p, "p_suisha"))
+	for i in 80:
+		Knowledge.train(p, "p_jouki", 12.0, Knowledge.CAP_TEACHER)
+	_check(absf(Knowledge.mastery(p, "p_jouki") - 90.0) < 0.01, "mastery limited by prerequisites + 30 (%.1f)" % Knowledge.mastery(p, "p_jouki"))
+	var got := Knowledge.read_textbook(p)
+	_check(got.size() > 0 and Knowledge.knows(p, "t_teori"), "the future textbook teaches principles whose prerequisites are known (%d)" % got.size())
+	_check(Knowledge.read_textbook(p).is_empty(), "rereading teaches nothing new")
+	var q := PlayerProfile.new()
+	q.autosave = false
+	q.from_dict(p.to_dict())
+	_check(absf(Knowledge.mastery(q, "p_jouki") - 90.0) < 0.01 and Knowledge.knows(q, "t_teori"), "knowledge saved")
+	# 本
+	var r := PlayerProfile.new()
+	r.autosave = false
+	var br := Knowledge.read_book(r, "hon_tekkou")
+	_check(not br["ok"], "a book needs its prerequisites (%s)" % br.get("reason", ""))
+	Knowledge.learn(r, "m_tatara", true)
+	var br2 := Knowledge.read_book(r, "hon_tekkou")
+	_check(br2["ok"] and Knowledge.knows(r, "m_hansharo"), "reading 鉄熕全書 teaches the reverberatory furnace")
+	# 知識で作る品
+	var s := PlayerProfile.new()
+	s.autosave = false
+	s.skills["machining"] = 40.0
+	s.add("hagane", 4); s.add("dou", 2); s.add("kikai_buhin", 3)
+	_check(not Crafting.can_craft(s, CraftDB.recipe("r_jouki"), "edo", "machine")[0], "steam engine needs steam mastery")
+	s.knowledge["p_suisha"] = {"p": true, "m": 60.0}
+	s.knowledge["p_jouki"] = {"p": true, "m": 45.0}
+	_check(Crafting.can_craft(s, CraftDB.recipe("r_jouki"), "sengoku", "machine")[0], "with the knowledge, a steam engine can be built even in Sengoku")
+	# 建てられるか
+	var b := Knowledge.building("boseki")
+	var c := PlayerProfile.new()
+	c.autosave = false
+	_check(not Knowledge.can_build(c, b, "edo", "village")[0], "spinning mill needs knowledge")
+	c.knowledge["t_boseki"] = {"p": true, "m": 45.0}
+	_check(str(Knowledge.can_build(c, b, "edo", "village")[1]).contains("許し"), "spinning mill needs the ruler's permission")
+	c.permits["edo"] = true
+	_check(str(Knowledge.can_build(c, b, "edo", "village")[1]).contains("建材"), "then materials")
+	_check(Knowledge.power_mode(b, "village") == "water" and Knowledge.power_mode(b, "castle") == "steam", "water power by the river, steam elsewhere")
+	_check(Knowledge.build_mats(b, "castle").has("jouki"), "steam power needs a steam engine")
+	GameSettings.values["master_mode"] = true
+	_check(Knowledge.knows(c, "e_hatsuden") and Knowledge.mastery(c, "f_hikoki") == 100.0, "master mode unlocks all knowledge")
+	GameSettings.values["master_mode"] = false
+	# 歴史：施設と学校
+	var db := HistoryDB.load_all()
+	var st := HistoryState.new(db)
+	var tr := ChaosTracker.new(db, st)
+	tr.begin_session("edo")
+	var e0: Dictionary = st.era_states.get("edo", {}).duplicate()
+	var h := tr.act("industry", "boseki", {"landmark": "village", "scale": 1})
+	_check(not h.is_empty() and str(st.actions[-1].get("verb", "")) == "industry", "industry event recorded")
+	var e1: Dictionary = st.era_states.get("edo", {})
+	_check(float(e1.get("economy", 0)) > float(e0.get("economy", 0)), "a spinning mill raises Edo economy")
+	_check(tr.act("industry", "boseki", {"landmark": "village", "scale": 1}).is_empty(), "the same building counts once")
+	_check(not tr.act("industry", "boseki", {"landmark": "village", "scale": 2}).is_empty(), "expanding counts again")
+	var w0 := st.war.duplicate(true)
+	var e2: Dictionary = st.era_states.get("edo", {}).duplicate()
+	tr.act("industry", "gakko", {"landmark": "capital", "scale": 1, "mult": 3.0})
+	var e3: Dictionary = st.era_states.get("edo", {})
+	_check(float(e3.get("education", 0)) - float(e2.get("education", 0)) >= 10.0, "a school spreading much knowledge has a big effect on education (+%.0f)" % (float(e3.get("education", 0)) - float(e2.get("education", 0))))
+	_check(HistoryActors.headline(db, st.actions[-1]).contains("学校"), "headline names the building")
+	_check(not tr.act("teach", "village", {"skill": "p_jouki", "level": 80}).is_empty(), "teaching artisans a knowledge node moves history")
+	_check(tr.act("teach", "village", {"skill": "p_jouki", "level": 80}).is_empty(), "teaching the same thing to the same place again does nothing")
+	var pil0: Dictionary = w0.get("pillars", {})
+	var pil1: Dictionary = st.war.get("pillars", {})
+	if pil0.has("industry") and pil1.has("industry"):
+		_check(float(pil1["industry"].get("score", pil1["industry"]) if pil1["industry"] is Dictionary else pil1["industry"]) >= float(pil0["industry"].get("score", pil0["industry"]) if pil0["industry"] is Dictionary else pil0["industry"]), "industrialisation does not lower the 1941 industry pillar")
+	tr.end_session()
+
+
+# ------------------------------------------------------------------ 8. 実際に建てて動かす（江戸で産業革命）
+func _industry() -> void:
+	var G: Node = root.get_node_or_null("Game")
+	if G == null:
+		return
+	G.set_meta("force_fallback_world", true)
+	G.state.reset_all()
+	var saved_prof = G.profile
+	var prof := PlayerProfile.new()
+	prof.autosave = false
+	G.profile = prof
+	var S: GDScript = load("res://scripts/mission/session.gd")
+	var sess: Node = S.start_free_roam("edo")
+	root.add_child(sess)
+	await _frames(5)
+	_check(sess.craft.find_station("seirenkata") != null and sess.craft.find_station("denshujo") != null, "Edo schools (佐賀藩精錬方・長崎海軍伝習所) placed")
+	# 学問所で知識を学ぶ
+	var sr = sess.craft.find_station("seirenkata")
+	if sr:
+		sess.craft.ui.open_workshop(sr)
+		sess.craft.ui._start_know_lesson("m_hansharo")
+		await _frames(2)
+		sess.craft.ui.finish_minigame(1.0)
+		await create_timer(0.9).timeout
+		_check(Knowledge.knows(prof, "m_hansharo") and Knowledge.mastery(prof, "m_hansharo") > 0.0, "learned the reverberatory furnace at 佐賀藩精錬方 (%.1f)" % Knowledge.mastery(prof, "m_hansharo"))
+		sess.craft.ui.close()
+	# 江戸の村に蒸気でない紡績工場（川沿い＝水力）を建てる
+	prof.knowledge["t_teori"] = {"p": true, "m": 60.0}
+	prof.knowledge["p_suisha"] = {"p": true, "m": 60.0}
+	prof.knowledge["t_boseki"] = {"p": true, "m": 50.0}
+	prof.add("mokuzai", 10); prof.add("kikai_buhin", 6)
+	prof.add_money(400000)
+	sess.player.teleport(sess.world.landmark_pos("village") + Vector3(5, 0, 5))
+	await _frames(2)
+	_check(sess.craft.current_landmark() == "village", "standing at the village")
+	var r0: Dictionary = sess.craft.build("boseki")
+	_check(not r0["ok"] and str(r0["reason"]).contains("許し"), "needs permission first")
+	prof.permits["edo"] = true
+	var n_act: int = G.state.actions.size()
+	var r1: Dictionary = sess.craft.build("boseki")
+	_check(r1["ok"], "built a spinning mill in Edo (%s)" % r1.get("reason", ""))
+	await _frames(2)
+	_check(G.state.actions.size() > n_act and str(G.state.actions[-1].get("verb", "")) == "industry", "building it moves history (industry action)")
+	var f = r1.get("facility")
+	if f:
+		_check(str(f.rec.get("power", "")) == "water", "village mill runs on water")
+		_check(not f.produce_once(), "no workers, no production")
+		f.rec["workers"] = f.needed_workers()
+		prof.add("wata", 9)
+		f.deposit(prof)
+		_check(f.produce_once() and f.produce_once(), "the mill spins cotton")
+		var got: Array = f.collect(prof)
+		_check(prof.count("menshi") >= 6, "collected cotton yarn (%d)" % prof.count("menshi"))
+		var old_skill := float(f.rec.get("skill", 0))
+		var tw: Dictionary = sess.craft.teach_workers(f, "t_boseki")
+		_check(tw["ok"] and float(f.rec["skill"]) > old_skill, "teaching artisans raises their skill")
+		var eff0 := Knowledge.efficiency(f.rec)
+		prof.add_money(300000)
+		var ex: Dictionary = sess.craft.expand(f)
+		_check(ex["ok"] and Knowledge.efficiency(f.rec) > eff0, "expanding raises output")
+		sess.craft.ui.open_factory(f)
+		await _frames(1)
+		_check(sess.craft.ui.is_open(), "factory panel opens")
+		sess.craft.ui.close()
+	# 蒸気の機械工場は蒸気機関と石炭が要る
+	prof.knowledge["k_karakuri"] = {"p": true, "m": 60.0}
+	prof.knowledge["m_tatara"] = {"p": true, "m": 60.0}
+	prof.knowledge["m_hansharo"] = {"p": true, "m": 60.0}
+	prof.knowledge["k_senban"] = {"p": true, "m": 50.0}
+	prof.add("hagane", 6); prof.add("kikai_buhin", 4); prof.add("renga", 10)
+	prof.add_money(400000)
+	var r2: Dictionary = sess.craft.build("kikai_kojo")
+	_check(not r2["ok"] and str(r2["reason"]).contains("蒸気機関"), "steam factory needs a steam engine (%s)" % r2.get("reason", ""))
+	prof.add("jouki", 1)
+	var r3: Dictionary = sess.craft.build("kikai_kojo")
+	_check(r3["ok"], "built a steam machine works in Edo")
+	if r3.get("facility"):
+		var f2 = r3["facility"]
+		f2.rec["workers"] = f2.needed_workers()
+		prof.add("tetsu", 4)
+		f2.deposit(prof)
+		_check(not f2.produce_once(), "no coal, no steam")
+		prof.add("sekitan", 2)
+		f2.deposit(prof)
+		_check(f2.produce_once(), "with coal the machine works runs")
+	var nb := prof.buildings.size()
+	sess.end()
+	await _frames(3)
+	# 同じ時代に戻ると施設が残っている（離れていた間の分も生産）
+	var sess2: Node = S.start_free_roam("edo")
+	root.add_child(sess2)
+	await _frames(4)
+	var facs := get_nodes_in_group("facility")
+	_check(facs.size() == nb, "buildings persist when revisiting Edo (%d)" % facs.size())
+	sess2.end()
+	await _frames(3)
+	var sess3: Node = S.start_free_roam("showa")
+	root.add_child(sess3)
+	await _frames(4)
+	_check(get_nodes_in_group("facility").is_empty(), "Edo buildings stay in Edo")
+	sess3.end()
+	await _frames(3)
+	G.profile = saved_prof
+	G.state.reset_all()
+	G.remove_meta("force_fallback_world")

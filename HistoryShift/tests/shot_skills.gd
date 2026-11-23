@@ -108,5 +108,56 @@ func _run() -> void:
 	Input.action_press("aim")
 	await _shot("skills_%s_block" % era_id, 10)
 	Input.action_release("aim")
+	p.arms.blocking = false
+	# 知識の木・建設・施設（江戸で産業革命）
+	Knowledge.read_textbook(prof)
+	for nid in ["m_tatara", "m_hansharo", "p_suisha", "p_jouki", "k_karakuri", "k_senban", "t_teori", "t_boseki", "m_saikutsu", "m_koro", "p_tetsudo"]:
+		Knowledge.learn(prof, nid, true)
+		prof.knowledge[nid]["m"] = 62.0
+	sess.craft.ui._tab = 2
+	sess.craft.ui._sel_node = "p_jouki"
+	sess.craft.ui.open_inventory()
+	await _shot("skills_%s_knowledge" % era_id)
+	prof.permits[era_id] = true
+	for pair in [["hagane", 12], ["kikai_buhin", 20], ["renga", 20], ["jouki", 3], ["mokuzai", 40], ["rail", 40], ["wata", 20], ["tetsu", 20], ["sekitan", 30]]:
+		prof.add(pair[0], pair[1], 0.6)
+	prof.add_money(4000000)
+	var vpos: Vector3 = sess.world.landmark_pos("village")
+	p.teleport(vpos + Vector3(12, 0, 12))
+	cam.yaw = 0.0
+	await _frames(10)
+	sess.craft.ui._tab = 3
+	sess.craft.ui.open_inventory()
+	await _shot("skills_%s_build_menu" % era_id)
+	sess.craft.ui.close()
+	var made: Array = []
+	for t in ["kikai_kojo", "boseki", "tetsudo"]:
+		var r: Dictionary = sess.craft.build(t)
+		print("build ", t, " ", r.get("ok"), " ", r.get("reason", ""))
+		if r.get("ok", false):
+			var f = r["facility"]
+			f.rec["workers"] = f.needed_workers()
+			f.deposit(prof)
+			made.append(f)
+		p.teleport(p.global_position + Vector3(-26, 0, 6))
+		await _frames(5)
+	if not made.is_empty():
+		var f0: Node3D = made[0]
+		p.teleport(f0.global_position + Vector3(14, 0, 26))
+		var to := f0.global_position - p.global_position
+		cam.yaw = atan2(-to.x, -to.z)
+		cam.pitch = -0.05
+		cam.snap()
+		await _shot("skills_%s_factory_world" % era_id, 150)
+		sess.craft.ui.open_factory(f0)
+		await _shot("skills_%s_factory_panel" % era_id)
+		sess.craft.ui.close()
+	for f in made:
+		if f.bdef.get("visual", "") == "railway":
+			p.teleport(f.global_position + Vector3(10, 0, 18))
+			var to2: Vector3 = f.global_position - p.global_position
+			cam.yaw = atan2(-to2.x, -to2.z)
+			cam.snap()
+			await _shot("skills_%s_railway" % era_id, 150)
 	Game.profile = saved
 	get_tree().quit()

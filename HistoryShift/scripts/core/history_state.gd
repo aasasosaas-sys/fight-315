@@ -58,6 +58,8 @@ func reset_all() -> void:
 	alterations = 0
 	restorations = 0
 	chaos_count = 0
+	if save_path == SAVE_PATH:
+		CivilHarm.reset_ledger()   # 民間人の犠牲の記録（scripts/core/civil_harm.gd）も新しい世界では消える（テスト用のセーブでは触らない）
 	recompute()
 
 

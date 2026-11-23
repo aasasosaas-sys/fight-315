@@ -1,0 +1,96 @@
+{
+ "eraId": "edo",
+ "roles": {
+  "capital": "町人",
+  "village": "商人",
+  "temple": "町人",
+  "port": "漁民",
+  "castle": "町人",
+  "battlefield": "町人",
+  "mountain": "農民",
+  "town": "町人"
+ },
+ "rules": [
+  {
+   "id": "cv_ed_nihonbashi",
+   "title": "日本橋の商人が失われる",
+   "trigger": {
+    "kind": "casualty",
+    "at": "village",
+    "min": 10
+   },
+   "vars": {
+    "commerce": -15
+   },
+   "year": 1700,
+   "text": "日本橋の大店の商人や奉公人が命を落とし、江戸の商いの中心は大きく傷ついた。",
+   "basis": "1673年、三井高利は江戸の本町（日本橋）に越後屋を開き、「現金掛け値なし」で繁盛した。日本橋は江戸の商業の中心だった。",
+   "recover": 40
+  },
+  {
+   "id": "cv_ed_nihonbashi2",
+   "title": "江戸の商い、細る",
+   "trigger": {
+    "kind": "casualty",
+    "at": "village",
+    "min": 25
+   },
+   "vars": {
+    "commerce": -15,
+    "economy": -5
+   },
+   "year": 1715,
+   "text": "町人地の多くの店が担い手を失って戸を閉ざし、江戸の商いは長く立ち直れなかった。",
+   "basis": "18世紀初めの江戸は人口100万に近い大都市で、その半分ほどを町人が占めた（1721年の町方人口調査で約50万人）。",
+   "recover": 40
+  },
+  {
+   "id": "cv_ed_sukego",
+   "title": "箱根の助郷の村が傷つく",
+   "trigger": {
+    "kind": "casualty",
+    "at": "mountain",
+    "min": 6
+   },
+   "vars": {
+    "economy": -5
+   },
+   "year": 1700,
+   "text": "宿場に人馬を出す村の働き手が失われ、東海道の荷運びが滞った。",
+   "basis": "1694年、幕府は東海道などの宿場に周りの村から人馬を出させる助郷の制度を定めた。",
+   "recover": 40
+  },
+  {
+   "id": "cv_ed_uchikowashi",
+   "title": "打ちこわしが起こる",
+   "trigger": {
+    "kind": "casualty",
+    "min": 15
+   },
+   "vars": {
+    "commoners": 8,
+    "centralization": -5
+   },
+   "year": 1733,
+   "text": "罪のない町人が殺される騒ぎに江戸の人々の怒りが爆発し、米屋が打ちこわされた。幕府は米の値の引き下げと救い米で応じた。",
+   "basis": "1733年、江戸で初めての打ちこわしが起こり、米問屋の高間伝兵衛の店が襲われた。幕府は米価の対策と困窮者への施しで応じた。",
+   "unrest": true
+  },
+  {
+   "id": "cv_ed_uchikowashi2",
+   "title": "大打ちこわしと改革",
+   "trigger": {
+    "kind": "casualty",
+    "min": 40
+   },
+   "vars": {
+    "commoners": 5,
+    "economy": -5
+   },
+   "year": 1787,
+   "text": "犠牲が重なった江戸で、町じゅうの米屋が打ちこわされた。新しく老中になった者は、飢饉と騒動に備える改革を急いだ。",
+   "basis": "1787年の天明の打ちこわしで江戸の米屋が軒並み襲われ、直後に老中となった松平定信は囲米や七分積金（1791年）で備えた。",
+   "unrest": true
+  }
+ ]
+}

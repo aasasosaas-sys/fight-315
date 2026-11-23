@@ -22,7 +22,8 @@ var _tab := 0
 var _game: Minigame = null
 var _first: Control = null
 
-const TABS := ["持ち物", "技能", "製作", "メモ"]
+const TABS := ["持ち物", "技能", "知識", "建設", "製作", "メモ"]
+var _sel_node := ""
 
 
 func _ready() -> void:
@@ -178,8 +179,21 @@ func open_workshop(st: CraftStation, msg := "") -> void:
 	if d.has("job"):
 		var job: Dictionary = d["job"]
 		_btn("手伝いをする：%s（日銭 %s まで）" % [job.get("text", ""), CraftDB.money_text(int(job.get("pay", 500)), era_id)], func(): _start_job(job))
+	# 知識の稽古（この工房・学問所の師が教える。その時代に師がいる知識だけ）
+	for nid in Knowledge.taught_at(str(d.get("id", ""))):
+		var nd := Knowledge.node(nid)
+		if CraftDB.era_index(str(nd.get("era", "showa"))) > CraftDB.era_index(era_id):
+			continue
+		var m := Knowledge.mastery(prof(), nid)
+		var cap := Knowledge.prereq_cap(prof(), nid)
+		var st_txt := "原理○" if Knowledge.knows(prof(), nid) else "原理×"
+		var nid2 := str(nid)
+		var lab := "学ぶ：%s（%s・習熟 %d／いまの上限 %d）" % [nd.get("name", nid), st_txt, int(m), int(minf(cap, 100))]
+		if m >= minf(cap, 100.0) and not PlayerProfile.master_mode():
+			lab += "　前提の習熟を上げよ" if cap < 100 else "　免許皆伝"
+		_btn(lab, func(): _start_know_lesson(nid2), true, "cyan")
 	var teachable := prof().skills_summary(40.0)
-	if not teachable.is_empty():
+	if not teachable.is_empty() or not _teachable_knowledge().is_empty():
 		_btn("職人たちに未来の技を教える（歴史が動くかもしれない）", _teach_page)
 	_btn("立ち去る", close, true, "ghost")
 	_focus()
@@ -205,15 +219,24 @@ func _teach_page() -> void:
 		var sid := str(s["id"])
 		var lv := float(s["level"])
 		_btn("%s（%s %d）" % [s["name"], s["rank"], int(lv)], func(): _teach(sid, lv))
+	for nid in _teachable_knowledge():
+		var n2 := str(nid)
+		var m := Knowledge.mastery(prof(), nid)
+		_btn("知識：%s（習熟 %d）" % [Knowledge.node_name(nid), int(m)], func(): _teach(n2, m), true, "cyan")
 	_btn("戻る", func(): open_workshop(_station), true, "ghost")
 	_focus()
+
+
+## 教えられる知識（習熟 30 以上）
+func _teachable_knowledge() -> Array:
+	return Knowledge.ids().filter(func(i): return Knowledge.mastery(prof(), i) >= 30.0)
 
 
 func _teach(sid: String, lv: float) -> void:
 	var msg := ""
 	if Game.chaos and Game.chaos.is_active():
 		var hit: Dictionary = Game.chaos.act("teach", _station.landmark, {"skill": sid, "level": int(lv)})
-		msg = "職人たちは%sの技を夢中で書き留めた。" % Skills.skill_name(sid) + ("" if not hit.is_empty() else "（もう教えたことだ）")
+		msg = "職人たちは%sを夢中で書き留めた。" % (Skills.skill_name(sid) if Skills.LIST.has(sid) else Knowledge.node_name(sid)) + ("" if not hit.is_empty() else "（もう教えたことだ）")
 	else:
 		msg = "職人たちは感心したが、任務中の今は歴史を動かせない。"
 	prof().practice("rhetoric", 0.5)
@@ -309,7 +332,12 @@ func open_crafting(st: CraftStation, msg := "") -> void:
 		if rs == "any" or rs in sts:
 			list.append(r)
 	_recipe_rows(list, sts)
-	_btn("戻る" if st else "閉じる", (func(): open_workshop(st)) if st else close, true, "ghost")
+	var back: Callable = close
+	if st is Facility:
+		back = func(): open_factory(st as Facility)
+	elif st:
+		back = func(): open_workshop(st)
+	_btn("戻る" if st else "閉じる", back, true, "ghost")
 	_focus()
 
 
@@ -491,8 +519,10 @@ func open_inventory(msg := "") -> void:
 	match _tab:
 		0: _inv_items()
 		1: _inv_skills()
-		2: _inv_craft()
-		3: _inv_memo()
+		2: _inv_knowledge()
+		3: _inv_build()
+		4: _inv_craft()
+		5: _inv_memo()
 	if _first == null and tabs.get_child_count() > 0:
 		_first = tabs.get_child(_tab)
 	_focus()
@@ -541,6 +571,8 @@ func _inv_items() -> void:
 		row2.add_child(info2)
 		_lbl(label, 21, JSUI.TEXT, info2, true)
 		_lbl(str(it.get("desc", "")), 17, JSUI.DIM, info2)
+		if t == "book":
+			_btn("読む", func(): _read(sid), true, "normal", row2, 110)
 		if t in ["med", "tool", "valuable"] and (t != "valuable" or it.has("money")):
 			_btn("使う", func(): _use(sid), true, "normal", row2, 110)
 		if not it.get("keep", false) or sid == "smartphone":
@@ -598,7 +630,7 @@ func _use(id: String) -> void:
 						prof().practice("machining", 0.6)
 						msg = "%sを修理した（+%d）" % [v.get("display_name"), int(amt)]
 				"smartphone":
-					_tab = 3
+					_tab = 5
 					open_inventory("圏外。でも地図とメモは見られる。")
 					return
 	open_inventory(msg)
@@ -705,3 +737,269 @@ func _inv_memo() -> void:
 		_lbl("・%s（%s）" % [s.get("name", ""), HistoryDB.landmark_name(era, str(s.get("at", "")))], 19)
 	_lbl("操作", 22, JSUI.CYAN, null, true)
 	_lbl("左クリック：殴る・斬る・撃つ（長押しで強い振り・弓を引く）　右クリック：受け（刀）・狙う（銃・弓）　R：装填　1：持ち替え　2〜5：爆弾など　G：投げる　Tab：時空鞄　E：工房・店・蔵・人物", 18)
+
+
+
+# ================================================================== 知識の木
+func _domain_lesson(nid: String) -> Dictionary:
+	var dm := Knowledge.domain_of(nid)
+	var nd := Knowledge.node(nid)
+	return {"title": str(nd.get("name", "")), "text": "【史実】" + str(nd.get("basis", "")), "skill": "", "steps": dm.get("steps", ["原理を聞く", "手本を見る", "自分でやってみる", "直してもらう"]),
+		"target": dm.get("target", [60, 25, 15]), "labels": dm.get("labels", ["一", "二", "三"])}
+
+
+func _start_know_lesson(nid: String) -> void:
+	var st := _station
+	var game := str(Knowledge.domain_of(nid).get("game", "assembly"))
+	_run_minigame(game, _domain_lesson(nid), Knowledge.mastery(prof(), nid), func(score: float):
+		var learned := Knowledge.learn(prof(), nid, true)
+		var before := Knowledge.mastery(prof(), nid)
+		var got := Knowledge.train(prof(), nid, 12.0 * (0.35 + 0.65 * score), Knowledge.CAP_TEACHER)
+		prof().save()
+		var msg := "%s「%s」　出来 %d 点　%s%s 習熟 %.1f → %.1f" % [st.def.get("teacher", "師"), "よく呑み込んだ" if score > 0.6 else "もう一度だ", roundi(score * 100),
+			"原理を知った！ " if learned else "", Knowledge.node_name(nid), before, before + got]
+		if got <= 0.0 and not PlayerProfile.master_mode():
+			msg += "（前提の習熟が足りない：前提 +30 までしか身につかない）"
+		open_workshop(st, msg))
+
+
+func _read(book_id: String) -> void:
+	var msg := ""
+	if book_id == "kyokasho":
+		var got := Knowledge.read_textbook(prof())
+		msg = "未来の教科書を読んだ。" + ("新しく原理を知った：" + "、".join(got.map(func(x): return Knowledge.node_name(x))) if not got.is_empty() else "いま読み解けることはもうない（前提を学べば先へ進める）")
+	else:
+		var r := Knowledge.read_book(prof(), book_id)
+		msg = ("%sを読んだ：%s%s 習熟 +%.1f" % [CraftDB.item_name(book_id), "原理を知った！ " if r.get("new", false) else "", Knowledge.node_name(str(r.get("node", ""))), float(r.get("gain", 0))]) if r["ok"] else str(r["reason"])
+	prof().save()
+	_tab = 2
+	open_inventory(msg)
+
+
+func _inv_knowledge() -> void:
+	_lbl("知識は時代をまたいで持ち越す。原理（○）は師・書物・未来の教科書・現代の常識で、習熟は師の稽古（100 まで）・自分で試す（60 まで）・施設を動かす（80 まで）で上がる。前提の習熟 +30 を超えては身につかない。", 18, JSUI.MUTED)
+	var top := JSUI.hbox(10)
+	_body.add_child(top)
+	if prof().count("kyokasho") > 0:
+		_btn("未来の教科書を読む", func(): _read("kyokasho"), true, "gold", top, 260)
+	_lbl("原理 %d / %d" % [Knowledge.known_count(prof()), Knowledge.ids().size()], 21, JSUI.CYAN, top, true)
+	if _sel_node != "":
+		_node_detail(_sel_node)
+	var dms := Knowledge.domains()
+	for dk in dms:
+		_lbl(str(dms[dk].get("name", dk)), 22, JSUI.GOLD, null, true)
+		var flow := HFlowContainer.new()
+		flow.add_theme_constant_override("h_separation", 6)
+		flow.add_theme_constant_override("v_separation", 6)
+		flow.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_body.add_child(flow)
+		var first := true
+		for nid in Knowledge.nodes_in(dk):
+			var nd := Knowledge.node(nid)
+			if not first:
+				var ar := JSUI.label("→", 20, JSUI.DIM)
+				ar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+				flow.add_child(ar)
+			first = false
+			var k := Knowledge.knows(prof(), nid)
+			var m := Knowledge.mastery(prof(), nid)
+			var b := JSUI.button("%s\n%s %d" % [nd.get("name", nid), "○" if k else "×", int(m)], "gold" if m >= 60 else ("cyan" if k else "ghost"), 17, 150)
+			b.custom_minimum_size = Vector2(150, 58)
+			var nid2 := str(nid)
+			b.pressed.connect(func(): UISfx.play("click"); _sel_node = nid2; open_inventory())
+			flow.add_child(b)
+			if _first == null:
+				_first = b
+
+
+func _node_detail(nid: String) -> void:
+	var nd := Knowledge.node(nid)
+	var box := JSUI.panel(JSUI.sb(Color(JSUI.CYAN, 0.06), 12, 1, Color(JSUI.CYAN, 0.3), 0, 14))
+	var v := JSUI.vbox(4)
+	box.add_child(v)
+	_body.add_child(box)
+	var k := Knowledge.knows(prof(), nid)
+	var m := Knowledge.mastery(prof(), nid)
+	_lbl("%s（%s）　原理 %s　習熟 %d（いまの上限 %d）" % [nd.get("name", nid), Knowledge.domain_of(nid).get("name", ""), "○" if k else "×", int(m), int(minf(100, Knowledge.prereq_cap(prof(), nid)))], 24, JSUI.CYAN, v, true)
+	var pre: PackedStringArray = []
+	for pr in nd.get("prereq", []):
+		pre.append("%s（%s %d）" % [Knowledge.node_name(pr), "○" if Knowledge.knows(prof(), pr) else "×", int(Knowledge.mastery(prof(), pr))])
+	_lbl("前提：" + ("、".join(pre) if not pre.is_empty() else "なし") + ("　［現代の常識］" if nd.get("modern", false) else ""), 18, JSUI.TEXT, v)
+	var src: PackedStringArray = []
+	var sc := Knowledge.schools()
+	var era_name := func(e: String) -> String: return str(Game.db.get_era(e).get("eraName", e)) if Game.db else e
+	for sid in nd.get("schools", []):
+		var wdef: Dictionary = sc.get(sid, CraftDB.workshop(sid))
+		var eras: Array = (wdef.get("eras", []) as Array).filter(func(e): return CraftDB.era_index(str(e)) >= CraftDB.era_index(str(nd.get("era", "jomon_kofun"))))
+		src.append("%s（%s）" % [wdef.get("name", sid), "・".join(eras.map(func(e): return era_name.call(str(e))))])
+	_lbl("師：" + "、".join(src), 18, JSUI.TEXT, v)
+	if nd.has("book"):
+		_lbl("書物：" + CraftDB.item_name(str(nd["book"])), 18, JSUI.TEXT, v)
+	_lbl("【史実】" + str(nd.get("basis", "")), 17, JSUI.MUTED, v)
+	var row := JSUI.hbox(10)
+	v.add_child(row)
+	var mats := Knowledge.experiment_mats(nid)
+	var have := true
+	var mt: PackedStringArray = []
+	for mm in mats:
+		mt.append("%s %d/%d" % [CraftDB.item_name(mm), prof().count(mm), int(mats[mm])])
+		if prof().count(mm) < int(mats[mm]):
+			have = false
+	_btn("自分で試す（実験：%s）" % ("、".join(mt) if not mt.is_empty() else "材料なし"), func(): _experiment(nid), k and have, "normal", row, 0)
+	if nd.has("book") and prof().count(str(nd["book"])) > 0:
+		var bk := str(nd["book"])
+		_btn("本を読む", func(): _read(bk), true, "normal", row, 160)
+
+
+func _experiment(nid: String) -> void:
+	var mats := Knowledge.experiment_mats(nid)
+	for mm in mats:
+		if not prof().take(mm, int(mats[mm])):
+			return
+	var game := str(Knowledge.domain_of(nid).get("game", "assembly"))
+	_page = "experiment"
+	_run_minigame(game, _domain_lesson(nid), Knowledge.mastery(prof(), nid), func(score: float):
+		var before := Knowledge.mastery(prof(), nid)
+		var got := Knowledge.train(prof(), nid, 7.0 * (0.35 + 0.65 * score), Knowledge.CAP_EXPERIMENT)
+		prof().save()
+		_tab = 2
+		open_inventory("実験の出来 %d 点：%s 習熟 %.1f → %.1f%s" % [roundi(score * 100), Knowledge.node_name(nid), before, before + got, "（独学・実験は 60 まで。その先は師に）" if got <= 0.0 else ""]))
+
+
+# ================================================================== 建設
+func _inv_build() -> void:
+	var at: String = mgr.current_landmark() if mgr and mgr.has_method("current_landmark") else ""
+	var era: Dictionary = Game.db.get_era(era_id) if Game.db else {}
+	var permitted: bool = prof().permits.get(era_id, false)
+	_lbl("いる場所：%s　　殖産の許し：%s" % [HistoryDB.landmark_name(era, at) if at != "" else "（名所から離れている：名所のそばで建てる）", "あり" if permitted else "なし（支配者・役人を説得するか、冥加金を納める）"], 21, JSUI.CYAN, null, true)
+	if not permitted:
+		var fee := Knowledge.permit_fee(era_id)
+		_btn("冥加金を納めて許しを得る（%s）" % CraftDB.money_text(fee, era_id), func(): _pay_permit(fee), prof().money >= fee and mgr != null and str(mgr.session.get("mode")) == "free")
+	if mgr == null or str(mgr.session.get("mode")) != "free":
+		_lbl("建設は自由探索のときだけできる。", 20, JSUI.SHU)
+	for b in Knowledge.buildings():
+		var chk := Knowledge.can_build(prof(), b, era_id, at)
+		var row := JSUI.panel(JSUI.sb(Color(1, 1, 1, 0.03), 10, 1, Color(1, 1, 1, 0.06), 0, 10))
+		var h := JSUI.hbox(14)
+		row.add_child(h)
+		var info := JSUI.vbox(2)
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		h.add_child(info)
+		_lbl("%s　― %s" % [b.get("name", ""), b.get("desc", "")], 22, JSUI.GOLD if chk[0] else JSUI.TEXT, info, true)
+		var kn: PackedStringArray = []
+		for kk in b.get("know", {}):
+			kn.append("%s %d/%d" % [Knowledge.node_name(kk), int(Knowledge.mastery(prof(), kk)), int(b["know"][kk])])
+		var mt: PackedStringArray = []
+		var mats := Knowledge.build_mats(b, at if at != "" else str(b.get("at", ["village"])[0]))
+		for mm in mats:
+			mt.append("%s %d/%d" % [CraftDB.item_name(mm), prof().count(mm), int(mats[mm])])
+		_lbl("知識：%s　建材：%s　費用：%s　働き手：%d人　動力：%s%s" % ["、".join(kn), "、".join(mt), CraftDB.money_text(int(b.get("money", 0)), era_id), int(b.get("workers", 1)),
+			{"none": "なし", "water": "水車", "steam": "蒸気（石炭）", "water_or_steam": "水車（川沿い）か蒸気"}.get(str(b.get("power", "none")), ""), "　要・許し" if b.get("permit", false) else ""], 17, JSUI.MUTED, info)
+		if not chk[0]:
+			_lbl(str(chk[1]), 17, JSUI.SHU, info)
+		var bid := str(b.get("id", ""))
+		var bb := JSUI.button("ここに建てる", "primary", 21, 170)
+		bb.disabled = not chk[0] or mgr == null or str(mgr.session.get("mode")) != "free"
+		bb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		bb.pressed.connect(func(): UISfx.play("confirm"); _build(bid))
+		h.add_child(bb)
+		_body.add_child(row)
+	_lbl("建てた施設", 22, JSUI.GOLD, null, true)
+	if prof().buildings.is_empty():
+		_lbl("まだない。", 18, JSUI.DIM)
+	for r in prof().buildings:
+		var e2: Dictionary = Game.db.get_era(str(r.get("era", ""))) if Game.db else {}
+		_lbl("・%s（%s・%s）規模 %d　働き手 %d　腕 %d" % [Knowledge.building(str(r["type"])).get("name", ""), e2.get("eraName", ""), HistoryDB.landmark_name(e2, str(r.get("at", ""))), int(r.get("scale", 1)), int(r.get("workers", 0)), int(r.get("skill", 0))], 18, JSUI.TEXT)
+
+
+func _pay_permit(fee: int) -> void:
+	if not prof().spend(fee):
+		return
+	prof().permits[era_id] = true
+	prof().save()
+	_tab = 3
+	open_inventory("冥加金を納め、殖産の許しを得た。")
+
+
+func _build(bid: String) -> void:
+	var r: Dictionary = mgr.build(bid)
+	_tab = 3
+	if r["ok"]:
+		close()
+		var hud = get_tree().get_first_node_in_group("hud")
+		if hud:
+			hud.toast("%sを建てた！ 働き手を雇い、原料・燃料を入れれば動き出す（E で管理）" % Knowledge.building(bid).get("name", ""), 5.0)
+	else:
+		open_inventory("建てられなかった：" + str(r["reason"]))
+
+
+# ================================================================== 施設の管理
+func open_factory(f: Facility, msg := "") -> void:
+	_station = f
+	_page = "factory"
+	_show()
+	_clear()
+	var b := f.bdef
+	var rec := f.rec
+	_title.text = "%s（規模 %d）" % [b.get("name", ""), int(rec.get("scale", 1))]
+	_sub.text = str(b.get("desc", "")) + ("　【史実】" + str(b["basis"]) if b.has("basis") else "")
+	_msg.text = msg if msg != "" else "所持金 %s" % _money()
+	_lbl("状態：%s" % f.status_text(), 22, JSUI.CYAN, null, true)
+	_lbl("働き手 %d / %d 人　職人の腕 %d　動力：%s　これまでの生産 %d 回" % [int(rec.get("workers", 0)), f.needed_workers(), int(rec.get("skill", 0)),
+		{"none": "なし", "water": "水車", "steam": "蒸気機関"}.get(str(rec.get("power", "none")), ""), int(rec.get("made", 0))], 20)
+	var st: Dictionary = rec.get("stock", {})
+	var ins: PackedStringArray = []
+	var outs: PackedStringArray = []
+	for k in st:
+		if int(st[k]) <= 0:
+			continue
+		if str(k).begins_with("out_"):
+			outs.append("%s ×%d" % [CraftDB.item_name(str(k).substr(4)), int(st[k])])
+		else:
+			ins.append("%s ×%d" % [CraftDB.item_name(str(k)), int(st[k])])
+	_lbl("蔵の原料・燃料：%s" % ("、".join(ins) if not ins.is_empty() else "なし"), 19)
+	_lbl("できた品：%s　稼ぎ：%s" % ["、".join(outs) if not outs.is_empty() else "なし", CraftDB.money_text(int(rec.get("money", 0)), era_id)], 19)
+	var w: int = mgr.wage() if mgr else 3000
+	var lack := f.needed_workers() - int(rec.get("workers", 0))
+	if lack > 0:
+		_btn("人を雇う（1人 %s）" % CraftDB.money_text(w, era_id), func(): _hire(f, 1, w), prof().money >= w)
+		_btn("足りない %d 人をまとめて雇う（%s）" % [lack, CraftDB.money_text(w * lack, era_id)], func(): _hire(f, lack, w), prof().money >= w * lack)
+	_btn("持ち物の原料・燃料を蔵に入れる", func():
+		var put := f.deposit(prof())
+		prof().save()
+		open_factory(f, "入れた：" + ("、".join(put.map(func(x): return "%s ×%d" % [CraftDB.item_name(x[0]), x[1]])) if not put.is_empty() else "入れられる物を持っていない")))
+	_btn("できた品と稼ぎを受け取る", func():
+		var got := f.collect(prof())
+		prof().save()
+		open_factory(f, "受け取った：" + ("、".join(got.map(func(x): return CraftDB.money_text(x[1], era_id) if x[0] == "money" else "%s ×%d" % [CraftDB.item_name(x[0]), x[1]])) if not got.is_empty() else "まだ何もない")))
+	var nodes: Array = []
+	for kk in b.get("know", {}):
+		nodes.append(kk)
+		for pr in Knowledge.node(kk).get("prereq", []):
+			if not (pr in nodes):
+				nodes.append(pr)
+	for nid in nodes:
+		var m := Knowledge.mastery(prof(), nid)
+		if m >= 30.0:
+			var n2 := str(nid)
+			_btn("職人に教える：%s（あなたの習熟 %d）― 腕が上がり、知識が広まる" % [Knowledge.node_name(nid), int(m)], func():
+				var r: Dictionary = mgr.teach_workers(f, n2)
+				open_factory(f, ("職人の腕 %d → %d" % [int(r["old"]), int(r["new"])]) if r["ok"] else str(r["reason"])))
+	var sts: Array = b.get("station", [])
+	if not sts.is_empty():
+		_btn("ここで製作する（%s）" % "・".join(sts.map(func(x): return CraftDB.station_name(str(x)))), func(): open_crafting(f))
+	if int(rec.get("scale", 1)) < 3:
+		var cost := int(float(b.get("money", 0)) * 0.6)
+		_btn("拡張する（規模 %d → %d：%s）" % [int(rec.get("scale", 1)), int(rec.get("scale", 1)) + 1, CraftDB.money_text(cost, era_id)], func():
+			var r: Dictionary = mgr.expand(f)
+			open_factory(f, "規模を広げた！" if r["ok"] else str(r["reason"])), prof().money >= cost)
+	_btn("閉じる", close, true, "ghost")
+	_focus()
+
+
+func _hire(f: Facility, n: int, w: int) -> void:
+	if not prof().spend(w * n):
+		return
+	f.rec["workers"] = mini(f.needed_workers(), int(f.rec.get("workers", 0)) + n)
+	prof().save()
+	open_factory(f, "%d 人を雇った" % n)

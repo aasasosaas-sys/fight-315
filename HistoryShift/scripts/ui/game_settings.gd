@@ -16,6 +16,7 @@ static var values := {
 	"fullscreen": true,
 	"master_mode": false,       # 技術完全習得モード（すべての技能 100・レシピ解禁。scripts/core/player_profile.gd）
 	"start_armed": false,       # 最初から武装（時空銃を貸与。気軽に遊びたい人向け）
+	"civil_harm": false,        # 民間人への危害（成人向け。scripts/core/civil_harm.gd）。教育版・未所有では常にオフ
 }
 static var _loaded_from_file := false
 
@@ -26,6 +27,8 @@ static func load_and_apply() -> void:
 	if _loaded_from_file:
 		for k in values:
 			values[k] = cfg.get_value("settings", k, values[k])
+	if not MatureContent.is_unlocked():
+		values["civil_harm"] = false
 	apply(_loaded_from_file)
 
 
@@ -57,6 +60,8 @@ static func apply(apply_window := true) -> void:
 
 
 static func set_value(key: String, v: Variant) -> void:
+	if key == "civil_harm" and not MatureContent.is_unlocked():
+		v = false
 	values[key] = v
 	apply(key == "fullscreen")
 	save()

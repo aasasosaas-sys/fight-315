@@ -189,7 +189,8 @@ func _build_chaos() -> void:
 	var v := JSUI.vbox(18)
 	m.add_child(v)
 	v.add_child(JSUI.label("HISTORY DISRUPTED", 22, JSUI.SHU, JSUI.sans_bold()))
-	var head := JSUI.label("それで、未来が変わっちゃった！", 76, Color.WHITE, JSUI.serif_bold())
+	var civil_n := Wanted.civil_count   # 民間人への危害（設定オン時のみ）。犠牲は功績として扱わない
+	var head := JSUI.label("失われた命は、戻らない。" if civil_n > 0 else "それで、未来が変わっちゃった！", 76, Color.WHITE, JSUI.serif_bold())
 	head.add_theme_constant_override("outline_size", 10)
 	head.add_theme_color_override("font_outline_color", Color(JSUI.SHU, 0.25))
 	head.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.5))
@@ -218,15 +219,24 @@ func _build_chaos() -> void:
 	var left := JSUI.vbox(14)
 	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	left_sc.add_child(left)
+	if civil_n > 0:
+		var cp := JSUI.panel(JSUI.sb(Color(0.6, 0.62, 0.7, 0.08), 12, 0, Color.TRANSPARENT, 0, 16))
+		var cpv := JSUI.vbox(4)
+		cp.add_child(cpv)
+		cpv.add_child(JSUI.label("犠牲者 %d人" % civil_n, 24, JSUI.MUTED, JSUI.sans_bold(), true))
+		cpv.add_child(JSUI.label("この時代に暮らしていた名もない人々が、あなたのせいで命を落とした。下の揺らぎは、その喪失が残された人々の暮らしと国に残した傷跡である。", 21, JSUI.TEXT, JSUI.serif(), true))
+		left.add_child(cp)
 	for i in chaos_hits.size():
 		var h: Dictionary = chaos_hits[i]
 		var col := JSUI.SHU if h.get("broke", false) else JSUI.GOLD
+		if h.get("civil", false):
+			col = JSUI.MUTED
 		var p := JSUI.panel(JSUI.sb(Color(col, 0.08), 12, 0, Color.TRANSPARENT, 0, 16))
 		var pst: StyleBoxFlat = p.get_theme_stylebox("panel")
 		pst.border_width_left = 6; pst.border_color = col
 		var pv := JSUI.vbox(4)
 		p.add_child(pv)
-		pv.add_child(JSUI.label("歴史が揺らいだ：" + str(h.get("title", "")), 24, col, JSUI.sans_bold(), true))
+		pv.add_child(JSUI.label(("犠牲の波紋：" if h.get("civil", false) else "歴史が揺らいだ：") + str(h.get("title", "")), 24, col, JSUI.sans_bold(), true))
 		var tl := JSUI.label(str(h.get("text", "")), 22, JSUI.TEXT, JSUI.serif(), true)
 		tl.add_theme_constant_override("line_spacing", 6)
 		pv.add_child(tl)
