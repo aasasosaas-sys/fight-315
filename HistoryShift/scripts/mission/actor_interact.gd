@@ -8,7 +8,10 @@ extends Node
 var session: Node
 var hud
 var figures: Array = []
+var sites: Array = []                 # 国家事業の現場（ProjectSite）
 var _near: HistFigure = null
+var _near_site: ProjectSite = null
+var _task: Dictionary = {}            # 進行中の事業 {site, type, enemies, pickups, got}
 var _menu_fig: HistFigure = null
 var _layer: CanvasLayer
 var _panel: PanelContainer
@@ -92,10 +95,17 @@ func _process(dt: float) -> void:
 	figures = figures.filter(func(f): return is_instance_valid(f))
 	if not is_open():
 		_near = _nearest()
+		_near_site = null if _near else _nearest_site()
 		if hud and not hud.is_dialog_open():
-			hud.set_prompt(("E：%sと話す" % _near.figure_name) if _near else "")
+			if _near:
+				hud.set_prompt("E：%sと話す" % _near.figure_name)
+			elif _near_site:
+				hud.set_prompt("E：国家事業「%s」" % _near_site.project.get("name", ""))
+			else:
+				hud.set_prompt("")
 	_tick_escort(dt)
 	_tick_protect()
+	_tick_task()
 
 
 func _nearest() -> HistFigure:
@@ -111,6 +121,22 @@ func _nearest() -> HistFigure:
 		if d < bd:
 			bd = d
 			best = f
+	return best
+
+
+func _nearest_site() -> ProjectSite:
+	var p: Node3D = Game.player
+	if p.in_vehicle():
+		return null
+	var best: ProjectSite = null
+	var bd := TALK_RANGE + 1.0
+	for st in sites:
+		if not is_instance_valid(st):
+			continue
+		var d := (st as Node3D).global_position.distance_to(p.global_position)
+		if d < bd:
+			bd = d
+			best = st
 	return best
 
 
@@ -131,6 +157,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif _near and not Game.input_blocked:
 			open(_near)
 			get_viewport().set_input_as_handled()
+		elif _near_site and not Game.input_blocked:
+			open_site(_near_site)
+			get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("pause") and is_open():
 		close()
 		get_viewport().set_input_as_handled()
@@ -146,10 +175,127 @@ func open(f: HistFigure) -> void:
 	_main_page()
 
 
+# ------------------------------------------------------------------ 国家事業
+var _site: ProjectSite = null
+
+
+func open_site(st: ProjectSite) -> void:
+	_site = st
+	_menu_fig = null
+	_panel.visible = true
+	Game.input_blocked = true
+	Game.lock_mouse(false)
+	_site_page()
+
+
+func _site_page(msg := "") -> void:
+	_clear()
+	var pr: Dictionary = _site.project
+	var m: Dictionary = Game.db.war_model
+	_title.text = "国家事業：" + str(pr.get("name", ""))
+	var eff: PackedStringArray = []
+	for pid in pr.get("pillars", {}):
+		var v := int(pr["pillars"][pid])
+		eff.append("%s%s%d" % [WarModel.pillar_name(Game.db, pid), "+" if v >= 0 else "", v])
+	var lines: PackedStringArray = []
+	if msg != "":
+		lines.append(msg)
+	lines.append("【史実】" + str(pr.get("basis", pr.get("desc", ""))))
+	lines.append("【この事業】%d年ごろ　1941年への効き目 %s　（%s）" % [int(pr["year"]), WarModel.leverage_text(m, int(pr["year"])), "、".join(eff)])
+	if pr.has("cost"):
+		lines.append("【代償】" + str(pr["cost"]))
+	_line.text = "\n".join(lines)
+	var av: Array = WarModel.available(Game.db, Game.state.actions, Game.state.war.get("pillars", {}), str(pr["id"]))
+	if _task.is_empty() and av[0]:
+		var t: Dictionary = pr.get("task", {})
+		var label := "着手する"
+		match str(t.get("type", "talk")):
+			"defend": label = "着手する（%sを %d 人退ける）" % [t.get("enemy", "妨害者"), int(t.get("count", 3))]
+			"collect": label = "着手する（%sを %d 個集めてここへ）" % [t.get("item", "資材"), int(t.get("count", 3))]
+			_: label = "着手する（関係者を説き伏せる）"
+		_button(label, _start_task)
+	elif not av[0]:
+		_button("着手できない：" + str(av[1]), func(): pass, false)
+	else:
+		_button("別の事業が進行中", func(): pass, false)
+	_button("立ち去る", close)
+
+
+func _start_task() -> void:
+	var pr: Dictionary = _site.project
+	var t: Dictionary = pr.get("task", {})
+	var st := _site
+	close()
+	match str(t.get("type", "talk")):
+		"defend":
+			var rng := RandomNumberGenerator.new()
+			rng.randomize()
+			var en: Array = []
+			var n := int(t.get("count", 3))
+			for i in n:
+				var ang := TAU * i / n
+				var p: Vector3 = Game.world.random_ground_point_near(st.global_position + Vector3(cos(ang), 0, sin(ang)) * 26.0, 4.0, rng)
+				var e := Enemy.spawn(session, p + Vector3.UP * 0.5, str(t.get("enemy", "妨害者")), session.era["eraId"], i == 0)
+				e.aggro_range = 120.0
+				en.append(e)
+			_task = {"site": st, "type": "defend", "enemies": en}
+			if hud:
+				hud.extra_markers = hud.extra_markers + en
+				hud.set_objective("国家事業：" + str(pr["name"]), "現場を襲う%sを退けよ。" % t.get("enemy", "妨害者"), "")
+		"collect":
+			var rng2 := RandomNumberGenerator.new()
+			rng2.randomize()
+			var center: Vector3 = Game.world.landmark_pos(str(t.get("from", "village")))
+			var pk: Array = []
+			for i in int(t.get("count", 3)):
+				var pp: Vector3 = Game.world.random_ground_point_near(center, 18.0, rng2)
+				pk.append(Pickup.spawn(session, pp + Vector3.UP * 1.0, str(t.get("item", "資材"))))
+			_task = {"site": st, "type": "collect", "pickups": pk}
+			if hud:
+				hud.set_objective("国家事業：" + str(pr["name"]), "%sで%sを集め、現場へ運べ。" % [HistoryDB.landmark_name(session.era, str(t.get("from", "village"))), t.get("item", "資材")], "")
+		_:
+			_finish_project(st)
+
+
+func _tick_task() -> void:
+	if _task.is_empty():
+		return
+	var st: ProjectSite = _task["site"]
+	if not is_instance_valid(st):
+		_task = {}
+		return
+	match str(_task["type"]):
+		"defend":
+			var en: Array = _task["enemies"]
+			var left := en.filter(func(e): return is_instance_valid(e) and not e.dead).size()
+			if hud:
+				hud.set_counter("残り %d" % left)
+			if left == 0:
+				_finish_project(st)
+		"collect":
+			var pk: Array = _task["pickups"]
+			var left2 := pk.filter(func(p): return is_instance_valid(p) and not p.get("_taken")).size()
+			if hud:
+				hud.set_counter("資材 %d / %d" % [pk.size() - left2, pk.size()] + ("　→ 現場へ運べ" if left2 == 0 else ""))
+			if left2 == 0 and Game.player and (Game.player as Node3D).global_position.distance_to(st.global_position) < 10.0:
+				_finish_project(st)
+
+
+func _finish_project(st: ProjectSite) -> void:
+	_task = {}
+	if hud:
+		hud.set_objective("自由探索", "好きに暴れろ。人物に近づいて E で話せる。看板で国家事業に着手できる。", "")
+	Game.chaos.act("project", str(st.project.get("id", "")), {})
+	for s2 in sites:
+		if is_instance_valid(s2):
+			s2.refresh()
+
+
 func close() -> void:
 	if _menu_fig and is_instance_valid(_menu_fig):
 		_menu_fig.talking = false
 	_menu_fig = null
+	_site = null
 	_panel.visible = false
 	Game.input_blocked = false
 	Game.lock_mouse(true)

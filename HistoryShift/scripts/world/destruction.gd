@@ -793,19 +793,19 @@ func _make_fire_fx(u: Destructible, with_light: bool) -> Node3D:
 	root.global_position = Vector3(ctr.x, maxf(y, u.base_y + 0.5), ctr.z)
 	var fl := CPUParticles3D.new()
 	fl.name = "Flames"
-	fl.amount = 40
-	fl.lifetime = 1.0
+	fl.amount = 64
+	fl.lifetime = 0.85
 	fl.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
-	fl.emission_box_extents = Vector3(maxf(ext.x * 0.7, 0.4), 0.5, maxf(ext.z * 0.7, 0.4))
+	fl.emission_box_extents = Vector3(maxf(ext.x * 0.5, 0.4), 0.4, maxf(ext.z * 0.5, 0.4))
 	fl.direction = Vector3.UP
 	fl.spread = 15.0
-	fl.initial_velocity_min = 2.5
-	fl.initial_velocity_max = 5.5
-	fl.gravity = Vector3(0, 3.0, 0)
-	fl.scale_amount_min = 1.8
-	fl.scale_amount_max = clampf(ext.length() * 0.5, 2.6, 5.5)
+	fl.initial_velocity_min = 1.0
+	fl.initial_velocity_max = 2.6
+	fl.gravity = Vector3(0, 2.0, 0)
+	fl.scale_amount_min = 2.2
+	fl.scale_amount_max = clampf(ext.length() * 0.55, 3.2, 6.5)
 	var c1 := Curve.new()
-	c1.add_point(Vector2(0, 0.4)); c1.add_point(Vector2(0.3, 1.0)); c1.add_point(Vector2(1, 0.1))
+	c1.add_point(Vector2(0, 0.55)); c1.add_point(Vector2(0.25, 1.0)); c1.add_point(Vector2(1, 0.15))
 	fl.scale_amount_curve = c1
 	var g := Gradient.new()
 	g.set_color(0, Color(1.0, 0.92, 0.45, 1.0))
@@ -830,20 +830,20 @@ func _make_fire_fx(u: Destructible, with_light: bool) -> Node3D:
 	sm.initial_velocity_min = 2.0
 	sm.initial_velocity_max = 3.5
 	sm.gravity = Vector3(0.6, 0.4, 0.2)
-	sm.scale_amount_min = 2.5
-	sm.scale_amount_max = clampf(ext.length() * 0.8, 3.0, 8.0)
+	sm.scale_amount_min = 4.0
+	sm.scale_amount_max = clampf(ext.length() * 1.1, 6.0, 12.0)
 	var c2 := Curve.new()
 	c2.add_point(Vector2(0, 0.3)); c2.add_point(Vector2(1, 1.0))
 	sm.scale_amount_curve = c2
 	var g2 := Gradient.new()
-	g2.set_color(0, Color(0.2, 0.18, 0.18, 0.9))
-	g2.set_color(1, Color(0.5, 0.48, 0.48, 0.0))
+	g2.set_color(0, Color(0.32, 0.29, 0.29, 0.7))
+	g2.set_color(1, Color(0.62, 0.6, 0.6, 0.0))
 	sm.color_ramp = g2
 	var q2 := QuadMesh.new()
 	q2.material = Effects.particle_mat(Color.WHITE, false)
 	sm.mesh = q2
 	sm.local_coords = false
-	sm.position = Vector3(0, 1.5, 0)
+	sm.position = Vector3(0, 3.0, 0)
 	root.add_child(sm)
 	if with_light:
 		var l := OmniLight3D.new()

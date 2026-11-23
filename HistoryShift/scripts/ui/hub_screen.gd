@@ -89,6 +89,12 @@ func _header() -> Control:
 	h.add_child(_stat("誤答", str(total - cc), JSUI.SHU if total - cc > 0 else JSUI.MUTED))
 	h.add_child(_stat("歴史改変", "%d 回" % Game.state.alterations, JSUI.GOLD))
 	h.add_child(_stat("史実修復", "%d 回" % Game.state.restorations, JSUI.TEXT))
+	if not Game.state.war.is_empty():
+		var wt := Game.state.war_tier()
+		var wb := JSUI.button("戦局予測：" + wt, "gold" if wt in ["勝利", "有利な休戦"] else ("cyan" if wt in ["開戦回避", "早期講和"] else "normal"), 22, 240)
+		wb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		wb.pressed.connect(_show_war)
+		h.add_child(wb)
 	var cb := Game.state.chaos_broken().size()
 	if cb > 0 or Game.state.chaos_count > 0:
 		h.add_child(_stat("混乱で崩壊", "%d 問" % cb, JSUI.SHU if cb > 0 else JSUI.MUTED))
@@ -477,6 +483,76 @@ func _footer() -> Control:
 		JSUI.confirm(self, "すべてリセット", "答案・歴史改変・ログをすべて消去し、世界を本来の史実に戻します。この操作は取り消せません。", "リセットする", "やめる", func(): reset_all.emit(), true))
 	h.add_child(reset_b)
 	return h
+
+
+## 戦局予測：1941年の国力の柱と、太平洋戦争の帰趨。史実の数字を先に、そのあと「どの時代で何をすれば変わるか」
+func _show_war() -> void:
+	var w: Dictionary = Game.state.war
+	var m: Dictionary = Game.db.war_model
+	var r := JSUI.modal(self, 1400, "戦局予測 ― 1941年、この世界の日本の国力")
+	var overlay: Control = r[0]
+	var v: VBoxContainer = r[1]
+	var td: Dictionary = w.get("tier_def", {})
+	v.add_child(JSUI.label("予測：%s（総合 %d）" % [td.get("name", w.get("tier", "")), int(w.get("score", 0.0))], 34, JSUI.GOLD, JSUI.serif_bold()))
+	v.add_child(JSUI.label(str(td.get("summary", "")), 21, JSUI.TEXT, null, true))
+	v.add_child(JSUI.label(str(m.get("scale", "")) + "　" + str(m.get("growth", {}).get("note", "")), 17, JSUI.MUTED, null, true))
+	var sc := ScrollContainer.new()
+	sc.custom_minimum_size = Vector2(0, 520)
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	v.add_child(sc)
+	var lv := JSUI.vbox(10)
+	lv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sc.add_child(lv)
+	var parts: Dictionary = w.get("parts", {})
+	for pl in m.get("pillars", []):
+		var pid: String = pl["id"]
+		var val := float(w.get("pillars", {}).get(pid, 0.0))
+		var p := JSUI.panel(JSUI.sb(Color(1, 1, 1, 0.03), 8, 0, Color.TRANSPARENT, 0, 12))
+		var pv := JSUI.vbox(4)
+		p.add_child(pv)
+		var hh := JSUI.hbox(12)
+		var nm := JSUI.label("%s　%d / 100（史実 %d）" % [pl["name"], int(val), int(pl["base"])], 22, Color.WHITE, JSUI.sans_bold())
+		nm.custom_minimum_size = Vector2(420, 0)
+		hh.add_child(nm)
+		var bar := ProgressBar.new()
+		bar.max_value = 100
+		bar.value = val
+		bar.show_percentage = false
+		bar.custom_minimum_size = Vector2(0, 18)
+		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		hh.add_child(bar)
+		pv.add_child(hh)
+		pv.add_child(JSUI.label("【史実】" + str(pl.get("basis", "")), 18, JSUI.TEXT, null, true))
+		var pt: Dictionary = parts.get(pid, {})
+		var got: PackedStringArray = []
+		for it in pt.get("list", []):
+			got.append("%s +%d" % [it[0], int(it[1])])
+		if absf(float(pt.get("vars", 0.0))) >= 1.0:
+			got.append("歴史の流れ %+d" % int(pt["vars"]))
+		if absf(float(pt.get("facts", 0.0))) >= 1.0:
+			got.append("書き換わった史実 %+d" % int(pt["facts"]))
+		if not got.is_empty():
+			pv.add_child(JSUI.label("【この世界】" + "、".join(got), 18, JSUI.CYAN, null, true))
+		pv.add_child(JSUI.label("【変えるには】" + str(pl.get("hint", "")), 18, JSUI.GOLD, null, true))
+		lv.add_child(p)
+	# 時代ごとの事業と効き目
+	lv.add_child(JSUI.label("時代ごとの国家事業（自由探索で看板に E）― 早い時代ほど1941年への効き目が大きい", 22, JSUI.CYAN, JSUI.sans_bold(), true))
+	for e in Game.db.eras:
+		var prs := WarModel.projects_for(Game.db, e["eraId"])
+		if prs.is_empty():
+			continue
+		var names: PackedStringArray = []
+		for pr in prs:
+			names.append(("✓" if WarModel.is_done(Game.state.actions, pr["id"]) else "・") + str(pr["name"]))
+		lv.add_child(JSUI.label("■ %s（%s）　%s" % [String(e["eraName"]).split("（")[0], WarModel.leverage_text(m, int(prs[0]["year"])), "　".join(names)], 18, JSUI.TEXT, null, true))
+	var row := JSUI.hbox()
+	row.alignment = BoxContainer.ALIGNMENT_END
+	var close := JSUI.button("閉じる", "ghost", 24, 200)
+	close.pressed.connect(func(): UISfx.play("back"); JSUI.close_modal(overlay))
+	row.add_child(close)
+	v.add_child(row)
+	close.call_deferred("grab_focus")
 
 
 ## 自由探索での行動（わざとでも、うっかりでも）と、その結果の年表

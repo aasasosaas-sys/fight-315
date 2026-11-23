@@ -202,8 +202,21 @@ func _spawn_figures() -> void:
 	interact.setup(self, hud, figures)
 	add_child(interact)
 	_spawn_battles(rng)
+	_spawn_projects(rng)
 	_appt_announced.clear()
 	_stream_figures()
+
+
+## 国家事業の現場（看板）を名所に立てる
+func _spawn_projects(rng: RandomNumberGenerator) -> void:
+	for pr in WarModel.projects_for(Game.db, era["eraId"]):
+		var key := str(pr.get("at", "village"))
+		if not (key in HistoryDB.LANDMARK_KEYS):
+			key = "village"
+		var pos: Vector3 = world.random_ground_point_near(world.landmark_pos(key) + Vector3(rng.randf_range(-10, 10), 0, rng.randf_range(-10, 10)), 6.0, rng)
+		var site := ProjectSite.spawn(self, pos, pr)
+		interact.sites.append(site)
+		hud.compass_points["▲" + str(pr.get("name", ""))] = pos
 
 
 ## テスト用：すべての人物をすぐに実体化する
@@ -348,6 +361,10 @@ func _on_history_shift(hit: Dictionary) -> void:
 	for c in changes:
 		if c.get("now_correct", false) and not c.get("was_correct", true):
 			hud.toast("第%d問 ○ 正解に！" % number.get(c["question"]["id"], 0), 5.0)
+	var wb := str(hit.get("war_before", ""))
+	var wa := str(hit.get("war_after", ""))
+	if wb != "" and wa != "" and wb != wa:
+		hud.banner("戦局予測：%s → %s" % [wb, wa], Color(1.0, 0.85, 0.4), 3.0)
 	for f in figures:
 		if is_instance_valid(f):
 			f.refresh_hint()

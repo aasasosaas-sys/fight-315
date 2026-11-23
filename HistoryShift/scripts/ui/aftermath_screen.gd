@@ -265,6 +265,14 @@ func _build_chaos() -> void:
 	for c in sc.get_children():
 		(c as Label).size_flags_vertical = Control.SIZE_SHRINK_END
 	left_col.add_child(sc)
+	var wt := Game.state.war_tier()
+	if wt != "":
+		var wb0 := ""
+		for h0 in chaos_hits:
+			if str(h0.get("war_before", "")) != "":
+				wb0 = str(h0["war_before"])
+				break
+		left_col.add_child(JSUI.label(("戦局予測：%s → %s" % [wb0, wt]) if wb0 != "" and wb0 != wt else ("戦局予測：" + wt), 24, JSUI.GOLD, JSUI.sans_bold(), true))
 	if not broken.is_empty():
 		left_col.add_child(JSUI.label("混乱のせいで %d 問の確定解答が崩れた。ハブから時空跳躍して史実を修復しよう（古い時代から直すのが近道）。" % broken.size(), 22, JSUI.SHU, null, true))
 	elif Game.state.exam_submitted:

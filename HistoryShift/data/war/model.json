@@ -2,10 +2,10 @@
  "war_year": 1941,
  "growth": {
   "base": 1.5,
-  "cap": 4.0,
-  "note": "早い時代の変化ほど1941年までに複利で大きくなる（100年ごとに1.5倍、最大4倍）"
+  "cap": 3.0,
+  "note": "早い時代の変化ほど1941年までに複利で大きくなる（100年ごとに1.5倍、最大3倍。千年以上前の変化は他の出来事に薄められるため頭打ち）"
  },
- "vars_cap": 25,
+ "vars_cap": 15,
  "pillars": [
   {
    "id": "industry",
@@ -125,8 +125,8 @@
    "name": "開戦回避",
    "color": "cyan",
    "if": {
-    "diplomacy": 60,
-    "politics": 50
+    "diplomacy": 55,
+    "politics": 45
    },
    "summary": "外交と文民統制が戦争を止めた。日米交渉はまとまり、太平洋戦争は起こらなかった。",
    "mods": {
@@ -148,7 +148,7 @@
     "resources": 55,
     "navy_air": 65,
     "economy": 45,
-    "score": 48,
+    "score": 52,
     "any": {
      "technology": 55,
      "intelligence": 60

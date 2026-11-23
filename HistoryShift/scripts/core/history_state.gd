@@ -502,6 +502,11 @@ func compose_ending() -> Array:
 				lines.append("・%d年 %s：「%s」（%s）%s" % [q["year"], q["topic"], q["choices"][world_choice(q)], how, ("\n　" + legacy) if legacy != "" and is_intervened(q) and not is_chaos(q) else ""])
 			for t in item["lines"]:
 				lines.append("　" + t)
+	var wt: Dictionary = war.get("tier_def", {})
+	if not wt.is_empty():
+		lines.append("")
+		lines.append("―― 太平洋戦争：%s ――" % wt.get("name", wt.get("id", "")))
+		lines.append(str(wt.get("summary", "")))
 	var mj := modern_japan()
 	if not mj.is_empty():
 		lines.append("")
