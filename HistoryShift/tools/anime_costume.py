@@ -399,7 +399,8 @@ def leg_w(L, q, crotch=0.12, center_soft=0.03, side=None):
     w = {}
     leg = ss(hip_z + 0.02, hip_z - crotch, q.z)
     if center_soft > 0:
-        leg *= ss(0.0, center_soft, abs(q.x - L["pelvis"].x)) * 0.5 + 0.5 * ss(hip_z - 0.02, hip_z - crotch - 0.05, q.z)
+        soft = ss(0.0, center_soft, abs(q.x - L["pelvis"].x)) * 0.5 + 0.5
+        leg *= lerp(soft, 1.0, ss(hip_z - 0.02, hip_z - crotch - 0.05, q.z))   # 股の近くだけ中央を腰に残す
     if leg < 1.0:
         for k, x in _torso_w(L, q.z).items():
             w[k] = x * (1 - leg)
@@ -1000,58 +1001,67 @@ def preview(garments, body_p, L, path, parts="", cams="front,back,feet"):
 
 # ================================================================ 下着の殻・脚の殻
 def legs_shell(L, name, waist_z, hem_z, off, thigh_r, knee_r, calf_r, hem_r, calf_z=None, waist_r=None, hip_add=0.0):
-    """二股の筒（ズボン・もんぺ・小袴）：腰→尻→左右の太腿→膝→ふくらはぎ→裾。"""
+    """二股の筒（ズボン・もんぺ・小袴）：腰回りの筒＋左右の脚の筒（水平な楕円の輪を重ねる）をボクセルで一体化。
+    脚の筒は横の半径を中心線までの距離で抑え、股の下で左右がくっつかないようにする（太さは前後に出す）。"""
     D = G.dims(L)
+    tsec = G.tsection_dims(L)
     c = D["center"]
-    nodes, edges = [], []
+    hip_z = L["pelvis"].z
+    crotch = hip_z - 0.1
+    parts = []
 
-    def add(p, rx, ry):
-        nodes.append((p, rx, ry))
-        return len(nodes) - 1
-    wr = waist_r or (D["waist"][0] + off, D["waist"][1] + off)
-    wst = add(Vector((c.x, c.y, waist_z)), wr[0], wr[1])
-    hip = add(Vector((c.x, c.y, L["pelvis"].z)), D["hip"][0] + off + hip_add, D["hip"][1] + off + hip_add)
-    edges.append((wst, hip))
-    for s in ("l", "r"):
-        th, kn, ft = L["thigh_" + s], L["calf_" + s], L["foot_" + s]
-        top = add(Vector((th.x * 1.12 + c.x * -0.12, th.y, L["pelvis"].z - 0.11)), thigh_r, thigh_r * 1.05)
-        knee = add(kn.copy(), knee_r, knee_r * 1.05)
-        edges += [(hip, top), (top, knee)]
-        prev = knee
+    def fh(su, t):
+        z = lerp(crotch - 0.03, waist_z + 0.01, t)
+        cc, rx, ry = tsec(None, max(z, hip_z - 0.02))
+        k = ss(waist_z, hip_z, z)
+        rx += off + hip_add * k
+        ry += off + hip_add * k
+        if waist_r and z > hip_z:
+            rx = lerp(rx, waist_r[0], ss(hip_z, waist_z, z))
+            ry = lerp(ry, waist_r[1], ss(hip_z, waist_z, z))
+        a = 2 * math.pi * su
+        return Vector((c.x + math.cos(a) * rx, cc.y + math.sin(a) * ry, z))
+    parts.append(grid(name + "_h", fh, 40, 10, closed_u=True, cap0=True, cap1=True))
+    for sd in ("l", "r"):
+        th, kn, ft = L["thigh_" + sd], L["calf_" + sd], L["foot_" + sd]
+        prof = [(crotch + 0.06, thigh_r), (kn.z, knee_r)]
         if calf_z is not None:
-            t = (kn.z - calf_z) / max(kn.z - ft.z, 0.01)
-            cp = kn.lerp(ft, t)
-            cn = add(Vector((cp.x, cp.y, calf_z)), calf_r, calf_r * 1.05)
-            edges.append((prev, cn))
-            prev = cn
-        t = (kn.z - hem_z) / max(kn.z - ft.z, 0.01)
-        hp = kn.lerp(ft, t)
-        hn = add(Vector((hp.x, hp.y, hem_z - 0.01)), hem_r, hem_r * 1.06)
-        edges.append((prev, hn))
-    me = bpy.data.meshes.new(name)
-    me.from_pydata([tuple(n[0]) for n in nodes], edges, [])
-    me.update()
-    g = bpy.data.objects.new(name, me)
-    bpy.context.collection.objects.link(g)
-    sk = g.modifiers.new("skin", "SKIN")
-    sk.use_smooth_shade = True
-    sv = me.skin_vertices[0].data
-    for i, (p, rx, ry) in enumerate(nodes):
-        sv[i].radius = (rx, ry)
-    sv[hip].use_root = True
-    sub = g.modifiers.new("sub", "SUBSURF")
-    sub.levels = 2
-    rm = g.modifiers.new("remesh", "REMESH")
-    rm.mode = "VOXEL"
-    rm.voxel_size = 0.006
-    sm = g.modifiers.new("smooth", "SMOOTH")
-    sm.factor = 0.6
-    sm.iterations = 6
-    dec = g.modifiers.new("dec", "DECIMATE")
-    dec.ratio = 0.16
-    for m in list(g.modifiers):
-        apply_mod(g, m)
-    delete_verts(g, lambda q: q.z > waist_z - 0.004 or q.z < hem_z + 0.002)
+            prof.append((calf_z, calf_r))
+        prof.append((hem_z - 0.012, hem_r))
+
+        def axis(z, th=th, kn=kn, ft=ft):
+            if z >= kn.z:
+                t = (th.z - z) / max(th.z - kn.z, 0.01)
+                p = th.lerp(kn, t)
+                p.x = lerp(th.x * 1.08 + c.x * -0.08, kn.x, t)
+            else:
+                t = (kn.z - z) / max(kn.z - ft.z, 0.01)
+                p = kn.lerp(ft, t)
+            return Vector((p.x, p.y, z))
+
+        def fl(su, t, prof=prof, axis=axis):
+            k = t * (len(prof) - 1)
+            i = min(int(k), len(prof) - 2)
+            u = k - i
+            z = lerp(prof[i][0], prof[i + 1][0], u)
+            r = lerp(prof[i][1], prof[i + 1][1], ss(0.0, 1.0, u))
+            ax = axis(z)
+            rx = max(0.03, min(r, abs(ax.x - c.x) - 0.008))
+            ry = max(r * 1.06, rx)
+            a = 2 * math.pi * su
+            return Vector((ax.x + math.cos(a) * rx, ax.y + math.sin(a) * ry, z))
+        parts.append(grid(name + "_l", fl, 28, 6 * (len(prof) - 1), closed_u=True, cap0=True, cap1=True))
+    g = remesh_solid(parts, name, voxel=0.005, smooth=4, ratio=1.0)
+    bm = bmesh.new()
+    bm.from_mesh(g.data)
+    bmesh.ops.bisect_plane(bm, geom=bm.verts[:] + bm.edges[:] + bm.faces[:], plane_co=Vector((0, 0, waist_z)), plane_no=Vector((0, 0, 1)), clear_outer=True)
+    bmesh.ops.bisect_plane(bm, geom=bm.verts[:] + bm.edges[:] + bm.faces[:], plane_co=Vector((0, 0, hem_z)), plane_no=Vector((0, 0, -1)), clear_outer=True)
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(g.data)
+    bm.free()
+    d = g.modifiers.new("dec", "DECIMATE")
+    d.ratio = 0.25
+    apply_mod(g, d)
     for p in g.data.polygons:
         p.use_smooth = True
     return g
