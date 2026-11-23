@@ -137,6 +137,218 @@ func _seg_xf(a: Vector3, b: Vector3) -> Transform3D:
 	return Transform3D(Basis(Vector3.UP, atan2(d.x, d.z)), mid)
 
 
+# ================================================================ 屋内（中空の壁体・入口・内装の登録）
+## 建物の壁は「外から見た姿は従来の箱と同じ」中空の壁体で作り、入口の開口を抜く。
+## 内装そのものは WorldInteriors（scripts/world/interiors/）が近づいた時だけ生成する。
+## 面: 0=+Z(正面) 1=+X 2=-Z 3=-X。開口の u は局所座標（前後面は x、側面は z）。
+
+## 1 枚の壁（c が中心、局所 X 方向に長さ size.x・高さ size.y・厚み size.z）に開口を抜く。
+## openings: [{u: 壁の中心からの横位置, y: 壁の底からの下端, w, h}]。当たり判定は入口（y<0.45）だけ抜く
+func slab(mat: String, xf: Transform3D, c: Vector3, size: Vector3, colr: Color, openings := [], collide := true, rot := 0.0) -> void:
+	var ops: Array = openings.duplicate()
+	ops.sort_custom(func(p, q): return float(p["u"]) < float(q["u"]))
+	var sx := xf * Transform3D(Basis(Vector3.UP, rot), c)
+	var hx := size.x * 0.5
+	var y0 := -size.y * 0.5
+	var y1 := size.y * 0.5
+	var cur := -hx
+	for op in ops:
+		var a0 := clampf(float(op["u"]) - float(op["w"]) * 0.5, -hx, hx)
+		var a1 := clampf(float(op["u"]) + float(op["w"]) * 0.5, -hx, hx)
+		var oy0 := y0 + float(op.get("y", 0.0))
+		var oy1 := minf(oy0 + float(op["h"]), y1)
+		_slab_piece(mat, sx, cur, a0, y0, y1, size.z, colr, y0)
+		_slab_piece(mat, sx, a0, a1, y0, oy0, size.z, colr, y0)
+		_slab_piece(mat, sx, a0, a1, oy1, y1, size.z, colr, y0)
+		cur = maxf(cur, a1)
+	_slab_piece(mat, sx, cur, hx, y0, y1, size.z, colr, y0)
+	if not collide:
+		return
+	cur = -hx
+	for op in ops:
+		if float(op.get("y", 0.0)) >= 0.45:
+			continue
+		var a0 := clampf(float(op["u"]) - float(op["w"]) * 0.5, -hx, hx)
+		var a1 := clampf(float(op["u"]) + float(op["w"]) * 0.5, -hx, hx)
+		_slab_col(sx, cur, a0, y0, y1, size.z)
+		_slab_col(sx, a0, a1, minf(y0 + float(op.get("y", 0.0)) + float(op["h"]), y1), y1, size.z)
+		cur = maxf(cur, a1)
+	_slab_col(sx, cur, hx, y0, y1, size.z)
+
+
+func _slab_piece(mat: String, sx: Transform3D, ua: float, ub: float, ya: float, yb: float, th: float, colr: Color, ybase: float) -> void:
+	if ub - ua < 0.02 or yb - ya < 0.02:
+		return
+	kit.box(mat, sx * Transform3D(Basis(), Vector3((ua + ub) * 0.5, (ya + yb) * 0.5, 0)), Vector3(ub - ua, yb - ya, th), colr, ya <= ybase + 0.01)
+
+
+func _slab_col(sx: Transform3D, ua: float, ub: float, ya: float, yb: float, th: float) -> void:
+	if ub - ua < 0.05 or yb - ya < 0.05:
+		return
+	cols.append([sx * Transform3D(Basis(), Vector3((ua + ub) * 0.5, (ya + yb) * 0.5, 0)), Vector3(ub - ua, yb - ya, maxf(th, 0.12))])
+
+
+## 中空の壁体。外寸 size・中心 c の箱と同じ外観（四面の壁＋天面）で、内側に天井面を持つ。
+## openings: [{side, u, y, w, h}]（u は局所座標）。o: th 壁厚 / cap 天面 / ceil 天井 / hole 吹き抜け(Rect2, xz)
+## / floor 床面（上階の床） / collide / ceil_col
+func shell(mat: String, xf: Transform3D, c: Vector3, size: Vector3, colr: Color, openings := [], o := {}) -> void:
+	var th: float = o.get("th", 0.2)
+	var collide: bool = o.get("collide", true)
+	var hx := size.x * 0.5
+	var hz := size.z * 0.5
+	for side in 4:
+		var ops: Array = []
+		for op in openings:
+			if int(op.get("side", 0)) != side:
+				continue
+			var q: Dictionary = op.duplicate()
+			q["u"] = float(op["u"]) - (c.x if side % 2 == 0 else c.z)
+			ops.append(q)
+		match side:
+			0: slab(mat, xf, Vector3(c.x, c.y, c.z + hz - th * 0.5), Vector3(size.x, size.y, th), colr, ops, collide)
+			2: slab(mat, xf, Vector3(c.x, c.y, c.z - hz + th * 0.5), Vector3(size.x, size.y, th), colr, ops, collide)
+			1: slab(mat, xf, Vector3(c.x + hx - th * 0.5, c.y, c.z), Vector3(size.z - th * 2.0, size.y, th), colr, ops, collide, -PI * 0.5)
+			_: slab(mat, xf, Vector3(c.x - hx + th * 0.5, c.y, c.z), Vector3(size.z - th * 2.0, size.y, th), colr, ops, collide, -PI * 0.5)
+	var top := c.y + size.y * 0.5
+	var hole: Rect2 = o.get("hole", Rect2())
+	var outer := Rect2(c.x - hx, c.z - hz, size.x, size.z)
+	var inner := outer.grow(-th)
+	if o.get("cap", true):
+		rect_quads(mat, xf, top, outer, hole, colr, true)
+	if o.get("ceil", true):
+		rect_quads(mat, xf, top - 0.01, inner, hole, o.get("ceil_col", colr * Color(0.82, 0.8, 0.78)), false)
+	if o.get("floor", false):
+		rect_quads(o.get("floor_mat", "wood"), xf, c.y - size.y * 0.5 + 0.01, inner, o.get("floor_hole", Rect2()), o.get("floor_col", Color(0.85, 0.75, 0.62)), true)
+
+
+## 外側に巻く帯（下見板・胴蛇腹など）。天面・天井なし・当たり判定なし。中が見えても床の上に面が出ない
+func band(mat: String, xf: Transform3D, c: Vector3, size: Vector3, colr: Color, openings := [], th := 0.25) -> void:
+	shell(mat, xf, c, size, colr, openings, {"th": th, "cap": false, "ceil": false, "collide": false})
+
+
+## 矩形の面（hole を抜く）。r は局所 xz（position=(x0,z0)）
+func rect_quads(mat: String, xf: Transform3D, y: float, r: Rect2, hole: Rect2, colr: Color, up: bool) -> void:
+	var rects: Array = [r]
+	if hole.size.x > 0.01 and hole.size.y > 0.01:
+		var h := hole.intersection(r)
+		if h.size.x > 0.01 and h.size.y > 0.01:
+			rects = [Rect2(r.position.x, r.position.y, r.size.x, h.position.y - r.position.y),
+				Rect2(r.position.x, h.end.y, r.size.x, r.end.y - h.end.y),
+				Rect2(r.position.x, h.position.y, h.position.x - r.position.x, h.size.y),
+				Rect2(h.end.x, h.position.y, r.end.x - h.end.x, h.size.y)]
+	for q in rects:
+		if q.size.x < 0.01 or q.size.y < 0.01:
+			continue
+		var p0 := xf * Vector3(q.position.x, y, q.end.y)
+		var p1 := xf * Vector3(q.end.x, y, q.end.y)
+		var p2 := xf * Vector3(q.end.x, y, q.position.y)
+		var p3 := xf * Vector3(q.position.x, y, q.position.y)
+		if up:
+			kit.quad(mat, p0, p1, p2, p3, colr)
+		else:
+			kit.quad(mat, p0, p3, p2, p1, colr)
+
+
+## 坂の当たり判定（階段・梯子・式台）。局所 a（下）→ b（上）。breakable=false なら壊れない静的コリジョン
+func ramp(xf: Transform3D, a: Vector3, b: Vector3, width: float, breakable := false) -> void:
+	var e := ramp_shape(xf, a, b, width)
+	if e.is_empty():
+		return
+	if breakable:
+		cols.append(e)
+	else:
+		base_cols.append(e)
+
+
+static func ramp_shape(xf: Transform3D, a: Vector3, b: Vector3, width: float) -> Array:
+	var d := b - a
+	var L := d.length()
+	if L < 0.05:
+		return []
+	var z := d / L
+	var x := Vector3.UP.cross(z)
+	if x.length_squared() < 1e-4:
+		x = Vector3.RIGHT
+	x = x.normalized()
+	var y := z.cross(x)
+	return [xf * Transform3D(Basis(x, y, z), (a + b) * 0.5 - y * 0.15), Vector3(width, 0.3, L + 0.1)]
+
+
+## 見た目の階段（a 下 → b 上、n 段）
+func steps(mat: String, xf: Transform3D, a: Vector3, b: Vector3, width: float, colr: Color, n := 0) -> void:
+	var hz := Vector3(b.x - a.x, 0, b.z - a.z)
+	var run := hz.length()
+	if run < 0.05:
+		return
+	if n <= 0:
+		n = maxi(2, int(ceil((b.y - a.y) / 0.2)))
+	var dirn := hz / run
+	var yaw := atan2(dirn.x, dirn.z)
+	for i in n:
+		var top := a.y + (b.y - a.y) * float(i + 1) / n
+		var bot := minf(a.y, b.y) - 0.25
+		var p := a + dirn * run * (float(i) + 0.5) / n
+		kit.box(mat, xf * Transform3D(Basis(Vector3.UP, yaw), Vector3(p.x, (top + bot) * 0.5, p.z)), Vector3(width, top - bot, run / n + 0.01), colr)
+
+
+## 入口の段（土台の高さ h まで）: 見た目の段＋坂の当たり判定。x は入口の横位置、z_edge は土台の縁（+Z 向き）
+func entry_steps(xf: Transform3D, x: float, z_edge: float, h: float, width: float, mat := "stonewall", colr := STONE, breakable := false) -> float:
+	if h < 0.06:
+		return 0.0
+	var run := maxf(h / 0.62, 0.5)
+	var top := Vector3(x, h, z_edge)
+	var bot := Vector3(x, 0.0, z_edge + run)
+	steps(mat, xf, bot, top, width, colr, maxi(1, int(ceil(h / 0.2))))
+	ramp(xf, bot + Vector3(0, -0.05, 0.25), top + Vector3(0, 0, -0.05), width, breakable)
+	return run
+
+
+## 内装の登録。floors: [{y, rect(Rect2 局所 xz), h, hole?(この階の天井の吹き抜け), stair?}]
+## doors: [{p 局所(敷居の中心), n 外向き, w, h, out 外の地面の点}]。o: tags / win / opts
+func reg_interior(type: String, xf: Transform3D, floors: Array, doors: Array, o := {}) -> void:
+	if _ustack.is_empty():
+		return
+	var yaw := xf.basis.get_euler().y
+	var d := {"id": int(_ustack.back()["id"]), "type": type, "xf": Transform3D(Basis(Vector3.UP, yaw), xf.origin),
+		"floors": floors, "doors": doors, "era": w.era_id, "landmark": landmark}
+	for k in o:
+		d[k] = o[k]
+	w.interior_defs.append(d)
+
+
+static func fl(y: float, rect: Rect2, h: float, o := {}) -> Dictionary:
+	var d := {"y": y, "rect": rect, "h": h}
+	for k in o:
+		d[k] = o[k]
+	return d
+
+
+static func door(p: Vector3, n: Vector3, wd: float, ht: float, out_dist := 2.5) -> Dictionary:
+	return {"p": p, "n": n, "w": wd, "h": ht, "out": p + n * out_dist}
+
+
+## 開いた引き戸・板扉など入口の飾り（xf 局所、+Z 面の u に幅 dw・高さ dh、床 y、壁面 z）
+func door_frame(xf: Transform3D, u: float, y: float, z: float, dw: float, dh: float, style := "frame", colr := DARK, cloth_col := Color(0.15, 0.2, 0.42)) -> void:
+	var fx := xf
+	var c := Vector3(u, y, z)
+	for sgn in [-1.0, 1.0]:
+		kit.box("darkwood", fx * Transform3D(Basis(), c + Vector3(sgn * (dw * 0.5 + 0.05), dh * 0.5, 0.04)), Vector3(0.1, dh, 0.22), colr)
+	kit.box("darkwood", fx * Transform3D(Basis(), c + Vector3(0, dh + 0.06, 0.04)), Vector3(dw + 0.3, 0.12, 0.24), colr, false)
+	match style:
+		"leaves":
+			# 観音開き（外へ開いた板扉）
+			for sgn in [-1.0, 1.0]:
+				kit.box("darkwood", fx * Transform3D(Basis(), c + Vector3(sgn * (dw * 0.5 - 0.04), dh * 0.48, dw * 0.25 + 0.06)), Vector3(0.07, dh * 0.96, dw * 0.5 - 0.02), Color(0.62, 0.48, 0.38))
+		"slide":
+			# 引き戸を片側へ開けた状態（外壁の前に重ねる）
+			kit.box("darkwood", fx * Transform3D(Basis(), c + Vector3(dw * 0.98, dh * 0.48, 0.12)), Vector3(dw, dh * 0.96, 0.05), Color(0.55, 0.42, 0.34))
+		"noren":
+			kit.box("cloth", fx * Transform3D(Basis(), c + Vector3(0, dh - 0.36, 0.16)), Vector3(dw + 0.1, 0.7, 0.02), cloth_col)
+		"glass":
+			for sgn in [-1.0, 1.0]:
+				kit.box("glass", fx * Transform3D(Basis(), c + Vector3(sgn * (dw * 0.5 + 0.02), dh * 0.48, dw * 0.25 + 0.04)), Vector3(0.05, dh * 0.94, dw * 0.48), Color(0.5, 0.58, 0.64))
+
+
 # ================================================================ 基本ユーティリティ
 func ground(p: Vector3) -> float:
 	return t.height_at(p.x, p.z)
@@ -231,12 +443,19 @@ func _u_jp_hall(xf: Transform3D, wd: float, dp: float, o := {}) -> void:
 	var base_mat: String = o.get("base_mat", "stonewall")
 	var two_tier: bool = o.get("two_tier", false)
 	var raised: bool = o.get("raised", false)
+	# 入口は正面中央の間（柱と柱の間）
+	var nbay := maxi(1, int(round(wd / 3.2)))
+	var bay := wd / nbay
+	var door_k := nbay / 2
+	var door_x := -wd * 0.5 + bay * (door_k + 0.5)
+	var dw := minf(bay * 0.72, 2.4)
+	var dh := clampf(wall_h * 0.8, 2.1, 2.8)
+	var z_out := dp * 0.5 + 1.2
 	if base_h > 0.05:
 		foundation(xf, wd + 2.4, dp + 2.4, base_h, base_mat, o.get("base_col", STONE))
-		# 正面の階段
-		for s in 3:
-			var sh := base_h * (3 - s) / 3.0
-			bx(base_mat, xf, Vector3(0, sh * 0.5, dp * 0.5 + 1.2 + 0.45 + s * 0.45), Vector3(minf(wd * 0.4, 6.0), sh, 0.45), o.get("base_col", STONE))
+		if not raised:
+			# 正面の階段（入口の前）
+			z_out += entry_steps(xf, door_x, dp * 0.5 + 1.2, base_h, maxf(minf(wd * 0.4, 6.0), dw + 1.2), base_mat, o.get("base_col", STONE))
 	var y0 := base_h
 	if raised:
 		# 高床＋縁側（寝殿造など）
@@ -245,20 +464,32 @@ func _u_jp_hall(xf: Transform3D, wd: float, dp: float, o := {}) -> void:
 			for j in [-1.0, 1.0]:
 				cyl("wood", xf, Vector3(-wd * 0.5 - 0.8 + i * (wd + 1.6) / int(wd / 2.5), y0, j * (dp * 0.5 + 0.8)), 0.12, 0.12, fh, 6)
 		bx("wood", xf, Vector3(0, y0 + fh - 0.1, 0), Vector3(wd + 1.8, 0.2, dp + 1.8), Color(0.9, 0.85, 0.8))
-		# 高欄
+		# 高欄（正面は階の幅だけ開ける）
+		var rmat := "plaster" if pillar_mat == "plaster" else "wood"
+		var g0 := door_x - dw * 0.5 - 0.3
+		var g1 := door_x + dw * 0.5 + 0.3
+		var e0 := -(wd * 0.5 + 0.9)
+		var e1 := wd * 0.5 + 0.9
+		bx(rmat, xf, Vector3((e0 + g0) * 0.5, y0 + fh + 0.55, dp * 0.5 + 0.85), Vector3(g0 - e0, 0.08, 0.08), pillar_col)
+		bx(rmat, xf, Vector3((g1 + e1) * 0.5, y0 + fh + 0.55, dp * 0.5 + 0.85), Vector3(e1 - g1, 0.08, 0.08), pillar_col)
+		bx(rmat, xf, Vector3(0, y0 + fh + 0.55, -(dp * 0.5 + 0.85)), Vector3(wd + 1.8, 0.08, 0.08), pillar_col)
 		for sgn in [-1.0, 1.0]:
-			bx("plaster" if pillar_mat == "plaster" else "wood", xf, Vector3(0, y0 + fh + 0.55, sgn * (dp * 0.5 + 0.85)), Vector3(wd + 1.8, 0.08, 0.08), pillar_col)
-			bx("plaster" if pillar_mat == "plaster" else "wood", xf, Vector3(sgn * (wd * 0.5 + 0.85), y0 + fh + 0.55, 0), Vector3(0.08, 0.08, dp + 1.8), pillar_col)
+			bx(rmat, xf, Vector3(sgn * (wd * 0.5 + 0.85), y0 + fh + 0.55, 0), Vector3(0.08, 0.08, dp + 1.8), pillar_col)
 		y0 += fh
 		col(xf, Vector3(0, y0 * 0.5, 0), Vector3(wd + 1.8, y0, dp + 1.8))
-	# 壁（柱の内側）
-	bx("plaster", xf, Vector3(0, y0 + wall_h * 0.5, 0), Vector3(wd - 0.3, wall_h, dp - 0.3), wall_col)
-	# 腰壁・扉（正面は格子戸の帯）
+		# 階（木の階段）
+		z_out = dp * 0.5 + 0.9 + entry_steps(xf, door_x, dp * 0.5 + 0.9, y0, minf(dw + 0.6, 2.6), "wood", Color(0.9, 0.85, 0.8), true)
+	# 壁（柱の内側）: 中空の壁体＋入口
+	var wwid := wd - 0.3
+	var wdep := dp - 0.3
+	shell("plaster", xf, Vector3(0, y0 + wall_h * 0.5, 0), Vector3(wwid, wall_h, wdep), wall_col, [{"side": 0, "u": door_x, "w": dw, "h": dh}], {"th": 0.18})
+	# 腰壁・扉（正面は格子戸の帯）。入口の間は扉を外へ開く
 	var door_mat: String = o.get("door_mat", "darkwood")
-	var nbay := maxi(1, int(round(wd / 3.2)))
-	var bay := wd / nbay
 	for i in nbay:
 		var x := -wd * 0.5 + bay * (i + 0.5)
+		if i == door_k:
+			door_frame(xf, door_x, y0, wdep * 0.5, dw, dh, "leaves", Color(0.55, 0.42, 0.34) if pillar_col != VERMILION else Color(0.7, 0.3, 0.2))
+			continue
 		bx(door_mat, xf, Vector3(x, y0 + wall_h * 0.42, dp * 0.5 - 0.1), Vector3(bay * 0.78, wall_h * 0.84, 0.12), o.get("door_col", Color(0.82, 0.74, 0.66)))
 		# 格子
 		for k in 5:
@@ -296,29 +527,72 @@ func _u_jp_hall(xf: Transform3D, wd: float, dp: float, o := {}) -> void:
 		roof(xf, y2 + 3.2, w2 * 0.5 + over, d2 * 0.5 + over, minf(w2, d2) * rise_k * 1.1, roof_style, roof_mat, roof_col, lift)
 	else:
 		roof(xf, ry, hw, hd, rise, roof_style, roof_mat, roof_col, lift)
-	col(xf, Vector3(0, y0 + wall_h * 0.5, 0), Vector3(wd, wall_h, dp))
 	col(xf, Vector3(0, ry + rise * 0.4, 0), Vector3(wd + over, rise * 0.8, dp + over))
 	occupy(xf, wd + 2.4, dp + 2.4, 2.0)
+	# 内装の登録
+	var th := 0.18
+	var dd := door(Vector3(door_x, y0, wdep * 0.5), Vector3.BACK, dw, dh)
+	dd["out"] = Vector3(door_x, 0.0, z_out + 1.2)
+	var kind: String = o.get("interior", _hall_interior(base_h, roof_style, roof_mat, raised))
+	reg_interior(kind, xf, [fl(y0, Rect2(-wwid * 0.5 + th, -wdep * 0.5 + th, wwid - th * 2.0, wdep - th * 2.0), wall_h)], [dd],
+		{"pillar": pillar_col, "two_tier": two_tier, "wall": wall_col})
+
+
+## 堂の用途（内装キット）を時代・場所・屋根から決める
+func _hall_interior(base_h: float, roof_style: String, roof_mat: String, raised: bool) -> String:
+	var era := w.era_id
+	if raised:
+		return "shinden"
+	if landmark == "temple":
+		if era == "showa" or roof_style == "gable":
+			return "shrine"
+		if era == "kamakura_muromachi" and roof_mat == "thatch":
+			return "shoin"
+		return "temple"
+	if landmark == "village" and roof_style == "gable":
+		return "shrine"
+	if era in ["jomon_kofun", "asuka_nara", "heian"]:
+		return "daigokuden" if base_h >= 1.5 else "palace"
+	if era in ["sengoku", "edo"] and landmark == "capital":
+		return "goten"
+	return "shoin"
 
 
 ## 五重塔／三重塔
 func _u_pagoda(xf: Transform3D, tiers := 5, base_w := 7.0, tier_h := 3.0, colr := VERMILION) -> void:
 	foundation(xf, base_w + 3.0, base_w + 3.0, 1.0)
+	var z_out := (base_w + 3.0) * 0.5
+	z_out += entry_steps(xf, 0.0, z_out, 1.0, 2.6)
 	var y := 1.0
+	var y_t1 := 0.0
 	for i in tiers:
 		var wd := base_w * (1.0 - i * 0.075)
 		var h := tier_h if i == 0 else tier_h * 0.72
-		bx("plaster", xf, Vector3(0, y + h * 0.5, 0), Vector3(wd, h, wd), PLASTER)
+		if i == 0:
+			# 初層は中に入れる（心柱と四方仏）
+			var dw := wd * 0.3
+			var dh := minf(h * 0.78, 2.5)
+			shell("plaster", xf, Vector3(0, y + h * 0.5, 0), Vector3(wd, h, wd), PLASTER, [{"side": 0, "u": 0.0, "w": dw, "h": dh}], {"th": 0.2})
+			door_frame(xf, 0.0, y, wd * 0.5, dw, dh, "leaves", Color(0.6, 0.3, 0.2))
+			var inner := Rect2(-wd * 0.5 + 0.2, -wd * 0.5 + 0.2, wd - 0.4, wd - 0.4)
+			var dd := door(Vector3(0, y, wd * 0.5), Vector3.BACK, dw, dh)
+			dd["out"] = Vector3(0, 0, z_out + 1.2)
+			reg_interior("pagoda", xf, [fl(y, inner, h)], [dd])
+		else:
+			bx("plaster", xf, Vector3(0, y + h * 0.5, 0), Vector3(wd, h, wd), PLASTER)
 		for cx in [-1.0, 1.0]:
 			for cz in [-1.0, 1.0]:
 				cyl("plaster", xf, Vector3(cx * wd * 0.5, y, cz * wd * 0.5), 0.2, 0.2, h, 6, colr)
 		# 扉（正面）
-		bx("darkwood", xf, Vector3(0, y + h * 0.45, wd * 0.5 + 0.02), Vector3(wd * 0.36, h * 0.75, 0.08), Color(0.6, 0.3, 0.2))
+		if i > 0:
+			bx("darkwood", xf, Vector3(0, y + h * 0.45, wd * 0.5 + 0.02), Vector3(wd * 0.36, h * 0.75, 0.08), Color(0.6, 0.3, 0.2))
 		bx("plaster", xf, Vector3(0, y + h - 0.1, 0), Vector3(wd + 0.3, 0.2, wd + 0.3), colr)
 		bx("darkwood", xf, Vector3(0, y + h + 0.25, 0), Vector3(wd + 1.1, 0.5, wd + 1.1), Color(0.75, 0.5, 0.35))
 		var hw := wd * 0.5 + 2.3
 		roof(xf, y + h + 0.45, hw, hw, 1.25, "pyramid" if i == tiers - 1 else "hip", "rooftile", TILE_DARK, 0.75, Color(0.75, 0.42, 0.3), 1.6)
 		y += h + 1.25 * 0.62
+		if i == 0:
+			y_t1 = y
 	# 相輪
 	var ty := y + 0.3
 	cyl("metal", xf, Vector3(0, ty, 0), 0.6, 0.6, 0.6, 8, Color(0.3, 0.27, 0.2))
@@ -326,7 +600,8 @@ func _u_pagoda(xf: Transform3D, tiers := 5, base_w := 7.0, tier_h := 3.0, colr :
 	for k in 9:
 		cyl("metal", xf, Vector3(0, ty + 1.0 + k * 0.55, 0), 0.42 - k * 0.02, 0.42 - k * 0.02, 0.1, 10, Color(0.36, 0.32, 0.24))
 	kit.sphere("gold", xf * Transform3D(Basis(), Vector3(0, ty + 8.2, 0)), 0.3, 8, 5)
-	col(xf, Vector3(0, y * 0.5, 0), Vector3(base_w, y, base_w))
+	# 当たり判定: 初層は壁体（shell）、二層目から上は塊
+	col(xf, Vector3(0, (y_t1 - 0.8 + y) * 0.5, 0), Vector3(base_w * 0.9, y - y_t1 + 0.8, base_w * 0.9))
 	occupy(xf, base_w + 3, base_w + 3, 2.5)
 
 
@@ -359,18 +634,59 @@ func _u_torii(xf: Transform3D, wd := 6.0, h := 6.0, colr := VERMILION, mat := "p
 	bx(mat, xf, Vector3(0, h * 0.89, 0), Vector3(r * 1.2, h * 0.2, r * 0.8), colr)
 
 
-## 竪穴住居
+## 竪穴住居（茅葺きの円錐。正面の区画の下を抜いて屋根付きの入口を通す）
 func _u_pit_dwelling(xf: Transform3D, r := 3.6) -> void:
 	cyl("earth", xf, Vector3(0, -0.6, 0), r + 0.9, r + 0.5, 1.0, 14, Color(0.8, 0.72, 0.6))
-	cyl("thatch", xf, Vector3(0, 0.2, 0), r + 0.35, 0.55, 4.4, 14, THATCH)
+	_thatch_cone(xf, 0.2, r + 0.35, 0.55, 4.4, 14, 3, 0.5)
 	# 煙出しの小屋根
 	roof(xf, 4.3, 0.95, 0.6, 0.7, "gable", "thatch", THATCH * 0.9, 0.0)
-	# 入口
+	# 入口（屋根付きの通路）
 	var ex := xf * Transform3D(Basis(), Vector3(0, 0, r - 0.2))
-	bx("darkwood", ex, Vector3(0, 0.8, 0.6), Vector3(1.4, 1.6, 1.4), Color(0.25, 0.2, 0.18))
-	roof(ex, 1.55, 1.05, 1.1, 0.75, "gable", "thatch", THATCH, 0.0)
-	col(xf, Vector3(0, 1.2, 0), Vector3(r * 1.6, 2.4, r * 1.6))
+	var dh := 1.95
+	for sgn in [-1.0, 1.0]:
+		bx("darkwood", ex, Vector3(sgn * 0.68, dh * 0.5 + 0.1, 0.35), Vector3(0.14, dh + 0.2, 1.9), Color(0.36, 0.3, 0.26))
+		cols.append([xf * Transform3D(Basis(), Vector3(sgn * 0.7, 1.0, r - 0.3)), Vector3(0.18, 2.0, 2.6)])
+	roof(ex, dh + 0.1, 1.05, 1.25, 0.75, "gable", "thatch", THATCH, 0.0)
+	# 当たり判定: 内側の環（入口は開ける）＋床（盛り土の上面）
+	var rin := r * 0.68
+	var nseg := 10
+	for k in nseg:
+		var am := TAU * (k + 0.5) / nseg
+		if absf(wrapf(am - PI * 0.5, -PI, PI)) < 0.3:
+			continue
+		var dv := Vector3(cos(am), 0, sin(am))
+		cols.append([xf * Transform3D(Basis(Vector3.UP, atan2(dv.x, dv.z)), dv * (rin + 0.15) + Vector3(0, 1.6, 0)), Vector3(2.0 * rin * tan(PI / nseg) + 0.15, 2.4, 0.3)])
+	for k in 2:
+		base_cols.append([xf * Transform3D(Basis(Vector3.UP, PI * 0.25 * k), Vector3(0, -0.1, 0)), Vector3(r * 1.55, 1.0, r * 1.55)])
+	ramp(xf, Vector3(0, 0.0, r + 1.5), Vector3(0, 0.4, rin), 1.2)
 	occupy(xf, r * 2 + 1.5, r * 2 + 1.5, 1.5)
+	var dd := door(Vector3(0, 0.4, rin), Vector3.BACK, 1.1, dh)
+	dd["out"] = Vector3(0, 0, r + 2.6)
+	reg_interior("pit", xf, [fl(0.4, Rect2(-rin, -rin, rin * 2.0, rin * 2.0), 2.6, {"round": rin, "cone": [0.2, r + 0.35, 0.55, 4.4]})], [dd])
+
+
+## 茅葺きの円錐（外面＋煤けた内面）。gap_seg の区画は高さ比 gap_t より上だけ作る（入口）
+func _thatch_cone(xf: Transform3D, y0: float, r0: float, r1: float, h: float, segs: int, gap_seg: int, gap_t: float,
+		colr := THATCH, inner_col := Color(0.46, 0.36, 0.27)) -> void:
+	for i in segs:
+		var a0 := TAU * i / segs
+		var a1 := TAU * (i + 1) / segs
+		var t0 := gap_t if i == gap_seg else 0.0
+		var ra := lerpf(r0, r1, t0)
+		var ya := y0 + h * t0
+		var p00 := xf * Vector3(cos(a0) * ra, ya, sin(a0) * ra)
+		var p01 := xf * Vector3(cos(a1) * ra, ya, sin(a1) * ra)
+		var p10 := xf * Vector3(cos(a0) * r1, y0 + h, sin(a0) * r1)
+		var p11 := xf * Vector3(cos(a1) * r1, y0 + h, sin(a1) * r1)
+		kit.quad("thatch", p00, p10, p11, p01, colr)
+		var q00 := xf * Vector3(cos(a0) * (ra - 0.25), ya, sin(a0) * (ra - 0.25))
+		var q01 := xf * Vector3(cos(a1) * (ra - 0.25), ya, sin(a1) * (ra - 0.25))
+		var q10 := xf * Vector3(cos(a0) * maxf(r1 - 0.2, 0.2), y0 + h - 0.3, sin(a0) * maxf(r1 - 0.2, 0.2))
+		var q11 := xf * Vector3(cos(a1) * maxf(r1 - 0.2, 0.2), y0 + h - 0.3, sin(a1) * maxf(r1 - 0.2, 0.2))
+		kit.quad("thatch", q00, q01, q11, q10, inner_col)
+		if i == gap_seg:
+			# 入口の上の縁（厚み）
+			kit.quad("thatch", p00, p01, q01, q00, inner_col * 0.8)
 
 
 ## 高床倉庫
@@ -381,18 +697,28 @@ func _u_raised_storehouse(xf: Transform3D, wd := 4.2, dp := 3.4, h := 1.9) -> vo
 			cyl("wood", xf, p + Vector3(0, -0.5, 0), 0.16, 0.15, h + 0.5, 6, DARK)
 			cyl("wood", xf, p + Vector3(0, h - 0.5, 0), 0.5, 0.5, 0.08, 8, DARK)
 	bx("wood", xf, Vector3(0, h + 0.1, 0), Vector3(wd + 0.6, 0.25, dp + 0.6), DARK)
-	bx("darkwood", xf, Vector3(0, h + 1.25, 0), Vector3(wd, 2.1, dp), Color(0.9, 0.82, 0.72))
+	var dw := 0.9
+	var dh := 1.85
+	shell("darkwood", xf, Vector3(0, h + 1.25, 0), Vector3(wd, 2.1, dp), Color(0.9, 0.82, 0.72), [{"side": 0, "u": 0.0, "w": dw, "h": dh}], {"th": 0.12})
+	door_frame(xf, 0.0, h + 0.2, dp * 0.5, dw, dh, "slide", DARK)
 	roof(xf, h + 2.3, wd * 0.5 + 0.9, dp * 0.5 + 1.0, 2.6, "gable", "thatch", THATCH, 0.0, Color(0.5, 0.4, 0.3), 1.0)
-	# はしご
-	var lx := xf * Transform3D(Basis(Vector3.RIGHT, -0.5), Vector3(0, 0, dp * 0.5 + 1.0))
-	for sgn in [-0.3, 0.3]:
-		kit.box("wood", lx * Transform3D(Basis(), Vector3(sgn, 1.1, 0)), Vector3(0.08, 2.4, 0.08), DARK)
+	# 刻み梯子（丸太に段を刻む）
+	var top := Vector3(0, h + 0.22, dp * 0.5 + 0.3)
+	var run := (h + 0.22) / 0.84
+	var bot := Vector3(0, 0.0, dp * 0.5 + 0.3 + run)
+	kit.rod("darkwood", xf * (bot + Vector3(0, -0.15, 0.1)), xf * (top + Vector3(0, -0.05, 0.0)), 0.17, 6, DARK)
 	for k in 5:
-		kit.box("wood", lx * Transform3D(Basis(), Vector3(0, 0.3 + k * 0.42, 0)), Vector3(0.62, 0.06, 0.08), DARK)
-	col(xf, Vector3(0, h + 1.2, 0), Vector3(wd, 2.4, dp))
+		var q := bot.lerp(top, (k + 0.7) / 5.6)
+		kit.box("wood", xf * Transform3D(Basis(), q + Vector3(0, 0.08, 0)), Vector3(0.42, 0.08, 0.22), DARK)
+	ramp(xf, bot + Vector3(0, -0.05, 0.2), top + Vector3(0, 0, -0.05), 0.8, true)
+	col(xf, Vector3(0, h + 0.1, 0), Vector3(wd + 0.6, 0.25, dp + 0.6))
 	for i in 3:
 		col(xf, Vector3(-wd * 0.5 + wd * i / 2.0, h * 0.5, 0), Vector3(0.3, h, dp))
+	col(xf, Vector3(0, h + 3.0, 0), Vector3(wd, 1.2, dp))
 	occupy(xf, wd + 1, dp + 1, 1.0)
+	var dd := door(Vector3(0, h + 0.225, dp * 0.5), Vector3.BACK, dw, dh)
+	dd["out"] = bot + Vector3(0, 0, 1.4)
+	reg_interior("takayuka", xf, [fl(h + 0.225, Rect2(-wd * 0.5 + 0.12, -dp * 0.5 + 0.12, wd - 0.24, dp - 0.24), 2.0)], [dd])
 
 
 ## 物見櫓
@@ -603,38 +929,68 @@ func shinden(lm_xf: Transform3D, lx: float, lz: float, size := 46.0) -> void:
 		w.deco_trees.append(["sakura" if k % 2 == 0 else "pine", c * Vector3(rng.randf_range(-hs * 0.7, hs * 0.7), 0, hs * 0.75 + rng.randf_range(-2, 2)), rng.randf_range(0.6, 0.9)])
 
 
-## 町家（ローカル +Z が通り側）
+## 町家（ローカル +Z が通り側）。入口は通り庭の側（左）、二階へは箱階段
 func _u_machiya(xf: Transform3D, wd := 6.0, dp := 11.0, stories := 2, o := {}) -> void:
 	var wall: Color = o.get("wall", PLASTER.lerp(OCHRE, rng.randf() * 0.4))
 	var h1 := 3.0
 	foundation(xf, wd, dp, 0.3)
-	bx("plaster", xf, Vector3(0, 0.3 + h1 * 0.5, -0.4), Vector3(wd - 0.1, h1, dp - 0.8), wall)
-	# 正面の格子と暗い内部
-	bx("darkwood", xf, Vector3(0, 0.3 + h1 * 0.45, dp * 0.5 - 0.45), Vector3(wd - 0.3, h1 * 0.9, 0.1), Color(0.25, 0.2, 0.18))
+	var dw := 1.2
+	var dh := 2.1
+	var door_x := -wd * 0.5 + 0.95
+	var fz := dp * 0.5 - 0.8
+	var two := stories >= 2
+	# 箱階段: 右の壁沿いに奥へ上る
+	var st_w := 0.85
+	var sx := wd * 0.5 - 0.2 - st_w * 0.5
+	var z_b := fz - 2.3
+	var z_t := z_b - 2.9
+	var hole := Rect2(sx - st_w * 0.5 - 0.05, z_t, st_w + 0.1, z_b - z_t) if two else Rect2()
+	shell("plaster", xf, Vector3(0, 0.3 + h1 * 0.5, -0.4), Vector3(wd - 0.1, h1, dp - 0.8), wall, [{"side": 0, "u": door_x, "w": dw, "h": dh}], {"th": 0.15, "hole": hole})
+	# 正面の格子と暗い内部（入口だけ抜く）
+	slab("darkwood", xf, Vector3(0, 0.3 + h1 * 0.45, dp * 0.5 - 0.45), Vector3(wd - 0.3, h1 * 0.9, 0.1), Color(0.25, 0.2, 0.18), [{"u": door_x, "w": dw + 0.1, "h": dh}], false)
 	var n := int(wd / 0.16)
 	for k in n:
 		if k % 2 == 0:
-			bx("wood", xf, Vector3(-wd * 0.5 + 0.15 + k * (wd - 0.3) / n, 0.3 + h1 * 0.42, dp * 0.5 - 0.35), Vector3(0.05, h1 * 0.78, 0.05), Color(0.55, 0.4, 0.32))
-	# 暖簾
-	if rng.randf() < 0.5:
-		var nc: Color = [Color(0.15, 0.2, 0.42), Color(0.55, 0.15, 0.12), Color(0.2, 0.32, 0.22), Color(0.82, 0.78, 0.7)][rng.randi() % 4]
-		bx("cloth", xf, Vector3(rng.randf_range(-wd * 0.2, wd * 0.2), 0.3 + h1 - 0.65, dp * 0.5 - 0.2), Vector3(1.6, 0.9, 0.03), nc)
+			var lx := -wd * 0.5 + 0.15 + k * (wd - 0.3) / n
+			if absf(lx - door_x) < dw * 0.5 + 0.08:
+				continue
+			bx("wood", xf, Vector3(lx, 0.3 + h1 * 0.42, dp * 0.5 - 0.35), Vector3(0.05, h1 * 0.78, 0.05), Color(0.55, 0.4, 0.32))
+	# 暖簾（無い家は格子戸を開けてある）
+	var has_noren := rng.randf() < 0.5
+	var nc := Color(0.15, 0.2, 0.42)
+	if has_noren:
+		nc = [Color(0.15, 0.2, 0.42), Color(0.55, 0.15, 0.12), Color(0.2, 0.32, 0.22), Color(0.82, 0.78, 0.7)][rng.randi() % 4]
+		rng.randf_range(-wd * 0.2, wd * 0.2)   # 旧配置の乱数（以降の並びを保つ）
+	door_frame(xf, door_x, 0.3, dp * 0.5 - 0.42, dw, dh, "noren" if has_noren else "slide", DARK, nc)
+	entry_steps(xf, door_x, dp * 0.5, 0.3, dw + 0.3)
 	# 柱
 	for sgn in [-1.0, 1.0]:
 		bx("wood", xf, Vector3(sgn * (wd * 0.5 - 0.1), 0.3 + h1 * 0.5, dp * 0.5 - 0.35), Vector3(0.2, h1, 0.2), DARK)
 	# 庇
 	shed(xf, Vector3(0, 0.3 + h1 + 0.25, dp * 0.5 + 0.2), wd + 0.1, 1.5, 0.45)
 	var top := 0.3 + h1
-	if stories >= 2:
+	if two:
 		var h2 := 2.2
-		bx("plaster", xf, Vector3(0, top + h2 * 0.5, -0.6), Vector3(wd - 0.1, h2, dp - 1.4), wall)
+		shell("plaster", xf, Vector3(0, top + h2 * 0.5, -0.6), Vector3(wd - 0.1, h2, dp - 1.4), wall, [], {"th": 0.15, "cap": false})
 		# 虫籠窓
 		for k in 2:
 			bx("darkwood", xf, Vector3(-wd * 0.22 + k * wd * 0.44, top + h2 * 0.55, dp * 0.5 - 1.28), Vector3(wd * 0.28, h2 * 0.4, 0.06), Color(0.2, 0.17, 0.15))
 		top += h2
-	roof(xf, top + 0.1, wd * 0.5 + 0.35, dp * 0.5 + 0.3, 2.0 if stories >= 2 else 2.3, "gable", "rooftile", TILE_DARK.lerp(TILE, rng.randf()), 0.0, Color(0.45, 0.38, 0.32), 1.15)
-	col(xf, Vector3(0, top * 0.5 + 0.5, -0.3), Vector3(wd, top + 1.0, dp - 0.6))
+	roof(xf, top + 0.1, wd * 0.5 + 0.35, dp * 0.5 + 0.3, 2.0 if two else 2.3, "gable", "rooftile", TILE_DARK.lerp(TILE, rng.randf()), 0.0, Color(0.45, 0.38, 0.32), 1.15)
+	col(xf, Vector3(0, top + 0.6, -0.3), Vector3(wd, 1.0, dp - 0.6))
 	occupy(xf, wd, dp, 0.0)
+	var floors: Array = [fl(0.3, Rect2(-wd * 0.5 + 0.2, -dp * 0.5 + 0.15, wd - 0.4, dp - 1.1), h1,
+		{"hole": hole, "stair": {"a": Vector3(sx, 0.3, z_b), "b": Vector3(sx, 0.3 + h1, z_t), "w": st_w} if two else {}})]
+	if two:
+		floors.append(fl(0.3 + h1, Rect2(-wd * 0.5 + 0.2, -dp * 0.5 + 0.25, wd - 0.4, dp - 1.7), 2.2))
+	var dd := door(Vector3(door_x, 0.3, fz), Vector3.BACK, dw, dh)
+	dd["out"] = Vector3(door_x, 0.0, dp * 0.5 + 1.8)
+	var kind := "machiya"
+	if w.era_id == "edo" and landmark == "battlefield":
+		kind = "chaya"
+	elif w.era_id == "edo" and not two:
+		kind = "nagaya"
+	reg_interior(kind, xf, floors, [dd], {"doma_x": door_x, "noren": nc if has_noren else Color(0, 0, 0, 0)})
 
 
 ## 片流れの庇（正面 +Z に向かって下がる）
@@ -643,15 +999,18 @@ func shed(xf: Transform3D, c: Vector3, wd: float, depth: float, drop: float, mat
 	kit.box(mat, xf * Transform3D(Basis(Vector3.RIGHT, ang), c), Vector3(wd, 0.12, Vector2(depth, drop).length()), colr)
 
 
-## 民家（切妻・板葺/茅葺/瓦）
+## 民家（切妻・板葺/茅葺/瓦）。入口は左寄りの土間口
 func _u_minka(xf: Transform3D, wd := 8.0, dp := 6.0, roof_mat := "thatch") -> void:
 	foundation(xf, wd + 0.4, dp + 0.4, 0.3, "stonewall", STONE)
 	var wall := Color(0.82, 0.72, 0.58) if roof_mat != "rooftile" else Color(0.9, 0.86, 0.78)
-	bx("plaster", xf, Vector3(0, 0.3 + 1.3, 0), Vector3(wd, 2.6, dp), wall)
-	bx("darkwood", xf, Vector3(0, 0.3 + 0.55, dp * 0.5 + 0.03), Vector3(wd, 1.1, 0.06), Color(0.8, 0.7, 0.6))
+	var door_x := -wd / 3.0
+	var dw := 1.3
+	var dh := 2.0
+	shell("plaster", xf, Vector3(0, 0.3 + 1.3, 0), Vector3(wd, 2.6, dp), wall, [{"side": 0, "u": door_x, "w": dw, "h": dh}], {"th": 0.15})
+	slab("darkwood", xf, Vector3(0, 0.3 + 0.55, dp * 0.5 + 0.03), Vector3(wd, 1.1, 0.06), Color(0.8, 0.7, 0.6), [{"u": door_x, "w": dw, "h": 1.2}], false)
 	for i in 4:
 		bx("wood", xf, Vector3(-wd * 0.5 + wd * i / 3.0, 0.3 + 1.3, dp * 0.5 + 0.05), Vector3(0.18, 2.6, 0.18), DARK)
-	bx("darkwood", xf, Vector3(-wd * 0.2, 0.3 + 1.1, dp * 0.5 + 0.07), Vector3(1.6, 2.0, 0.05), Color(0.28, 0.22, 0.2))
+	door_frame(xf, door_x, 0.3, dp * 0.5, dw, dh, "slide")
 	var rc := THATCH if roof_mat == "thatch" else (TILE_DARK if roof_mat == "rooftile" else Color(0.6, 0.5, 0.42))
 	var rm := roof_mat if roof_mat != "board" else "darkwood"
 	roof(xf, 2.95, wd * 0.5 + 0.7, dp * 0.5 + 0.8, 2.4 if roof_mat == "thatch" else 1.7, "gable", rm, rc, 0.0, Color(0.5, 0.4, 0.3), 1.0)
@@ -659,35 +1018,54 @@ func _u_minka(xf: Transform3D, wd := 8.0, dp := 6.0, roof_mat := "thatch") -> vo
 		# 石置き屋根の押さえ石
 		for k in 4:
 			kit.sphere("stonewall", xf * Transform3D(Basis(), Vector3(-wd * 0.3 + k * wd * 0.2, 2.95 + 1.0, dp * 0.25)), 0.25, 6, 4, STONE)
-	col(xf, Vector3(0, 1.8, 0), Vector3(wd, 3.6, dp))
+	col(xf, Vector3(0, 3.3, 0), Vector3(wd, 0.7, dp))
+	var run := entry_steps(xf, door_x, dp * 0.5 + 0.2, 0.3, dw + 0.3)
 	occupy(xf, wd + 0.6, dp + 0.6, 1.2)
+	var dd := door(Vector3(door_x, 0.3, dp * 0.5), Vector3.BACK, dw, dh)
+	dd["out"] = Vector3(door_x, 0.0, dp * 0.5 + 0.2 + run + 1.4)
+	reg_interior("showa_house" if w.era_id == "showa" else "minka", xf, [fl(0.3, Rect2(-wd * 0.5 + 0.15, -dp * 0.5 + 0.15, wd - 0.3, dp - 0.3), 2.6)], [dd],
+		{"doma_x": door_x, "roof_mat": roof_mat})
 
 
-## 農家（茅葺き入母屋）
+## 農家（茅葺き入母屋）。土間口は右寄り
 func _u_farmhouse(xf: Transform3D, wd := 10.0, dp := 7.0) -> void:
 	foundation(xf, wd + 0.6, dp + 0.6, 0.35, "stonewall", STONE)
-	bx("plaster", xf, Vector3(0, 0.35 + 1.4, 0), Vector3(wd, 2.8, dp), Color(0.86, 0.76, 0.6))
-	bx("darkwood", xf, Vector3(0, 0.35 + 0.6, dp * 0.5 + 0.02), Vector3(wd, 1.2, 0.06), Color(0.85, 0.75, 0.65))
+	var door_x := wd * 0.375
+	var dw := minf(1.8, wd * 0.25 - 0.4)
+	var dh := 2.1
+	shell("plaster", xf, Vector3(0, 0.35 + 1.4, 0), Vector3(wd, 2.8, dp), Color(0.86, 0.76, 0.6), [{"side": 0, "u": door_x, "w": dw, "h": dh}], {"th": 0.16})
+	slab("darkwood", xf, Vector3(0, 0.35 + 0.6, dp * 0.5 + 0.02), Vector3(wd, 1.2, 0.06), Color(0.85, 0.75, 0.65), [{"u": door_x, "w": dw, "h": 1.3}], false)
 	for i in 5:
 		bx("wood", xf, Vector3(-wd * 0.5 + wd * i / 4.0, 0.35 + 1.4, dp * 0.5 + 0.05), Vector3(0.2, 2.8, 0.2), DARK)
 	# 縁側
-	bx("wood", xf, Vector3(0, 0.75, dp * 0.5 + 0.6), Vector3(wd * 0.8, 0.12, 1.0), Color(0.85, 0.75, 0.65))
-	bx("darkwood", xf, Vector3(wd * 0.25, 1.65, dp * 0.5 + 0.06), Vector3(2.4, 2.0, 0.05), Color(0.3, 0.25, 0.22))
+	bx("wood", xf, Vector3(-wd * 0.1, 0.75, dp * 0.5 + 0.6), Vector3(wd * 0.6, 0.12, 1.0), Color(0.85, 0.75, 0.65))
+	door_frame(xf, door_x, 0.35, dp * 0.5, dw, dh, "slide")
 	roof(xf, 3.2, wd * 0.5 + 1.2, dp * 0.5 + 1.2, 4.6, "irimoya", "thatch", THATCH.lerp(Color(0.8, 0.72, 0.58), rng.randf()), 0.0, Color(0.5, 0.4, 0.3), 1.05)
-	col(xf, Vector3(0, 2.4, 0), Vector3(wd, 4.8, dp))
+	col(xf, Vector3(0, 3.7, 0), Vector3(wd, 1.0, dp))
+	var run := entry_steps(xf, door_x, dp * 0.5 + 0.3, 0.35, dw + 0.3)
 	occupy(xf, wd + 1.5, dp + 1.5, 1.8)
+	var dd := door(Vector3(door_x, 0.35, dp * 0.5), Vector3.BACK, dw, dh)
+	dd["out"] = Vector3(door_x, 0.0, dp * 0.5 + 0.3 + run + 1.4)
+	reg_interior("farmhouse", xf, [fl(0.35, Rect2(-wd * 0.5 + 0.16, -dp * 0.5 + 0.16, wd - 0.32, dp - 0.32), 2.8)], [dd], {"doma_x": door_x})
 
 
-## 土蔵
+## 土蔵（観音開きの土扉）
 func _u_kura(xf: Transform3D, wd := 5.0, dp := 6.5, h := 5.0) -> void:
 	foundation(xf, wd + 0.4, dp + 0.4, 0.5)
-	bx("plaster", xf, Vector3(0, 0.5 + h * 0.5, 0), Vector3(wd, h, dp), PLASTER)
-	bx("stonewall", xf, Vector3(0, 0.5 + 0.7, 0), Vector3(wd + 0.06, 1.4, dp + 0.06), Color(0.45, 0.45, 0.48))
-	bx("darkwood", xf, Vector3(0, 0.5 + 1.3, dp * 0.5 + 0.08), Vector3(1.4, 2.4, 0.15), Color(0.3, 0.28, 0.26))
+	var dw := 1.2
+	var dh := 2.2
+	var ops := [{"side": 0, "u": 0.0, "w": dw, "h": dh}]
+	shell("plaster", xf, Vector3(0, 0.5 + h * 0.5, 0), Vector3(wd, h, dp), PLASTER, ops, {"th": 0.3})
+	band("stonewall", xf, Vector3(0, 0.5 + 0.7, 0), Vector3(wd + 0.06, 1.4, dp + 0.06), Color(0.45, 0.45, 0.48), ops, 0.2)
+	door_frame(xf, 0.0, 0.5, dp * 0.5 + 0.03, dw, dh, "leaves", Color(0.3, 0.28, 0.26))
 	bx("darkwood", xf, Vector3(0, 0.5 + h * 0.78, dp * 0.5 + 0.06), Vector3(0.8, 0.7, 0.1), BLACK)
 	roof(xf, 0.5 + h + 0.15, wd * 0.5 + 0.5, dp * 0.5 + 0.6, 1.9, "gable", "rooftile", TILE_DARK, 0.0, Color(0.9, 0.9, 0.88), 1.1)
-	col(xf, Vector3(0, (h + 1.0) * 0.5, 0), Vector3(wd, h + 1.0, dp))
+	col(xf, Vector3(0, 0.5 + h + 0.8, 0), Vector3(wd, 1.2, dp))
+	var run := entry_steps(xf, 0.0, dp * 0.5 + 0.2, 0.5, dw + 0.4)
 	occupy(xf, wd + 0.5, dp + 0.5, 1.0)
+	var dd := door(Vector3(0, 0.5, dp * 0.5), Vector3.BACK, dw, dh)
+	dd["out"] = Vector3(0, 0.0, dp * 0.5 + 0.2 + run + 1.4)
+	reg_interior("kura", xf, [fl(0.5, Rect2(-wd * 0.5 + 0.3, -dp * 0.5 + 0.3, wd - 0.6, dp - 0.6), h)], [dd])
 
 
 ## 武家屋敷（塀・門・主屋・蔵）
@@ -721,48 +1099,102 @@ func castle(xf: Transform3D, base_w := 40.0, base_h := 11.0, tiers := 5, wall_co
 	_ishigaki(xf * Transform3D(Basis(), Vector3(0, y, 0)), tw + 2.0, td + 2.0, tw + 1.0, td + 1.0, 1.2)
 	y += 1.2
 	begin_unit("castle_keep", xf * Transform3D(Basis(), Vector3(0, y, 0)), {"kind_detail": "tenshu", "tiers": tiers})
+	# 各層の寸法を先に決める（階段の吹き抜けを上下の層で揃えるため）
+	var ti: Array = []
+	var yy := y
 	for i in tiers:
 		var k := 1.0 - i * 0.14
-		var ww := tw * k
-		var dd := td * k
+		var last := i == tiers - 1
 		var hh := 4.2 if i == 0 else 3.4
+		var rise := (2.4 if last else 1.35)
+		ti.append({"ww": tw * k, "dd": td * k, "hh": hh, "y": yy, "rise": rise, "last": last})
+		yy += hh + rise * (0.25 if not last else 0.0)
+	# 階段（i 層から i+1 層へ。45°、層ごとに向きと位置を交互に）
+	var stairs: Array = []
+	for i in tiers - 1:
+		var nx: Dictionary = ti[i + 1]
+		var rise_f: float = float(nx["y"]) - float(ti[i]["y"])
+		var sz := (1.0 if i % 2 == 0 else -1.0) * (float(nx["dd"]) * 0.5 - 1.1)
+		var sd := 1.0 if i % 2 == 0 else -1.0
+		var sa := Vector3(-sd * rise_f * 0.5, float(ti[i]["y"]), sz)
+		var sb := Vector3(sd * rise_f * 0.5, float(nx["y"]), sz)
+		stairs.append({"a": sa, "b": sb, "w": 1.0, "hole": Rect2(-rise_f * 0.5 - 0.1, sz - 0.6, rise_f + 0.2, 1.2)})
+	var floors: Array = []
+	var y_top := y
+	for i in tiers:
+		var t_: Dictionary = ti[i]
+		var ww: float = t_["ww"]
+		var dd: float = t_["dd"]
+		var hh: float = t_["hh"]
+		var ty: float = t_["y"]
+		var last: bool = t_["last"]
 		var body_col := wall_col
-		bx("plaster", xf, Vector3(0, y + hh * 0.5, 0), Vector3(ww, hh, dd), body_col)
-		# 下見板（黒）
-		bx("darkwood", xf, Vector3(0, y + hh * 0.25, 0), Vector3(ww + 0.06, hh * 0.5, dd + 0.06), BLACK if accent or i == 0 else Color(0.32, 0.3, 0.3))
-		# 窓
+		# 窓（連子窓。内から外が見える）と入口
+		var ops: Array = []
+		var wy := hh * 0.66 - 0.45
 		var nwin := maxi(2, int(ww / 3.0))
 		for j in nwin:
 			var wx := -ww * 0.5 + ww * (j + 0.5) / nwin
-			bx("darkwood", xf, Vector3(wx, y + hh * 0.66, dd * 0.5 + 0.03), Vector3(1.0, 0.9, 0.08), Color(0.12, 0.1, 0.1))
-			bx("darkwood", xf, Vector3(wx, y + hh * 0.66, -dd * 0.5 - 0.03), Vector3(1.0, 0.9, 0.08), Color(0.12, 0.1, 0.1))
+			ops.append({"side": 2, "u": wx, "y": wy, "w": 1.0, "h": 0.9})
+			if i == 0 and absf(wx) < 1.6:
+				continue
+			ops.append({"side": 0, "u": wx, "y": wy, "w": 1.0, "h": 0.9})
 		var nwin2 := maxi(2, int(dd / 3.0))
 		for j in nwin2:
 			var wz := -dd * 0.5 + dd * (j + 0.5) / nwin2
-			bx("darkwood", xf, Vector3(ww * 0.5 + 0.03, y + hh * 0.66, wz), Vector3(0.08, 0.9, 1.0), Color(0.12, 0.1, 0.1))
-			bx("darkwood", xf, Vector3(-ww * 0.5 - 0.03, y + hh * 0.66, wz), Vector3(0.08, 0.9, 1.0), Color(0.12, 0.1, 0.1))
+			ops.append({"side": 1, "u": wz, "y": wy, "w": 1.0, "h": 0.9})
+			ops.append({"side": 3, "u": wz, "y": wy, "w": 1.0, "h": 0.9})
+		var door_ops: Array = []
+		if i == 0:
+			door_ops = [{"side": 0, "u": 0.0, "w": 1.8, "h": 2.6}]
+		var hole: Rect2 = stairs[i]["hole"] if i < stairs.size() else Rect2()
+		var fhole: Rect2 = stairs[i - 1]["hole"] if i > 0 else Rect2()
+		shell("plaster", xf, Vector3(0, ty + hh * 0.5, 0), Vector3(ww, hh, dd), body_col, ops + door_ops,
+			{"th": 0.25, "cap": false, "hole": hole, "floor": i > 0, "floor_hole": fhole, "floor_col": Color(0.8, 0.68, 0.52)})
+		# 下見板（黒）
+		band("darkwood", xf, Vector3(0, ty + hh * 0.25, 0), Vector3(ww + 0.06, hh * 0.5, dd + 0.06), BLACK if accent or i == 0 else Color(0.32, 0.3, 0.3), door_ops, 0.28)
+		for op in ops:
+			_renji(xf, int(op["side"]), float(op["u"]), ty + wy + 0.45, ww, dd)
 		if accent:
-			bx("gold", xf, Vector3(0, y + hh - 0.15, 0), Vector3(ww + 0.1, 0.18, dd + 0.1), GOLD)
-		var last := i == tiers - 1
+			bx("gold", xf, Vector3(0, ty + hh - 0.15, 0), Vector3(ww + 0.1, 0.18, dd + 0.1), GOLD)
 		var hw := ww * 0.5 + 1.6
 		var hd := dd * 0.5 + 1.6
-		var rise := (2.4 if last else 1.35)
-		roof(xf, y + hh, hw, hd, rise, "irimoya" if (last or i % 2 == 0) else "hip", "rooftile", TILE_DARK, 0.55, PLASTER)
+		var rise: float = t_["rise"]
+		roof(xf, ty + hh, hw, hd, rise, "irimoya" if (last or i % 2 == 0) else "hip", "rooftile", TILE_DARK, 0.55, PLASTER)
+		# 屋根の当たり判定（壁の外側の軒の輪。上の層の中には入れない）
+		if last:
+			col(xf, Vector3(0, ty + hh + rise * 0.45, 0), Vector3(ww + 3.2, rise * 0.9, dd + 3.2))
+		else:
+			for sgn in [-1.0, 1.0]:
+				col(xf, Vector3(0, ty + hh + rise * 0.3, sgn * (dd * 0.5 + 0.8)), Vector3(ww + 3.2, rise * 0.6, 1.6))
+				col(xf, Vector3(sgn * (ww * 0.5 + 0.8), ty + hh + rise * 0.3, 0), Vector3(1.6, rise * 0.6, dd))
 		# 千鳥破風
 		if not last and i % 2 == 1:
 			for sgn in [-1.0, 1.0]:
-				var px := xf * Transform3D(Basis(Vector3.UP, PI * 0.5 if sgn > 0 else -PI * 0.5), Vector3(0, y + hh + 0.3, sgn * (dd * 0.5 + 0.6)))
+				var px := xf * Transform3D(Basis(Vector3.UP, PI * 0.5 if sgn > 0 else -PI * 0.5), Vector3(0, ty + hh + 0.3, sgn * (dd * 0.5 + 0.6)))
 				kit.roof(px, 2.2, 1.3, 1.5, 1.0, "rooftile", "plaster", TILE_DARK, 1.1, 0.25, 0.25, PLASTER, "plaster", wall_col)
 		if accent and last:
 			for sgn in [-1.0, 1.0]:
 				var hx := ww * 0.5 + 1.6 - (dd * 0.5 + 1.6) + (dd * 0.5 + 1.6) * 0.42
-				kit.box("gold", xf * Transform3D(Basis(), Vector3(sgn * hx, y + hh + rise + 0.8, 0)), Vector3(0.5, 1.2, 0.35), GOLD)
-		y += hh + rise * (0.25 if not last else 0.0)
+				kit.box("gold", xf * Transform3D(Basis(), Vector3(sgn * hx, ty + hh + rise + 0.8, 0)), Vector3(0.5, 1.2, 0.35), GOLD)
+		var win: Array = []
+		for op in ops:
+			win.append(op)
+		floors.append(fl(ty, Rect2(-ww * 0.5 + 0.25, -dd * 0.5 + 0.25, ww - 0.5, dd - 0.5), hh,
+			{"hole": hole, "stair": stairs[i] if i < stairs.size() else {}, "tier": i, "last": last, "win": win}))
+		y_top = ty + hh
+	y = y_top
 	if not accent:
 		var hx := tw * (1.0 - (tiers - 1) * 0.14) * 0.5 + 1.6 - ((td * (1.0 - (tiers - 1) * 0.14)) * 0.5 + 1.6) * 0.58
 		for sgn in [-1.0, 1.0]:
 			kit.box("gold", xf * Transform3D(Basis(), Vector3(sgn * hx, y + 2.4 + 0.9, 0)), Vector3(0.45, 1.1, 0.3), GOLD)
-	col(xf, Vector3(0, (y + base_h) * 0.5, 0), Vector3(tw, y - base_h + 2.0, td).max(Vector3.ONE) + Vector3(0, 0, 0))
+	# 天守台の石段（本丸から一層目の入口へ）
+	var kx := xf * Transform3D(Basis(), Vector3(0, base_h, 0))
+	var run := entry_steps(kx, 0.0, (td + 1.0) * 0.5, 1.2, 2.4)
+	door_frame(xf, 0.0, float(ti[0]["y"]), td * 0.5, 1.8, 2.6, "leaves", BLACK if accent else Color(0.3, 0.28, 0.27))
+	var dd0 := door(Vector3(0, float(ti[0]["y"]), td * 0.5), Vector3.BACK, 1.8, 2.6)
+	dd0["out"] = Vector3(0, base_h, (td + 1.0) * 0.5 + run + 1.5)
+	reg_interior("castle", xf, floors, [dd0], {"accent": accent, "tiers": tiers})
 	end_unit()
 	# 隅櫓と塀
 	for cx in [-1.0, 1.0]:
@@ -770,10 +1202,16 @@ func castle(xf: Transform3D, base_w := 40.0, base_h := 11.0, tiers := 5, wall_co
 			var p := Vector3(cx * (top_w * 0.5 - 3.5), base_h, cz * (top_w * 0.5 - 3.5))
 			var yx := xf * Transform3D(Basis(), p)
 			begin_unit("yagura", yx, {"kind_detail": "sumi_yagura"})
-			bx("plaster", yx, Vector3(0, 2.0, 0), Vector3(6, 4, 6), wall_col)
-			bx("darkwood", yx, Vector3(0, 1.0, 0), Vector3(6.05, 2.0, 6.05), BLACK if accent else Color(0.35, 0.33, 0.32))
+			# 入口は本丸の内側へ向ける
+			var fx := yx * Transform3D(Basis(Vector3.UP, 0.0 if cz < 0.0 else PI), Vector3.ZERO)
+			var yops := [{"side": 0, "u": 0.0, "w": 1.4, "h": 2.2}]
+			shell("plaster", fx, Vector3(0, 2.0, 0), Vector3(6, 4, 6), wall_col, yops, {"th": 0.25})
+			band("darkwood", fx, Vector3(0, 1.0, 0), Vector3(6.05, 2.0, 6.05), BLACK if accent else Color(0.35, 0.33, 0.32), yops, 0.25)
+			door_frame(fx, 0.0, 0.0, 3.0, 1.4, 2.2, "leaves", BLACK if accent else Color(0.3, 0.28, 0.27))
 			roof(yx, 4.0, 4.2, 4.2, 1.8, "irimoya", "rooftile", TILE_DARK, 0.4, PLASTER)
-			col(yx, Vector3(0, 2.0, 0), Vector3(6, 4, 6))
+			col(yx, Vector3(0, 4.7, 0), Vector3(6, 1.2, 6))
+			var ydd := door(Vector3(0, 0, 3.0), Vector3.BACK, 1.4, 2.2)
+			reg_interior("yagura", fx, [fl(0.0, Rect2(-2.75, -2.75, 5.5, 5.5), 4.0)], [ydd])
 			end_unit()
 	var hs := top_w * 0.5 - 0.6
 	for side in 4:
@@ -781,15 +1219,17 @@ func castle(xf: Transform3D, base_w := 40.0, base_h := 11.0, tiers := 5, wall_co
 		var b := Vector3(hs, base_h, hs).rotated(Vector3.UP, side * PI * 0.5)
 		var mid := (a + b) * 0.5
 		var sx := xf * Transform3D(Basis(Vector3.UP, side * PI * 0.5), mid)
-		# 塀は 3 区画に分けて壊れる
+		# 塀は 3 区画に分けて壊れる。正面（大手）の中央は開けて本丸に入れる
 		var nseg := 3
 		var seg_w := (top_w - 8.0) / nseg
 		for k in nseg:
-			var kx := sx * Transform3D(Basis(), Vector3(-(top_w - 8.0) * 0.5 + seg_w * (k + 0.5), 0, 0))
-			begin_unit("wall", kx, {"kind_detail": "castle_wall"})
-			bx("plaster", kx, Vector3(0, 1.1, 0), Vector3(seg_w + 0.02, 2.2, 0.5), wall_col)
-			kit.roof(kx * Transform3D(Basis(), Vector3(0, 2.2, 0)), seg_w * 0.5, 0.65, 0.4, 1.0, "rooftile", "darkwood", TILE_DARK, 1.0, 0.0, 0.15)
-			col(kx, Vector3(0, 1.1, 0), Vector3(seg_w, 2.2, 0.5))
+			if side == 0 and k == 1:
+				continue
+			var kx2 := sx * Transform3D(Basis(), Vector3(-(top_w - 8.0) * 0.5 + seg_w * (k + 0.5), 0, 0))
+			begin_unit("wall", kx2, {"kind_detail": "castle_wall"})
+			bx("plaster", kx2, Vector3(0, 1.1, 0), Vector3(seg_w + 0.02, 2.2, 0.5), wall_col)
+			kit.roof(kx2 * Transform3D(Basis(), Vector3(0, 2.2, 0)), seg_w * 0.5, 0.65, 0.4, 1.0, "rooftile", "darkwood", TILE_DARK, 1.0, 0.0, 0.15)
+			col(kx2, Vector3(0, 1.1, 0), Vector3(seg_w, 2.2, 0.5))
 			end_unit()
 	# 正面の登り坂（大手道）
 	var rx := xf * Transform3D(Basis(), Vector3(0, 0, base_w * 0.5 + 7.0))
@@ -822,6 +1262,28 @@ func _ishigaki(xf: Transform3D, bw: float, bd: float, tw: float, td: float, h: f
 			kit.quad("stonewall", xf * p0, xf * p1, xf * p2, xf * p3, STONE)
 	kit.quad("stonewall", xf * t0[0], xf * t0[1], xf * t0[2], xf * t0[3], Color(0.8, 0.78, 0.74))
 	col(xf, Vector3(0, (h - 1.5) * 0.5, 0), Vector3((bw + tw) * 0.5, h + 1.5, (bd + td) * 0.5))
+
+
+## 連子窓（外枠＋縦格子。開口の外面に付ける）
+func _renji(xf: Transform3D, side: int, u: float, yc: float, ww: float, dd: float) -> void:
+	var c: Vector3
+	var rot := 0.0
+	match side:
+		0: c = Vector3(u, yc, dd * 0.5 + 0.03)
+		2: c = Vector3(u, yc, -dd * 0.5 - 0.03)
+		1:
+			c = Vector3(ww * 0.5 + 0.03, yc, u)
+			rot = PI * 0.5
+		_:
+			c = Vector3(-ww * 0.5 - 0.03, yc, u)
+			rot = PI * 0.5
+	var fx := xf * Transform3D(Basis(Vector3.UP, rot), c)
+	var col_ := Color(0.12, 0.1, 0.1)
+	for sgn in [-1.0, 1.0]:
+		kit.box("darkwood", fx * Transform3D(Basis(), Vector3(0, sgn * 0.48, 0)), Vector3(1.12, 0.08, 0.1), col_, false)
+		kit.box("darkwood", fx * Transform3D(Basis(), Vector3(sgn * 0.53, 0, 0)), Vector3(0.08, 0.9, 0.1), col_)
+	for k in 4:
+		kit.box("darkwood", fx * Transform3D(Basis(), Vector3(-0.3 + k * 0.2, 0, 0)), Vector3(0.05, 0.9, 0.06), col_)
 
 
 ## 石灯籠
@@ -924,18 +1386,25 @@ func _u_stall(xf: Transform3D, colr: Color) -> void:
 
 
 # ================================================================ 近代建築
-## 煉瓦造の洋館（明治）。clock=時計塔
+## 煉瓦造の洋館（明治）。clock=時計塔。正面の玄関から入れる（2 階まで）
+var _brick_n := 0
+
+
 func _u_brick_building(xf: Transform3D, wd := 24.0, dp := 14.0, floors := 3, o := {}) -> void:
 	var fh := 4.2
 	var wall_mat: String = o.get("mat", "brick")
 	var wall_col: Color = o.get("col", Color(1.0, 0.68, 0.58) if wall_mat == "brick" else Color.WHITE)
 	var trim: Color = o.get("trim", Color(0.92, 0.9, 0.84))
 	var h := floors * fh
+	var dw := 2.0
+	var dh := 3.0
+	var dops := [{"side": 0, "u": 0.0, "w": dw, "h": dh}]
 	foundation(xf, wd + 0.4, dp + 0.4, 0.8, "stonewall", Color(0.82, 0.8, 0.76))
-	bx(wall_mat, xf, Vector3(0, 0.8 + h * 0.5, 0), Vector3(wd, h, dp), wall_col)
-	# 階ごとの帯
+	shell(wall_mat, xf, Vector3(0, 0.8 + h * 0.5, 0), Vector3(wd, h, dp), wall_col, dops, {"th": 0.3})
+	# 階ごとの帯（外側だけ）
 	for f in floors + 1:
-		bx("plaster", xf, Vector3(0, 0.8 + f * fh, 0), Vector3(wd + 0.3, 0.3 if f < floors else 0.6, dp + 0.3), trim)
+		var bh := 0.3 if f < floors else 0.6
+		band("plaster", xf, Vector3(0, 0.8 + f * fh, 0), Vector3(wd + 0.3, bh, dp + 0.3), trim, [{"side": 0, "u": 0.0, "w": dw, "h": 1.0}] if f == 0 else [], 0.35)
 	# 窓
 	var nw := int(wd / 3.2)
 	var nd := int(dp / 3.2)
@@ -944,6 +1413,8 @@ func _u_brick_building(xf: Transform3D, wd := 24.0, dp := 14.0, floors := 3, o :
 		for i in nw:
 			var x := -wd * 0.5 + wd * (i + 0.5) / nw
 			for sgn in [-1.0, 1.0]:
+				if f == 0 and sgn > 0.0 and absf(x) < 2.0:
+					continue
 				bx("plaster", xf, Vector3(x, wy, sgn * (dp * 0.5 + 0.05)), Vector3(1.4, 2.4, 0.12), trim)
 				bx("glass", xf, Vector3(x, wy - 0.05, sgn * (dp * 0.5 + 0.1)), Vector3(1.0, 2.0, 0.06))
 				bx("plaster", xf, Vector3(x, wy + 1.35, sgn * (dp * 0.5 + 0.12)), Vector3(1.7, 0.25, 0.2), trim)
@@ -956,12 +1427,16 @@ func _u_brick_building(xf: Transform3D, wd := 24.0, dp := 14.0, floors := 3, o :
 	for cx in [-1.0, 1.0]:
 		for cz in [-1.0, 1.0]:
 			bx("plaster", xf, Vector3(cx * wd * 0.5, 0.8 + h * 0.5, cz * dp * 0.5), Vector3(0.7, h, 0.7), trim)
-	# 玄関ポーチ（柱＋破風）
+	# 玄関ポーチ（柱＋破風）と石段
 	var pz := dp * 0.5 + 1.8
 	for k in 4:
 		cyl("plaster", xf, Vector3(-3.0 + k * 2.0, 0.8, pz), 0.3, 0.26, fh, 10, trim)
+		col(xf, Vector3(-3.0 + k * 2.0, 0.8 + fh * 0.5, pz), Vector3(0.55, fh, 0.55))
 	bx("plaster", xf, Vector3(0, 0.8 + fh + 0.3, pz - 0.6), Vector3(7.6, 0.6, 4.4), trim)
+	col(xf, Vector3(0, 0.8 + fh + 0.3, pz - 0.6), Vector3(7.6, 0.6, 4.4))
 	kit.roof(xf * Transform3D(Basis(), Vector3(0, 0.8 + fh + 0.6, pz - 0.6)), 3.9, 2.4, 1.3, 1.0, "rooftile", "plaster", TILE_DARK, 1.0, 0.0, 0.3, trim, "plaster", trim)
+	var run := entry_steps(xf, 0.0, dp * 0.5 + 0.2, 0.8, 3.2, "stonewall", Color(0.82, 0.8, 0.76))
+	door_frame(xf, 0.0, 0.8, dp * 0.5, dw, dh, "leaves", Color(0.45, 0.3, 0.22))
 	# 屋根
 	var rcol: Color = o.get("roof_col", Color(0.42, 0.45, 0.5))
 	if o.get("mansard", false):
@@ -977,9 +1452,35 @@ func _u_brick_building(xf: Transform3D, wd := 24.0, dp := 14.0, floors := 3, o :
 		var dx := xf * Transform3D(Basis(), Vector3(0, 0.8 + h, 0))
 		cyl(wall_mat, dx, Vector3.ZERO, 5.0, 5.0, 3.0, 16, wall_col)
 		kit.sphere("metal", dx * Transform3D(Basis().scaled(Vector3(1, 0.8, 1)), Vector3(0, 3.0, 0)), 5.0, 16, 8, COPPER)
-	col(xf, Vector3(0, 0.8 + h * 0.5, 0), Vector3(wd, h, dp))
-	col(xf, Vector3(0, 0.8 + fh * 0.5, pz), Vector3(7.6, fh, 2.0))
+	col(xf, Vector3(0, 0.8 + h + 1.2, 0), Vector3(wd, 1.8, dp))
 	occupy(xf, wd + 1, dp + 5, 2.5)
+	# 内装（1・2 階。階段は奥の壁沿い）
+	var nfl := mini(floors, 2)
+	var inner := Rect2(-wd * 0.5 + 0.3, -dp * 0.5 + 0.3, wd - 0.6, dp - 0.6)
+	var sa := Vector3(-wd * 0.5 + 1.6, 0.8, -dp * 0.5 + 1.0)
+	var sb := sa + Vector3(fh, fh, 0)
+	var flist: Array = [fl(0.8, inner, fh, {"hole": Rect2(sa.x - 0.1, sa.z - 0.7, fh + 0.2, 1.4) if nfl >= 2 else Rect2(),
+		"stair": {"a": sa, "b": sb, "w": 1.2} if nfl >= 2 else {}})]
+	if nfl >= 2:
+		flist.append(fl(0.8 + fh, inner, fh))
+	var dd := door(Vector3(0, 0.8, dp * 0.5), Vector3.BACK, dw, dh)
+	dd["out"] = Vector3(0, 0, dp * 0.5 + 0.2 + run + 1.6)
+	_brick_n += 1
+	reg_interior(_brick_interior(o), xf, flist, [dd], {"win_grid": {"nw": nw, "nd": nd, "fh": fh, "y0": 0.8}, "floors_total": floors, "n": _brick_n})
+
+
+## 洋館の用途: 駅舎・役所・洋館（迎賓）・銀行
+func _brick_interior(o: Dictionary) -> String:
+	if w.era_id == "showa":
+		return "bank"
+	match landmark:
+		"port":
+			return "station"
+		"castle":
+			return "office"
+		"capital":
+			return "office" if (o.get("clock", false) or String(o.get("mat", "brick")) == "plaster") else "yokan"
+	return "yokan"
 
 
 func _clock_tower(xf: Transform3D, s: float, y0: float, mat: String, colr: Color, trim: Color, dome: bool) -> void:
@@ -1002,12 +1503,13 @@ func _clock_tower(xf: Transform3D, s: float, y0: float, mat: String, colr: Color
 	col(xf, Vector3(0, y0 + th * 0.5, 0), Vector3(s, th, s))
 
 
-## 擬洋風の木造校舎
+## 擬洋風の木造校舎（中央の塔屋が玄関）
 func _u_wooden_school(xf: Transform3D, wd := 34.0, dp := 10.0) -> void:
 	var h := 7.6
 	var siding := Color(0.98, 0.95, 0.85)
 	foundation(xf, wd + 0.4, dp + 0.4, 0.6)
-	bx("darkwood", xf, Vector3(0, 0.6 + h * 0.5, 0), Vector3(wd, h, dp), siding * 1.4)
+	var dops := [{"side": 0, "u": 0.0, "w": 2.0, "h": 2.8}]
+	shell("darkwood", xf, Vector3(0, 0.6 + h * 0.5, 0), Vector3(wd, h, dp), siding * 1.4, dops, {"th": 0.2})
 	for f in 2:
 		var wy := 0.6 + f * 3.8 + 2.0
 		var n := int(wd / 2.6)
@@ -1019,38 +1521,63 @@ func _u_wooden_school(xf: Transform3D, wd := 34.0, dp := 10.0) -> void:
 				bx("wood", xf, Vector3(x, wy, sgn * (dp * 0.5 + 0.04)), Vector3(1.5, 2.2, 0.1), Color(0.55, 0.62, 0.7))
 				bx("glass", xf, Vector3(x, wy, sgn * (dp * 0.5 + 0.08)), Vector3(1.2, 1.9, 0.05))
 				bx("wood", xf, Vector3(x, wy, sgn * (dp * 0.5 + 0.11)), Vector3(0.06, 1.9, 0.04), Color(0.95, 0.95, 0.95))
-	bx("wood", xf, Vector3(0, 0.6 + 3.8, 0), Vector3(wd + 0.2, 0.2, dp + 0.2), Color(0.55, 0.62, 0.7))
+	band("wood", xf, Vector3(0, 0.6 + 3.8, 0), Vector3(wd + 0.2, 0.2, dp + 0.2), Color(0.55, 0.62, 0.7), [], 0.3)
 	roof(xf, 0.6 + h + 0.1, wd * 0.5 + 0.8, dp * 0.5 + 0.8, 3.2, "hip", "rooftile", TILE_DARK, 0.0, siding)
 	# 中央の玄関と塔屋
 	var c := xf * Transform3D(Basis(), Vector3(0, 0, dp * 0.5 + 1.5))
-	bx("darkwood", c, Vector3(0, 0.6 + 5.0, 0), Vector3(5.0, 10.0, 3.6), siding * 1.4)
-	bx("darkwood", c, Vector3(0, 0.6 + 1.4, 1.81), Vector3(2.0, 2.8, 0.06), Color(0.35, 0.28, 0.22))
+	foundation(c, 5.2, 3.8, 0.6)
+	shell("darkwood", c, Vector3(0, 0.6 + 5.0, 0), Vector3(5.0, 10.0, 3.6), siding * 1.4,
+		[{"side": 0, "u": 0.0, "w": 2.0, "h": 2.8}, {"side": 2, "u": 0.0, "w": 2.0, "h": 2.8}], {"th": 0.2})
+	door_frame(c, 0.0, 0.6, 1.8, 2.0, 2.8, "leaves", Color(0.35, 0.28, 0.22))
+	var run := entry_steps(c, 0.0, 1.9, 0.6, 2.8, "stonewall", STONE)
 	roof(c, 0.6 + 10.0, 3.0, 2.3, 1.6, "irimoya", "rooftile", TILE_DARK, 0.2, siding)
 	bx("darkwood", c, Vector3(0, 0.6 + 12.4, 0), Vector3(2.4, 2.4, 2.4), siding * 1.4)
 	roof(c, 0.6 + 13.6, 1.6, 1.6, 1.8, "pyramid", "rooftile", TILE_DARK, 0.0, siding)
-	col(xf, Vector3(0, 0.6 + h * 0.5, 0), Vector3(wd, h, dp))
-	col(c, Vector3(0, 5.0, 0), Vector3(5.0, 10.0, 3.6))
+	col(xf, Vector3(0, 0.6 + h + 1.4, 0), Vector3(wd, 2.4, dp))
+	col(c, Vector3(0, 0.6 + 12.4, 0), Vector3(2.4, 2.4, 2.4))
 	occupy(xf, wd + 1, dp + 5, 3.0)
+	var inner := Rect2(-wd * 0.5 + 0.2, -dp * 0.5 + 0.2, wd - 0.4, dp - 0.4)
+	var sa := Vector3(1.4, 0.6, -dp * 0.5 + 0.9)
+	var sb := sa + Vector3(3.8, 3.8, 0)
+	var dd := door(Vector3(0, 0.6, dp * 0.5 + 3.3), Vector3.BACK, 2.0, 2.8)
+	dd["out"] = Vector3(0, 0, dp * 0.5 + 3.4 + run + 1.4)
+	reg_interior("school", xf, [
+		fl(0.6, inner, 3.8, {"hole": Rect2(sa.x - 0.1, sa.z - 0.65, 4.0, 1.3), "stair": {"a": sa, "b": sb, "w": 1.1}}),
+		fl(0.6 + 3.8, inner, 3.8),
+		fl(0.6, Rect2(-2.3, dp * 0.5 - 0.1, 4.6, 3.2), 3.6, {"hall": true})], [dd])
 
 
-## 鉄筋コンクリートのビル（昭和）
+## 鉄筋コンクリートのビル（昭和）。1・2 階に入れる
 func _u_concrete_building(xf: Transform3D, wd := 18.0, dp := 14.0, floors := 5, o := {}) -> void:
 	var fh := 3.4
 	var h := floors * fh
 	var colr: Color = o.get("col", Color(0.9, 0.88, 0.84).lerp(Color(0.75, 0.72, 0.66), rng.randf()))
+	var dw := 2.4
+	var dh := 2.5
+	var dops := [{"side": 0, "u": 0.0, "w": dw, "h": dh}]
 	foundation(xf, wd + 0.3, dp + 0.3, 0.4, "concrete", Color(0.7, 0.7, 0.68))
-	bx("concrete", xf, Vector3(0, 0.4 + h * 0.5, 0), Vector3(wd, h, dp), colr)
+	shell("concrete", xf, Vector3(0, 0.4 + h * 0.5, 0), Vector3(wd, h, dp), colr, dops, {"th": 0.3})
 	for f in floors:
 		var wy := 0.4 + f * fh + fh * 0.55
 		for sgn in [-1.0, 1.0]:
-			bx("glass", xf, Vector3(0, wy, sgn * (dp * 0.5 + 0.03)), Vector3(wd - 1.2, fh * 0.45, 0.06), Color(0.55, 0.62, 0.7) if f > 0 else Color(0.35, 0.4, 0.45))
+			var gc := Color(0.55, 0.62, 0.7) if f > 0 else Color(0.35, 0.4, 0.45)
+			if f == 0 and sgn > 0.0:
+				# 入口の左右に分ける
+				var seg := (wd - 1.2) * 0.5 - 1.6
+				for s2 in [-1.0, 1.0]:
+					bx("glass", xf, Vector3(s2 * (1.6 + seg * 0.5), wy, dp * 0.5 + 0.03), Vector3(seg, fh * 0.45, 0.06), gc)
+			else:
+				bx("glass", xf, Vector3(0, wy, sgn * (dp * 0.5 + 0.03)), Vector3(wd - 1.2, fh * 0.45, 0.06), gc)
 			bx("glass", xf, Vector3(sgn * (wd * 0.5 + 0.03), wy, 0), Vector3(0.06, fh * 0.45, dp - 1.2), Color(0.55, 0.62, 0.7))
-		bx("concrete", xf, Vector3(0, 0.4 + f * fh + fh * 0.22, 0), Vector3(wd + 0.25, 0.25, dp + 0.25), colr * 0.95)
+		band("concrete", xf, Vector3(0, 0.4 + f * fh + fh * 0.22, 0), Vector3(wd + 0.25, 0.25, dp + 0.25), colr * 0.95, dops if f == 0 else [], 0.3)
 		# 窓の縦桟
 		var n := int(wd / 1.8)
 		for i in n:
 			for sgn in [-1.0, 1.0]:
-				bx("concrete", xf, Vector3(-wd * 0.5 + 0.6 + (wd - 1.2) * i / maxf(n - 1, 1), wy, sgn * (dp * 0.5 + 0.06)), Vector3(0.12, fh * 0.45, 0.06), colr)
+				var mx := -wd * 0.5 + 0.6 + (wd - 1.2) * i / maxf(n - 1, 1)
+				if f == 0 and sgn > 0.0 and absf(mx) < 1.6:
+					continue
+				bx("concrete", xf, Vector3(mx, wy, sgn * (dp * 0.5 + 0.06)), Vector3(0.12, fh * 0.45, 0.06), colr)
 	# 屋上
 	bx("concrete", xf, Vector3(0, 0.4 + h + 0.5, 0), Vector3(wd, 1.0, dp), colr * 0.9)
 	bx("concrete", xf, Vector3(0, 0.4 + h + 0.05, 0), Vector3(wd - 0.6, 0.1, dp - 0.6), Color(0.5, 0.5, 0.5))
@@ -1065,20 +1592,33 @@ func _u_concrete_building(xf: Transform3D, wd := 18.0, dp := 14.0, floors := 5, 
 		var sc: Color = [Color(0.9, 0.2, 0.15), Color(0.95, 0.8, 0.2), Color(0.2, 0.45, 0.8), Color(0.15, 0.6, 0.35)][rng.randi() % 4]
 		var sx := xf * Transform3D(Basis(), Vector3(wd * 0.5 - 1.0, 0.4 + h * 0.55, dp * 0.5 + 0.6))
 		kit.box("emissive", sx, Vector3(0.25, h * 0.6, 1.0), sc)
-	# 1 階の入口
-	bx("glass", xf, Vector3(0, 0.4 + 1.3, dp * 0.5 + 0.05), Vector3(3.0, 2.6, 0.08), Color(0.3, 0.35, 0.4))
+	# 1 階の入口（ガラス扉を開けてある）と庇
+	door_frame(xf, 0.0, 0.4, dp * 0.5, dw, dh, "glass", Color(0.45, 0.46, 0.48))
 	kit.box("concrete", xf * Transform3D(Basis(), Vector3(0, 0.4 + 3.0, dp * 0.5 + 1.0)), Vector3(4.5, 0.2, 2.0), colr)
-	col(xf, Vector3(0, 0.4 + h * 0.5, 0), Vector3(wd, h + 1.0, dp))
+	var run := entry_steps(xf, 0.0, dp * 0.5 + 0.15, 0.4, 3.0, "concrete", Color(0.7, 0.7, 0.68))
+	col(xf, Vector3(0, 0.4 + h + 0.5, 0), Vector3(wd, 1.0, dp))
 	occupy(xf, wd + 1, dp + 2, 1.5)
+	var inner := Rect2(-wd * 0.5 + 0.3, -dp * 0.5 + 0.3, wd - 0.6, dp - 0.6)
+	var sa := Vector3(-wd * 0.5 + 1.2, 0.4, -dp * 0.5 + 1.0)
+	var sb := sa + Vector3(fh, fh, 0)
+	var two := floors >= 2
+	var flist: Array = [fl(0.4, inner, fh, {"hole": Rect2(sa.x - 0.1, sa.z - 0.7, fh + 0.2, 1.4) if two else Rect2(), "stair": {"a": sa, "b": sb, "w": 1.2} if two else {}})]
+	if two:
+		flist.append(fl(0.4 + fh, inner, fh))
+	var dd := door(Vector3(0, 0.4, dp * 0.5), Vector3.BACK, dw, dh)
+	dd["out"] = Vector3(0, 0, dp * 0.5 + 0.15 + run + 1.5)
+	var kind := "warehouse_showa" if (not o.get("tank", true) and not o.get("sign", true)) else "office_showa"
+	reg_interior(kind, xf, flist, [dd], {"floors_total": floors})
 
 
-## 団地（板状アパート）
+## 団地（板状アパート）。裏の階段室から 1 階の住戸（2DK）に入れる
 func _u_apartment(xf: Transform3D, wd := 48.0, dp := 10.0, floors := 5) -> void:
 	var fh := 2.8
 	var h := floors * fh
 	var colr := Color(0.92, 0.9, 0.85)
 	foundation(xf, wd + 0.3, dp + 0.3, 0.4, "concrete", Color(0.7, 0.7, 0.68))
-	bx("concrete", xf, Vector3(0, 0.4 + h * 0.5, 0), Vector3(wd, h, dp), colr)
+	var xs := -wd * 0.5 + 8.0
+	shell("concrete", xf, Vector3(0, 0.4 + h * 0.5, 0), Vector3(wd, h, dp), colr, [{"side": 2, "u": xs, "w": 1.0, "h": 2.1}], {"th": 0.25})
 	var units := int(wd / 4.0)
 	for f in floors:
 		var y := 0.4 + f * fh
@@ -1093,30 +1633,60 @@ func _u_apartment(xf: Transform3D, wd := 48.0, dp := 10.0, floors := 5) -> void:
 			# 洗濯物
 			if rng.randf() < 0.3:
 				bx("cloth", xf, Vector3(x + rng.randf_range(-0.8, 0.8), y + 1.6, dp * 0.5 + 1.1), Vector3(0.8, 0.7, 0.02), [Color(0.9, 0.9, 0.95), Color(0.6, 0.7, 0.9), Color(0.95, 0.8, 0.6)][rng.randi() % 3])
-	# 階段室
+	# 階段室（最初の一つは中に入れる）
+	var run := 0.0
 	for k in int(wd / 16.0):
-		bx("concrete", xf, Vector3(-wd * 0.5 + 8.0 + k * 16.0, 0.4 + (h + 1.5) * 0.5, -dp * 0.5 - 1.2), Vector3(3.0, h + 1.5, 2.4), colr * 0.96)
+		var sxk := -wd * 0.5 + 8.0 + k * 16.0
+		var sc := Vector3(sxk, 0.4 + (h + 1.5) * 0.5, -dp * 0.5 - 1.2)
+		if k == 0:
+			var rx := xf * Transform3D(Basis(Vector3.UP, PI), Vector3.ZERO)
+			foundation(xf * Transform3D(Basis(), Vector3(sxk, 0, -dp * 0.5 - 1.2)), 3.2, 2.6, 0.4, "concrete", Color(0.7, 0.7, 0.68))
+			shell("concrete", xf, sc, Vector3(3.0, h + 1.5, 2.4), colr * 0.96, [{"side": 2, "u": sxk, "w": 1.3, "h": 2.2}, {"side": 0, "u": sxk, "w": 1.0, "h": 2.1}], {"th": 0.2})
+			door_frame(rx, -sxk, 0.4, dp * 0.5 + 2.4, 1.3, 2.2, "frame", Color(0.4, 0.42, 0.45))
+			run = entry_steps(rx, -sxk, dp * 0.5 + 2.5, 0.4, 1.8, "concrete", Color(0.7, 0.7, 0.68))
+		else:
+			bx("concrete", xf, sc, Vector3(3.0, h + 1.5, 2.4), colr * 0.96)
+			col(xf, sc, Vector3(3.0, h + 1.5, 2.4))
 	bx("concrete", xf, Vector3(0, 0.4 + h + 0.3, 0), Vector3(wd + 0.2, 0.6, dp + 0.2), colr * 0.9)
-	col(xf, Vector3(0, 0.4 + h * 0.5, 0), Vector3(wd, h, dp + 2.8))
+	col(xf, Vector3(0, 0.4 + h + 0.3, 0), Vector3(wd, 0.6, dp))
 	occupy(xf, wd + 1, dp + 6, 2.0)
+	var dd := door(Vector3(xs, 0.4, -dp * 0.5 - 2.4), Vector3.FORWARD, 1.3, 2.2)
+	dd["out"] = Vector3(xs, 0, -dp * 0.5 - 2.5 - run - 1.4)
+	reg_interior("danchi", xf, [
+		fl(0.4, Rect2(xs - 3.9, -dp * 0.5 + 0.25, 7.8, dp - 0.5), fh, {"unit": true}),
+		fl(0.4, Rect2(xs - 1.3, -dp * 0.5 - 2.2, 2.6, 2.0), h + 1.5, {"stairwell": true})], [dd], {"xs": xs, "fh": fh})
 
 
-## 昭和の木造家屋・商店（看板建築＋日よけ）
+## 昭和の木造家屋・商店（看板建築＋日よけ）。店先は開け放し、奥が茶の間、2 階は六畳
 func _u_showa_shop(xf: Transform3D, wd := 6.0, dp := 9.0) -> void:
 	var colr: Color = [Color(0.85, 0.82, 0.74), Color(0.7, 0.75, 0.72), Color(0.8, 0.7, 0.6), Color(0.9, 0.88, 0.82)][rng.randi() % 4]
+	var ow := wd - 1.6
+	var oh := 2.4
 	foundation(xf, wd, dp, 0.25, "concrete", Color(0.7, 0.7, 0.68))
-	bx("plaster", xf, Vector3(0, 0.25 + 3.3, -0.2), Vector3(wd - 0.1, 6.6, dp - 0.4), colr)
-	# 看板建築の正面
-	bx("concrete", xf, Vector3(0, 0.25 + 3.8, dp * 0.5 - 0.15), Vector3(wd, 7.6, 0.3), colr * 1.03)
-	bx("glass", xf, Vector3(0, 0.25 + 1.3, dp * 0.5 + 0.02), Vector3(wd - 1.0, 2.4, 0.06), Color(0.32, 0.36, 0.4))
+	shell("plaster", xf, Vector3(0, 0.25 + 3.3, -0.2), Vector3(wd - 0.1, 6.6, dp - 0.4), colr, [{"side": 0, "u": 0.0, "w": ow, "h": oh}], {"th": 0.15})
+	# 看板建築の正面（店先を抜く）
+	slab("concrete", xf, Vector3(0, 0.25 + 3.8, dp * 0.5 - 0.15), Vector3(wd, 7.6, 0.3), colr * 1.03, [{"u": 0.0, "w": ow, "h": oh + 0.25}], true)
+	for sgn in [-1.0, 1.0]:
+		bx("glass", xf, Vector3(sgn * (ow * 0.5 + 0.15), 0.25 + 1.3, dp * 0.5 + 0.02), Vector3(0.3, 2.4, 0.06), Color(0.32, 0.36, 0.4))
+	# 開けたガラス戸を戸袋側に重ねる
+	bx("glass", xf, Vector3(ow * 0.5 - 0.5, 0.25 + 1.2, dp * 0.5 - 0.45), Vector3(0.9, 2.2, 0.04), Color(0.45, 0.5, 0.55))
 	bx("glass", xf, Vector3(0, 0.25 + 4.6, dp * 0.5 + 0.02), Vector3(wd * 0.6, 1.4, 0.06), Color(0.5, 0.56, 0.62))
 	var ac: Color = [Color(0.85, 0.2, 0.15), Color(0.2, 0.5, 0.25), Color(0.9, 0.75, 0.2), Color(0.2, 0.35, 0.7), Color(0.95, 0.95, 0.9)][rng.randi() % 5]
 	var aw := xf * Transform3D(Basis(Vector3.RIGHT, 0.35), Vector3(0, 0.25 + 2.9, dp * 0.5 + 0.7))
 	kit.box("cloth", aw, Vector3(wd - 0.2, 0.05, 1.6), ac)
 	kit.box("emissive", xf * Transform3D(Basis(), Vector3(0, 0.25 + 3.45, dp * 0.5 + 0.05)), Vector3(wd * 0.7, 0.6, 0.05), Color(0.95, 0.92, 0.8))
 	roof(xf, 0.25 + 6.6, wd * 0.5 + 0.2, dp * 0.5 + 0.1, 1.6, "gable", "rooftile", TILE_DARK, 0.0)
-	col(xf, Vector3(0, 0.25 + 3.4, 0), Vector3(wd, 7.0, dp))
+	col(xf, Vector3(0, 0.25 + 6.6 + 0.6, 0), Vector3(wd, 1.0, dp))
+	var run := entry_steps(xf, 0.0, dp * 0.5, 0.25, ow, "concrete", Color(0.7, 0.7, 0.68))
 	occupy(xf, wd, dp, 0.0)
+	var inner := Rect2(-wd * 0.5 + 0.2, -dp * 0.5 + 0.15, wd - 0.4, dp - 0.7)
+	var sa := Vector3(-wd * 0.5 + 0.65, 0.25, -dp * 0.5 + 0.45 + 3.3)
+	var sb := Vector3(sa.x, 0.25 + 3.3, -dp * 0.5 + 0.45)
+	var dd := door(Vector3(0, 0.25, dp * 0.5 - 0.4), Vector3.BACK, ow, oh)
+	dd["out"] = Vector3(0, 0, dp * 0.5 + run + 1.6)
+	reg_interior("showa_shop", xf, [
+		fl(0.25, inner, 3.3, {"hole": Rect2(sa.x - 0.45, sb.z - 0.05, 0.9, 3.4), "stair": {"a": sa, "b": sb, "w": 0.8}}),
+		fl(0.25 + 3.3, inner, 3.3)], [dd], {"awning": ac})
 
 
 ## 電柱と電線（points に沿って）
@@ -1226,36 +1796,61 @@ func _u_boat(xf: Transform3D, kind := "small") -> void:
 	cols.append([xf * Transform3D(Basis(), Vector3(0, y + hh * 0.5, 0)), Vector3(B, hh * 1.5, L)])
 
 
-## 倉庫
+## 倉庫（中央の戸口から入れる）
 func _u_warehouse(xf: Transform3D, wd := 20.0, dp := 12.0, kind := "brick") -> void:
 	match kind:
 		"brick":
 			var h := 9.0
+			var nd := int(wd / 4.0)
+			var dk := nd / 2
+			var door_x := -wd * 0.5 + 4.0 * (dk + 0.5)
 			foundation(xf, wd + 0.3, dp + 0.3, 0.5, "stonewall", STONE)
-			bx("brick", xf, Vector3(0, 0.5 + h * 0.5, 0), Vector3(wd, h, dp), Color(1.0, 0.66, 0.55))
-			for i in int(wd / 4.0):
+			shell("brick", xf, Vector3(0, 0.5 + h * 0.5, 0), Vector3(wd, h, dp), Color(1.0, 0.66, 0.55), [{"side": 0, "u": door_x, "w": 2.0, "h": 3.0}], {"th": 0.3})
+			for i in nd:
 				var x := -wd * 0.5 + 4.0 * (i + 0.5)
 				for sgn in [-1.0, 1.0]:
 					bx("metal", xf, Vector3(x, 0.5 + 6.0, sgn * (dp * 0.5 + 0.05)), Vector3(1.2, 1.8, 0.08), Color(0.25, 0.3, 0.28))
+					if i == dk and sgn > 0.0:
+						# 鉄扉を横へ引いてある
+						bx("metal", xf, Vector3(x + 2.05, 0.5 + 1.6, dp * 0.5 + 0.14), Vector3(2.0, 3.0, 0.06), Color(0.3, 0.32, 0.3))
+						continue
 					bx("metal", xf, Vector3(x, 0.5 + 1.6, sgn * (dp * 0.5 + 0.05)), Vector3(2.0, 3.0, 0.08), Color(0.3, 0.32, 0.3))
 			bx("plaster", xf, Vector3(0, 0.5 + h, 0), Vector3(wd + 0.3, 0.4, dp + 0.3), STONE)
 			roof(xf, 0.5 + h + 0.2, wd * 0.5 + 0.4, dp * 0.5 + 0.4, 2.4, "gable", "rooftile", Color(0.38, 0.4, 0.44), 0.0)
-			col(xf, Vector3(0, 0.5 + h * 0.5, 0), Vector3(wd, h + 1.0, dp))
+			col(xf, Vector3(0, 0.5 + h + 0.6, 0), Vector3(wd, 1.2, dp))
+			var run := entry_steps(xf, door_x, dp * 0.5 + 0.15, 0.5, 2.6)
+			var dd := door(Vector3(door_x, 0.5, dp * 0.5), Vector3.BACK, 2.0, 3.0)
+			dd["out"] = Vector3(door_x, 0, dp * 0.5 + 0.15 + run + 1.5)
+			_wh_brick += 1
+			reg_interior("factory" if _wh_brick == 1 else "warehouse", xf, [fl(0.5, Rect2(-wd * 0.5 + 0.3, -dp * 0.5 + 0.3, wd - 0.6, dp - 0.6), h)], [dd])
 		"concrete":
 			concrete_building(xf, wd, dp, 2, {"tank": false, "sign": false, "col": Color(0.78, 0.76, 0.72)})
 			return
 		"wood":
 			var h := 4.0
+			var nd := maxi(1, int(wd / 5.0))
+			var dk := nd / 2
+			var door_x := -wd * 0.5 + 5.0 * (dk + 0.5)
 			foundation(xf, wd + 0.3, dp + 0.3, 0.4, "stonewall", STONE)
-			bx("darkwood", xf, Vector3(0, 0.4 + h * 0.5, 0), Vector3(wd, h, dp), Color(0.85, 0.78, 0.7))
+			shell("darkwood", xf, Vector3(0, 0.4 + h * 0.5, 0), Vector3(wd, h, dp), Color(0.85, 0.78, 0.7), [{"side": 0, "u": door_x, "w": 2.0, "h": 2.8}], {"th": 0.2})
 			for i in int(wd / 5.0):
+				if i == dk:
+					door_frame(xf, door_x, 0.4, dp * 0.5, 2.0, 2.8, "slide", DARK)
+					continue
 				bx("darkwood", xf, Vector3(-wd * 0.5 + 5.0 * (i + 0.5), 0.4 + 1.5, dp * 0.5 + 0.04), Vector3(2.4, 3.0, 0.06), Color(0.35, 0.3, 0.26))
 			roof(xf, 0.4 + h + 0.1, wd * 0.5 + 0.8, dp * 0.5 + 0.9, 3.0, "gable", "thatch" if w.era_id in ["jomon_kofun", "asuka_nara"] else "rooftile", THATCH if w.era_id in ["jomon_kofun", "asuka_nara"] else TILE_DARK, 0.0)
-			col(xf, Vector3(0, 0.4 + h * 0.5, 0), Vector3(wd, h + 1.0, dp))
+			col(xf, Vector3(0, 0.4 + h + 0.9, 0), Vector3(wd, 1.6, dp))
+			var run := entry_steps(xf, door_x, dp * 0.5 + 0.15, 0.4, 2.6)
+			var dd := door(Vector3(door_x, 0.4, dp * 0.5), Vector3.BACK, 2.0, 2.8)
+			dd["out"] = Vector3(door_x, 0, dp * 0.5 + 0.15 + run + 1.5)
+			reg_interior("storehouse", xf, [fl(0.4, Rect2(-wd * 0.5 + 0.2, -dp * 0.5 + 0.2, wd - 0.4, dp - 0.4), h)], [dd])
 		_:
 			kura(xf, wd, dp, 6.0)
 			return
 	occupy(xf, wd + 1, dp + 1, 2.0)
+
+
+var _wh_brick := 0
 
 
 ## 橋。pos=中央(2D)、dir=進行方向、deck_h=床の高さ
@@ -1341,16 +1936,23 @@ func _u_hangar(xf: Transform3D, wd := 30.0, dp := 26.0) -> void:
 	col(xf, Vector3(0, r * 0.6 - 0.5, 0), Vector3(wd * 0.7, 1.0, dp))
 	col(xf, Vector3(0, r * 0.3, -dp * 0.5), Vector3(wd, r * 0.6, 0.5))
 	occupy(xf, wd + 1, dp + 1, 2.0)
+	reg_interior("hangar", xf, [fl(0.2, Rect2(-wd * 0.5 + 0.8, -dp * 0.5 + 0.6, wd - 1.6, dp - 1.2), r * 0.6 - 0.6)],
+		[door(Vector3(0, 0.2, dp * 0.5), Vector3.BACK, wd * 0.7, r * 0.5)])
 
 
 func _u_control_tower(xf: Transform3D) -> void:
 	foundation(xf, 6, 6, 0.3, "concrete", Color(0.7, 0.7, 0.68))
-	bx("concrete", xf, Vector3(0, 0.3 + 5.0, 0), Vector3(5, 10, 5), Color(0.88, 0.86, 0.8))
+	shell("concrete", xf, Vector3(0, 0.3 + 5.0, 0), Vector3(5, 10, 5), Color(0.88, 0.86, 0.8), [{"side": 0, "u": 0.0, "w": 1.2, "h": 2.2}], {"th": 0.25})
+	door_frame(xf, 0.0, 0.3, 2.5, 1.2, 2.2, "frame", Color(0.4, 0.42, 0.45))
 	bx("glass", xf, Vector3(0, 0.3 + 11.2, 0), Vector3(6.2, 2.4, 6.2), Color(0.4, 0.5, 0.55))
 	bx("concrete", xf, Vector3(0, 0.3 + 12.6, 0), Vector3(7.0, 0.4, 7.0), Color(0.85, 0.84, 0.8))
 	kit.rod("metal", xf * Vector3(2, 12.8, 2), xf * Vector3(2, 17, 2), 0.06, 4, Color(0.3, 0.3, 0.3))
-	col(xf, Vector3(0, 6.5, 0), Vector3(6, 13, 6))
+	col(xf, Vector3(0, 0.3 + 11.5, 0), Vector3(6.2, 3.0, 6.2))
+	var run := entry_steps(xf, 0.0, 3.0, 0.3, 1.6, "concrete", Color(0.7, 0.7, 0.68))
 	occupy(xf, 7, 7, 2.0)
+	var dd := door(Vector3(0, 0.3, 2.5), Vector3.BACK, 1.2, 2.2)
+	dd["out"] = Vector3(0, 0, 3.0 + run + 1.4)
+	reg_interior("tower", xf, [fl(0.3, Rect2(-2.25, -2.25, 4.5, 4.5), 3.0)], [dd])
 
 
 ## 国会議事堂（中央塔＋左右の翼）
@@ -1358,24 +1960,35 @@ func _u_diet_building(xf: Transform3D, wd := 110.0) -> void:
 	var granite := Color(0.86, 0.82, 0.74)
 	var dp := 30.0
 	var h := 16.0
+	var cw := 26.0
 	foundation(xf, wd + 2, dp + 2, 1.2, "stonewall", granite)
-	bx("concrete", xf, Vector3(0, 1.2 + h * 0.5, 0), Vector3(wd, h, dp), granite)
+	foundation(xf * Transform3D(Basis(), Vector3(0, 0, 2.0)), cw + 0.4, dp + 6.4, 1.2, "stonewall", granite)
+	# 両翼（中は見えない。中央の広間との境は中央棟の壁）
+	shell("concrete", xf, Vector3(0, 1.2 + h * 0.5, 0), Vector3(wd, h, dp), granite,
+		[{"side": 0, "u": 0.0, "w": cw - 0.6, "h": h}, {"side": 2, "u": 0.0, "w": cw - 0.6, "h": h}], {"th": 0.4, "ceil": false})
 	for f in 3:
 		var wy := 1.2 + f * 5.0 + 2.8
 		for i in 30:
 			var x := -wd * 0.5 + wd * (i + 0.5) / 30.0
+			if absf(x) < cw * 0.5 + 0.5:
+				continue
 			bx("glass", xf, Vector3(x, wy, dp * 0.5 + 0.05), Vector3(1.4, 2.6, 0.08), Color(0.25, 0.28, 0.3))
 			bx("glass", xf, Vector3(x, wy, -dp * 0.5 - 0.05), Vector3(1.4, 2.6, 0.08), Color(0.25, 0.28, 0.3))
 	for i in 31:
 		var x := -wd * 0.5 + wd * i / 30.0
+		if absf(x) < cw * 0.5 + 0.5:
+			continue
 		bx("concrete", xf, Vector3(x, 1.2 + h * 0.5, dp * 0.5 + 0.3), Vector3(0.9, h, 0.6), granite * 1.04)
 	bx("concrete", xf, Vector3(0, 1.2 + h + 0.4, 0), Vector3(wd + 1, 0.8, dp + 1), granite * 1.05)
 	# 翼端のパビリオン
 	for sgn in [-1.0, 1.0]:
 		bx("concrete", xf, Vector3(sgn * (wd * 0.5 - 6.0), 1.2 + (h + 4.0) * 0.5, 0), Vector3(12, h + 4.0, dp + 4.0), granite)
-	# 中央塔（段々ピラミッド）
+		col(xf, Vector3(sgn * (wd * 0.5 - 6.0), 1.2 + (h + 4.0) * 0.5, 0), Vector3(12, h + 4.0, dp + 4.0))
+	# 中央塔（段々ピラミッド）。下は中央広間
 	var cx := xf * Transform3D(Basis(), Vector3(0, 1.2, 0))
-	bx("concrete", cx, Vector3(0, h * 0.5 + 2.0, 2.0), Vector3(26, h + 4.0, dp + 6.0), granite)
+	var cd := dp + 6.0
+	shell("concrete", cx, Vector3(0, h * 0.5 + 2.0, 2.0), Vector3(cw, h + 4.0, cd), granite, [{"side": 0, "u": 0.0, "w": 3.0, "h": 5.0}], {"th": 0.5, "ceil_col": Color(0.82, 0.76, 0.62)})
+	door_frame(cx, 0.0, 0.0, 2.0 + cd * 0.5, 3.0, 5.0, "leaves", Color(0.35, 0.25, 0.18))
 	for k in 4:
 		cyl("concrete", cx, Vector3(-7.5 + k * 5.0, 0, dp * 0.5 + 4.6), 0.8, 0.7, h, 12, granite * 1.05)
 	bx("concrete", cx, Vector3(0, h + 4.6, 2.0), Vector3(20, 5.0, 20), granite)
@@ -1387,9 +2000,13 @@ func _u_diet_building(xf: Transform3D, wd := 110.0) -> void:
 		bx("concrete", cx, Vector3(0, y + 1.0, 2.0), Vector3(s, 2.0, s), granite * (1.0 + k * 0.01))
 		y += 2.0
 	cyl("concrete", cx, Vector3(0, y, 2.0), 1.2, 0.6, 4.0, 8, granite)
-	col(xf, Vector3(0, 1.2 + h * 0.5, 0), Vector3(wd, h + 4.0, dp + 4.0))
-	col(cx, Vector3(0, (y) * 0.5, 2.0), Vector3(20, y, 20))
+	var run := entry_steps(xf, 0.0, 2.0 + cd * 0.5 + 0.2, 1.2, 8.0, "stonewall", granite)
+	col(xf, Vector3(0, 1.2 + h + 0.4, 0), Vector3(wd, 0.8, dp))
+	col(cx, Vector3(0, (h + 2.1 + y) * 0.5, 2.0), Vector3(20, y - h - 2.1, 20))
 	occupy(xf, wd + 4, dp + 12, 4.0)
+	var dd := door(Vector3(0, 1.2, 2.0 + cd * 0.5), Vector3.BACK, 3.0, 5.0)
+	dd["out"] = Vector3(0, 0, 2.0 + cd * 0.5 + 0.2 + run + 2.0)
+	reg_interior("diet", xf, [fl(1.2, Rect2(-cw * 0.5 + 0.5, 2.0 - cd * 0.5 + 0.5, cw - 1.0, cd - 1.0), 13.0)], [dd])
 
 
 # ================================================================ 破壊ユニットのラッパ（自動生成: 各建物を 1 ユニットに）

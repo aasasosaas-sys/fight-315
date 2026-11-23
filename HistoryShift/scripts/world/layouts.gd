@@ -408,7 +408,11 @@ func _raised_hall_body(xf: Transform3D, wd: float, dp: float, fh: float) -> void
 		for j in 3:
 			a.cyl("wood", xf, Vector3(-wd * 0.5 + wd * i / 4.0, -0.5, -dp * 0.5 + dp * j / 2.0), 0.3, 0.28, fh + 0.5, 8, Architecture.DARK)
 	a.bx("wood", xf, Vector3(0, fh, 0), Vector3(wd + 1.4, 0.3, dp + 1.4), Architecture.DARK)
-	a.bx("darkwood", xf, Vector3(0, fh + 1.7, 0), Vector3(wd, 3.2, dp), Color(0.92, 0.84, 0.74))
+	# 中に入れる（正面の板戸・梯子）
+	a.shell("darkwood", xf, Vector3(0, fh + 1.75, 0), Vector3(wd, 3.2, dp), Color(0.92, 0.84, 0.74), [{"side": 0, "u": wd * 0.125, "w": 1.4, "h": 2.3}], {"th": 0.15})
+	a.door_frame(xf, wd * 0.125, fh + 0.15, dp * 0.5, 1.4, 2.3, "leaves", Architecture.DARK)
+	var run: float = a.entry_steps(xf, wd * 0.125, dp * 0.5 + 0.7, fh + 0.15, 1.2, "wood", Architecture.DARK, true)
+	a.col(xf, Vector3(0, fh, 0), Vector3(wd + 1.4, 0.3, dp + 1.4))
 	for i in 5:
 		a.cyl("wood", xf, Vector3(-wd * 0.5 + wd * i / 4.0, fh, dp * 0.5), 0.25, 0.25, 3.4, 6, Architecture.DARK)
 	a.roof(xf, fh + 3.4, wd * 0.5 + 1.6, dp * 0.5 + 1.8, dp * 0.55, "gable", "thatch", Architecture.THATCH, 0.0, Color(0.5, 0.4, 0.3), 1.0)
@@ -419,8 +423,11 @@ func _raised_hall_body(xf: Transform3D, wd: float, dp: float, fh: float) -> void
 		a.kit.rod("wood", top + xf.basis * Vector3(0, -0.6, 0.8), top + xf.basis * Vector3(0, 1.8, -0.9), 0.1, 4, Architecture.DARK)
 	for k in 5:
 		a.kit.cylinder("wood", xf * Transform3D(Basis(Vector3.BACK, PI * 0.5), Vector3(-wd * 0.35 + k * wd * 0.175 + 0.6, fh + 3.4 + dp * 0.55 + 0.45, 0)), 0.22, 0.22, 1.2, 6, Architecture.DARK)
-	a.col(xf, Vector3(0, (fh + 3.4) * 0.5, 0), Vector3(wd, fh + 3.4, dp))
+	a.col(xf, Vector3(0, fh + 4.0, 0), Vector3(wd, 1.0, dp))
 	a.occupy(xf, wd + 2, dp + 2, 2.0)
+	var dd := Architecture.door(Vector3(wd * 0.125, fh + 0.15, dp * 0.5), Vector3.BACK, 1.4, 2.3)
+	dd["out"] = Vector3(wd * 0.125, 0, dp * 0.5 + 0.7 + run + 1.4)
+	a.reg_interior("raised_hall", xf, [Architecture.fl(fh + 0.15, Rect2(-wd * 0.5 + 0.15, -dp * 0.5 + 0.15, wd - 0.3, dp - 0.3), 3.2)], [dd])
 
 
 ## 回廊（朱塗りの柱列と瓦屋根）
@@ -467,7 +474,9 @@ func _kinkaku_body(xf: Transform3D) -> void:
 	a.foundation(xf, 13.5, 11.5, 0.6)
 	var gold := Architecture.GOLD
 	# 1 層: 白木と障子
-	a.bx("plaster", xf, Vector3(0, 0.6 + 1.6, 0), Vector3(12, 3.2, 10), Color(0.95, 0.92, 0.85))
+	a.shell("plaster", xf, Vector3(0, 0.6 + 1.6, 0), Vector3(12, 3.2, 10), Color(0.95, 0.92, 0.85), [{"side": 0, "u": 1.5, "w": 2.0, "h": 2.5}], {"th": 0.15})
+	a.door_frame(xf, 1.5, 0.6, 5.0, 2.0, 2.5, "slide", Color(0.6, 0.5, 0.4))
+	var run: float = a.entry_steps(xf, 1.5, 5.75, 0.6, 2.4)
 	for i in 5:
 		a.cyl("wood", xf, Vector3(-6 + i * 3, 0.6, 5), 0.16, 0.16, 3.2, 6, Color(0.85, 0.75, 0.62))
 	a.bx("wood", xf, Vector3(0, 0.6 + 3.3, 0), Vector3(13, 0.25, 11), Color(0.75, 0.65, 0.55))
@@ -477,8 +486,11 @@ func _kinkaku_body(xf: Transform3D) -> void:
 	a.bx("gold", xf, Vector3(0, 0.6 + 7.2 + 1.3, 0), Vector3(7.5, 2.6, 7.5), gold)
 	a.roof(xf, 0.6 + 7.2 + 2.6 + 0.1, 5.6, 5.6, 2.8, "pyramid", "thatch", Architecture.BARK, 0.7, gold, 1.5)
 	a.kit.box("gold", xf * Transform3D(Basis(), Vector3(0, 0.6 + 7.2 + 2.6 + 3.3, 0)), Vector3(0.6, 1.2, 0.3), gold)
-	a.col(xf, Vector3(0, 5.0, 0), Vector3(12, 10, 10))
+	a.col(xf, Vector3(0, 0.6 + 3.3 + 3.2, 0), Vector3(12, 6.4, 10))
 	a.occupy(xf, 14, 12, 0.0)
+	var dd := Architecture.door(Vector3(1.5, 0.6, 5.0), Vector3.BACK, 2.0, 2.5)
+	dd["out"] = Vector3(1.5, 0, 5.75 + run + 1.4)
+	a.reg_interior("kinkaku", xf, [Architecture.fl(0.6, Rect2(-5.85, -4.85, 11.7, 9.7), 3.2)], [dd])
 
 
 func _kairo_black(c: Array) -> void:
@@ -992,6 +1004,8 @@ func _port_layout(lm: Dictionary, pier_kind: String, boats: Array, wh_kind: Stri
 	street(lm, -40, shore_z - 8.0, 40, shore_z - 8.0, 3.2)
 	street(lm, 0, -30, 0, shore_z - 8.0, 3.0)
 	extra.call(shore_z)
+	# 実寸の大型船（data/ships → scripts/world/ships）: 岸近くか沖に錨泊。歩ける船内・浸水・沈没
+	ShipYard.place_port(w, lm, era, shore_z)
 
 
 func _port_jomon_kofun(lm: Dictionary) -> void:

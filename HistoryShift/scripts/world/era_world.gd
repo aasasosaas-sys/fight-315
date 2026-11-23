@@ -61,6 +61,8 @@ var next_unit_id := 0           # 破壊ユニットの ID（Architecture.begin_
 var unit_defs: Array = []       # 破壊ユニットの定義（Destruction が Destructible に変換）
 var tree_defs: Array = []       # 倒せる木 [species, Transform3D, [MultiMesh, index]...]
 var destruction: Destruction    # 破壊システム（ワールドごとに作り直し＝再入場でリセット）
+var interior_defs: Array = []   # 入れる建物（Architecture.reg_interior が登録。内装は WorldInteriors が近づいた時だけ生成）
+var interiors: WorldInteriors
 
 
 static func build(p_era: Dictionary) -> EraWorld:
@@ -148,6 +150,8 @@ func _build() -> void:
 	_tick("props")
 	destruction = Destruction.attach(self)
 	_tick("destruction")
+	interiors = WorldInteriors.attach(self)
+	_tick("interiors")
 	env_nodes = WorldAtmosphere.build_environment(self, style)
 	for key in landmarks:
 		var b := WorldAtmosphere.make_beacon(landmarks[key]["pos"])
@@ -259,6 +263,51 @@ func set_time_of_day(hours: float) -> void:
 		for l in get_tree().get_nodes_in_group("world_night_light"):
 			if is_ancestor_of(l):
 				l.visible = day < 0.35
+
+
+# ---- 屋内（scripts/world/interiors/）
+## 建物（破壊ユニット ID）の屋内の NPC 地点（ワールド座標）。内装を生成していなくても返す
+func get_interior_points(unit_id: int) -> Array:
+	var out: Array = []
+	if interiors:
+		for s in interiors.spots(unit_id):
+			out.append(s["pos"])
+	return out
+
+
+## 地点の詳細: [{pos, yaw, floor, role(stand/sit/work/guard/scene)}]
+func get_interior_spots(unit_id: int) -> Array:
+	return interiors.spots(unit_id) if interiors else []
+
+
+## 史実の場面の建物（"honnoji" "omiya" "tenshu" "rokumeikan" など、data/interiors/kits.json の scenes）。無ければ -1
+func find_interior(tag: String) -> int:
+	return interiors.find(tag) if interiors else -1
+
+
+## 入れる建物の ID 一覧（type: 内装キット名、landmark で絞り込み）
+func find_interiors(type := "", landmark := "") -> Array:
+	return interiors.find_all(type, landmark) if interiors else []
+
+
+## {id, type, name, basis, era, landmark, floors, tags, doors:[{pos, out, normal}], loaded, blocked}
+func get_interior_info(unit_id: int) -> Dictionary:
+	return interiors.info(unit_id) if interiors else {}
+
+
+## 内装をすぐ生成する（上階に NPC を立たせる前など）。pin=true の間は離れても外さない
+func ensure_interior(unit_id: int, pin := true) -> Node3D:
+	return interiors.ensure(unit_id, pin) if interiors else null
+
+
+func release_interior(unit_id: int) -> void:
+	if interiors:
+		interiors.release(unit_id)
+
+
+## p がどの建物の中か（-1 = 屋外）
+func interior_at(p: Vector3) -> int:
+	return interiors.inside_at(p) if interiors else -1
 
 
 func add_street_point(p: Vector3) -> void:

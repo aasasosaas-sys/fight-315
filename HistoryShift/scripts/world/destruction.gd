@@ -71,6 +71,7 @@ static func attach(w: Node3D) -> Destruction:
 static func blast_at(_tree: SceneTree, pos: Vector3, radius: float, damage: float, team := -1, fire_chance := 0.2) -> void:
 	if current != null and is_instance_valid(current) and current.is_inside_tree():
 		current.blast(pos, radius, damage, team, fire_chance)
+	ShipYard.blast_all(pos, radius, damage, team, fire_chance)   # 港の大型船（浸水・誘爆）
 
 
 static func note_player() -> void:
@@ -259,6 +260,10 @@ func collapse_roof(u: Destructible, dir: Vector3) -> void:
 
 func destroy_unit(u: Destructible, dir: Vector3, power: float) -> void:
 	var ctr := u.center()
+	# 屋内: 内装を外し、中にいるプレイヤーを外へ押し出す（瓦礫の当たり判定を置く前に）
+	var wi = world.get("interiors")
+	if wi != null and is_instance_valid(wi):
+		wi.on_destroyed(u)
 	var mat: String = u.cfg["mat"]
 	if u.palette.is_empty():
 		u.palette = Fracture.material_palette(u.def)

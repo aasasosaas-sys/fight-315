@@ -5,6 +5,8 @@ extends Camera3D
 enum Mode { ON_FOOT, GROUND, PLANE, ORBIT }
 
 static var I: CameraRig
+## 屋内（WorldInteriors が設定）: 腕を短く・低く、壁の手前で止める
+static var indoor := false
 
 var target: Node3D
 var mode := Mode.ON_FOOT
@@ -118,6 +120,11 @@ func _process(dt: float) -> void:
 	var want_dist := 16.0 if plane else ((2.9 if aiming else 4.8) if foot else 8.5)
 	var height := 2.5 if plane else (1.75 if foot else 2.6)
 	var shoulder := (1.0 if aiming else 0.75) if foot else 0.0
+	var inside := indoor and foot
+	if inside:
+		want_dist = 1.9 if aiming else 2.5
+		height = 1.5
+		shoulder = 0.55 if aiming else 0.4
 	_dist = lerpf(_dist, want_dist, 1.0 - exp(-dt * 10.0))
 	_smooth = _smooth.lerp(target.global_position, 1.0 - exp(-dt * (30.0 if foot else (40.0 if plane else 14.0))))
 	var pivot := _smooth + Vector3.UP * height + rb.x * shoulder
@@ -130,6 +137,24 @@ func _process(dt: float) -> void:
 	var hit := space.intersect_ray(q)
 	if not hit.is_empty():
 		desired = pivot + (hit["position"] - pivot) * 0.9
+		if inside:
+			# 屋内は壁・天井から少し離す（近接面で画面が欠けないように）
+			var back: Vector3 = hit["position"] - pivot
+			desired = pivot + back.normalized() * maxf(back.length() - 0.28, 0.15)
+	elif inside:
+		# 腕の先が天井・壁のすぐ手前でないか、太さのある判定で確かめる
+		var sp := SphereShape3D.new()
+		sp.radius = 0.22
+		var sq := PhysicsShapeQueryParameters3D.new()
+		sq.shape = sp
+		sq.transform = Transform3D(Basis(), pivot)
+		sq.motion = desired - pivot
+		sq.collision_mask = Game.COLLISION_WORLD
+		sq.exclude = _exclude
+		var frac := space.cast_motion(sq)
+		if frac.size() == 2 and frac[0] < 1.0:
+			desired = pivot + (desired - pivot) * maxf(frac[0], 0.1)
+	near = 0.05 if inside else 0.08
 	global_position = desired
 	global_basis = rb
 	var want_fov := 48.0 if aiming else (62.0 if foot else 70.0)

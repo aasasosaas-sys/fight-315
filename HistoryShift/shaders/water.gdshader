@@ -19,6 +19,15 @@ uniform float depth_scale = 4.0;
 uniform float foam_width = 1.2;
 uniform float clarity = 0.6;
 uniform float sparkle = 1.0;
+// 船体の中には海面を描かない（scripts/world/ships/ship_yard.gd が毎フレーム設定）。
+// o: 船の原点(xyz)・半長 / x: 船の右舷軸・半幅 / z: 船尾軸・平行部 / y: 上軸・甲板の高さ / p: (船首の細り, 船尾の細り, 指数, 縮小) / t: (船首・船尾のトランサム幅)
+uniform int dry_n = 0;
+uniform vec4 dry_o[8];
+uniform vec4 dry_x[8];
+uniform vec4 dry_z[8];
+uniform vec4 dry_y[8];
+uniform vec4 dry_p[8];
+uniform vec4 dry_t[8];
 
 varying vec3 v_wpos;
 varying float v_crest;
@@ -52,6 +61,30 @@ void vertex() {
 }
 
 void fragment() {
+	for (int i = 0; i < dry_n; i++) {
+		float hl = dry_o[i].w;
+		if (hl <= 0.0) {
+			continue;
+		}
+		vec3 dd = v_wpos - dry_o[i].xyz;
+		float lz = dot(dd, dry_z[i].xyz);
+		float tt = lz / hl;
+		if (abs(tt) < 0.985) {
+			float ly = dot(dd, dry_y[i].xyz);
+			if (ly < dry_y[i].w) {
+				float lx = dot(dd, dry_x[i].xyz);
+				float m = dry_z[i].w;
+				float a = clamp((abs(tt) - m) / max(1.0 - m, 0.01), 0.0, 1.0);
+				float pe = tt < 0.0 ? dry_p[i].x : dry_p[i].y;
+				float base = pow(max(0.0, 1.0 - pow(a, pe)), dry_p[i].z);
+				float tr = tt < 0.0 ? dry_t[i].x : dry_t[i].y;
+				float hb = dry_x[i].w * (tr + (1.0 - tr) * base) * dry_p[i].w - 0.15;
+				if (abs(lx) < hb) {
+					discard;
+				}
+			}
+		}
+	}
 	float t = TIME;
 	vec2 flow = vec2(flow_speed * t, 0.0);
 	vec2 uvn = (flow_speed > 0.0) ? UV : v_wpos.xz;

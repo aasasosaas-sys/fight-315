@@ -1,0 +1,48 @@
+{
+  "id": "sosen",
+  "variant_of": "ming_junk",
+  "name": {
+    "ja": "宋船（日宋貿易船・仮）",
+    "en": "Song trade junk (placeholder)"
+  },
+  "era": "heian",
+  "year": 1170,
+  "type": "placeholder: Song-dynasty Chinese trading junk of the Nissō trade (日宋貿易), built from the Ming junk data with a vermilion-trimmed paint scheme",
+  "schema_notes": "Variant file: everything not listed here comes from ming_junk.json (variant_of); layout_patch overrides the game layout only.",
+  "basis": [
+    {
+      "fact": "Placeholder — no ship-specific research; Song ocean junks share the Quanzhou-type hull (bulkheads, square transom)",
+      "source_url": "",
+      "year": 1170
+    }
+  ],
+  "layout_patch": {
+    "hull": {
+      "colors": {
+        "hull": [
+          0.45,
+          0.32,
+          0.22
+        ],
+        "bulwark": [
+          0.82,
+          0.24,
+          0.12
+        ],
+        "rail": [
+          0.85,
+          0.3,
+          0.15
+        ],
+        "transom": [
+          0.82,
+          0.24,
+          0.12
+        ]
+      }
+    }
+  },
+  "uncertain": [
+    "Entire vessel is a placeholder variant of ming_junk"
+  ]
+}
