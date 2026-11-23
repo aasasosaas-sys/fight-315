@@ -1,0 +1,136 @@
+{
+ "battles": [
+  {
+   "era": "asuka_nara",
+   "id": "jinshin",
+   "name": "壬申の乱（瀬田の唐橋）",
+   "at": "battlefield",
+   "year": 672,
+   "sides": [
+    {
+     "name": "大海人皇子方",
+     "label": "大海人方の兵",
+     "historical": true
+    },
+    {
+     "name": "大友皇子方",
+     "label": "近江朝廷の兵",
+     "wins": {
+      "vars": {
+       "centralization": -15,
+       "militarism": -5
+      }
+     },
+     "text": "あなたが大海人方の兵を蹴散らしたので、瀬田の決戦は近江朝廷の勝利に。天武天皇の強力な政治は生まれなかった。"
+    }
+   ]
+  },
+  {
+   "era": "heian",
+   "id": "hogen",
+   "name": "保元の乱（白河北殿）",
+   "at": "battlefield",
+   "year": 1156,
+   "sides": [
+    {
+     "name": "後白河天皇方",
+     "label": "後白河方の武士",
+     "historical": true
+    },
+    {
+     "name": "崇徳上皇方",
+     "label": "崇徳方の武士",
+     "wins": {
+      "vars": {
+       "court": 15,
+       "warrior": -10
+      }
+     },
+     "text": "あなたが後白河方を蹴散らし、崇徳上皇方が勝利した。源為義・平忠正らが朝廷の重臣となった。"
+    }
+   ]
+  },
+  {
+   "era": "kamakura_muromachi",
+   "id": "bunei",
+   "name": "文永の役（博多湾）",
+   "at": "battlefield",
+   "year": 1274,
+   "sides": [
+    {
+     "name": "鎌倉の御家人",
+     "label": "御家人の武者",
+     "historical": true
+    },
+    {
+     "name": "元・高麗の軍",
+     "label": "元軍の兵",
+     "wins": {
+      "vars": {
+       "unity": -20,
+       "open_asia": 20,
+       "warrior": -10
+      }
+     },
+     "text": "あなたが御家人たちを蹴散らしたので、元軍は博多に上陸して大宰府まで進んだ。幕府は元への服属を迫られた。"
+    }
+   ]
+  },
+  {
+   "era": "sengoku",
+   "id": "sekigahara",
+   "name": "関ヶ原の戦い",
+   "at": "battlefield",
+   "year": 1600,
+   "sides": [
+    {
+     "name": "東軍",
+     "label": "東軍の兵",
+     "historical": true
+    },
+    {
+     "name": "西軍",
+     "label": "西軍の兵",
+     "wins": {
+      "vars": {
+       "set": {
+        "ruler": "豊臣",
+        "capital": "大坂"
+       },
+       "unity": -10
+      }
+     },
+     "text": "あなたが東軍の兵をなぎ倒したので、関ヶ原は西軍の勝利に。豊臣秀頼のもと大坂の政権が続いた。"
+    }
+   ]
+  },
+  {
+   "era": "edo",
+   "id": "ueno",
+   "name": "上野戦争（戊辰戦争）",
+   "at": "battlefield",
+   "year": 1868,
+   "sides": [
+    {
+     "name": "新政府軍",
+     "label": "新政府軍の兵",
+     "historical": true
+    },
+    {
+     "name": "彰義隊",
+     "label": "彰義隊士",
+     "wins": {
+      "vars": {
+       "set": {
+        "ruler": "徳川"
+       },
+       "commerce": -10,
+       "unity": -10
+      }
+     },
+     "text": "あなたが新政府軍を蹴散らし、彰義隊が上野を守り抜いた。徳川家は江戸に踏みとどまり、新政府は徳川との連合政権になった。"
+    }
+   ]
+  }
+ ]
+}

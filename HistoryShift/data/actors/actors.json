@@ -1,0 +1,3368 @@
+{
+ "actors": [
+  {
+   "name": "卑弥呼",
+   "era": "jomon_kofun",
+   "faction": "邪馬台国",
+   "born": null,
+   "died": 248,
+   "death": "unknown",
+   "active": 189,
+   "tags": [
+    "ruler",
+    "religious",
+    "woman"
+   ],
+   "traits": {
+    "open": 1,
+    "faith": 2,
+    "war": -1
+   },
+   "spawn": "capital"
+  },
+  {
+   "name": "壱与",
+   "era": "jomon_kofun",
+   "faction": "邪馬台国",
+   "born": 235,
+   "died": null,
+   "death": "unknown",
+   "active": 248,
+   "tags": [
+    "ruler",
+    "religious",
+    "woman"
+   ],
+   "traits": {
+    "faith": 2,
+    "war": -1
+   }
+  },
+  {
+   "name": "難升米",
+   "era": "jomon_kofun",
+   "faction": "邪馬台国",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 238,
+   "tags": [
+    "diplomat",
+    "official"
+   ],
+   "traits": {
+    "open": 2,
+    "loyal": 2
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "q": "jomon_kofun_03",
+     "vars": {
+      "open_asia": -25,
+      "religion": -10
+     },
+     "year": 239,
+     "note": "魏への使いが届かず、大陸との往来が細った"
+    }
+   ],
+   "doc": {
+    "name": "魏の皇帝への上表文",
+    "q": "jomon_kofun_03",
+    "choice": 2,
+    "text": "上表文が奪われ、魏との外交は宙に浮いた。国内では卑弥呼の死後、男王がすんなり立つことになった。"
+   }
+  },
+  {
+   "name": "卑弥弓呼",
+   "era": "jomon_kofun",
+   "faction": "狗奴国",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 240,
+   "tags": [
+    "ruler",
+    "warrior",
+    "rebel"
+   ],
+   "traits": {
+    "war": 2,
+    "open": -1
+   }
+  },
+  {
+   "name": "倭王武",
+   "era": "jomon_kofun",
+   "faction": "ヤマト",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 470,
+   "tags": [
+    "ruler",
+    "sacred",
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "open": 1
+   },
+   "aka": [
+    "ワカタケル大王",
+    "雄略天皇"
+   ]
+  },
+  {
+   "name": "筑紫君磐井",
+   "era": "jomon_kofun",
+   "faction": "筑紫",
+   "born": null,
+   "died": 528,
+   "death": "killed",
+   "active": 520,
+   "tags": [
+    "warrior",
+    "rebel"
+   ],
+   "traits": {
+    "war": 1,
+    "open": 1,
+    "loyal": -2
+   },
+   "spawn": "mountain",
+   "contrib": [
+    {
+     "vars": {
+      "centralization": 25,
+      "unity": 15
+     },
+     "year": 520,
+     "note": "九州を戦わずに従えたヤマト政権が強大化した"
+    }
+   ],
+   "saved": {
+    "year": 528,
+    "text": "討たれるはずの磐井が生き延び、筑紫には新羅と結ぶ独立の王国が残った。ヤマト政権の統一は大きく遅れた。",
+    "vars": {
+     "unity": -20,
+     "centralization": -15,
+     "open_asia": 10
+    }
+   }
+  },
+  {
+   "name": "欽明天皇",
+   "era": "jomon_kofun",
+   "faction": "ヤマト",
+   "born": null,
+   "died": 571,
+   "death": "natural",
+   "active": 539,
+   "tags": [
+    "ruler",
+    "sacred"
+   ],
+   "traits": {
+    "faith": 1,
+    "open": 1
+   }
+  },
+  {
+   "name": "物部尾輿",
+   "era": "jomon_kofun",
+   "faction": "物部",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 538,
+   "tags": [
+    "official",
+    "warrior"
+   ],
+   "traits": {
+    "faith": -2,
+    "open": -2,
+    "war": 1
+   },
+   "spawn": "temple",
+   "contrib": [
+    {
+     "q": "jomon_kofun_06",
+     "choice": 2,
+     "note": "排仏派がいなくなり、朝廷は仏教をただちに国家の宗教とした"
+    }
+   ],
+   "persuade": {
+    "開国を勧める": {
+     "force": {
+      "q": "jomon_kofun_06",
+      "choice": 2
+     },
+     "text": "尾輿は異国の神も受け入れると言い出し、崇仏論争は起こらなかった。"
+    }
+   }
+  },
+  {
+   "name": "蘇我稲目",
+   "era": "jomon_kofun",
+   "faction": "蘇我",
+   "born": null,
+   "died": 570,
+   "death": "natural",
+   "active": 536,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": 2,
+    "reform": 1
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "q": "jomon_kofun_06",
+     "choice": 3,
+     "note": "崇仏派がいなくなり、仏像は難波の堀江に流された"
+    }
+   ]
+  },
+  {
+   "name": "上毛野君",
+   "era": "jomon_kofun",
+   "faction": "上毛野",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 500,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": 1
+   }
+  },
+  {
+   "name": "奴国の使者",
+   "era": "jomon_kofun",
+   "faction": "奴国",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 57,
+   "tags": [
+    "diplomat",
+    "official"
+   ],
+   "traits": {
+    "open": 2,
+    "loyal": 2
+   },
+   "spawn": "port",
+   "contrib": [
+    {
+     "q": "jomon_kofun_02",
+     "choice": 2,
+     "note": "代わりに吉野ヶ里の首長が後漢へ朝貢し、金印は吉野ヶ里に渡った"
+    }
+   ]
+  },
+  {
+   "name": "ムラの長老",
+   "era": "jomon_kofun",
+   "faction": "三内丸山のムラ",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": -3000,
+   "tags": [
+    "commoner"
+   ],
+   "traits": {
+    "open": 1,
+    "war": -1
+   },
+   "spawn": "village"
+  },
+  {
+   "name": "厩戸王",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": 574,
+   "died": 622,
+   "death": "illness",
+   "active": 593,
+   "tags": [
+    "ruler",
+    "reformer",
+    "sacred",
+    "scholar"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 2,
+    "faith": 2,
+    "war": -1
+   },
+   "spawn": "temple",
+   "contrib": [
+    {
+     "q": "asuka_nara_01",
+     "choice": 3,
+     "note": "厩戸王がいなければ十七条の心構えは説かれず、のちに中大兄皇子の改新の方針としてまとめられた"
+    }
+   ],
+   "saved": {
+    "year": 622,
+    "text": "病に倒れるはずの厩戸王が回復し、天皇中心の国づくりは20年早まった。蘇我氏の専横も抑えられた。",
+    "vars": {
+     "centralization": 15,
+     "education": 10
+    }
+   },
+   "aka": [
+    "聖徳太子"
+   ]
+  },
+  {
+   "name": "蘇我馬子",
+   "era": "asuka_nara",
+   "faction": "蘇我",
+   "born": null,
+   "died": 626,
+   "death": "natural",
+   "active": 572,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": 2,
+    "war": 1,
+    "loyal": -1
+   },
+   "spawn": "temple",
+   "contrib": [
+    {
+     "vars": {
+      "religion": -25,
+      "education": -10
+     },
+     "year": 600,
+     "note": "仏教の後ろ盾を失い、飛鳥寺の造営が止まった"
+    }
+   ]
+  },
+  {
+   "name": "中大兄皇子",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": 626,
+   "died": 671,
+   "death": "illness",
+   "active": 644,
+   "tags": [
+    "ruler",
+    "reformer",
+    "sacred"
+   ],
+   "traits": {
+    "reform": 2,
+    "war": 1,
+    "open": 1
+   },
+   "aka": [
+    "天智天皇"
+   ]
+  },
+  {
+   "name": "中臣鎌足",
+   "era": "asuka_nara",
+   "faction": "中大兄派",
+   "born": 614,
+   "died": 669,
+   "death": "illness",
+   "active": 644,
+   "tags": [
+    "official",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2,
+    "loyal": 2,
+    "open": 1
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "q": "asuka_nara_02",
+     "choice": 0,
+     "note": "即位を急ぐなと諫める者がおらず、中大兄皇子がその場で即位した"
+    }
+   ],
+   "schedule": [
+    {
+     "event": "乙巳の変の密議",
+     "at": "capital",
+     "year": 645,
+     "missed": {
+      "force": {
+       "q": "asuka_nara_02",
+       "choice": 0
+      }
+     },
+     "text": "密議に鎌足が遅れ、中大兄皇子は誰にも止められずに即位まで突っ走った。"
+    }
+   ]
+  },
+  {
+   "name": "中臣御食子",
+   "era": "asuka_nara",
+   "faction": "中臣",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 600,
+   "tags": [
+    "official",
+    "religious"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": -1
+   }
+  },
+  {
+   "name": "大海人皇子",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": null,
+   "died": 686,
+   "death": "illness",
+   "active": 671,
+   "tags": [
+    "ruler",
+    "warrior",
+    "sacred"
+   ],
+   "traits": {
+    "war": 2,
+    "reform": 1
+   },
+   "aka": [
+    "天武天皇"
+   ]
+  },
+  {
+   "name": "皇極天皇",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": 594,
+   "died": 661,
+   "death": "illness",
+   "active": 642,
+   "tags": [
+    "ruler",
+    "sacred",
+    "woman"
+   ],
+   "traits": {
+    "faith": 1
+   },
+   "aka": [
+    "斉明天皇"
+   ]
+  },
+  {
+   "name": "豊璋",
+   "era": "asuka_nara",
+   "faction": "百済",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 631,
+   "tags": [
+    "foreigner",
+    "diplomat"
+   ],
+   "traits": {
+    "war": 1,
+    "open": 2
+   }
+  },
+  {
+   "name": "長屋王",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": 684,
+   "died": 729,
+   "death": "suicide",
+   "active": 721,
+   "tags": [
+    "official",
+    "sacred"
+   ],
+   "traits": {
+    "reform": 1,
+    "loyal": 2
+   },
+   "saved": {
+    "year": 729,
+    "text": "長屋王の変が防がれ、皇族の左大臣が藤原氏を抑え続けた。藤原四子の台頭は遅れた。",
+    "vars": {
+     "court": 10,
+     "centralization": 10
+    }
+   }
+  },
+  {
+   "name": "橘諸兄",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": 684,
+   "died": 757,
+   "death": "natural",
+   "active": 737,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "reform": 1,
+    "loyal": 1
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "vars": {
+      "centralization": -20,
+      "court": -10
+     },
+     "year": 740,
+     "note": "政権が崩れ、班田収授はなし崩しになった"
+    }
+   ]
+  },
+  {
+   "name": "山部王",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": 737,
+   "died": 806,
+   "death": "natural",
+   "active": 770,
+   "tags": [
+    "sacred"
+   ],
+   "traits": {
+    "reform": 2
+   },
+   "aka": [
+    "桓武天皇（山部王）"
+   ]
+  },
+  {
+   "name": "聖武天皇",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": 701,
+   "died": 756,
+   "death": "illness",
+   "active": 724,
+   "tags": [
+    "ruler",
+    "sacred"
+   ],
+   "traits": {
+    "faith": 2,
+    "war": -1
+   }
+  },
+  {
+   "name": "小野妹子",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 607,
+   "tags": [
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2,
+    "loyal": 2
+   },
+   "spawn": "port",
+   "contrib": [
+    {
+     "q": "asuka_nara_05",
+     "choice": 2,
+     "note": "国書を取り繕える使者がおらず、隋との国交は断絶した"
+    }
+   ],
+   "doc": {
+    "name": "「日出づる処の天子」の国書",
+    "q": "asuka_nara_05",
+    "choice": 2,
+    "text": "国書が盗まれ、妹子は手ぶらで煬帝の前に出る羽目に。国交は開かれず、留学生も送れなかった。"
+   },
+   "schedule": [
+    {
+     "event": "遣隋使の船出",
+     "at": "port",
+     "year": 607,
+     "missed": {
+      "vars": {
+       "open_asia": -20,
+       "education": -10
+      }
+     },
+     "text": "妹子が船出に間に合わず、遣隋使は一年遅れた。留学生の派遣も先送りになった。"
+    }
+   ]
+  },
+  {
+   "name": "高向玄理",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": null,
+   "died": 654,
+   "death": "illness",
+   "active": 608,
+   "tags": [
+    "scholar",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 2
+   }
+  },
+  {
+   "name": "僧旻",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": null,
+   "died": 653,
+   "death": "illness",
+   "active": 608,
+   "tags": [
+    "religious",
+    "scholar"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 2,
+    "faith": 1
+   }
+  },
+  {
+   "name": "南淵請安",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 608,
+   "tags": [
+    "scholar"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 2
+   }
+  },
+  {
+   "name": "鑑真",
+   "era": "asuka_nara",
+   "faction": "唐",
+   "born": 688,
+   "died": 763,
+   "death": "natural",
+   "active": 753,
+   "tags": [
+    "religious",
+    "foreigner"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": 2
+   }
+  },
+  {
+   "name": "桓武天皇",
+   "era": "heian",
+   "faction": "朝廷",
+   "born": 737,
+   "died": 806,
+   "death": "natural",
+   "active": 781,
+   "tags": [
+    "ruler",
+    "sacred",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2,
+    "war": 1
+   }
+  },
+  {
+   "name": "最澄",
+   "era": "heian",
+   "faction": "天台宗",
+   "born": 767,
+   "died": 822,
+   "death": "illness",
+   "active": 785,
+   "tags": [
+    "religious",
+    "scholar"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": 1
+   }
+  },
+  {
+   "name": "和気清麻呂",
+   "era": "heian",
+   "faction": "朝廷",
+   "born": 733,
+   "died": 799,
+   "death": "natural",
+   "active": 769,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "loyal": 2,
+    "reform": 1
+   }
+  },
+  {
+   "name": "吉備真備",
+   "era": "heian",
+   "faction": "朝廷",
+   "born": 695,
+   "died": 775,
+   "death": "natural",
+   "active": 735,
+   "tags": [
+    "scholar",
+    "official",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 1
+   }
+  },
+  {
+   "name": "平将門",
+   "era": "heian",
+   "faction": "坂東",
+   "born": null,
+   "died": 940,
+   "death": "killed",
+   "active": 935,
+   "tags": [
+    "warrior",
+    "rebel"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": -2
+   },
+   "spawn": "castle",
+   "contrib": [
+    {
+     "vars": {
+      "warrior": -20
+     },
+     "year": 935,
+     "note": "坂東の武士が力を伸ばす流れが遅れた"
+    }
+   ],
+   "saved": {
+    "year": 940,
+    "text": "討たれるはずの将門が生き延び、新皇の関東政権が続いた。",
+    "force": {
+     "q": "heian_05",
+     "choice": 1
+    }
+   }
+  },
+  {
+   "name": "藤原秀郷",
+   "era": "heian",
+   "faction": "朝廷",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 939,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "loyal": 1,
+    "war": 1
+   },
+   "spawn": "battlefield",
+   "contrib": [
+    {
+     "q": "heian_05",
+     "choice": 1,
+     "note": "将門を討つ者がおらず、関東政権が続いた"
+    }
+   ]
+  },
+  {
+   "name": "藤原純友",
+   "era": "heian",
+   "faction": "瀬戸内",
+   "born": null,
+   "died": 941,
+   "death": "killed",
+   "active": 936,
+   "tags": [
+    "warrior",
+    "rebel"
+   ],
+   "traits": {
+    "war": 2,
+    "open": 1,
+    "loyal": -2
+   },
+   "spawn": "port",
+   "contrib": [
+    {
+     "vars": {
+      "warrior": -10,
+      "centralization": 10
+     },
+     "year": 939,
+     "note": "瀬戸内の海は朝廷の手に戻った"
+    }
+   ],
+   "saved": {
+    "year": 941,
+    "text": "討たれるはずの純友が逃げ延び、大宰府を拠点に大陸との交易を独占した。",
+    "force": {
+     "q": "heian_05",
+     "choice": 3
+    }
+   }
+  },
+  {
+   "name": "藤原忠平",
+   "era": "heian",
+   "faction": "摂関家",
+   "born": 880,
+   "died": 949,
+   "death": "natural",
+   "active": 909,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "loyal": 1,
+    "reform": -1
+   }
+  },
+  {
+   "name": "藤原良房",
+   "era": "heian",
+   "faction": "摂関家",
+   "born": 804,
+   "died": 872,
+   "death": "natural",
+   "active": 842,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "loyal": -1,
+    "reform": -1
+   },
+   "successor": "藤原基経"
+  },
+  {
+   "name": "藤原基経",
+   "era": "heian",
+   "faction": "摂関家",
+   "born": 836,
+   "died": 891,
+   "death": "natural",
+   "active": 872,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "loyal": -1
+   }
+  },
+  {
+   "name": "藤原実資",
+   "era": "heian",
+   "faction": "摂関家",
+   "born": 957,
+   "died": 1046,
+   "death": "natural",
+   "active": 1000,
+   "tags": [
+    "official",
+    "scholar"
+   ],
+   "traits": {
+    "loyal": 2,
+    "reform": 1
+   }
+  },
+  {
+   "name": "藤原頼通",
+   "era": "heian",
+   "faction": "摂関家",
+   "born": 992,
+   "died": 1074,
+   "death": "natural",
+   "active": 1017,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "faith": 2,
+    "war": -2
+   },
+   "spawn": "village",
+   "contrib": [
+    {
+     "q": "heian_06",
+     "choice": 0,
+     "note": "鳳凰堂は建たず、極楽往生の願いは念仏の教団へ向かった"
+    }
+   ]
+  },
+  {
+   "name": "法然",
+   "era": "heian",
+   "faction": "浄土宗",
+   "born": 1133,
+   "died": 1212,
+   "death": "natural",
+   "active": 1175,
+   "tags": [
+    "religious"
+   ],
+   "traits": {
+    "faith": 2,
+    "reform": 1
+   }
+  },
+  {
+   "name": "成尋",
+   "era": "heian",
+   "faction": "天台宗",
+   "born": 1011,
+   "died": 1081,
+   "death": "natural",
+   "active": 1072,
+   "tags": [
+    "religious",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2,
+    "faith": 2
+   }
+  },
+  {
+   "name": "定朝",
+   "era": "heian",
+   "faction": "仏師",
+   "born": null,
+   "died": 1057,
+   "death": "natural",
+   "active": 1020,
+   "tags": [
+    "artist",
+    "merchant"
+   ],
+   "traits": {
+    "faith": 1
+   }
+  },
+  {
+   "name": "平清盛",
+   "era": "heian",
+   "faction": "平氏",
+   "born": 1118,
+   "died": 1181,
+   "death": "illness",
+   "active": 1156,
+   "tags": [
+    "ruler",
+    "warrior",
+    "merchant"
+   ],
+   "traits": {
+    "open": 2,
+    "war": 1,
+    "reform": 1
+   },
+   "spawn": "port",
+   "contrib": [
+    {
+     "vars": {
+      "warrior": -15,
+      "commerce": -15,
+      "open_asia": -15
+     },
+     "year": 1160,
+     "note": "平氏政権も日宋貿易も幻に終わった"
+    }
+   ],
+   "saved": {
+    "year": 1181,
+    "text": "熱病で死ぬはずの清盛が薬で回復した。平氏は源氏の挙兵を退け、福原を都に宋との貿易国家を築いた。",
+    "vars": {
+     "set": {
+      "ruler": "平氏"
+     },
+     "warrior": 15,
+     "commerce": 15,
+     "open_asia": 15
+    }
+   }
+  },
+  {
+   "name": "白河天皇",
+   "era": "heian",
+   "faction": "朝廷",
+   "born": 1053,
+   "died": 1129,
+   "death": "natural",
+   "active": 1073,
+   "tags": [
+    "ruler",
+    "sacred"
+   ],
+   "traits": {
+    "reform": 1,
+    "faith": 2
+   },
+   "aka": [
+    "白河上皇"
+   ]
+  },
+  {
+   "name": "源為義",
+   "era": "heian",
+   "faction": "源氏",
+   "born": 1096,
+   "died": 1156,
+   "death": "executed",
+   "active": 1120,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "loyal": 1,
+    "war": 1
+   },
+   "saved": {
+    "year": 1156,
+    "text": "保元の乱後に斬られるはずの為義が助かり、源氏の勢力は温存された。",
+    "vars": {
+     "warrior": 10,
+     "unity": -5
+    }
+   }
+  },
+  {
+   "name": "紫式部",
+   "era": "heian",
+   "faction": "宮廷",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 1001,
+   "tags": [
+    "artist",
+    "woman",
+    "scholar"
+   ],
+   "traits": {
+    "faith": 1
+   }
+  },
+  {
+   "name": "清少納言",
+   "era": "heian",
+   "faction": "宮廷",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 993,
+   "tags": [
+    "artist",
+    "woman",
+    "scholar"
+   ],
+   "traits": {
+    "open": 1
+   }
+  },
+  {
+   "name": "源頼朝",
+   "era": "kamakura_muromachi",
+   "faction": "鎌倉幕府",
+   "born": 1147,
+   "died": 1199,
+   "death": "accident",
+   "active": 1180,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "reform": 2,
+    "loyal": -1
+   },
+   "saved": {
+    "year": 1199,
+    "text": "落馬で死ぬはずの頼朝が助かり、源氏将軍のもとで幕府は長く安定した。北条氏の執権政治は生まれなかった。",
+    "vars": {
+     "centralization": 15,
+     "unity": 10,
+     "warrior": 5
+    }
+   }
+  },
+  {
+   "name": "後白河法皇",
+   "era": "kamakura_muromachi",
+   "faction": "朝廷",
+   "born": 1127,
+   "died": 1192,
+   "death": "illness",
+   "active": 1158,
+   "tags": [
+    "ruler",
+    "sacred"
+   ],
+   "traits": {
+    "loyal": -2,
+    "faith": 2
+   }
+  },
+  {
+   "name": "藤原秀康",
+   "era": "kamakura_muromachi",
+   "faction": "朝廷",
+   "born": null,
+   "died": 1221,
+   "death": "executed",
+   "active": 1215,
+   "tags": [
+    "official",
+    "warrior"
+   ],
+   "traits": {
+    "loyal": 2,
+    "war": 1
+   }
+  },
+  {
+   "name": "北条泰時",
+   "era": "kamakura_muromachi",
+   "faction": "鎌倉幕府",
+   "born": 1183,
+   "died": 1242,
+   "death": "illness",
+   "active": 1221,
+   "tags": [
+    "ruler",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2,
+    "loyal": 2,
+    "war": -1
+   },
+   "spawn": "castle",
+   "contrib": [
+    {
+     "vars": {
+      "centralization": -15,
+      "unity": -10
+     },
+     "year": 1225,
+     "note": "御成敗式目を定める者がおらず、武家の法はばらばらのままだった"
+    }
+   ]
+  },
+  {
+   "name": "北条時頼",
+   "era": "kamakura_muromachi",
+   "faction": "鎌倉幕府",
+   "born": 1227,
+   "died": 1263,
+   "death": "illness",
+   "active": 1246,
+   "tags": [
+    "ruler"
+   ],
+   "traits": {
+    "faith": 2,
+    "loyal": 1
+   }
+  },
+  {
+   "name": "北条時宗",
+   "era": "kamakura_muromachi",
+   "faction": "鎌倉幕府",
+   "born": 1251,
+   "died": 1284,
+   "death": "illness",
+   "active": 1268,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "open": -2,
+    "loyal": 1
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "vars": {
+      "unity": -20,
+      "centralization": -15
+     },
+     "year": 1270,
+     "note": "執権不在で元への対応が混乱した"
+    }
+   ],
+   "saved": {
+    "year": 1284,
+    "text": "34歳で病死するはずの時宗が薬で長生きし、恩賞に不満な御家人たちをなんとか抑えた。",
+    "vars": {
+     "unity": 10,
+     "centralization": 10
+    }
+   }
+  },
+  {
+   "name": "後醍醐天皇",
+   "era": "kamakura_muromachi",
+   "faction": "朝廷",
+   "born": 1288,
+   "died": 1339,
+   "death": "illness",
+   "active": 1318,
+   "tags": [
+    "ruler",
+    "sacred",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2,
+    "war": 1,
+    "loyal": -1
+   }
+  },
+  {
+   "name": "二条道平",
+   "era": "kamakura_muromachi",
+   "faction": "朝廷",
+   "born": 1287,
+   "died": 1335,
+   "death": "natural",
+   "active": 1330,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "loyal": 2
+   }
+  },
+  {
+   "name": "楠木正成",
+   "era": "kamakura_muromachi",
+   "faction": "南朝",
+   "born": null,
+   "died": 1336,
+   "death": "suicide",
+   "active": 1331,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "loyal": 2,
+    "war": 1
+   },
+   "spawn": "mountain",
+   "contrib": [
+    {
+     "vars": {
+      "court": -15
+     },
+     "year": 1333,
+     "note": "天皇の政治を武力で支える者がいなくなった"
+    }
+   ],
+   "saved": {
+    "year": 1336,
+    "text": "湊川で自害するはずの正成が生き延び、南朝は京都を取り戻して足利方と互角に渡り合った。",
+    "vars": {
+     "court": 15,
+     "unity": -10
+    }
+   }
+  },
+  {
+   "name": "足利尊氏",
+   "era": "kamakura_muromachi",
+   "faction": "足利",
+   "born": 1305,
+   "died": 1358,
+   "death": "illness",
+   "active": 1333,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": -1,
+    "faith": 1
+   },
+   "spawn": "castle",
+   "contrib": [
+    {
+     "q": "kamakura_muromachi_06",
+     "choice": 1,
+     "note": "後醍醐天皇に背く有力武士がおらず、建武の新政が続いた"
+    }
+   ],
+   "persuade": {
+    "忠義を説く": {
+     "force": {
+      "q": "kamakura_muromachi_06",
+      "choice": 1
+     },
+     "text": "尊氏は帝への忠義を誓い直し、新政に背かなかった。"
+    }
+   }
+  },
+  {
+   "name": "足利直義",
+   "era": "kamakura_muromachi",
+   "faction": "足利",
+   "born": 1306,
+   "died": 1352,
+   "death": "poisoned",
+   "active": 1336,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "loyal": 1,
+    "reform": 1
+   },
+   "saved": {
+    "year": 1352,
+    "text": "毒殺されるはずの直義が助かり、尊氏との和解が成った。観応の擾乱は早く収まった。",
+    "vars": {
+     "unity": 10
+    }
+   }
+  },
+  {
+   "name": "足利義満",
+   "era": "kamakura_muromachi",
+   "faction": "室町幕府",
+   "born": 1358,
+   "died": 1408,
+   "death": "illness",
+   "active": 1368,
+   "tags": [
+    "ruler"
+   ],
+   "traits": {
+    "open": 2,
+    "war": 1
+   },
+   "spawn": "temple",
+   "contrib": [
+    {
+     "q": "kamakura_muromachi_03",
+     "choice": 2,
+     "note": "明との国交は義教の代まで開かれなかった"
+    }
+   ],
+   "persuade": {
+    "鎖国を勧める": {
+     "force": {
+      "q": "kamakura_muromachi_03",
+      "choice": 2
+     },
+     "text": "義満は明への朝貢をやめた。勘合貿易は義教の代まで持ち越された。"
+    }
+   }
+  },
+  {
+   "name": "足利義教",
+   "era": "kamakura_muromachi",
+   "faction": "室町幕府",
+   "born": 1394,
+   "died": 1441,
+   "death": "assassinated",
+   "active": 1429,
+   "tags": [
+    "ruler"
+   ],
+   "traits": {
+    "war": 2,
+    "reform": 1,
+    "loyal": -1
+   },
+   "saved": {
+    "year": 1441,
+    "text": "嘉吉の乱で討たれるはずの義教が助かり、将軍の専制がさらに続いた。守護大名は抑え込まれた。",
+    "vars": {
+     "centralization": 20,
+     "unity": 10
+    }
+   }
+  },
+  {
+   "name": "足利義政",
+   "era": "kamakura_muromachi",
+   "faction": "室町幕府",
+   "born": 1436,
+   "died": 1490,
+   "death": "illness",
+   "active": 1449,
+   "tags": [
+    "ruler",
+    "artist"
+   ],
+   "traits": {
+    "war": -2,
+    "faith": 1
+   }
+  },
+  {
+   "name": "細川勝元",
+   "era": "kamakura_muromachi",
+   "faction": "細川",
+   "born": 1430,
+   "died": 1473,
+   "death": "illness",
+   "active": 1445,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": -1
+   },
+   "spawn": "castle",
+   "contrib": [
+    {
+     "vars": {
+      "unity": 20,
+      "centralization": 30
+     },
+     "year": 1460,
+     "note": "東軍の総大将がおらず、応仁の乱はしぼんだ"
+    }
+   ]
+  },
+  {
+   "name": "山名宗全",
+   "era": "kamakura_muromachi",
+   "faction": "山名",
+   "born": 1404,
+   "died": 1473,
+   "death": "illness",
+   "active": 1441,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": -1
+   },
+   "spawn": "village",
+   "contrib": [
+    {
+     "vars": {
+      "unity": 20,
+      "centralization": 30
+     },
+     "year": 1460,
+     "note": "西軍の総大将がおらず、応仁の乱はしぼんだ"
+    }
+   ]
+  },
+  {
+   "name": "道元",
+   "era": "kamakura_muromachi",
+   "faction": "曹洞宗",
+   "born": 1200,
+   "died": 1253,
+   "death": "illness",
+   "active": 1227,
+   "tags": [
+    "religious"
+   ],
+   "traits": {
+    "faith": 2,
+    "war": -2
+   }
+  },
+  {
+   "name": "栄西",
+   "era": "kamakura_muromachi",
+   "faction": "臨済宗",
+   "born": 1141,
+   "died": 1215,
+   "death": "natural",
+   "active": 1191,
+   "tags": [
+    "religious",
+    "scholar"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": 2
+   }
+  },
+  {
+   "name": "絶海中津",
+   "era": "kamakura_muromachi",
+   "faction": "臨済宗",
+   "born": 1336,
+   "died": 1405,
+   "death": "natural",
+   "active": 1378,
+   "tags": [
+    "religious",
+    "scholar",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2
+   }
+  },
+  {
+   "name": "蓮如",
+   "era": "kamakura_muromachi",
+   "faction": "本願寺",
+   "born": 1415,
+   "died": 1499,
+   "death": "natural",
+   "active": 1457,
+   "tags": [
+    "religious"
+   ],
+   "traits": {
+    "faith": 2,
+    "reform": 1
+   }
+  },
+  {
+   "name": "織田信長",
+   "era": "sengoku",
+   "faction": "織田",
+   "born": 1534,
+   "died": 1582,
+   "death": "suicide",
+   "active": 1560,
+   "tags": [
+    "ruler",
+    "warrior",
+    "reformer"
+   ],
+   "traits": {
+    "war": 2,
+    "open": 2,
+    "reform": 2,
+    "faith": -2,
+    "loyal": -1
+   },
+   "spawn": "village",
+   "contrib": [
+    {
+     "q": "sengoku_05",
+     "choice": 3,
+     "note": "主を失った織田家は分裂し、毛利が義昭を奉じて上洛した"
+    }
+   ],
+   "saved": {
+    "year": 1582,
+    "text": "本能寺の襲撃から逃れた信長が安土へ戻って光秀を討ち、天下統一を成し遂げた。",
+    "force": {
+     "q": "sengoku_05",
+     "choice": 0
+    }
+   },
+   "schedule": [
+    {
+     "event": "本能寺に入る",
+     "at": "capital",
+     "year": 1582,
+     "missed": {
+      "force": {
+       "q": "sengoku_05",
+       "choice": 0
+      }
+     },
+     "text": "信長は本能寺に入るのが遅れ、宿所を変えて光秀の襲撃をかわした。"
+    }
+   ]
+  },
+  {
+   "name": "豊臣秀吉",
+   "era": "sengoku",
+   "faction": "豊臣",
+   "born": 1537,
+   "died": 1598,
+   "death": "illness",
+   "active": 1573,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "open": 1,
+    "loyal": 1
+   },
+   "spawn": "mountain",
+   "contrib": [
+    {
+     "q": "sengoku_05",
+     "choice": 2,
+     "note": "中国大返しが起きず、山崎の戦いで光秀が勝った"
+    }
+   ],
+   "saved": {
+    "year": 1598,
+    "text": "病死するはずの秀吉が薬で回復し、秀頼の成人まで政権を守り抜いた。豊臣の天下が続いた。",
+    "vars": {
+     "set": {
+      "ruler": "豊臣",
+      "capital": "大坂"
+     },
+     "unity": 5
+    }
+   },
+   "schedule": [
+    {
+     "event": "中国大返し",
+     "at": "mountain",
+     "year": 1582,
+     "missed": {
+      "force": {
+       "q": "sengoku_05",
+       "choice": 2
+      }
+     },
+     "text": "秀吉は天王山に着くのが遅れ、山崎の戦いは光秀の勝利に終わった。"
+    }
+   ],
+   "aka": [
+    "羽柴秀吉"
+   ]
+  },
+  {
+   "name": "徳川家康",
+   "era": "sengoku",
+   "faction": "徳川",
+   "born": 1543,
+   "died": 1616,
+   "death": "illness",
+   "active": 1560,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": 1,
+    "open": 1,
+    "reform": 1
+   },
+   "contrib": [
+    {
+     "vars": {
+      "set": {
+       "ruler": "豊臣",
+       "capital": "大坂"
+      },
+      "unity": -10
+     },
+     "year": 1600,
+     "note": "家康がいなければ関ヶ原は起きず、豊臣政権が続いた"
+    }
+   ]
+  },
+  {
+   "name": "今川義元",
+   "era": "sengoku",
+   "faction": "今川",
+   "born": 1519,
+   "died": 1560,
+   "death": "killed",
+   "active": 1536,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": 1
+   },
+   "saved": {
+    "year": 1560,
+    "text": "桶狭間で討たれるはずの義元が生き延び、駿府から東海道を制した。",
+    "force": {
+     "q": "sengoku_02",
+     "choice": 3
+    }
+   }
+  },
+  {
+   "name": "石田三成",
+   "era": "sengoku",
+   "faction": "豊臣",
+   "born": 1560,
+   "died": 1600,
+   "death": "executed",
+   "active": 1585,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "loyal": 2,
+    "reform": 1,
+    "war": -1
+   },
+   "spawn": "castle",
+   "contrib": [
+    {
+     "q": "sengoku_04",
+     "choice": 0,
+     "note": "三成がおらず、清正が西軍の旗頭になった"
+    }
+   ]
+  },
+  {
+   "name": "加藤清正",
+   "era": "sengoku",
+   "faction": "豊臣",
+   "born": 1562,
+   "died": 1611,
+   "death": "illness",
+   "active": 1583,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": 2
+   }
+  },
+  {
+   "name": "北政所",
+   "era": "sengoku",
+   "faction": "豊臣",
+   "born": null,
+   "died": 1624,
+   "death": "natural",
+   "active": 1561,
+   "tags": [
+    "woman"
+   ],
+   "traits": {
+    "loyal": 1,
+    "faith": 1
+   },
+   "aka": [
+    "ねね",
+    "高台院"
+   ]
+  },
+  {
+   "name": "小早川秀秋",
+   "era": "sengoku",
+   "faction": "小早川",
+   "born": 1582,
+   "died": 1602,
+   "death": "illness",
+   "active": 1597,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "loyal": -1,
+    "war": -1
+   },
+   "spawn": "battlefield",
+   "contrib": [
+    {
+     "vars": {
+      "set": {
+       "ruler": "豊臣",
+       "capital": "大坂"
+      },
+      "unity": -10
+     },
+     "year": 1600,
+     "note": "寝返る者がおらず西軍が勝った"
+    }
+   ],
+   "persuade": {
+    "忠義を説く": {
+     "vars": {
+      "set": {
+       "ruler": "豊臣",
+       "capital": "大坂"
+      },
+      "unity": -10
+     },
+     "year": 1600,
+     "text": "秀秋は豊臣への忠義を貫き、松尾山から東軍に襲いかかった。西軍が勝った。"
+    }
+   }
+  },
+  {
+   "name": "小早川隆景",
+   "era": "sengoku",
+   "faction": "毛利",
+   "born": 1533,
+   "died": 1597,
+   "death": "illness",
+   "active": 1555,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "loyal": 2,
+    "war": -1
+   }
+  },
+  {
+   "name": "毛利輝元",
+   "era": "sengoku",
+   "faction": "毛利",
+   "born": 1553,
+   "died": 1625,
+   "death": "natural",
+   "active": 1570,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": -1,
+    "loyal": 1
+   }
+  },
+  {
+   "name": "黒田長政",
+   "era": "sengoku",
+   "faction": "黒田",
+   "born": 1568,
+   "died": 1623,
+   "death": "illness",
+   "active": 1587,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "loyal": -1,
+    "faith": 1
+   }
+  },
+  {
+   "name": "後藤又兵衛",
+   "era": "sengoku",
+   "faction": "黒田",
+   "born": 1560,
+   "died": 1615,
+   "death": "killed",
+   "active": 1586,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": 1
+   }
+  },
+  {
+   "name": "フランシスコ＝ザビエル",
+   "era": "sengoku",
+   "faction": "イエズス会",
+   "born": 1506,
+   "died": 1552,
+   "death": "illness",
+   "active": 1549,
+   "tags": [
+    "religious",
+    "foreigner"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": 2
+   },
+   "aka": [
+    "ザビエル"
+   ]
+  },
+  {
+   "name": "ガスパル＝コエリョ",
+   "era": "sengoku",
+   "faction": "イエズス会",
+   "born": null,
+   "died": 1590,
+   "death": "illness",
+   "active": 1581,
+   "tags": [
+    "religious",
+    "foreigner"
+   ],
+   "traits": {
+    "faith": 2,
+    "war": 1
+   }
+  },
+  {
+   "name": "種子島時堯",
+   "era": "sengoku",
+   "faction": "種子島",
+   "born": 1528,
+   "died": 1579,
+   "death": "illness",
+   "active": 1542,
+   "tags": [
+    "official",
+    "ruler"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 1
+   },
+   "spawn": "port",
+   "contrib": [
+    {
+     "q": "sengoku_01",
+     "choice": 3,
+     "note": "鉄砲を買う者がおらず、国産は始まらなかった"
+    }
+   ]
+  },
+  {
+   "name": "八板金兵衛",
+   "era": "sengoku",
+   "faction": "種子島",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 1543,
+   "tags": [
+    "merchant",
+    "commoner"
+   ],
+   "traits": {
+    "reform": 1
+   },
+   "contrib": [
+    {
+     "q": "sengoku_01",
+     "choice": 3,
+     "note": "鉄砲を複製できる鍛冶がおらず、国産は始まらなかった"
+    }
+   ]
+  },
+  {
+   "name": "顕如",
+   "era": "sengoku",
+   "faction": "本願寺",
+   "born": 1543,
+   "died": 1592,
+   "death": "illness",
+   "active": 1554,
+   "tags": [
+    "religious"
+   ],
+   "traits": {
+    "faith": 2,
+    "war": 1
+   }
+  },
+  {
+   "name": "吉田兼見",
+   "era": "sengoku",
+   "faction": "吉田神道",
+   "born": 1535,
+   "died": 1610,
+   "death": "natural",
+   "active": 1570,
+   "tags": [
+    "religious"
+   ],
+   "traits": {
+    "faith": 2
+   }
+  },
+  {
+   "name": "里村紹巴",
+   "era": "sengoku",
+   "faction": "連歌",
+   "born": 1525,
+   "died": 1602,
+   "death": "natural",
+   "active": 1570,
+   "tags": [
+    "artist"
+   ],
+   "traits": {
+    "open": 1
+   }
+  },
+  {
+   "name": "森蘭丸",
+   "era": "sengoku",
+   "faction": "織田",
+   "born": 1565,
+   "died": 1582,
+   "death": "killed",
+   "active": 1577,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "loyal": 2
+   }
+  },
+  {
+   "name": "明智光秀",
+   "era": "sengoku",
+   "faction": "織田",
+   "born": 1528,
+   "died": 1582,
+   "death": "killed",
+   "active": 1568,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "loyal": -1,
+    "faith": 1,
+    "reform": 1
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "q": "sengoku_05",
+     "choice": 0,
+     "note": "本能寺の変が起きず、信長が天下統一を成し遂げた"
+    }
+   ],
+   "persuade": {
+    "忠義を説く": {
+     "force": {
+      "q": "sengoku_05",
+      "choice": 0
+     },
+     "text": "光秀は謀反を思いとどまった。本能寺の変は起きず、信長が天下を統一した。"
+    }
+   }
+  },
+  {
+   "name": "武田信玄",
+   "era": "sengoku",
+   "faction": "武田",
+   "born": 1521,
+   "died": 1573,
+   "death": "illness",
+   "active": 1541,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": -1
+   },
+   "saved": {
+    "year": 1573,
+    "text": "病死するはずの信玄が薬で持ち直し、上洛して信長と雌雄を決した。天下は二つに割れた。",
+    "vars": {
+     "warrior": 10,
+     "unity": -20
+    }
+   }
+  },
+  {
+   "name": "上杉謙信",
+   "era": "sengoku",
+   "faction": "上杉",
+   "born": 1530,
+   "died": 1578,
+   "death": "illness",
+   "active": 1548,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": 2,
+    "faith": 2
+   },
+   "saved": {
+    "year": 1578,
+    "text": "急死するはずの謙信が回復し、越後の龍が信長の北陸進出を止め続けた。",
+    "vars": {
+     "warrior": 10,
+     "unity": -10
+    }
+   }
+  },
+  {
+   "name": "本多正純",
+   "era": "edo",
+   "faction": "徳川",
+   "born": 1565,
+   "died": 1637,
+   "death": "natural",
+   "active": 1600,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "loyal": 1
+   }
+  },
+  {
+   "name": "徳川家光",
+   "era": "edo",
+   "faction": "徳川",
+   "born": 1604,
+   "died": 1651,
+   "death": "illness",
+   "active": 1623,
+   "tags": [
+    "ruler"
+   ],
+   "traits": {
+    "war": 1,
+    "open": -2,
+    "reform": 1
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "q": "edo_01",
+     "choice": 0,
+     "note": "家光がいなければ参勤交代は制度にならなかった"
+    }
+   ]
+  },
+  {
+   "name": "金地院崇伝",
+   "era": "edo",
+   "faction": "徳川",
+   "born": 1569,
+   "died": 1633,
+   "death": "natural",
+   "active": 1608,
+   "tags": [
+    "religious",
+    "official"
+   ],
+   "traits": {
+    "loyal": 1,
+    "open": -1
+   }
+  },
+  {
+   "name": "松平信綱",
+   "era": "edo",
+   "faction": "徳川",
+   "born": 1596,
+   "died": 1662,
+   "death": "illness",
+   "active": 1633,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "loyal": 2,
+    "open": -1
+   }
+  },
+  {
+   "name": "天草四郎",
+   "era": "edo",
+   "faction": "島原の一揆",
+   "born": null,
+   "died": 1638,
+   "death": "killed",
+   "active": 1637,
+   "tags": [
+    "rebel",
+    "religious",
+    "commoner"
+   ],
+   "traits": {
+    "faith": 2,
+    "loyal": -2
+   },
+   "saved": {
+    "year": 1638,
+    "text": "原城で討たれるはずの四郎が生き延び、ひそかにキリシタンの信仰が守られた。",
+    "vars": {
+     "religion": 15,
+     "open_west": 10
+    }
+   }
+  },
+  {
+   "name": "徳川吉宗",
+   "era": "edo",
+   "faction": "徳川",
+   "born": 1684,
+   "died": 1751,
+   "death": "illness",
+   "active": 1716,
+   "tags": [
+    "ruler",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 1
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "q": "edo_02",
+     "choice": 2,
+     "note": "上げ米は行われず、のちの囲米の形で登場した"
+    }
+   ]
+  },
+  {
+   "name": "大黒屋光太夫",
+   "era": "edo",
+   "faction": "伊勢の船頭",
+   "born": 1751,
+   "died": 1828,
+   "death": "natural",
+   "active": 1792,
+   "tags": [
+    "commoner",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2
+   }
+  },
+  {
+   "name": "松平定信",
+   "era": "edo",
+   "faction": "徳川",
+   "born": 1759,
+   "died": 1829,
+   "death": "illness",
+   "active": 1787,
+   "tags": [
+    "official",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 1,
+    "open": -2
+   },
+   "spawn": "temple",
+   "contrib": [
+    {
+     "vars": {
+      "open_west": 30
+     },
+     "year": 1788,
+     "note": "寛政の改革が遅れ、異国の学問への関心が高まった"
+    }
+   ]
+  },
+  {
+   "name": "柴野栗山",
+   "era": "edo",
+   "faction": "幕府",
+   "born": 1736,
+   "died": 1807,
+   "death": "natural",
+   "active": 1788,
+   "tags": [
+    "scholar"
+   ],
+   "traits": {
+    "open": -1
+   }
+  },
+  {
+   "name": "中井竹山",
+   "era": "edo",
+   "faction": "懐徳堂",
+   "born": 1730,
+   "died": 1804,
+   "death": "natural",
+   "active": 1782,
+   "tags": [
+    "scholar",
+    "merchant"
+   ],
+   "traits": {
+    "reform": 1
+   }
+  },
+  {
+   "name": "本居宣長",
+   "era": "edo",
+   "faction": "国学",
+   "born": 1730,
+   "died": 1801,
+   "death": "natural",
+   "active": 1764,
+   "tags": [
+    "scholar"
+   ],
+   "traits": {
+    "open": -2,
+    "faith": 1
+   }
+  },
+  {
+   "name": "吉雄耕牛",
+   "era": "edo",
+   "faction": "長崎",
+   "born": 1724,
+   "died": 1800,
+   "death": "natural",
+   "active": 1750,
+   "tags": [
+    "scholar",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2
+   }
+  },
+  {
+   "name": "田沼意次",
+   "era": "edo",
+   "faction": "徳川",
+   "born": 1719,
+   "died": 1788,
+   "death": "illness",
+   "active": 1767,
+   "tags": [
+    "official",
+    "reformer",
+    "merchant"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 2
+   },
+   "spawn": "castle",
+   "contrib": [
+    {
+     "vars": {
+      "open_west": -30,
+      "commerce": -15
+     },
+     "year": 1770,
+     "note": "幕府は一気に保守化し、蘭学が危険視された"
+    }
+   ],
+   "aka": [
+    "老中 田沼意次"
+   ]
+  },
+  {
+   "name": "堀田正睦",
+   "era": "edo",
+   "faction": "徳川",
+   "born": 1810,
+   "died": 1864,
+   "death": "natural",
+   "active": 1855,
+   "tags": [
+    "official",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2
+   }
+  },
+  {
+   "name": "岩瀬忠震",
+   "era": "edo",
+   "faction": "徳川",
+   "born": 1818,
+   "died": 1861,
+   "death": "illness",
+   "active": 1854,
+   "tags": [
+    "official",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 2
+   },
+   "spawn": "port",
+   "contrib": [
+    {
+     "q": "edo_04",
+     "choice": 0,
+     "note": "交渉役がおらず、条約は骨抜きになった"
+    }
+   ],
+   "doc": {
+    "name": "日米修好通商条約の草案",
+    "q": "edo_04",
+    "choice": 0,
+    "text": "条約の草案が盗まれ、交渉は振り出しに。結ばれたのは下田・箱館を開くだけの約束だった。"
+   }
+  },
+  {
+   "name": "森山栄之助",
+   "era": "edo",
+   "faction": "長崎",
+   "born": 1820,
+   "died": 1871,
+   "death": "natural",
+   "active": 1848,
+   "tags": [
+    "scholar",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2
+   }
+  },
+  {
+   "name": "タウンゼント＝ハリス",
+   "era": "edo",
+   "faction": "アメリカ",
+   "born": 1804,
+   "died": 1878,
+   "death": "natural",
+   "active": 1856,
+   "tags": [
+    "diplomat",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 2
+   },
+   "aka": [
+    "ハリス"
+   ]
+  },
+  {
+   "name": "九条尚忠",
+   "era": "edo",
+   "faction": "朝廷",
+   "born": 1798,
+   "died": 1871,
+   "death": "natural",
+   "active": 1856,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "open": 1,
+    "loyal": 1
+   }
+  },
+  {
+   "name": "坂本龍馬",
+   "era": "edo",
+   "faction": "土佐",
+   "born": 1836,
+   "died": 1867,
+   "death": "assassinated",
+   "active": 1862,
+   "tags": [
+    "reformer",
+    "merchant"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 2,
+    "war": -1
+   },
+   "spawn": "village",
+   "contrib": [
+    {
+     "vars": {
+      "unity": -15,
+      "militarism": 10
+     },
+     "year": 1866,
+     "note": "薩長同盟を仲立ちする者がおらず、倒幕は遅れて泥沼になった"
+    }
+   ],
+   "saved": {
+    "year": 1867,
+    "text": "近江屋で暗殺されるはずの龍馬が生き延びた。船中八策は新政府の綱領となり、議会と海運の国づくりが早まった。",
+    "vars": {
+     "democracy": 15,
+     "commerce": 10,
+     "open_west": 10
+    }
+   },
+   "schedule": [
+    {
+     "event": "薩長同盟の会談",
+     "at": "capital",
+     "year": 1866,
+     "missed": {
+      "vars": {
+       "unity": -15,
+       "militarism": 10
+      }
+     },
+     "text": "龍馬が会談に遅れ、薩摩と長州は手を結べなかった。倒幕は遅れ、戦いは長引いた。"
+    }
+   ]
+  },
+  {
+   "name": "西郷隆盛",
+   "era": "meiji_taisho",
+   "faction": "薩摩",
+   "born": 1828,
+   "died": 1877,
+   "death": "suicide",
+   "active": 1868,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": 2,
+    "open": -1
+   },
+   "saved": {
+    "year": 1877,
+    "text": "城山で自刃するはずの西郷が生き延び、新政府に戻った。士族の不満は和らいだが、軍の発言力が増した。",
+    "vars": {
+     "militarism": 10,
+     "unity": 10
+    }
+   }
+  },
+  {
+   "name": "大久保利通",
+   "era": "meiji_taisho",
+   "faction": "薩摩",
+   "born": 1830,
+   "died": 1878,
+   "death": "assassinated",
+   "active": 1868,
+   "tags": [
+    "official",
+    "reformer",
+    "ruler"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 2,
+    "war": -1
+   },
+   "spawn": "castle",
+   "contrib": [
+    {
+     "q": "meiji_taisho_01",
+     "choice": 0,
+     "note": "大黒柱がおらず、地租改正は先送りになった"
+    }
+   ],
+   "saved": {
+    "year": 1878,
+    "text": "紀尾井坂で暗殺されるはずの大久保が助かり、殖産興業が加速した。",
+    "vars": {
+     "centralization": 15,
+     "tech": 10,
+     "economy": 10
+    }
+   }
+  },
+  {
+   "name": "大隈重信",
+   "era": "meiji_taisho",
+   "faction": "改進党",
+   "born": 1838,
+   "died": 1922,
+   "death": "natural",
+   "active": 1869,
+   "tags": [
+    "official",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 2
+   }
+  },
+  {
+   "name": "伊藤博文",
+   "era": "meiji_taisho",
+   "faction": "政府",
+   "born": 1841,
+   "died": 1909,
+   "death": "assassinated",
+   "active": 1871,
+   "tags": [
+    "ruler",
+    "official",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 1,
+    "open": 2,
+    "war": -1
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "q": "meiji_taisho_02",
+     "choice": 3,
+     "note": "伊藤がおらず、民定憲法が作られた"
+    }
+   ],
+   "saved": {
+    "year": 1909,
+    "text": "ハルビンで撃たれるはずの伊藤が助かり、大陸への強硬策に歯止めがかかった。",
+    "vars": {
+     "militarism": -10,
+     "open_asia": 10
+    }
+   }
+  },
+  {
+   "name": "井上毅",
+   "era": "meiji_taisho",
+   "faction": "政府",
+   "born": 1844,
+   "died": 1895,
+   "death": "illness",
+   "active": 1871,
+   "tags": [
+    "official",
+    "scholar"
+   ],
+   "traits": {
+    "reform": 1,
+    "open": 1
+   }
+  },
+  {
+   "name": "三条実美",
+   "era": "meiji_taisho",
+   "faction": "政府",
+   "born": 1837,
+   "died": 1891,
+   "death": "illness",
+   "active": 1868,
+   "tags": [
+    "official",
+    "ruler"
+   ],
+   "traits": {
+    "loyal": 2
+   }
+  },
+  {
+   "name": "植木枝盛",
+   "era": "meiji_taisho",
+   "faction": "自由党",
+   "born": 1857,
+   "died": 1892,
+   "death": "illness",
+   "active": 1877,
+   "tags": [
+    "reformer",
+    "scholar"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 1
+   },
+   "contrib": [
+    {
+     "vars": {
+      "democracy": -15
+     },
+     "year": 1881,
+     "note": "私擬憲法を起草する民権家がいなくなった"
+    }
+   ]
+  },
+  {
+   "name": "後藤象二郎",
+   "era": "meiji_taisho",
+   "faction": "土佐",
+   "born": 1838,
+   "died": 1897,
+   "death": "illness",
+   "active": 1867,
+   "tags": [
+    "official",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 1,
+    "open": 1
+   }
+  },
+  {
+   "name": "陸奥宗光",
+   "era": "meiji_taisho",
+   "faction": "政府",
+   "born": 1844,
+   "died": 1897,
+   "death": "illness",
+   "active": 1888,
+   "tags": [
+    "diplomat",
+    "official"
+   ],
+   "traits": {
+    "open": 2,
+    "war": 1
+   }
+  },
+  {
+   "name": "加藤高明",
+   "era": "meiji_taisho",
+   "faction": "憲政会",
+   "born": 1860,
+   "died": 1926,
+   "death": "illness",
+   "active": 1900,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 2
+   },
+   "spawn": "battlefield",
+   "contrib": [
+    {
+     "vars": {
+      "democracy": -20
+     },
+     "year": 1924,
+     "note": "護憲三派がまとまらず、普通選挙が遠のいた"
+    }
+   ]
+  },
+  {
+   "name": "小村寿太郎",
+   "era": "meiji_taisho",
+   "faction": "政府",
+   "born": 1855,
+   "died": 1911,
+   "death": "illness",
+   "active": 1901,
+   "tags": [
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2,
+    "war": 1
+   },
+   "spawn": "port",
+   "contrib": [
+    {
+     "vars": {
+      "open_west": -15,
+      "militarism": 15
+     },
+     "year": 1904,
+     "note": "外交が迷走し、軍事に頼るようになった"
+    }
+   ]
+  },
+  {
+   "name": "桂太郎",
+   "era": "meiji_taisho",
+   "faction": "陸軍",
+   "born": 1848,
+   "died": 1913,
+   "death": "illness",
+   "active": 1901,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 1
+   }
+  },
+  {
+   "name": "高橋是清",
+   "era": "meiji_taisho",
+   "faction": "政友会",
+   "born": 1854,
+   "died": 1936,
+   "death": "assassinated",
+   "active": 1904,
+   "tags": [
+    "official",
+    "merchant"
+   ],
+   "traits": {
+    "reform": 1,
+    "war": -2
+   },
+   "spawn": "castle",
+   "contrib": [
+    {
+     "vars": {
+      "economy": -25,
+      "commerce": -15
+     },
+     "year": 1914,
+     "note": "財政の舵取り役がいなくなった"
+    }
+   ],
+   "saved": {
+    "year": 1936,
+    "text": "二・二六事件で殺されるはずの高橋が助かり、軍事費の膨張に最後まで歯止めをかけた。",
+    "vars": {
+     "militarism": -15,
+     "economy": 10
+    }
+   }
+  },
+  {
+   "name": "平塚らいてう",
+   "era": "meiji_taisho",
+   "faction": "青鞜社",
+   "born": 1886,
+   "died": 1971,
+   "death": "natural",
+   "active": 1911,
+   "tags": [
+    "reformer",
+    "woman",
+    "artist"
+   ],
+   "traits": {
+    "reform": 2
+   }
+  },
+  {
+   "name": "若槻礼次郎",
+   "era": "meiji_taisho",
+   "faction": "憲政会",
+   "born": 1866,
+   "died": 1949,
+   "death": "natural",
+   "active": 1912,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "reform": 1,
+    "war": -1
+   }
+  },
+  {
+   "name": "原敬",
+   "era": "meiji_taisho",
+   "faction": "政友会",
+   "born": 1856,
+   "died": 1921,
+   "death": "assassinated",
+   "active": 1918,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "reform": 1
+   },
+   "saved": {
+    "year": 1921,
+    "text": "東京駅で刺されるはずの原敬が助かり、政党政治が早くから根づいた。",
+    "vars": {
+     "democracy": 15,
+     "set": {
+      "ruler": "政党"
+     }
+    }
+   }
+  },
+  {
+   "name": "幣原喜重郎",
+   "era": "meiji_taisho",
+   "faction": "憲政会",
+   "born": 1872,
+   "died": 1951,
+   "death": "natural",
+   "active": 1924,
+   "tags": [
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2,
+    "war": -2
+   }
+  },
+  {
+   "name": "英国公使マクドナルド",
+   "era": "meiji_taisho",
+   "faction": "イギリス",
+   "born": 1852,
+   "died": 1915,
+   "death": "natural",
+   "active": 1900,
+   "tags": [
+    "diplomat",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 2
+   },
+   "aka": [
+    "マクドナルド"
+   ]
+  },
+  {
+   "name": "井上準之助",
+   "era": "showa",
+   "faction": "民政党",
+   "born": 1869,
+   "died": 1932,
+   "death": "assassinated",
+   "active": 1927,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "open": 2,
+    "war": -1
+   },
+   "saved": {
+    "year": 1932,
+    "text": "血盟団事件で殺されるはずの井上が助かり、財界と政党は軍部に対抗し続けた。",
+    "vars": {
+     "militarism": -10
+    }
+   }
+  },
+  {
+   "name": "田中義一",
+   "era": "showa",
+   "faction": "政友会",
+   "born": 1864,
+   "died": 1929,
+   "death": "illness",
+   "active": 1927,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "open": -1
+   }
+  },
+  {
+   "name": "伊東巳代治",
+   "era": "showa",
+   "faction": "枢密院",
+   "born": 1857,
+   "died": 1934,
+   "death": "natural",
+   "active": 1927,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "reform": -1
+   }
+  },
+  {
+   "name": "團琢磨",
+   "era": "showa",
+   "faction": "三井",
+   "born": 1858,
+   "died": 1932,
+   "death": "assassinated",
+   "active": 1927,
+   "tags": [
+    "merchant"
+   ],
+   "traits": {
+    "open": 2
+   },
+   "saved": {
+    "year": 1932,
+    "text": "暗殺されるはずの團琢磨が助かり、財界は軍部の暴走に声を上げ続けた。",
+    "vars": {
+     "economy": 5,
+     "militarism": -5
+    }
+   }
+  },
+  {
+   "name": "リットン卿",
+   "era": "showa",
+   "faction": "国際連盟",
+   "born": 1876,
+   "died": 1947,
+   "death": "natural",
+   "active": 1932,
+   "tags": [
+    "diplomat",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 2,
+    "war": -2
+   }
+  },
+  {
+   "name": "内田康哉",
+   "era": "showa",
+   "faction": "外務省",
+   "born": 1865,
+   "died": 1936,
+   "death": "natural",
+   "active": 1932,
+   "tags": [
+    "diplomat",
+    "official"
+   ],
+   "traits": {
+    "war": 1,
+    "open": -1
+   }
+  },
+  {
+   "name": "犬養毅",
+   "era": "showa",
+   "faction": "政友会",
+   "born": 1855,
+   "died": 1932,
+   "death": "assassinated",
+   "active": 1931,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "reform": 1,
+    "war": -1
+   },
+   "saved": {
+    "year": 1932,
+    "text": "五・一五事件で殺されるはずの犬養首相が助かり、政党内閣が続いた。",
+    "vars": {
+     "democracy": 20,
+     "militarism": -15
+    }
+   }
+  },
+  {
+   "name": "和田博雄",
+   "era": "showa",
+   "faction": "農林省",
+   "born": 1903,
+   "died": 1967,
+   "death": "natural",
+   "active": 1946,
+   "tags": [
+    "official",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2
+   },
+   "contrib": [
+    {
+     "q": "showa_03",
+     "choice": 2,
+     "note": "改革を進める大臣がおらず、第一次案がそのまま実施された"
+    }
+   ]
+  },
+  {
+   "name": "渋沢敬三",
+   "era": "showa",
+   "faction": "大蔵省",
+   "born": 1896,
+   "died": 1963,
+   "death": "natural",
+   "active": 1945,
+   "tags": [
+    "official",
+    "scholar",
+    "merchant"
+   ],
+   "traits": {
+    "reform": 1
+   }
+  },
+  {
+   "name": "十河信二",
+   "era": "showa",
+   "faction": "国鉄",
+   "born": 1884,
+   "died": 1981,
+   "death": "natural",
+   "active": 1955,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 1
+   },
+   "spawn": "port",
+   "contrib": [
+    {
+     "vars": {
+      "tech": -20,
+      "economy": -10
+     },
+     "year": 1958,
+     "note": "新幹線の計画は立ち消えになった"
+    }
+   ]
+  },
+  {
+   "name": "下村治",
+   "era": "showa",
+   "faction": "大蔵省",
+   "born": 1910,
+   "died": 1989,
+   "death": "natural",
+   "active": 1959,
+   "tags": [
+    "scholar",
+    "official"
+   ],
+   "traits": {
+    "reform": 1
+   },
+   "spawn": "castle",
+   "contrib": [
+    {
+     "vars": {
+      "economy": -30
+     },
+     "year": 1959,
+     "note": "所得倍増計画は作られなかった"
+    }
+   ]
+  },
+  {
+   "name": "米内光政",
+   "era": "showa",
+   "faction": "海軍",
+   "born": 1880,
+   "died": 1948,
+   "death": "illness",
+   "active": 1937,
+   "tags": [
+    "warrior",
+    "ruler"
+   ],
+   "traits": {
+    "war": -2,
+    "open": 1
+   },
+   "spawn": "castle",
+   "contrib": [
+    {
+     "vars": {
+      "militarism": 15
+     },
+     "year": 1939,
+     "note": "軍部の暴走に歯止めがかからなくなった"
+    }
+   ]
+  },
+  {
+   "name": "畑俊六",
+   "era": "showa",
+   "faction": "陸軍",
+   "born": 1879,
+   "died": 1962,
+   "death": "natural",
+   "active": 1939,
+   "tags": [
+    "warrior",
+    "sacred"
+   ],
+   "traits": {
+    "war": 1
+   }
+  },
+  {
+   "name": "松岡洋右",
+   "era": "showa",
+   "faction": "外務省",
+   "born": 1880,
+   "died": 1946,
+   "death": "illness",
+   "active": 1932,
+   "tags": [
+    "diplomat",
+    "official"
+   ],
+   "traits": {
+    "war": 1,
+    "open": -2
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "vars": {
+      "militarism": -25,
+      "open_west": 15
+     },
+     "year": 1932,
+     "note": "強硬派の全権がおらず、日本は連盟にとどまった"
+    }
+   ]
+  },
+  {
+   "name": "コーデル・ハル",
+   "era": "showa",
+   "faction": "アメリカ",
+   "born": 1871,
+   "died": 1955,
+   "death": "natural",
+   "active": 1933,
+   "tags": [
+    "diplomat",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 1
+   },
+   "aka": [
+    "コーデル＝ハル"
+   ]
+  },
+  {
+   "name": "グルー大使",
+   "era": "showa",
+   "faction": "アメリカ",
+   "born": 1880,
+   "died": 1965,
+   "death": "natural",
+   "active": 1932,
+   "tags": [
+    "diplomat",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 2,
+    "war": -2
+   },
+   "aka": [
+    "グルー"
+   ]
+  },
+  {
+   "name": "鈴木貫太郎",
+   "era": "showa",
+   "faction": "海軍",
+   "born": 1868,
+   "died": 1948,
+   "death": "natural",
+   "active": 1936,
+   "tags": [
+    "ruler",
+    "warrior",
+    "sacred"
+   ],
+   "traits": {
+    "war": -2,
+    "loyal": 2
+   },
+   "spawn": "capital"
+  },
+  {
+   "name": "東條英機",
+   "era": "showa",
+   "faction": "陸軍",
+   "born": 1884,
+   "died": 1948,
+   "death": "executed",
+   "active": 1937,
+   "tags": [
+    "ruler",
+    "warrior",
+    "sacred"
+   ],
+   "traits": {
+    "war": 2,
+    "open": -2
+   }
+  },
+  {
+   "name": "山本五十六",
+   "era": "showa",
+   "faction": "海軍",
+   "born": 1884,
+   "died": 1943,
+   "death": "killed",
+   "active": 1939,
+   "tags": [
+    "warrior",
+    "sacred"
+   ],
+   "traits": {
+    "war": -1,
+    "open": 1
+   }
+  }
+ ]
+}
