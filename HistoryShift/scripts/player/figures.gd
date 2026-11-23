@@ -1372,7 +1372,7 @@ static func _crest(kind: String, x: float, y: float) -> int:
 					var sz := lerpf(0.13, 0.045, t)
 					var nrm := Vector2(cos(a), sin(a))
 					if q.distance_to(c + nrm * sz * 0.55) < sz or q.distance_to(c - nrm * sz * 0.45) < sz * 0.85:
-						return 1 if q.distance_to(c) > sz * 0.25 or t > 0.7 else 2
+						return 1
 			return 0
 		"takesuzume":   # 竹に雀（上杉）：竹の輪と向かい合う雀
 			if _in_ring(x, y, 0.8, 0.92) and not (y < -0.7 and absf(x) < 0.25):
