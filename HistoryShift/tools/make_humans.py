@@ -46,6 +46,13 @@ JAPANESE_BASE = [
     ("nose-hump-decr", 0.3, 0.65), ("nose-flaring-incr", 0.15, 0.4), ("nose-point-width-incr", 0.1, 0.35),
     ("l-cheek-bones-incr", 0.15, 0.4), ("r-cheek-bones-incr", None, None),
 ]
+# アニメ調の顔の形：鼻と口を小さく、目を大きく、あごを細く短く
+ANIME_BASE = [
+    ("nose-scale-depth-decr", 0.85), ("nose-scale-horiz-decr", 0.55), ("nose-scale-vert-decr", 0.5),
+    ("mouth-scale-horiz-decr", 0.45), ("mouth-scale-vert-decr", 0.35), ("mouth-scale-depth-decr", 0.5),
+    ("l-eye-scale-incr", 0.7), ("r-eye-scale-incr", 0.7), ("chin-width-decr", 0.35), ("chin-height-decr", 0.25),
+    ("chin-prominent-decr", 0.3), ("l-cheek-volume-incr", 0.25), ("r-cheek-volume-incr", 0.25),
+]
 JP_EXCLUDE = {"eye-epicanthus-in", "eye-eyefold-down", "nose-hump-decr", "cheek-bones-decr", "cheek-bones-incr"}
 
 
@@ -56,13 +63,15 @@ def face_targets(rng):
         if lo is not None:
             last = rng.uniform(lo, hi)
         out.append({"target": name, "value": last})
+    for name, val in ANIME_BASE:
+        out.append({"target": name, "value": val})
     for a, b in FACE_PAIRS:
-        if a in JP_EXCLUDE or b in JP_EXCLUDE or a.startswith("nose-hump"):
+        if a in JP_EXCLUDE or b in JP_EXCLUDE or a.startswith("nose-") or a.startswith("mouth-") or a.startswith("chin-"):
             continue
         if rng.random() < 0.6:
             out.append({"target": rng.choice((a, b)), "value": rng.uniform(0.1, 0.45)})
     for a, b in FACE_SYM:
-        if a in JP_EXCLUDE or b in JP_EXCLUDE or a.startswith("eye-epicanthus") or a.startswith("eye-eyefold") or a.startswith("cheek-bones"):
+        if a in JP_EXCLUDE or b in JP_EXCLUDE or a.startswith("eye-") or a.startswith("cheek-"):
             continue
         if rng.random() < 0.6:
             t, v = rng.choice((a, b)), rng.uniform(0.1, 0.4)

@@ -703,7 +703,7 @@ const HAIR_LAYER := 1 << 1
 ## アニメ調：セル塗り＋輪郭線、写実的な目・眉・まつげを隠してアニメ顔を投影、肌は塗りつぶし
 func _animeify(model: Node3D, outfit: int, rng: RandomNumberGenerator) -> void:
 	var female: bool = get_meta("female", false)
-	var skin := Color(0.98, 0.86, 0.76).lerp(Color(0.9, 0.74, 0.6), rng.randf())
+	var skin := Color(1.0, 0.86, 0.77).lerp(Color(0.93, 0.75, 0.63), rng.randf())
 	if outfit == Outfit.GUARDIAN:
 		skin = Color(0.3, 0.27, 0.36)
 	for node in find_children("*", "MeshInstance3D", true, false):
@@ -711,8 +711,13 @@ func _animeify(model: Node3D, outfit: int, rng: RandomNumberGenerator) -> void:
 		if not mi.visible:
 			continue
 		var n := String(mi.name).to_lower()
-		if n.contains("low-poly") or n.contains("eyebrow") or n.contains("eyelash"):
+		if n.contains("eyebrow") or n.contains("eyelash"):
 			mi.visible = false
+		elif n.contains("low-poly"):
+			Toon.apply(mi, 0.0, Color(0.97, 0.96, 0.95))   # 白目（虹彩はデカールで描く）
+		elif _under_attachment(mi):
+			mi.layers = HAIR_LAYER                          # 帽子・兜などには顔を映さない
+			Toon.apply(mi, 0.0035)
 		elif n.ends_with("_body") or n.ends_with("_bodyw"):
 			Toon.apply(mi, 0.0035, skin)
 		elif n.contains("short") or n.contains("long") or n.contains("bob") or n.contains("ponytail") or n.contains("braid") or n.contains("afro"):
@@ -721,6 +726,15 @@ func _animeify(model: Node3D, outfit: int, rng: RandomNumberGenerator) -> void:
 		else:
 			Toon.apply(mi, 0.0045)
 	Toon.add_face(_holder("Head"), female, rng.randi() % 3, HAIR_LAYER)
+
+
+func _under_attachment(n: Node) -> bool:
+	var p := n.get_parent()
+	while p and p != self:
+		if p is BoneAttachment3D:
+			return true
+		p = p.get_parent()
+	return false
 
 
 func _attach(bone: String) -> Node3D:

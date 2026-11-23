@@ -155,7 +155,7 @@ static func add_face(head_holder: Node3D, female: bool, style: int, hair_layer: 
 	var d := Decal.new()
 	d.texture_albedo = face_texture(female, style)
 	d.size = Vector3(0.15, 0.16, 0.115)
-	d.position = Vector3(0, 0.065, 0.12)
+	d.position = Vector3(0, 0.036, 0.12)
 	d.rotation_degrees = Vector3(90, 0, 0)    # -Y（投影方向）を顔へ向ける
 	d.cull_mask = 0xFFFFF & ~hair_layer
 	d.upper_fade = 0.0
