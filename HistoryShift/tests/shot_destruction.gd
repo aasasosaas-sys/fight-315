@@ -160,7 +160,7 @@ func _era(era_id: String) -> void:
 		await _shot("%s_fire_late" % era_id)
 
 	# ---- 3) 塀（tsuiji 等）を大筒で
-	var wall := _find("wall", cap, 500.0)
+	var wall := _find("wall", cap, 500.0, func(u: Destructible) -> bool: return String(u.def.get("opts", {}).get("kind_detail", "")) == "tsuiji")
 	if wall == null:
 		wall = _find("fence", cap, 500.0)
 	if wall and _on("wall"):

@@ -849,7 +849,7 @@ func _make_fire_fx(u: Destructible, with_light: bool) -> Node3D:
 		var l := OmniLight3D.new()
 		l.name = "L"
 		l.light_color = Color(1.0, 0.55, 0.2)
-		l.light_energy = 0.8
+		l.light_energy = 0.45
 		l.omni_range = clampf(ext.length() * 1.6, 7.0, 14.0)
 		l.omni_attenuation = 1.6
 		l.position = Vector3(0, 2.0, 0)
