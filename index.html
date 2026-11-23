@@ -753,9 +753,10 @@
             font-size: 21cqw; box-shadow: 0 1px 3px rgba(0,0,0,.6);
         }
         .uport-badge i { font-size: inherit; }
-        .uport-dim > img { filter: grayscale(.85) brightness(.55); }
+        .uport-img { display: block; width: 100%; height: 100%; border-radius: 9999px; background-repeat: no-repeat; }
+        .uport-dim > img, .uport-dim > .uport-img { filter: grayscale(.85) brightness(.55); }
         .uport-dim .uport-badge { filter: grayscale(1) brightness(.7); }
-        .uport-god > img { box-shadow: 0 0 10px rgba(255,236,170,.65); }
+        .uport-god > img, .uport-god > .uport-img { box-shadow: 0 0 10px rgba(255,236,170,.65); }
         /* ============ 必殺技カットイン＆属性エフェクト ============ */
         .uport-ready { box-shadow: 0 0 0 2px #fde047, 0 0 12px 3px rgba(253,224,71,.75); }
         .spec-root .sp-layer { position: absolute; inset: 0; z-index: 1; overflow: hidden; }
@@ -1964,10 +1965,12 @@
             }
 
             const SILHOUETTE = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="31" fill="#1a1424"/><path d="M6 66 Q8 47 32 44.5 Q56 47 58 66Z" fill="#000"/><ellipse cx="32" cy="29" rx="10" ry="12" fill="#000"/><text x="32" y="36" text-anchor="middle" font-size="18" font-weight="900" fill="#d4af37" font-family="serif">?</text><circle cx="32" cy="32" r="30.6" fill="none" stroke="#6b7280" stroke-width="1.8"/></svg>`);
-            const cache = new Map();
-            function unitPortraitURL(u) {
-                if (!u) return SILHOUETTE;
-                const key = (u.id || u.name) + '|' + (u.gender || '') + '|' + (u.rarity || '');
+            const cache = new Map();      // key -> SVG data URL（ベクター原本）
+            // ★軽量化: 全キャラの肖像を1枚のスプライト画像にまとめ、一覧はCSS背景で切り出して表示する
+            //（SVGを1枚ずつ描画・デコードすると、図鑑や編成を開くたびに数百ミリ秒かかるため）
+            const portraitKey = (u) => (u.id || u.name) + '|' + (u.gender || '') + '|' + (u.rarity || '');
+            function svgURL(u) {
+                const key = portraitKey(u);
                 let url = cache.get(key);
                 if (!url) {
                     try { url = 'data:image/svg+xml,' + encodeURIComponent(draw(u)); } catch (e) { url = SILHOUETTE; }
@@ -1975,13 +1978,69 @@
                 }
                 return url;
             }
+            function unitPortraitURL(u) { return u ? svgURL(u) : SILHOUETTE; }
+
+            const CELL = 112, COLS = 16;
+            const sprite = { url: null, slots: new Map(), rows: 0 };
+            function spriteStyle(u) {
+                if (!sprite.url || !u) return null;
+                const i = sprite.slots.get(portraitKey(u));
+                if (i === undefined) return null;
+                const c = i % COLS, r = Math.floor(i / COLS);
+                const px = COLS > 1 ? (c / (COLS - 1)) * 100 : 0, py = sprite.rows > 1 ? (r / (sprite.rows - 1)) * 100 : 0;
+                return `background-image:url(${sprite.url});background-size:${COLS * 100}% ${sprite.rows * 100}%;background-position:${px.toFixed(4)}% ${py.toFixed(4)}%`;
+            }
+            const loadImg = (src) => new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
+            const idle = window.requestIdleCallback ? (fn) => window.requestIdleCallback(fn, { timeout: 1200 }) : (fn) => setTimeout(() => fn({ timeRemaining: () => 8 }), 40);
+            async function buildPortraitSprite() {
+                let units = [];
+                try {
+                    units = (typeof getAllDefinedUnitsForLookup === 'function') ? getAllDefinedUnitsForLookup().slice() : [];
+                    if (typeof getUnit === 'function') { const me = getUnit('ch_000'); units.push(me, Object.assign({}, me, { gender: me.gender === '女性' ? '男性' : '女性' })); }
+                } catch (e) { return; }
+                const keys = [], list = [];
+                units.forEach(u => { if (!u) return; const k = portraitKey(u); if (!keys.includes(k)) { keys.push(k); list.push(u); } });
+                const rows = Math.ceil(list.length / COLS);
+                const cv = document.createElement('canvas');
+                cv.width = COLS * CELL; cv.height = rows * CELL;
+                const ctx = cv.getContext('2d');
+                let i = 0;
+                await new Promise((done) => {
+                    const step = async (dl) => {
+                        const t0 = performance.now();
+                        while (i < list.length && (performance.now() - t0) < 10) {
+                            const im = await loadImg(svgURL(list[i]));
+                            if (im) ctx.drawImage(im, (i % COLS) * CELL, Math.floor(i / COLS) * CELL, CELL, CELL);
+                            i++;
+                        }
+                        if (i < list.length) idle(step); else done();
+                    };
+                    idle(step);
+                });
+                let blob = null;
+                try { blob = await new Promise(r => cv.toBlob(r, 'image/png')); } catch (e) { return; } // canvasが使えない環境ではSVGのまま
+                if (!blob) return;
+                const url = URL.createObjectURL(blob);
+                const im = await loadImg(url);
+                if (!im) return;
+                try { if (im.decode) await im.decode(); } catch (e) { }
+                sprite.keepAlive = im; // デコード済み画像を保持
+                keys.forEach((k, idx) => sprite.slots.set(k, idx));
+                sprite.rows = rows;
+                sprite.url = url;
+            }
+            window.addEventListener('load', () => setTimeout(() => { buildPortraitSprite().catch(() => { }); }, 400));
+
             // opts: { hidden: 神キャラ秘匿時のシルエット, dim: 未所持のグレー表示, badge: false でアイコン紋章を非表示 }
             function unitIconHTML(u, opts) {
                 opts = opts || {};
-                if (opts.hidden) return `<span class="uport"><img src="${SILHOUETTE}" alt="？？？" draggable="false"></span>`;
+                if (opts.hidden) return `<span class="uport"><img src="${SILHOUETTE}" alt="？？？" draggable="false" decoding="async"></span>`;
                 const badge = opts.badge === false ? '' : `<span class="uport-badge"><i class="fa-solid ${fixIcon(u && u.icon)}"></i></span>`;
                 const alt = u && u.name ? String(u.name).replace(/"/g, '') : '';
-                return `<span class="uport${opts.dim ? ' uport-dim' : ''}${u && u.rarity === '神' ? ' uport-god' : ''}"><img src="${unitPortraitURL(u)}" alt="${alt}" draggable="false">${badge}</span>`;
+                const cls = `uport${opts.dim ? ' uport-dim' : ''}${u && u.rarity === '神' ? ' uport-god' : ''}`;
+                const sp = spriteStyle(u);
+                if (sp) return `<span class="${cls}"><span class="uport-img" role="img" aria-label="${alt}" style="${sp}"></span>${badge}</span>`;
+                return `<span class="${cls}"><img src="${unitPortraitURL(u)}" alt="${alt}" draggable="false" decoding="async">${badge}</span>`;
             }
             window.unitPortraitURL = unitPortraitURL;
             window.unitIconHTML = unitIconHTML;
@@ -6372,13 +6431,24 @@
             }, 2200);
         }
 
+        let _unitIdIndex = null;
         function getUnit(id) {
             if (id === "butsu_001") return BUTSU_UNIT;
             if (id === "amaterasu_001") return AMATERASU_UNIT;
             if (id === "kaguya_001") return KAGUYA_UNIT;
             if (isBossRushGodId(id)) return BOSS_RUSH_GOD_UNITS[parseInt(id.slice(-2), 10)] || null;
+            // ★軽量化: 毎回全キャラ配列を作り直して探さず、ID索引で引く（図鑑などで数千回呼ばれる）
+            if (id !== "ch_000") {
+                if (!_unitIdIndex) {
+                    _unitIdIndex = new Map();
+                    getWeekdayUnitsFlat().forEach(u => { if (u && !_unitIdIndex.has(u.id)) _unitIdIndex.set(u.id, u); });
+                    ALL_GACHA_CHARACTERS().forEach(u => { if (u && !_unitIdIndex.has(u.id)) _unitIdIndex.set(u.id, u); });
+                }
+                const hit = _unitIdIndex.get(id);
+                if (hit) return hit;
+            }
             const weekdayUnit = getWeekdayUnitsFlat().find(u => u.id === id);
-            if (weekdayUnit) return weekdayUnit;
+            if (weekdayUnit) { _unitIdIndex = null; return weekdayUnit; }
             if (id === "ch_000") {
                 const rankInfo = getNobleRankInfo(state.noble.level);
                 return {
@@ -6394,7 +6464,7 @@
                     gaugeNeedsVotes: 9, synergies: []
                 };
             }
-            return ALL_GACHA_CHARACTERS().find(u => u.id === id);
+            { const u = ALL_GACHA_CHARACTERS().find(x => x.id === id); if (u) _unitIdIndex = null; return u; }
         }
 
         function getUnitStats(id) {
