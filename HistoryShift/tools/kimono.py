@@ -44,6 +44,7 @@ def landmarks(body):
     return L
 
 
+KEEP_V = True        # 和装用の体で衿元の肌を残すか（アニメ素体は小袖の殻が覆うので残さない）
 SECTION_HOOK = None   # 差し替え用（アニメ素体では腕を除いた断面を使う）
 
 
@@ -437,7 +438,7 @@ def body_for_wasou(body, variant, L):
     for v in bm.verts:
         w = sum(v[deform].get(i, 0.0) for i in hide) if deform else 0.0
         q = g.matrix_world @ v.co
-        keep_v = q.z > neck.z - 0.16 and abs(q.x - neck.x) < 0.11 and q.y < neck.y + 0.05   # 衿元
+        keep_v = KEEP_V and q.z > neck.z - 0.16 and abs(q.x - neck.x) < 0.11 and q.y < neck.y + 0.05   # 衿元
         if w > 0.55 and not keep_v and q.z > ankle:
             kill.append(v)
     bmesh.ops.delete(bm, geom=kill, context="VERTS")

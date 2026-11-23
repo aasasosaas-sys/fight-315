@@ -84,6 +84,8 @@ void fragment() {
 		// 塊の内側にも葉の筆タッチ（控えめ）、縁の葉ははっきり
 		shade = mix(mix(0.88, 1.1, bid), mix(0.95, 1.04, bid), inner);
 	}
+	// カメラが樹冠に入った時は手前 2.5m の葉を抜く（巨大な葉カードで視界が塞がれないように）
+	a *= step(2.5, length(VERTEX));
 	vec3 col = v_col * shade;
 	ALBEDO = col;
 	ALPHA = a;

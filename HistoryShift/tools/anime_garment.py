@@ -28,76 +28,135 @@ def _sum(w, names):
     return sum(w.get(n, 0.0) for n in names)
 
 
-def shell(body, L, name, top_z, bottom_z, offset, wrist_t=0.96, sleeve_flare=0.035, smooth=12):
-    """体から胴（と腕）を切り出して膨らませた殻。袖口に向かって少し広げる。"""
+def dims(L):
+    """骨の位置から胴の寸法（アニメ体型）を決める。VRoid は服の下の胴・脚の肌が削られているため体からは測れない。"""
+    hip_w = abs(L["thigh_l"].x - L["thigh_r"].x) / 2
+    sh_w = abs(L["upperarm_l"].x - L["upperarm_r"].x) / 2
+    c = L["pelvis"]
+    return {
+        "center": Vector((c.x, (L["pelvis"].y + L["spine_03"].y) / 2, 0)),
+        "hip": (hip_w + 0.07, 0.105),
+        "waist": (hip_w + 0.045, 0.092),
+        "chest": (sh_w * 0.78, 0.1),
+        "shoulder": sh_w,
+    }
+
+
+def tsection_dims(L):
+    D = dims(L)
+
+    def f(body, z):
+        cz_hip = L["pelvis"].z
+        cz_waist = L["spine_01"].z
+        cz_chest = L["spine_03"].z
+        if z <= cz_hip:
+            rx, ry = D["hip"]
+        elif z <= cz_waist:
+            t = (z - cz_hip) / max(cz_waist - cz_hip, 0.01)
+            rx = D["hip"][0] + (D["waist"][0] - D["hip"][0]) * t
+            ry = D["hip"][1] + (D["waist"][1] - D["hip"][1]) * t
+        else:
+            t = min(1.0, (z - cz_waist) / max(cz_chest - cz_waist, 0.01))
+            rx = D["waist"][0] + (D["chest"][0] - D["waist"][0]) * t
+            ry = D["waist"][1] + (D["chest"][1] - D["waist"][1]) * t
+        return Vector((D["center"].x, D["center"].y, z)), rx, ry
+    return f
+
+
+def shell(body, L, name, top_z, bottom_z, offset, wrist_t=0.95, sleeve_flare=0.04, smooth=0):
+    """小袖の胴と袖：骨組み（腰→胴→胸→首元、胸→肩→肘→手首）にスキンを付けて細分化した、継ぎ目のない形。"""
+    D = dims(L)
+    c = D["center"]
+    neck = L["neck_01"]
+    nodes = []   # (位置, rx, ry)
+    edges = []
+
+    def add(p, rx, ry):
+        nodes.append((p, rx, ry))
+        return len(nodes) - 1
+
+    hem = add(Vector((c.x, c.y, bottom_z)), D["hip"][0] + offset + 0.01, D["hip"][1] + offset + 0.01)
+    hip = add(Vector((c.x, c.y, L["pelvis"].z)), D["hip"][0] + offset, D["hip"][1] + offset)
+    waist = add(Vector((c.x, c.y, L["spine_01"].z)), D["waist"][0] + offset, D["waist"][1] + offset)
+    chest = add(Vector((c.x, c.y, L["spine_03"].z)), D["chest"][0] + offset, D["chest"][1] + offset)
+    top = add(Vector((neck.x, c.y + 0.005, top_z)), 0.075, 0.07)
+    edges += [(hem, hip), (hip, waist), (waist, chest), (chest, top)]
+    for s in ("l", "r"):
+        sh, el, wr = L["upperarm_" + s], L["lowerarm_" + s], L["hand_" + s]
+        ax = wr - sh
+        shoulder = add(sh + Vector((0, 0, 0.005)), 0.06 + offset, 0.06 + offset)
+        elbow = add(el, 0.05 + offset + sleeve_flare * 0.4, 0.05 + offset + sleeve_flare * 0.4)
+        wrist = add(sh + ax * wrist_t, 0.045 + offset + sleeve_flare, 0.05 + offset + sleeve_flare)
+        edges += [(chest, shoulder), (shoulder, elbow), (elbow, wrist)]
+    me = bpy.data.meshes.new(name)
+    me.from_pydata([tuple(n[0]) for n in nodes], edges, [])
+    me.update()
+    g = bpy.data.objects.new(name, me)
+    bpy.context.collection.objects.link(g)
+    sk = g.modifiers.new("skin", "SKIN")
+    sk.use_smooth_shade = True
+    sv = me.skin_vertices[0].data
+    for i, (p, rx, ry) in enumerate(nodes):
+        sv[i].radius = (rx, ry)
+    sv[hip].use_root = True
+    sub = g.modifiers.new("sub", "SUBSURF")
+    sub.levels = 2
+    # 枝分かれ（胸）にできる穴やねじれを、閉じたままボクセルで作り直して消す
+    rm = g.modifiers.new("remesh", "REMESH")
+    rm.mode = "VOXEL"
+    rm.voxel_size = 0.006
+    sm = g.modifiers.new("smooth", "SMOOTH")
+    sm.factor = 0.6
+    sm.iterations = 6
+    dec = g.modifiers.new("dec", "DECIMATE")
+    dec.ratio = 0.3
+    bpy.context.view_layer.objects.active = g
+    for mn in ("skin", "sub", "remesh", "smooth", "dec"):
+        with bpy.context.temp_override(object=g, active_object=g):
+            bpy.ops.object.modifier_apply(modifier=mn)
+    # 首・手首・裾を開ける
+    mw = g.matrix_world
+    bm = bmesh.new()
+    bm.from_mesh(g.data)
+    kill = []
+    for v in bm.verts:
+        q = mw @ v.co
+        if q.z > top_z - 0.005 and abs(q.x - neck.x) < 0.1:
+            kill.append(v)
+        elif q.z < bottom_z + 0.005:
+            kill.append(v)
+        else:
+            for s in ("l", "r"):
+                sh, wr = L["upperarm_" + s], L["hand_" + s]
+                ax = wr - sh
+                t = (q - sh).dot(ax) / ax.length_squared
+                if t > wrist_t - 0.005 and (q - (sh + ax * t)).length < 0.11:
+                    kill.append(v)
+                    break
+    bmesh.ops.delete(bm, geom=list(set(kill)), context="VERTS")
+    bm.to_mesh(g.data)
+    bm.free()
+    for p in g.data.polygons:
+        p.use_smooth = True
+    return g
+
+
+def collision_body(body, L):
+    """布シミュの当たり判定用：腕・手を除いた体（袴や裾が下ろした手に押し出されないように）。"""
     g = body.copy()
     g.data = body.data.copy()
-    g.name = name
+    g.name = "CollBody"
     bpy.context.collection.objects.link(g)
     for m in list(g.modifiers):
         g.modifiers.remove(m)
     W = _weights(g)
-    head_names = [K.bn("head"), K.bn("neck_01")]
-    hand_names = [K.bn("hand_l"), K.bn("hand_r")]
-    mw = g.matrix_world
-    arms = {}
-    for s in ("l", "r"):
-        sh, wr = L["upperarm_" + s], L["hand_" + s]
-        arms[s] = (sh, wr, (wr - sh))
     bm = bmesh.new()
     bm.from_mesh(g.data)
     bm.verts.ensure_lookup_table()
-    kill = []
-    arm_t = {}
-    for v in bm.verts:
-        w = W[v.index]
-        q = mw @ v.co
-        if _sum(w, head_names) > 0.35 or _sum(w, hand_names) > 0.3:
-            kill.append(v)
-            continue
-        on_arm = None
-        for s, (sh, wr, ax) in arms.items():
-            if _sum(w, [K.bn("upperarm_" + s), K.bn("lowerarm_" + s)]) > 0.5:
-                on_arm = s
-                t = (q - sh).dot(ax) / ax.length_squared
-                if t > wrist_t:
-                    kill.append(v)
-                    on_arm = "x"
-                else:
-                    arm_t[v.index] = (s, t)
-        if on_arm is None and (q.z > top_z or q.z < bottom_z):
-            kill.append(v)
+    kill = [bm.verts[i] for i, w in enumerate(W) if sum(x for n, x in w.items() if any(k in n for k in ("LowerArm", "Hand", "Thumb", "Index", "Middle", "Ring", "Little"))) > 0.3]
     bmesh.ops.delete(bm, geom=kill, context="VERTS")
     bm.to_mesh(g.data)
     bm.free()
-    # 体の起伏（筋肉・胸など）をならしてから膨らませる
-    sm = g.modifiers.new("smooth", "SMOOTH")
-    sm.factor = 0.8
-    sm.iterations = smooth
-    disp = g.modifiers.new("inflate", "DISPLACE")
-    disp.strength = offset
-    disp.mid_level = 0.0
-    bpy.context.view_layer.objects.active = g
-    for mn in ("smooth", "inflate"):
-        with bpy.context.temp_override(object=g, active_object=g):
-            bpy.ops.object.modifier_apply(modifier=mn)
-    # 袖口へ向かって少し広げる（腕の軸から放射方向に押し出す）
-    for v in g.data.vertices:
-        q = mw @ v.co
-        best = None
-        for s, (sh, wr, ax) in arms.items():
-            t = (q - sh).dot(ax) / ax.length_squared
-            if 0.15 < t < 1.0:
-                c = sh + ax * t
-                d = q - c
-                if d.length < 0.09 and (best is None or d.length < best[1].length):
-                    best = (t, d)
-        if best:
-            t, d = best
-            k = max(0.0, (t - 0.25) / 0.75) ** 1.4
-            v.co = mw.inverted() @ (q + d.normalized() * sleeve_flare * k)
-    for p in g.data.polygons:
-        p.use_smooth = True
     return g
 
 
@@ -218,12 +277,12 @@ def collar(kosode, L, width=0.034, han_w=0.012):
 
     objs = []
     # 下前（着る人の右の衿）を先に、少しだけ低く
-    objs.append(ribbon("eri_under", path(-1.0), width, 0.003, toward_neck))
-    objs.append(ribbon("eri_top", path(1.0), width, 0.006, toward_neck))
+    objs.append(ribbon("eri_under", path(-1.0), width, 0.006, toward_neck))
+    objs.append(ribbon("eri_top", path(1.0), width, 0.011, toward_neck))
     # 半衿（白）：衿の内側（首側）に細く見える
     han = []
-    han.append(ribbon("haneri_u", path(-1.0, cross=True)[:24], han_w, 0.0045, lambda q: -toward_neck(q)))
-    han.append(ribbon("haneri_t", path(1.0)[:24], han_w, 0.0075, lambda q: -toward_neck(q)))
+    han.append(ribbon("haneri_u", path(-1.0, cross=True)[:24], han_w, 0.008, lambda q: -toward_neck(q)))
+    han.append(ribbon("haneri_t", path(1.0)[:24], han_w, 0.013, lambda q: -toward_neck(q)))
     return objs, han
 
 
@@ -272,8 +331,8 @@ def hakama(body, L, n=72):
     """袴：腰から足首へ、前後に深いひだ。寸法は体の断面から（アニメ体型でも大きくなりすぎない）。"""
     waist = L["spine_01"].z - 0.02
     ank = L["floor"] + 0.05
-    c0, rx0, ry0 = tsection(body, waist)
-    hc, hrx, hry = tsection(body, L["pelvis"].z - 0.05)
+    c0, rx0, ry0 = K.section(body, waist)
+    hc, hrx, hry = K.section(body, L["pelvis"].z - 0.05)
     rings = []
     steps = 18
     for i in range(steps + 1):
@@ -303,8 +362,8 @@ def robe_skirt(body, L, n=56):
     """女性の着物の裾：腰から足首へ、裾すぼまりの筒。"""
     top = L["spine_01"].z - 0.04
     bottom = L["floor"] + 0.02
-    c0, rx0, ry0 = tsection(body, top)
-    hc, hrx, hry = tsection(body, L["pelvis"].z - 0.06)
+    c0, rx0, ry0 = K.section(body, top)
+    hc, hrx, hry = K.section(body, L["pelvis"].z - 0.06)
     rings = []
     steps = 18
     for i in range(steps + 1):
@@ -319,8 +378,93 @@ def robe_skirt(body, L, n=56):
     return o
 
 
+def _ss(a, b, x):
+    t = max(0.0, min(1.0, (x - a) / (b - a)))
+    return t * t * (3 - 2 * t)
+
+
+def bone_weights(o, L, arms=True, legs=0.0):
+    """骨の位置から直接ウェイトを付ける（服の下の肌がない VRoid でも、服同士が同じように動く）。
+    胴：高さで 腰→背骨→胸→上胸 を補間。腕：腕の軸への射影で上腕・前腕、肩でなめらかに胴へ。
+    legs>0：腰から下を脚（左右・太腿/すね）へ legs の割合まで寄せる。"""
+    for vg in list(o.vertex_groups):
+        o.vertex_groups.remove(vg)
+    for m in list(o.modifiers):
+        if m.type == "ARMATURE":
+            o.modifiers.remove(m)
+    chain = [("pelvis", L["pelvis"].z), ("spine_01", L["spine_01"].z), ("spine_02", (L["spine_01"].z + L["spine_03"].z) / 2),
+             ("spine_03", L["spine_03"].z)]
+    groups = {}
+
+    def g(n):
+        name = K.bn(n)
+        if name not in groups:
+            groups[name] = o.vertex_groups.new(name=name)
+        return groups[name]
+
+    mw = o.matrix_world
+    tsec = tsection_dims(L)
+    knee_z = L["calf_l"].z
+    hip_z = L["pelvis"].z
+    for v in o.data.vertices:
+        q = mw @ v.co
+        w = {}
+        # 胴
+        z = q.z
+        if z <= chain[0][1]:
+            w[chain[0][0]] = 1.0
+        elif z >= chain[-1][1]:
+            w[chain[-1][0]] = 1.0
+        else:
+            for (n0, z0), (n1, z1) in zip(chain, chain[1:]):
+                if z0 <= z <= z1:
+                    t = (z - z0) / max(z1 - z0, 1e-4)
+                    w[n0] = 1 - t
+                    w[n1] = t
+                    break
+        # 腕
+        # 胴の断面の内側にある点は腕に引っ張らせない（A ポーズでは上腕が胸の横に近い）
+        c_, rx_, ry_ = tsec(None, q.z)
+        inside = ((q.x - c_.x) / (rx_ + 0.03)) ** 2 + ((q.y - c_.y) / (ry_ + 0.05)) ** 2
+        if arms and inside > 0.85:
+            best = None
+            for sd in ("l", "r"):
+                sh, el, wr = L["upperarm_" + sd], L["lowerarm_" + sd], L["hand_" + sd]
+                ax = wr - sh
+                t = (q - sh).dot(ax) / ax.length_squared
+                d = (q - (sh + ax * max(0.0, min(1.0, t)))).length
+                if t > -0.15 and d < 0.13 and (best is None or d < best[2]):
+                    best = (sd, t, d, (el - sh).dot(ax) / ax.length_squared)
+            if best:
+                sd, t, d, te = best
+                a = _ss(-0.12, 0.1, t) * _ss(0.85, 1.25, inside)
+                if a > 0:
+                    lo = _ss(te - 0.1, te + 0.1, t)
+                    for k in list(w):
+                        w[k] *= (1 - a)
+                    w["upperarm_" + sd] = a * (1 - lo)
+                    w["lowerarm_" + sd] = a * lo
+        # 脚
+        if legs > 0 and z < hip_z:
+            sd = "l" if q.x > L["pelvis"].x else "r"
+            k = legs * _ss(hip_z, L["floor"], z) if False else legs * min(1.0, (hip_z - z) / max(hip_z - L["floor"], 0.01) * 1.6)
+            side_k = _ss(0.0, 0.08, abs(q.x - L["pelvis"].x))   # 中央は両脚の間なので腰に残す
+            k *= side_k
+            lo = _ss(knee_z + 0.08, knee_z - 0.08, z)
+            for kk in list(w):
+                w[kk] *= (1 - k)
+            w["thigh_" + sd] = w.get("thigh_" + sd, 0) + k * (1 - lo)
+            w["calf_" + sd] = w.get("calf_" + sd, 0) + k * lo
+        for n, x in w.items():
+            if x > 1e-4:
+                g(n).add([v.index], x, "REPLACE")
+    am = o.modifiers.new("Armature", "ARMATURE")
+    am.object = L["arm"]
+
+
 def make(body_p, L, female, rest_body):
-    K.SECTION_HOOK = tsection
+    K.SECTION_HOOK = tsection_dims(L)
+    K.KEEP_V = False
     hip_z = L["pelvis"].z
     waist_z = L["spine_01"].z
     neck_z = L["neck_01"].z
@@ -332,25 +476,25 @@ def make(body_p, L, female, rest_body):
     hk_main, himo = hakama(body_p, L)
     hk = [hk_main]
     rb = robe_skirt(body_p, L)
-    K.drape([tl, tr, hk_main, rb], body_p, frames=40, stiff=14.0, bend=0.8)
-    K.transfer_weights(ks, body_p, 0.0, L)
+    cb = collision_body(body_p, L)
+    K.drape([hk_main, rb], cb, frames=40, stiff=14.0, bend=0.8)
+    K.drape([tl, tr], body_p, frames=40, stiff=14.0, bend=0.8)
+    bpy.data.objects.remove(cb, do_unlink=True)
+    bone_weights(ks, L)
     for t, s in ((tl, "l"), (tr, "r")):
         K.arm_weights(t, L, s)
-    K.transfer_weights(rb, body_p, 0.7, L)
-    strip_arm_weights(rb)
+    bone_weights(rb, L, arms=False, legs=0.3)
     for h in hk + himo:
         K.wrap_onto(h, body_p, 0.0) if False else None
-        K.transfer_weights(h, body_p, 0.25, L)
-        strip_arm_weights(h)
+        bone_weights(h, L, arms=False, legs=0.6)
     hk = hk + himo
     er, han = collar(ks, L)
     for e in er + han:
-        K.transfer_weights(e, body_p, 0.0, L)
+        bone_weights(e, L)
     ob = K.obi(body_p, L, 0.2 if female else 0.06, female)
     K.wrap_onto(ob[0], ks, 0.012)
     for x in ob:
-        K.transfer_weights(x, body_p, 0.0, L)
-        strip_arm_weights(x)
+        bone_weights(x, L, arms=False)
     # 甲冑は別途作り直す（ここでは作らない）
     groups = {"kosode": [ks, tl, tr], "eri": er, "haneri": han, "hakama": hk, "robe": [rb], "obi": ob}
     out = {}

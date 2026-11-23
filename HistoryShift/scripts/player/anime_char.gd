@@ -12,6 +12,10 @@ const SETS := {
 	"samurai": ["kosode", "eri", "haneri", "hakama", "obi", "armor"],
 	"hakama": ["kosode", "eri", "haneri", "hakama", "obi"],
 	"kimono": ["kosode", "eri", "haneri", "robe", "obi"],
+	"_dbg_noeri": ["kosode", "hakama", "obi"],
+	"_dbg_eri": ["eri", "haneri"],
+	"_dbg_k": ["kosode"],
+	"_dbg_o": ["obi"],
 }
 
 ## 自然染料ふうの色（明るめのアニメ配色）。[地の色, 影の色]
@@ -94,7 +98,13 @@ static func _dress(n: Node3D, sk: Skeleton3D, base: String, outfit: String, pal:
 		g.skin = _rebind(mi, sk)
 		g.extra_cull_margin = 2.0
 		var dye: Array = DYES.get(pal.get(part, "ai"), DYES["ai"])
-		g.material_override = _cloth_mat(template, dye[0], dye[1], not part in ["eri", "haneri"])
+		g.material_override = _cloth_mat(template, dye[0], dye[1], not part in ["eri", "haneri"] and OS.get_environment("NO_OUTLINE") == "")
+		if OS.get_environment("DBG_PART") == part:
+			var dm := StandardMaterial3D.new()
+			dm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			dm.albedo_color = Color(1, 0, 1)
+			dm.cull_mode = BaseMaterial3D.CULL_DISABLED
+			g.material_override = dm
 	src.free()
 
 
@@ -177,6 +187,10 @@ static func _cloth_mat(template: Material, lit: Color, shade: Color, outline := 
 			ol.set_shader_parameter("_MainTex", null)
 			ol.set_shader_parameter("_Color", lit)
 			ol.set_shader_parameter("_OutlineColor", shade.darkened(0.5))
+			# 画面空間の輪郭線（正面向きの面では押し出さない）：布のくぼみで線が表に突き出さない
+			ol.set_shader_parameter("_OutlineWidthTexture", null)
+			ol.set_shader_parameter("_OutlineWidthMode", 2.0)
+			ol.set_shader_parameter("_OutlineWidth", 0.22)
 			m.next_pass = ol
 		return m
 	var sm := StandardMaterial3D.new()
