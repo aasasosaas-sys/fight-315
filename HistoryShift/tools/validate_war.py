@@ -94,6 +94,34 @@ def main():
         if per_era.get(e, 0) < n_min: err(f"{e}: needs >= {n_min} projects, got {per_era.get(e, 0)}")
     for p, es in pillar_eras.items():
         if len(es) < 3: err(f"pillar {p}: reachable from only {len(es)} eras {sorted(es)} (need 3)")
+    # 国際的地位の推移（data/war/standing.json）
+    sp = os.path.join(BASE, "war", "standing.json")
+    if os.path.exists(sp):
+        S = json.load(open(sp, encoding="utf-8"))
+        tiers = [t["id"] for t in S.get("tiers", [])]
+        if len(tiers) < 4 or [t["min"] for t in S["tiers"]] != sorted(t["min"] for t in S["tiers"]): err("standing: tiers must be >= 4 and sorted by min")
+        if S.get("power_tier") not in tiers: err("standing: power_tier")
+        ys = [c.get("year") for c in S.get("checkpoints", [])]
+        if ys != sorted(ys) or len(ys) < 5: err("standing: checkpoints must be >= 5 and in order")
+        for c in S.get("checkpoints", []):
+            if not 0 <= c.get("base", -1) <= 100: err(f"standing {c.get('year')}: base")
+            if not DATED.search(c.get("basis", "")): err(f"standing {c.get('year')}: basis needs a dated real fact")
+        qs = {}
+        for f in glob.glob(os.path.join(BASE, "*.json")):
+            d = json.load(open(f, encoding="utf-8"))
+            for q in d.get("questions", []): qs[q["id"]] = q
+        for f in S.get("facts", []):
+            q = qs.get(f.get("q"))
+            if q is None or f.get("choice") not in (0, 1, 2, 3) or f["choice"] == q["real"]: err(f"standing fact {f}: q/choice")
+            if not f.get("note") or not isinstance(f.get("from"), int): err(f"standing fact {f.get('q')}: note/from")
+        for c in S.get("consequences", []):
+            eff_ok(c.get("mods", {}), f"standing consequence {c.get('year')}")
+            if not c.get("text") or not DATED.search(c.get("basis", "")): err(f"standing consequence {c.get('year')}: text / dated basis")
+        if sorted(S.get("endings", {}).keys()) != sorted(tiers): err("standing: endings for every tier")
+        mod = json.load(open(os.path.join(BASE, "modern.json"), encoding="utf-8"))
+        for t in tiers:
+            if not any(r.get("if", {}).get("standing") == "==" + t for r in mod["ending_rules"]): err(f"modern.json: no ending rule for standing {t}")
+        print(f"standing: {len(ys)} checkpoints, {len(tiers)} tiers, {len(S.get('facts', []))} facts, {len(S.get('consequences', []))} consequences")
     if errors:
         for e in errors: print("ERROR", e)
         print(f"{len(errors)} errors"); sys.exit(1)

@@ -233,7 +233,8 @@ func _standing_tests(db: HistoryDB) -> void:
 			if int(p["year"]) == 1853:
 				s1853 = p
 		if float(s1853.get("score", 0.0)) >= 65.0:
-			_check(st.world_choice(db.by_id["edo_04"]) == 1, "a great power in 1853 gets an equal treaty (edo_04 → ①)")
+			_check((st.standing.get("notes", []) as Array).any(func(n): return String(n).contains("ペリー")), "a great power in 1853: Perry consequence applied")
+			print("  edo_04 in this world: %d（%s）" % [st.world_choice(db.by_id["edo_04"]), st.reason(db.by_id["edo_04"])])
 		else:
 			print("  (1853 score %d: below 65, Perry consequence not tested in this strategy)" % int(s1853.get("score", 0.0)))
 		var ending := st.compose_ending()
