@@ -188,10 +188,151 @@ static func _anim_node(n: String) -> AnimationNodeAnimation:
 	return a
 
 
+## アニメ調（VRoid）素体を使うか。素体がない環境では写実→KayKit→手作りの順に代わりを使う
+static var anime := true
+const ANIME_MALE := ["HairSample_Male", "Sakurada_Fumiriya", "Sendagaya_Shibu"]
+const ANIME_FEMALE := ["Sendagaya_Shino", "HairSample_Female"]
+var _anim_lib_override: AnimationLibrary
+
+
+## 服装（Outfit）→ アニメ素体の衣装・髪型・配色。未実装の衣装は近い時代の装いで代用
+func _anime_spec(outfit: int, female: bool, rng: RandomNumberGenerator) -> Dictionary:
+	var sets: Dictionary = AnimeChar.SETS
+	var pick := func(names: Array) -> String:
+		for nm in names:
+			if sets.has(nm):
+				return nm
+		return "hakama"
+	var dye := func(opts: Array) -> String:
+		return opts[rng.randi() % opts.size()]
+	match outfit:
+		Outfit.AGENT:
+			return {"outfit": "modern", "hair": ""}
+		Outfit.GUARDIAN:
+			return {"outfit": "modern", "hair": ""}
+		Outfit.SAMURAI:
+			return {"outfit": pick.call(["busho", "samurai"]), "hair": "chonmage",
+				"pal": {"kosode": dye.call(["kon:kasuri:ai", "kuro:plain", "enji:plain", "ai:kasuri:shiro"]), "eri": "kuro", "haneri": "shiro",
+					"hakama": dye.call(["nezumi:shima:kuro", "kuchiba:shima:kaki", "kon:shima:ai"]), "obi": "kuro", "armor": "enji"}}
+		Outfit.ASHIGARU:
+			return {"outfit": pick.call(["ashigaru", "hakama"]), "hair": "chasen",
+				"pal": {"kosode": dye.call(["kaki:plain", "ai:plain", "kuchiba:plain"]), "eri": "kuro", "haneri": "shiro", "hakama": "kuchiba:plain", "obi": "kuro"}}
+		Outfit.NOBLE:
+			if female:
+				return {"outfit": "kimono", "hair": "suberakashi",
+					"pal": {"kosode": dye.call(["enji:asanoha:kin", "moegi:asanoha:shiro", "sakura:sakura_komon:shiro"]), "eri": "kin", "haneri": "shiro", "robe": dye.call(["enji:plain", "kon:plain"]), "obi": "kin:asanoha:enji"}}
+			return {"outfit": "hakama", "hair": "court_bun",
+				"pal": {"kosode": dye.call(["enji:asanoha:kin", "kon:asanoha:kin", "moegi:plain"]), "eri": "kin", "haneri": "shiro", "hakama": dye.call(["shiro:plain", "kon:plain"]), "obi": "kuro"}}
+		Outfit.MONK:
+			return {"outfit": "kimono", "hair": "buzz", "pal": {"kosode": "kuro:plain", "eri": "kuro", "haneri": "shiro", "robe": "kuro:plain", "obi": "nezumi"}}
+		Outfit.ANCIENT:
+			return {"outfit": "kimono", "hair": "suberakashi" if female else "court_bun",
+				"pal": {"kosode": "shiro:plain", "eri": "kuchiba", "haneri": "shiro", "robe": "kuchiba:plain", "obi": "enji"}}
+		Outfit.KIMONO:
+			return {"outfit": "kimono", "hair": dye.call(["shimada", "shimada", "sokuhatsu"]) if female else "chonmage",
+				"pal": {"kosode": dye.call(["sakura:sakura_komon:shiro", "ai:ichimatsu:shiro", "moegi:asanoha:shiro", "kaki:kasuri:shiro"]), "eri": dye.call(["enji", "kuro"]), "haneri": "shiro",
+					"robe": "", "obi": dye.call(["kin:asanoha:enji", "enji:ichimatsu:kuro", "kuro:plain"])}}
+		Outfit.WESTERN:
+			return {"outfit": pick.call(["haikara" if female else "suit_meiji", "shosei", "hakama"]), "hair": "sokuhatsu" if female else "zangiri",
+				"pal": {"kosode": "ai:plain", "eri": "kon", "haneri": "shiro", "hakama": "kon:plain", "obi": "kuro"}}
+		Outfit.SOLDIER:
+			return {"outfit": pick.call(["army", "hakama"]), "hair": "buzz", "pal": {"kosode": "kuchiba:plain", "eri": "kuchiba", "haneri": "shiro", "hakama": "kuchiba:plain", "obi": "kuro"}}
+		Outfit.POLICE:
+			return {"outfit": pick.call(["police", "army", "hakama"]), "hair": "zangiri", "pal": {"kosode": "kon:plain", "eri": "kon", "haneri": "shiro", "hakama": "kon:plain", "obi": "kuro"}}
+	# 町人
+	if female:
+		return {"outfit": "kimono", "hair": "shimada",
+			"pal": {"kosode": dye.call(["ai:kasuri:shiro", "kaki:ichimatsu:kuchiba", "moegi:plain"]), "eri": "kuro", "haneri": "shiro", "robe": "", "obi": "kuro:plain"}}
+	return {"outfit": "hakama", "hair": "chonmage",
+		"pal": {"kosode": dye.call(["ai:kasuri:shiro", "kaki:plain", "kuchiba:shima:kaki", "nezumi:plain"]), "eri": "kuro", "haneri": "shiro", "hakama": dye.call(["nezumi:shima:kuro", "kon:plain", "kuchiba:plain"]), "obi": "kuro"}}
+
+
+## 「歴史の修正力」：墨のように黒い体に、紫に光る輪郭と目（主人公の現代服と見分けがつくように）
+func _shadowify(model: Node3D) -> void:
+	for mi: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+		for si in mi.mesh.get_surface_count():
+			var m := mi.get_surface_override_material(si)
+			if m == null:
+				m = mi.mesh.surface_get_material(si)
+			if not (m is ShaderMaterial):
+				continue
+			var mm := (m as ShaderMaterial).duplicate() as ShaderMaterial
+			var eye := "eye" in m.resource_name.to_lower()
+			mm.set_shader_parameter("_Color", Color(0.9, 0.3, 1.0) if eye else Color(0.09, 0.07, 0.13))
+			mm.set_shader_parameter("_ShadeColor", Color(0.03, 0.02, 0.06))
+			mm.set_shader_parameter("_RimColor", Color(0.75, 0.2, 1.0))
+			mm.set_shader_parameter("_RimFresnelPower", 3.0)
+			mm.set_shader_parameter("_RimLift", 0.15)
+			if eye:
+				mm.set_shader_parameter("_EmissionColor", Color(0.9, 0.3, 1.0))
+			if mm.next_pass is ShaderMaterial:
+				var ol := (mm.next_pass as ShaderMaterial).duplicate() as ShaderMaterial
+				ol.set_shader_parameter("_OutlineColor", Color(0.8, 0.25, 1.0))
+				ol.set_shader_parameter("_OutlineLightingMix", 0.0)
+				mm.next_pass = ol
+			mi.set_surface_override_material(si, mm)
+
+
+func _construct_anime(outfit: int, rng: RandomNumberGenerator, armed: bool) -> bool:
+	var female := false
+	if _female_req >= 0:
+		female = _female_req == 1
+	elif outfit == Outfit.KIMONO:
+		female = rng.randf() < 0.8
+	elif outfit in [Outfit.COMMONER, Outfit.NOBLE, Outfit.ANCIENT, Outfit.WESTERN]:
+		female = rng.randf() < 0.35
+	var bases: Array = ANIME_FEMALE if female else ANIME_MALE
+	var base: String = bases[rng.randi() % bases.size()]
+	if outfit == Outfit.AGENT:
+		base = "HairSample_Male"
+	if not ResourceLoader.exists(AnimeChar.VRM_DIR + base + ".vrm"):
+		return false
+	var spec := _anime_spec(outfit, female, rng)
+	var pal: Dictionary = spec.get("pal", {})
+	if pal.get("robe", null) == "":
+		pal["robe"] = pal.get("kosode", "ai")
+	var model: Node3D = AnimeChar.build(base, spec.outfit, pal, spec.hair)
+	if outfit == Outfit.GUARDIAN:
+		_shadowify(model)
+	# アニメ素体は自前のアニメーションプレイヤーを持つので、木（AnimationTree）だけで動かす
+	var own := model.get_node_or_null("Anim")
+	if own:
+		_anim_lib_override = (own as AnimationPlayer).get_animation_library("")
+		model.remove_child(own)
+		own.free()
+	add_child(model)
+	realistic = true
+	_skel = model.find_children("*", "Skeleton3D", true, false)[0]
+	set_meta("female", female)
+	set_meta("anime_base", base)
+	var h := _rest_height(model)
+	var target := 1.72 if outfit == Outfit.AGENT else ((1.55 if female else 1.68) if outfit in MODERN else (1.5 if female else 1.62))
+	target *= rng.randf_range(0.97, 1.03)
+	model.scale = Vector3.ONE * (target / maxf(h, 0.5))
+	if armed:
+		var hand := _holder("RightHand")
+		weapon = Node3D.new()
+		weapon.name = "Weapon"
+		hand.add_child(weapon)
+		weapon.position = Vector3(0, 0.07, 0.03)
+		weapon.rotation_degrees = Vector3(-90, 0, 0)
+		var metal := mat(Color(0.12, 0.12, 0.13), 0.35, 0.9)
+		var wood := mat(Color(0.35, 0.22, 0.12), 0.7)
+		part(weapon, "box", wood, Vector3(0, -0.01, -0.05), Vector3(0.045, 0.07, 0.42))
+		part(weapon, "cyl", metal, Vector3(0, 0.02, 0.38), Vector3(0.022, 0.62, 0.022), Vector3(90, 0, 0))
+		muzzle = Node3D.new()
+		muzzle.position = Vector3(0, 0.02, 0.7)
+		weapon.add_child(muzzle)
+	_setup_tree(model, outfit, armed)
+	return true
+
+
 func _construct_skinned(outfit: int, seed: int, armed: bool) -> void:
 	skinned = true
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed
+	if anime and force_variant == "" and _construct_anime(outfit, rng, armed):
+		return
 	var real_path := _pick_realistic(outfit, rng)
 	var model: Node3D
 	if real_path != "":
@@ -290,10 +431,10 @@ func _setup_tree(model: Node3D, outfit: int, armed: bool) -> void:
 	_tree = AnimationTree.new()
 	model.add_child(_tree)
 	_tree.root_node = NodePath("..")
-	_tree.add_animation_library("", anim_library())
+	var lib: AnimationLibrary = _anim_lib_override if _anim_lib_override else anim_library()
+	_tree.add_animation_library("", lib)
 	var bt := AnimationNodeBlendTree.new()
 	var bs := AnimationNodeBlendSpace1D.new()
-	var lib := anim_library()
 	var mocap := lib.has_animation("Mocap_Walk")
 	var idle_name := "Skeletons_Idle" if outfit == Outfit.GUARDIAN else ("Mocap_Stand" if mocap else "Idle_A")
 	bs.add_blend_point(_anim_node(idle_name), 0.0)
