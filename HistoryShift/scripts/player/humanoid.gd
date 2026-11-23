@@ -294,7 +294,7 @@ func _setup_tree(model: Node3D, outfit: int, armed: bool) -> void:
 	var bs := AnimationNodeBlendSpace1D.new()
 	var lib := anim_library()
 	var mocap := lib.has_animation("Mocap_Walk")
-	var idle_name := "Skeletons_Idle" if outfit == Outfit.GUARDIAN else "Idle_A"
+	var idle_name := "Skeletons_Idle" if outfit == Outfit.GUARDIAN else ("Mocap_Stand" if mocap else "Idle_A")
 	bs.add_blend_point(_anim_node(idle_name), 0.0)
 	if mocap:
 		var soldier := outfit in [Outfit.SOLDIER, Outfit.ASHIGARU, Outfit.SAMURAI]

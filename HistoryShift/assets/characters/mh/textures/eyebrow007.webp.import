@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://u0j1xr2tjx5m"
-path="res://.godot/imported/eyebrow002.webp-b798f9e9d7967a742fca1cc256b5b369.ctex"
+uid="uid://dly534dgradq8"
+path="res://.godot/imported/eyebrow007.webp-484e986a8d9d632853c59b73266cb719.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/mh/textures/eyebrow002.webp"
-dest_files=["res://.godot/imported/eyebrow002.webp-b798f9e9d7967a742fca1cc256b5b369.ctex"]
+source_file="res://assets/characters/mh/textures/eyebrow007.webp"
+dest_files=["res://.godot/imported/eyebrow007.webp-484e986a8d9d632853c59b73266cb719.ctex"]
 
 [params]
 
