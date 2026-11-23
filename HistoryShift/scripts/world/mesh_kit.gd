@@ -3,13 +3,42 @@ extends RefCounted
 ## 手続き的ジオメトリをマテリアル別にまとめて 1 つの ArrayMesh にするビルダー。
 ## UV はメートル単位（マテリアル側の uv1_scale でテクスチャの実寸に合わせる）。
 
-var surf := {}   # mat_key -> [verts, norms, uvs, cols, idx]
+var surf := {}   # mat_key -> [verts, norms, uvs, cols, idx, uv2(unit id, part)]
+## 破壊ユニット ID（UV2.x に焼き込む。0 = 破壊対象外）。part は UV2.y（0=躯体, 1=屋根）
+var cur_unit := 0
+var has_units := false
+const ROOF_MATS := ["rooftile", "thatch"]
 
 
 func _s(key: String) -> Array:
 	if not surf.has(key):
-		surf[key] = [PackedVector3Array(), PackedVector3Array(), PackedVector2Array(), PackedColorArray(), PackedInt32Array()]
+		surf[key] = [PackedVector3Array(), PackedVector3Array(), PackedVector2Array(), PackedColorArray(), PackedInt32Array(), PackedVector2Array()]
 	return surf[key]
+
+
+## 以降の頂点を unit id に割り当てる（それまでの頂点は前の id で確定）
+func set_unit(id: int) -> void:
+	sync_units()
+	cur_unit = id
+	if id != 0:
+		has_units = true
+
+
+## UV2 配列を頂点数まで現在の unit id で埋める
+func sync_units() -> void:
+	for k in surf:
+		var s: Array = surf[k]
+		var n: int = s[0].size()
+		var u: PackedVector2Array = s[5]
+		var m := u.size()
+		if m >= n:
+			continue
+		var part := 1.0 if k in ROOF_MATS else 0.0
+		var val := Vector2(float(cur_unit), part)
+		u.resize(n)
+		for i in range(m, n):
+			u[i] = val
+		s[5] = u
 
 
 func is_empty() -> bool:
@@ -373,6 +402,7 @@ func ridge_cap(xf: Transform3D, hw: float, hd: float, rise: float, gable_s: floa
 
 ## 確定: ArrayMesh を作って MeshInstance3D を返す
 func commit(name := "Mesh", shadows := true) -> MeshInstance3D:
+	sync_units()
 	var am := ArrayMesh.new()
 	var keys := surf.keys()
 	keys.sort()
@@ -387,6 +417,8 @@ func commit(name := "Mesh", shadows := true) -> MeshInstance3D:
 		arrays[Mesh.ARRAY_TEX_UV] = s[2]
 		arrays[Mesh.ARRAY_COLOR] = s[3]
 		arrays[Mesh.ARRAY_INDEX] = s[4]
+		if has_units:
+			arrays[Mesh.ARRAY_TEX_UV2] = s[5]
 		am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 		am.surface_set_material(am.get_surface_count() - 1, WorldMaterials.get_mat(k))
 	var mi := MeshInstance3D.new()

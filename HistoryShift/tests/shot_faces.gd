@@ -99,9 +99,11 @@ func _ready() -> void:
 	sheet.fill(Color(0.2, 0.2, 0.22))
 	cam.fov = 30
 	for ci in chars.size():
-		var n: Node3D = chars[ci][0]
-		cam.position = n.position + Vector3(0, 0.88, 3.6)
-		cam.look_at(n.position + Vector3(0, 0.8, 0))
+		var fr0 := _facing(chars[ci][1], "Hips")
+		var base_p: Vector3 = Vector3(fr0[0].x, 0.0, fr0[0].z)
+		var fwd0: Vector3 = fr0[1]
+		cam.position = base_p + Vector3(0, 0.88, 0) + fwd0 * 3.6
+		cam.look_at(base_p + Vector3(0, 0.8, 0))
 		for f in 3:
 			await get_tree().process_frame
 		sheet.blit_rect(_crop(tw, th), Rect2i(0, 0, tw, th), Vector2i((ci % cols) * tw, (ci / cols) * th))
@@ -116,13 +118,14 @@ func _ready() -> void:
 		cam.fov = 20
 		for ci in chars.size():
 			var sk: Skeleton3D = chars[ci][1]
-			var hb := sk.find_bone("Head")
-			var hp: Vector3 = sk.global_transform * sk.get_bone_global_pose(hb).origin
+			var fr := _facing(sk, "Head")
+			var hp: Vector3 = fr[0]
+			var fwd: Vector3 = fr[1]
 			var hs: float = sk.global_transform.basis.get_scale().x
-			var look := hp + Vector3(0, 0.065 * hs, 0)
+			var look := hp + Vector3(0, 0.07 * hs, 0)
 			var dist := 0.62 * maxf(hs, 0.8) * (1.15 if String(CAST[chars[ci][2]][3]) == "child" else 1.0)
 			var ang := 0.0 if view == "close" else deg_to_rad(35.0)
-			cam.position = look + Vector3(sin(ang) * dist, 0.02, cos(ang) * dist)
+			cam.position = look + fwd.rotated(Vector3.UP, ang) * dist + Vector3(0, 0.02, 0)
 			cam.look_at(look)
 			for f in 3:
 				await get_tree().process_frame
@@ -138,6 +141,18 @@ func _ready() -> void:
 	get_viewport().get_texture().get_image().save_png(OUT + tag + "_crowd.png")
 	print("saved ", OUT + tag + "_*.png")
 	get_tree().quit()
+
+
+## 骨の世界位置と、その骨から見た水平の正面方向
+func _facing(sk: Skeleton3D, bone: String) -> Array:
+	var bi := sk.find_bone(bone)
+	var g := sk.global_transform * sk.get_bone_global_pose(bi)
+	var rest := sk.get_bone_global_rest(bi)
+	var fwd := (g.basis * rest.basis.inverse()) * Vector3(0, 0, 1)
+	fwd.y = 0.0
+	if fwd.length() < 0.01:
+		fwd = Vector3(0, 0, 1)
+	return [g.origin, fwd.normalized()]
 
 
 func _crop(tw: int, th: int) -> Image:
