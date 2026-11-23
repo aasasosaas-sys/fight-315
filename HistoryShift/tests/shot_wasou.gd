@@ -34,7 +34,7 @@ func _ready() -> void:
 			specs.append(a.split(":"))
 	var x := -(specs.size() - 1) * 0.4
 	for s in specs:
-		var n := AnimeChar.build(s[0], s[1])
+		var n := AnimeChar.build(s[0], s[1], {}, s[2] if s.size() > 2 else "")
 		add_child(n)
 		n.position = Vector3(x, 0, 0)
 		x += 0.8

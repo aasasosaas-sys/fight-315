@@ -477,13 +477,52 @@ def bone_weights(o, L, arms=True, legs=0.0):
     am.object = L["arm"]
 
 
+def body_hidden(rest_body, L, wrist_t=0.93):
+    """和装用の体：服に隠れる範囲（足首より上〜首元）を位置で消す。手首から先と足首から下は残す。
+    rest_body は T ポーズ（休止姿勢）なので腕は休止姿勢の骨の位置で判定する。"""
+    arm = L["arm"]
+    mw_a = arm.matrix_world
+    b = arm.data.bones
+    rest_arms = []
+    for s_ in ("l", "r"):
+        sh = mw_a @ b[K.bn("upperarm_" + s_)].head_local
+        wr = mw_a @ b[K.bn("hand_" + s_)].head_local
+        rest_arms.append((sh, wr - sh))
+    neck_z = (mw_a @ b[K.bn("neck_01")].head_local).z
+    g = rest_body.copy()
+    g.data = rest_body.data.copy()
+    g.name = "w_bodyw"
+    bpy.context.collection.objects.link(g)
+    mw = g.matrix_world
+    zs = [(mw @ v.co).z for v in g.data.vertices]
+    floor = min(zs)
+    bm = bmesh.new()
+    bm.from_mesh(g.data)
+    kill = []
+    for v in bm.verts:
+        q = mw @ v.co
+        hand = False
+        for sh, ax in rest_arms:
+            t = (q - sh).dot(ax) / ax.length_squared
+            if t > wrist_t and (q - (sh + ax * t)).length < 0.12:
+                hand = True
+        if hand:
+            continue
+        if floor + 0.1 < q.z < neck_z - 0.025:
+            kill.append(v)
+    bmesh.ops.delete(bm, geom=kill, context="VERTS")
+    bm.to_mesh(g.data)
+    bm.free()
+    return g
+
+
 def make(body_p, L, female, rest_body):
     K.SECTION_HOOK = tsection_dims(L)
     K.KEEP_V = False
     hip_z = L["pelvis"].z
     waist_z = L["spine_01"].z
     neck_z = L["neck_01"].z
-    K.body_for_wasou(rest_body, "w", L)
+    body_hidden(rest_body, L)
     # 小袖：男は腰下まで（袴の中へ）、女は膝上まで（下は裾の筒が受け持つ）
     ks = shell(body_p, L, "kosode", neck_z + 0.03, hip_z - (0.06 if not female else 0.1), 0.012)
     tl = tamoto(body_p, L, "l", 0.22 if female else 0.08, 0.24 if female else 0.2)
