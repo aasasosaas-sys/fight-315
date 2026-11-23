@@ -31,6 +31,7 @@ var _protect_fig: Variant = null
 var hints_on := true
 var _input_frame := -1                # E を受け取ったフレーム（MissionRunner が同じ E で直接会話を始めないように）
 var _prompted := false                # ミッション中：自分が出した案内を消すため
+var _gifted: Dictionary = {}          # この探索で武器を譲ってもらった（頼んだ）人物
 
 const TALK_RANGE := 3.8
 const ESCORT_RADIUS := 30.0
@@ -375,6 +376,9 @@ func _main_page(msg := "") -> void:
 	if not f.questions.is_empty():
 		_button("未来を語る", _steer_page)
 	_button("未来の品を渡す", _give_page)
+	if Game.profile and not Game.profile.skills_summary(30.0).is_empty():
+		_button("技術を教える", _teach_page)
+	_button("武器を譲ってもらう（話術）", _ask_weapon, not _gifted.has(f.figure_name))
 	if "protect" in verbs:
 		_button("守る（刺客から命を救う）", _start_protect, _protect_fig == null)
 	if _escort == f:
@@ -383,8 +387,9 @@ func _main_page(msg := "") -> void:
 		_button("連れて行く（別の名所まで同行させる）", _start_escort)
 	if "steal" in verbs:
 		var doc: Dictionary = a.get("doc", {})
-		_button("書状を盗む" + ("（%s）" % doc["name"] if doc.has("name") else ""), func(): _do("steal", {}))
-		_button("偽の書状を渡す", func(): _do("forge", {}))
+		var pct := roundi(Skills.forge_success(Game.profile.level("komonjo")) * 100) if Game.profile else 100
+		_button("書状を盗む" + ("（%s）" % doc["name"] if doc.has("name") else "") + "　成功 %d%%（古文読解）" % pct, func(): _doc_try("steal"))
+		_button("偽の書状を渡す　成功 %d%%（古文読解）" % pct, func(): _doc_try("forge"))
 	_button("立ち去る", close)
 
 
@@ -392,7 +397,7 @@ func _persuade_page() -> void:
 	_clear()
 	_line.text = "何を説く？（相手の性格によっては、はねつけられる）"
 	for arg in HistoryActors.ARGS:
-		_button(arg, func(): _do("persuade", {"arg": arg}))
+		_button(arg, func(): _do("persuade", {"arg": arg, "skill_bonus": _rhetoric_bonus()}))
 	_button("戻る", _main_page)
 
 
@@ -401,7 +406,120 @@ func _give_page() -> void:
 	_line.text = "時空鞄から何を渡す？（渡すと信頼も得られる）"
 	for it in HistoryActors.ITEMS:
 		_button(it, func(): _do("give", {"item": it}))
+	# 実際の持ち物から（この時代にまだない品を渡すと、それだけで歴史が揺らぐ）
+	if Game.profile:
+		var era_id := str(_menu_fig.era_id) if _menu_fig else ""
+		var shown := 0
+		for w in Game.profile.weapons():
+			if w.get("loan", false) or shown >= 4:
+				continue
+			shown += 1
+			var uid := int(w["uid"])
+			var gap := CraftDB.anachronism_gap(str(w["id"]), era_id)
+			_button("持ち物から：%s%s" % [Game.profile.item_label(w), "　［未来の品］" if gap > 0 else ""], func(): _give_inv(str(w["id"]), uid))
+		for id in Game.profile.stacks.keys():
+			if int(Game.profile.stacks[id]) - int(Game.profile.loan_stacks.get(id, 0)) <= 0 or shown >= 7:
+				continue
+			shown += 1
+			var sid := str(id)
+			var gap2 := CraftDB.anachronism_gap(sid, era_id)
+			_button("持ち物から：%s%s" % [CraftDB.item_name(sid), "　［未来の品］" if gap2 > 0 else ""], func(): _give_inv(sid, -1))
 	_button("戻る", _main_page)
+
+
+## 持ち物の品を渡す。時空鞄の「未来の品」と同じ品（鉄砲・特効薬・千両箱）ならその効き目、
+## この時代にまだない品なら「時代錯誤」（anachronism）として歴史を揺らす。どちらでもなければ贈り物（信頼）
+const INV_TO_ITEMS := {"hinawaju": "鉄砲", "murataju": "鉄砲", "arisaka38": "鉄砲", "pistol14": "鉄砲", "lmg96": "鉄砲",
+	"tokkouyaku": "特効薬", "senryobako": "千両箱"}
+
+
+func _give_inv(id: String, uid: int) -> void:
+	if _menu_fig == null or Game.profile == null:
+		return
+	var era_id := str(_menu_fig.era_id)
+	var gap := CraftDB.anachronism_gap(id, era_id)
+	if uid >= 0:
+		Game.profile.remove_instance(uid)
+	else:
+		Game.profile.take(id, 1)
+	var hit: Dictionary = {}
+	if INV_TO_ITEMS.has(id):
+		hit = _chaos_act("give", _menu_fig.figure_name, {"item": INV_TO_ITEMS[id]})
+	if gap > 0:
+		var h2: Dictionary = _chaos_act("anachronism", _menu_fig.figure_name, {"item": id, "gap": gap, "cause": "give", "type": CraftDB.item_type(id)})
+		if hit.is_empty():
+			hit = h2
+	if hit.is_empty() and not INV_TO_ITEMS.has(id):
+		hit = _chaos_act("give", _menu_fig.figure_name, {"item": CraftDB.item_name(id)})
+	for f in figures:
+		if is_instance_valid(f):
+			f.refresh_hint()
+	if hit.is_empty() or hit.get("refused", false):
+		_main_page("%s「%sか。ありがたく頂戴する」" % [_menu_fig.figure_name, CraftDB.item_name(id)])
+		return
+	close()
+
+
+func _rhetoric_bonus() -> int:
+	if Game.profile == null:
+		return 0
+	Game.profile.practice("rhetoric", 0.4)
+	return Skills.persuade_bonus(Game.profile.level("rhetoric"))
+
+
+# ------------------------------------------------------------------ 技術を教える
+func _teach_page() -> void:
+	_clear()
+	_line.text = "どの技を教える？（未来の知識は、この時代の技術・軍事・暮らしを動かす）"
+	for s in Game.profile.skills_summary(30.0):
+		var sid := str(s["id"])
+		var lv := float(s["level"])
+		_button("%s（%s %d）" % [s["name"], s["rank"], int(lv)], func(): _do("teach", {"skill": sid, "level": int(lv)}))
+	_button("戻る", _main_page)
+
+
+# ------------------------------------------------------------------ 武器を譲ってもらう
+const GIFTS := {
+	"jomon_kofun": ["tekken", "tankyu"], "asuka_nara": ["chokuto", "tankyu"], "heian": ["tachi", "wakyu"],
+	"kamakura_muromachi": ["tachi", "naginata", "wakyu"], "sengoku": ["uchigatana", "hinawaju", "yari"],
+	"edo": ["uchigatana", "wakizashi", "hinawaju"], "meiji_taisho": ["guntou", "murataju"], "showa": ["guntou", "arisaka38"],
+}
+const GIFT_AMMO := {"tankyu": ["ya", 20], "wakyu": ["ya", 20], "hinawaju": ["hayago", 12], "murataju": ["murata_dan", 15], "arisaka38": ["dan38", 25]}
+
+
+func _ask_weapon() -> void:
+	var f: Variant = _menu_fig
+	if f == null or Game.profile == null:
+		return
+	_gifted[f.figure_name] = true
+	var tr := Game.chaos.trust(Game.db.actor_name(f.figure_name)) if Game.chaos else 0
+	var p := Skills.gift_success(Game.profile.level("rhetoric"), tr)
+	Game.profile.practice("rhetoric", 0.6)
+	if randf() >= p:
+		_main_page("%s「得体の知れぬ者に、刀は渡せぬ」（成功 %d%%：話術・信頼で上がる）" % [f.figure_name, roundi(p * 100)])
+		return
+	var list: Array = GIFTS.get(str(f.era_id), ["uchigatana"])
+	var id: String = list[randi() % list.size()]
+	var q := randf_range(0.6, 0.88)
+	var it: Dictionary = Game.profile.add_instance(Crafting.make_item(id, q, f.figure_name, str(f.era_id)))
+	var extra := ""
+	if GIFT_AMMO.has(id):
+		Game.profile.add(GIFT_AMMO[id][0], GIFT_AMMO[id][1], 0.65)
+		extra = "と%s" % CraftDB.item_name(GIFT_AMMO[id][0])
+	_main_page("%s「よかろう。これを持っていけ」――%s%sを譲り受けた" % [f.figure_name, Game.profile.item_label(it), extra])
+
+
+# ------------------------------------------------------------------ 書状（古文読解）
+func _doc_try(verb: String) -> void:
+	if Game.profile:
+		var ok := randf() < Skills.forge_success(Game.profile.level("komonjo"))
+		Game.profile.practice("komonjo", 0.8)
+		if not ok:
+			var f: Variant = _menu_fig
+			Wanted.report((f as Node3D).global_position if f else Vector3.ZERO, 1.5)
+			_main_page("見破られた！ %s" % ("「その書状に触れるな！」" if verb == "steal" else "「この花押は偽物だ！」") + "（古文読解を磨けば成功しやすい）")
+			return
+	_do(verb, {})
 
 
 func _steer_page() -> void:

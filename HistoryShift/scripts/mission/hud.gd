@@ -53,6 +53,9 @@ var _shift_detail: Label
 var _shift_fx: ColorRect          # 画面のゆらぎ（色収差風の走査線）
 var _shift_queue: Array = []
 var _shift_busy := false
+var _weapon: Label                # 手にしている武器（左下）
+var _dur_bar: ProgressBar         # 武器の耐久
+var _money: Label                 # 所持金（右上）
 
 
 func _ready() -> void:
@@ -102,8 +105,20 @@ func _ready() -> void:
 	_hp_bar.add_theme_stylebox_override("fill", fill)
 	_hp_bar.add_theme_stylebox_override("background", bg)
 	v.add_child(_hp_bar)
+	_weapon = _label("", 22, GOLD, v)
+	_weapon.add_theme_font_override("font", _bold)
 	_ammo = _label("30 / ∞", 34, Color.WHITE, v)
 	_ammo.add_theme_font_override("font", _bold)
+	_dur_bar = ProgressBar.new()
+	_dur_bar.custom_minimum_size = Vector2(200, 8)
+	_dur_bar.show_percentage = false
+	_dur_bar.max_value = 1.0
+	var dfill := StyleBoxFlat.new(); dfill.bg_color = Color(0.85, 0.8, 0.6); dfill.set_corner_radius_all(3)
+	var dbg := StyleBoxFlat.new(); dbg.bg_color = Color(1, 1, 1, 0.1); dbg.set_corner_radius_all(3)
+	_dur_bar.add_theme_stylebox_override("fill", dfill)
+	_dur_bar.add_theme_stylebox_override("background", dbg)
+	_dur_bar.visible = false
+	v.add_child(_dur_bar)
 	_veh = _label("", 22, Color(1, 1, 1, 0.8), v)
 	_tool = _label("", 21, CYAN, v)
 
@@ -115,6 +130,16 @@ func _ready() -> void:
 	_stars.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_stars.add_theme_constant_override("outline_size", 8)
 	_stars.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+	_money = _label("", 22, Color(1, 0.9, 0.6))
+	_money.anchor_left = 1.0
+	_money.anchor_right = 1.0
+	_money.offset_left = -660.0
+	_money.offset_right = -30.0
+	_money.offset_top = 116.0
+	_money.offset_bottom = 146.0
+	_money.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_money.add_theme_constant_override("outline_size", 6)
+	_money.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 	_destr = _label("", 22, Color(1, 0.82, 0.6))
 	_destr.anchor_left = 1.0
 	_destr.anchor_right = 1.0
@@ -312,7 +337,7 @@ func _build_pause() -> void:
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_button(v, "再開", _on_resume)
 	_button(v, "ミッションを中断してハブへ", _on_abort)
-	var help := _label("WASD 移動 / Shift ダッシュ / Space ジャンプ / 左クリック 射撃 / 右クリック エイム\nR リロード / F 乗り物 / E 話す / 飛行機: W・S スロットル, マウス 進路, Shift ブースト", 20, Color(1, 1, 1, 0.7), v)
+	var help := _label("WASD 移動 / Shift ダッシュ / Space ジャンプ / 左クリック 攻撃（長押しで強い振り・弓を引く）/ 右クリック 受け・エイム\nR 装填 / 1 持ち替え / 2〜5 爆弾など / F 乗り物 / E 話す・工房 / Tab 時空鞄 / 飛行機: W・S スロットル, マウス 進路", 20, Color(1, 1, 1, 0.7), v)
 	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 
@@ -361,6 +386,21 @@ func toast(t: String, dur := 3.0) -> void:
 	l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	var tw := l.create_tween()
 	tw.tween_interval(dur)
+	tw.tween_property(l, "modulate:a", 0.0, 0.5)
+	tw.tween_callback(l.queue_free)
+	while _toast_box.get_child_count() > 4:
+		_toast_box.get_child(0).free()
+
+
+## 技能が上がったときの知らせ（金色）
+func skill_toast(t: String, up := true) -> void:
+	var l := _label(t, 28, GOLD if up else Color(0.8, 0.8, 0.8), _toast_box)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.add_theme_constant_override("outline_size", 8)
+	l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	l.add_theme_font_override("font", _bold)
+	var tw := l.create_tween()
+	tw.tween_interval(3.0)
 	tw.tween_property(l, "modulate:a", 0.0, 0.5)
 	tw.tween_callback(l.queue_free)
 	while _toast_box.get_child_count() > 4:
@@ -504,7 +544,20 @@ func _process(dt: float) -> void:
 		if fill:
 			fill.bg_color = Color(0.35, 0.85, 0.5) if p.hp > p.max_hp * 0.35 else RED
 		var in_plane: bool = p.in_vehicle() and p.vehicle.get("kind") == "plane"
-		_ammo.text = ("リロード中…" if p.reloading else "%d / ∞" % p.ammo) if not in_plane else "機銃 ∞"
+		var arms = p.get("arms")
+		if arms != null and not in_plane:
+			_ammo.text = arms.ammo_text()
+			_weapon.text = arms.weapon_name()
+			var dr: float = arms.durability_ratio()
+			_dur_bar.visible = dr >= 0.0
+			_dur_bar.value = maxf(dr, 0.0)
+			(_dur_bar.get_theme_stylebox("fill") as StyleBoxFlat).bg_color = Color(0.85, 0.8, 0.6) if dr > 0.25 else RED
+		else:
+			_ammo.text = ("リロード中…" if p.reloading else "%d / ∞" % p.ammo) if not in_plane else "機銃 ∞"
+			_weapon.text = ""
+			_dur_bar.visible = false
+		if Game.profile and Game.world and "era_id" in Game.world:
+			_money.text = "所持金 " + CraftDB.money_text(Game.profile.money, str(Game.world.era_id))
 		if p.in_vehicle():
 			var sp: float = p.vehicle.get_speed() * 3.6
 			_veh.text = "%s  %d km/h" % [p.vehicle.get("display_name"), int(sp)]
@@ -558,6 +611,18 @@ func _draw_cross() -> void:
 	var gap := 7.0
 	var ln := 10.0
 	var c := Color(1, 1, 1, 0.9)
+	var arms = p.get("arms") if p != null and is_instance_valid(p) else null
+	if arms != null:
+		var k: String = arms.kind()
+		if k == "bow":
+			var f: float = arms.draw_fraction()
+			if f > 0.0:
+				_cross.draw_arc(Vector2.ZERO, 22, -PI / 2, -PI / 2 + TAU * f, 32, GOLD if f >= 1.0 else Color(1, 1, 1, 0.8), 3.0)
+		elif k in ["melee", "fists"]:
+			_cross.draw_circle(Vector2.ZERO, 3.0, Color(1, 1, 1, 0.8))
+			if arms.blocking:
+				_cross.draw_arc(Vector2.ZERO, 18, PI * 0.15, PI * 0.85, 16, CYAN, 3.0)
+			return
 	for d in [Vector2.RIGHT, Vector2.LEFT, Vector2.UP, Vector2.DOWN]:
 		_cross.draw_line(d * gap, d * (gap + ln), Color(0, 0, 0, 0.6), 4.0)
 		_cross.draw_line(d * gap, d * (gap + ln), c, 2.0)

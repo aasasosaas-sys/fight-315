@@ -195,6 +195,9 @@ func _stop_backdrop() -> void:
 func start_new_game() -> void:
 	Game.state.reset_all()
 	HistoryState.delete_save()
+	if Game.profile:
+		Game.profile.reset()   # 技能・持ち物も最初から（現代の高校生、素手）
+		Game.profile.save()
 	show_exam()
 
 
@@ -233,6 +236,9 @@ func show_hub(select_qid := "", reveal := false) -> void:
 	h.reset_all.connect(func():
 		Game.state.reset_all()
 		HistoryState.delete_save()
+		if Game.profile:
+			Game.profile.reset()
+			Game.profile.save()
 		show_title())
 	h.open_settings.connect(func(): SettingsScreen.open(root))
 	_show(h, "hub")

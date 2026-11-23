@@ -102,7 +102,7 @@ func _place(kind: String, d: Dictionary, w, rng: RandomNumberGenerator, used: Ar
 	var st := CraftStation.spawn(session, pos, yaw, kind, d, at)
 	stations.append(st)
 	if hud and "compass_points" in hud:
-		var mark := {"workshop": "⚒", "shop": "＄", "loot": "蔵"}.get(kind, "")
+		var mark: String = {"workshop": "⚒", "shop": "＄", "loot": "蔵"}.get(kind, "")
 		hud.compass_points[mark + str(d.get("name", ""))] = pos
 	return st
 

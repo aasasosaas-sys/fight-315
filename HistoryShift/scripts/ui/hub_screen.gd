@@ -95,6 +95,9 @@ func _header() -> Control:
 		wb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		wb.pressed.connect(_show_war)
 		h.add_child(wb)
+	if Game.profile:
+		var top: Array = Game.profile.skills_summary(1.0)
+		h.add_child(_stat("技能", ("%s %d" % [top[0]["name"], int(top[0]["level"])]) if not top.is_empty() else "素人", JSUI.GOLD if not top.is_empty() else JSUI.MUTED))
 	var cb := Game.state.chaos_broken().size()
 	if cb > 0 or Game.state.chaos_count > 0:
 		h.add_child(_stat("混乱で崩壊", "%d 問" % cb, JSUI.SHU if cb > 0 else JSUI.MUTED))
@@ -469,6 +472,9 @@ func _footer() -> Control:
 		var act_b := JSUI.button("自由行動の記録", "normal", 23, 220)
 		act_b.pressed.connect(_show_actions)
 		h.add_child(act_b)
+	var sk_b := JSUI.button("技能・持ち物", "normal", 23, 200)
+	sk_b.pressed.connect(_show_skills)
+	h.add_child(sk_b)
 	var free_b := JSUI.button("自由探索", "cyan", 23, 170)
 	free_b.pressed.connect(func(): EraPicker.open(self, func(id): free_roam.emit(id)))
 	h.add_child(free_b)
@@ -480,7 +486,7 @@ func _footer() -> Control:
 	h.add_child(title_b)
 	var reset_b := JSUI.button("リセット", "danger", 23, 150)
 	reset_b.pressed.connect(func():
-		JSUI.confirm(self, "すべてリセット", "答案・歴史改変・ログをすべて消去し、世界を本来の史実に戻します。この操作は取り消せません。", "リセットする", "やめる", func(): reset_all.emit(), true))
+		JSUI.confirm(self, "すべてリセット", "答案・歴史改変・ログ・技能・持ち物をすべて消去し、世界を本来の史実に戻します。この操作は取り消せません。", "リセットする", "やめる", func(): reset_all.emit(), true))
 	h.add_child(reset_b)
 	return h
 
@@ -645,3 +651,55 @@ func _show_log() -> void:
 	v.add_child(row)
 	close.call_deferred("grab_focus")
 	sc.call_deferred("set", "scroll_vertical", 100000)
+
+
+## 技能と持ち物のまとめ（時代をまたいで持ち越す）
+func _show_skills() -> void:
+	var prof: PlayerProfile = Game.profile
+	if prof == null:
+		return
+	var r := JSUI.modal(self, 1300, "技能と持ち物 ― 時代をまたいで持ち越す")
+	var overlay: Control = r[0]
+	var v: VBoxContainer = r[1]
+	v.add_child(JSUI.label("技術完全習得モード：%s　　所持金 %d文（%s）" % ["オン" if PlayerProfile.master_mode() else "オフ", prof.money, CraftDB.money_text(prof.money, "edo")], 21, JSUI.MUTED))
+	var sc := ScrollContainer.new()
+	sc.custom_minimum_size = Vector2(0, 560)
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	v.add_child(sc)
+	var list := JSUI.vbox(6)
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sc.add_child(list)
+	for k in Skills.ids():
+		var lv := prof.level(k)
+		var row := JSUI.hbox(14)
+		list.add_child(row)
+		var nm := JSUI.label(Skills.skill_name(k), 22, JSUI.TEXT, JSUI.sans_bold())
+		nm.custom_minimum_size = Vector2(170, 0)
+		row.add_child(nm)
+		var rk := JSUI.label("%s %d" % [Skills.rank(lv), int(lv)], 20, JSUI.GOLD if lv >= 60 else (JSUI.CYAN if lv > 0 else JSUI.DIM), JSUI.sans_bold())
+		rk.custom_minimum_size = Vector2(130, 0)
+		row.add_child(rk)
+		var bar := ProgressBar.new()
+		bar.max_value = 100
+		bar.value = lv
+		bar.show_percentage = false
+		bar.custom_minimum_size = Vector2(200, 16)
+		bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(bar)
+		var ef := JSUI.label(Skills.effect_line(k, lv), 17, JSUI.MUTED, null, true)
+		ef.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(ef)
+	list.add_child(JSUI.gap(8))
+	list.add_child(JSUI.label("武器", 24, JSUI.GOLD, JSUI.sans_bold()))
+	if prof.weapons().is_empty():
+		list.add_child(JSUI.label("なし（素手）。過去で奪う・買う・譲ってもらう・作る", 19, JSUI.MUTED))
+	for w in prof.weapons():
+		list.add_child(JSUI.label("・%s　%s" % [prof.item_label(w), Crafting.stats_text(w)], 18, Crafting.grade_color(float(w.get("q", 0.5)))))
+	var parts: PackedStringArray = []
+	for id in prof.stacks:
+		parts.append("%s×%d" % [CraftDB.item_name(id), int(prof.stacks[id])])
+	list.add_child(JSUI.label("持ち物：" + ("、".join(parts) if not parts.is_empty() else "なし"), 19, JSUI.TEXT, null, true))
+	var close := JSUI.button("閉じる", "primary", 24, 200)
+	close.pressed.connect(func(): UISfx.play("back"); JSUI.close_modal(overlay))
+	v.add_child(close)
+	close.call_deferred("grab_focus")
