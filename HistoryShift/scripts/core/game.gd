@@ -11,6 +11,7 @@ signal chaos_event(kind: String, id: String, info: Dictionary)
 var db: HistoryDB
 var state: HistoryState
 var chaos: ChaosTracker           # 自由探索の「歴史の揺らぎ」（scripts/core/chaos.gd）
+var profile: PlayerProfile        # 主人公の技能・持ち物・所持金（時代をまたいで持ち越す。scripts/core/player_profile.gd）
 var world: Node3D = null          # 現在の EraWorld
 var player: Node3D = null         # 現在の Player
 var input_blocked := false        # UI が前面にあるとき true
@@ -36,6 +37,8 @@ func _ready() -> void:
 	state.load_save()
 	chaos = ChaosTracker.new(db, state)
 	chaos_event.connect(chaos.on_event)
+	profile = PlayerProfile.new()
+	profile.load_save()
 	for e in db.errors:
 		push_warning(e)
 	for e in chaos.errors:
@@ -52,6 +55,8 @@ func _setup_input() -> void:
 		# 破壊ツール（1:銃 2:焙烙玉 3:火薬樽/ダイナマイト 4:大筒 5:棒火矢、G:焙烙玉を投げる）
 		"weapon_1": [KEY_1], "weapon_2": [KEY_2], "weapon_3": [KEY_3], "weapon_4": [KEY_4], "weapon_5": [KEY_5],
 		"throw": [KEY_G],
+		# 持ち物・技能・製作の画面（Tab / I、ゲームパッドは Back）
+		"inventory": [KEY_TAB, KEY_I],
 	}
 	for action in keys:
 		if not InputMap.has_action(action):
@@ -75,7 +80,8 @@ func _setup_input() -> void:
 		InputMap.action_add_event(pair[0], wb)
 	# ゲームパッド
 	var pad := {"jump": JOY_BUTTON_A, "interact": JOY_BUTTON_X, "vehicle": JOY_BUTTON_Y, "reload": JOY_BUTTON_B, "pause": JOY_BUTTON_START, "sprint": JOY_BUTTON_LEFT_STICK,
-		"weapon_next": JOY_BUTTON_RIGHT_SHOULDER, "weapon_prev": JOY_BUTTON_LEFT_SHOULDER, "throw": JOY_BUTTON_RIGHT_STICK}
+		"weapon_next": JOY_BUTTON_RIGHT_SHOULDER, "weapon_prev": JOY_BUTTON_LEFT_SHOULDER, "throw": JOY_BUTTON_RIGHT_STICK,
+		"inventory": JOY_BUTTON_BACK}
 	for action in pad:
 		var jb := InputEventJoypadButton.new()
 		jb.button_index = pad[action]
