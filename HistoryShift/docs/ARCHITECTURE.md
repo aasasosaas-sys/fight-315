@@ -94,3 +94,29 @@ main.gd が `Flow` ノードとして生成する。タイトル・試験・採�
 - 箱庭との縮尺: 地形は ±220m、岸から境界まで 30〜40m しかないので、喫水の深い船（大和・赤城・加賀・氷川丸・三笠・サスケハナ等）は実寸のまま
   境界の外の沖に錨泊させ、その船の周り 60m にいる間だけ `EraWorld.half_size` を広げる（小舟で渡る）。浅い船は岸近くに桟橋つきで置く。
 - テスト: `tests/test_ships.tscn`（ヘッドレス: 全船の組立・自沈/爆薬/弾火薬庫/放火の早回し）、`tests/shot_ships.tscn`（外観・船内・沈没の連続写真）。
+
+## 屋内（担当: world）— `scripts/world/interiors/`
+- 生成時: 建物の壁は `Architecture.shell()`（外から見た姿は従来の箱と同じ中空の壁体＋天面＋室内側の天井）で作り、入口の開口を抜く
+  （`slab()` が見た目と当たり判定の両方を抜く。窓の開口は見た目だけ）。土台の段は `entry_steps()`（見た目の段＋坂の当たり判定）。
+  外側の帯（下見板・胴蛇腹）は `band()`（天面なし＝室内に面が出ない）。いずれも破壊ユニットの begin/end の中で作るので、
+  破片・状態テクスチャ・ユニットのコリジョンに自動で含まれる。
+- 登録: `Architecture.reg_interior(type, xf, floors, doors, opts)` → `EraWorld.interior_defs`。
+  floors = [{y, rect(局所 xz), h, hole(天井の吹き抜け), stair{a,b,w}, win(窓)}]、doors = [{p, n, w, h, out}]。寸法は外観と同じ。
+- `WorldInteriors`（EraWorld の子）: プレイヤーが 25m 以内に来た建物だけ `InteriorBuilder`＋`InteriorKits`/`InteriorKitsModern` で内装を作り、
+  60m 超で外す（6 棟までプール、同時 10 棟）。1 棟 = MeshInstance 1 つ＋StaticBody 1 つ。実ライトは近い順に 4 灯まで（無影）、他は発光材。
+- キット（時代×用途）: pit 竪穴住居 / takayuka 高床倉庫 / raised_hall 祭殿 / shinden 寝殿造 / palace・daigokuden / temple 本堂 / pagoda / kinkaku /
+  shrine 拝殿 / shoin 書院造 / goten 御殿 / machiya 町家（2 階）/ nagaya 長屋 / chaya 茶屋 / minka・farmhouse / kura 土蔵 / storehouse /
+  castle 天守（全層・階段・連子窓）/ yagura / yokan 洋館 / office・office_showa / bank / station 駅舎 / factory 製糸場 / warehouse(_showa) /
+  school / diet 中央広間 / showa_shop・showa_house / danchi 2DK / hangar / tower。典拠は `data/interiors/kits.json` の basis。
+- 破壊との連動: 屋根崩落（stage>=2）・炎上で入口を塞ぐ（中にいなければ内装も消す）。中にいる時に燃えたら屋内に炎と煙（体力 3 割までの微ダメージ）。
+  倒壊（`Destruction.destroy_unit` → `on_destroyed`）で内装を捨て、中のプレイヤーは入口の外へ押し出して最大 45 のダメージ（即死させない）。
+- カメラ: `CameraRig.indoor`（WorldInteriors が設定）で腕を短く・低く、壁・天井の手前で止める（各階の天井に当たり判定あり）。
+```gdscript
+EraWorld.get_interior_points(unit_id) -> Array[Vector3]       # 屋内の NPC 地点（内装を作っていなくても返す）
+EraWorld.get_interior_spots(unit_id) -> [{pos, yaw, floor, role}]   # role: stand/sit/work/guard/scene
+EraWorld.find_interior(tag) -> int                            # "honnoji" "omiya" "tenshu" "rokumeikan" "shimbashi" "diet" ...（kits.json の scenes）
+EraWorld.find_interiors(type, landmark) -> Array[int]
+EraWorld.get_interior_info(unit_id) -> {type, name, basis, floors, tags, doors:[{pos, out, normal}], loaded, blocked}
+EraWorld.ensure_interior(unit_id, pin) / release_interior(unit_id) # 上階に NPC を立たせる前などに先に作る
+EraWorld.interior_at(pos) -> int
+```
