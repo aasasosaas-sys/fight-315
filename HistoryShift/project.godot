@@ -54,3 +54,18 @@ export/convert_text_resources_to_binary=true
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/vrm/plugin.cfg")
+
+[shader_globals]
+
+toon_shade_color={
+"type": "color",
+"value": Color(0.55, 0.6, 0.85, 1)
+}
+toon_params={
+"type": "vec4",
+"value": Vector4(0.08, 0.06, 0.35, 0.55)
+}
+world_night={
+"type": "float",
+"value": 0.0
+}

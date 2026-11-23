@@ -1,6 +1,9 @@
 shader_type spatial;
-// 葉カード（手続き的な葉の形で alpha scissor）＋内側の塊。風で揺れる。
-render_mode cull_disabled, diffuse_burley, specular_schlick_ggx;
+// アニメ調の樹冠: 葉カード（丸い塊＋縁の葉っぱ形で alpha scissor）と内側の塊。
+// 法線は塊の中心から外向き（頂点側で設定済み）→ セル塗りで柔らかい塊の陰影になる。風で揺れる。
+render_mode cull_disabled, diffuse_burley;
+
+#include "res://shaders/toon.gdshaderinc"
 
 uniform vec3 leaf_color : source_color = vec3(0.16, 0.3, 0.08);
 uniform vec3 leaf_color2 : source_color = vec3(0.24, 0.36, 0.1);
@@ -9,7 +12,10 @@ uniform float leaf_size = 0.42;
 uniform float leaf_aspect = 0.5;
 uniform float sway = 1.0;
 uniform float translucency = 0.45;
-// 写真の葉アトラス（黒背景・上段5枚/下段3枚）。use_tex=1 で使用
+uniform float blob = 0.62;          // 中央の塊の半径（UV 0..1 に対する比）
+uniform vec3 tip_color : source_color = vec3(0.75, 0.88, 0.4);   // 逆光で透ける色
+uniform float ao_strength = 0.55;
+// 互換（未使用）
 uniform sampler2D leaf_tex : source_color, filter_linear_mipmap, repeat_disable;
 uniform float use_tex = 0.0;
 uniform vec3 tex_tint : source_color = vec3(1.0);
@@ -17,6 +23,7 @@ uniform float tex_desat = 0.0;
 
 varying vec3 v_col;
 varying float v_core;
+varying float v_seed;
 
 float hash12(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -32,73 +39,65 @@ void vertex() {
 	float fy = max(VERTEX.y, 0.0);
 	VERTEX.x += bend * 0.012 * fy * COLOR.g * (1.0 + fy * 0.05);
 	VERTEX.z += bend * 0.008 * fy * COLOR.g;
-	// 葉先の細かい揺れ
-	VERTEX += NORMAL * sin(TIME * 4.0 + VERTEX.x * 3.0 + VERTEX.y * 2.0) * 0.03 * (1.0 - COLOR.a) * sway;
-	v_col = mix(leaf_color, leaf_color2, hv) * mix(0.55, 1.08, COLOR.r);
+	VERTEX += NORMAL * sin(TIME * 3.0 + VERTEX.x * 2.0 + VERTEX.y * 1.5) * 0.04 * (1.0 - COLOR.a) * sway;
+	float ao = mix(1.0 - ao_strength * 0.75, 1.06, COLOR.r);
+	v_col = mix(leaf_color, leaf_color2, hv) * ao;
 	v_core = COLOR.a;
-}
-
-vec4 atlas_leaf(vec2 lp, float r, float lod) {
-	// lp: 葉ローカル座標（-0.5..0.5、y が葉の長さ方向）
-	float idx = floor(r * 7.999);
-	vec2 rect_pos = idx < 5.0 ? vec2(idx * 0.2, 0.0) : vec2((idx - 5.0) * 0.2, 0.5);
-	vec2 uv = rect_pos + vec2(lp.x + 0.5, 0.5 - lp.y) * vec2(0.2, 0.5);
-	if (lp.x < -0.5 || lp.x > 0.5 || lp.y < -0.5 || lp.y > 0.5) return vec4(0.0);
-	vec3 c = textureLod(leaf_tex, uv, lod).rgb;
-	float a = smoothstep(0.05, 0.12, max(c.r, max(c.g, c.b)));
-	return vec4(c, a);
+	v_seed = fract(VERTEX.x * 3.17 + VERTEX.y * 1.71 + VERTEX.z * 2.33);
 }
 
 void fragment() {
+	// 両面: 裏面でも外向き法線のまま（塊の陰影を保つ）
+	if (!FRONT_FACING) {
+		NORMAL = -NORMAL;
+	}
 	float a = 1.0;
 	float shade = 1.0;
-	vec3 texc = vec3(-1.0);
 	if (v_core < 0.5) {
+		vec2 c = UV - 0.5;
+		float r = length(c) * 2.0;
+		float ang = atan(c.y, c.x);
+		// 丸い塊（ゆるい凹凸）
+		float lobes = blob * (1.0 + 0.12 * sin(ang * 4.0 + v_seed * 20.0) + 0.06 * sin(ang * 9.0 + v_seed * 7.0));
+		float inner = step(r, lobes);
+		// 縁の葉っぱ（ボロノイ風に並べた尖った楕円）
 		vec2 g = UV * leaf_count;
 		vec2 id = floor(g);
 		float best = 10.0;
 		float bid = 0.0;
-		float lod = clamp(log2(max(length(dFdx(UV)), length(dFdy(UV))) * 1024.0 / leaf_count * 2.5), 0.0, 8.0);
-		bool tex_mode = use_tex > 0.5;
 		for (int y = -1; y <= 1; y++) {
 			for (int x = -1; x <= 1; x++) {
-				vec2 c = id + vec2(float(x), float(y));
-				float r = hash12(c);
-				float r2 = hash12(c + 7.7);
-				vec2 ctr = c + vec2(r, r2);
-				vec2 d = g - ctr;
-				float ang = r * 6.2831;
-				vec2 rd = vec2(cos(ang) * d.x + sin(ang) * d.y, -sin(ang) * d.x + cos(ang) * d.y);
-				if (tex_mode) {
-					vec2 lp = vec2(rd.x / (leaf_size * leaf_aspect * 2.0), rd.y / (leaf_size * 2.0));
-					vec4 lc = atlas_leaf(lp, r2, lod);
-					if (lc.a > 0.5 && r2 < best) { best = r2; bid = r2; texc = lc.rgb; }
-				} else {
-					rd.y /= leaf_aspect;
-					rd.x *= 1.0 + 0.4 * rd.y;
-					float dd = length(rd) / leaf_size;
-					if (dd < best) { best = dd; bid = r2; }
-				}
+				vec2 cc = id + vec2(float(x), float(y));
+				float r1 = hash12(cc);
+				float r2 = hash12(cc + 7.7);
+				vec2 d = g - (cc + vec2(r1, r2));
+				float an = r1 * 6.2831;
+				vec2 rd = vec2(cos(an) * d.x + sin(an) * d.y, -sin(an) * d.x + cos(an) * d.y);
+				rd.y /= leaf_aspect;
+				rd.x *= 1.0 + 0.5 * rd.y;
+				float dd = length(rd) / leaf_size;
+				if (dd < best) { best = dd; bid = r2; }
 			}
 		}
-		if (tex_mode) {
-			a = texc.r >= 0.0 ? 1.0 : 0.0;
-		} else {
-			a = 1.0 - step(1.0, best);
-		}
-		float edge = length(UV - 0.5) * 2.0;
-		a *= step(edge, 0.98 - hash12(floor(g)) * 0.15);
-		shade = mix(0.78, 1.12, bid);
+		float leaf = (1.0 - step(1.0, best)) * step(r, 0.97);
+		a = max(inner, leaf);
+		// 塊の内側はほぼ均一、縁の葉は少し明暗（筆のタッチ）
+		shade = mix(mix(0.9, 1.1, bid), 1.0, inner * 0.6);
 	}
 	vec3 col = v_col * shade;
-	if (texc.r >= 0.0) {
-		vec3 tc = mix(texc, vec3(dot(texc, vec3(0.3, 0.59, 0.11))), tex_desat);
-		col = tc * tex_tint * 2.2 * mix(0.6, 1.1, (v_col.g + v_col.r) * 2.0) * shade;
-	}
 	ALBEDO = col;
 	ALPHA = a;
 	ALPHA_SCISSOR_THRESHOLD = 0.5;
-	ROUGHNESS = 0.65;
-	SPECULAR = 0.35;
-	BACKLIGHT = col * translucency;
+	ROUGHNESS = 0.9;
+	SPECULAR = 0.1;
+}
+
+void light() {
+	toon_light_common(NORMAL, VIEW, LIGHT, LIGHT_COLOR, ATTENUATION, LIGHT_IS_DIRECTIONAL, 0.1, 1.2, DIFFUSE_LIGHT);
+	if (LIGHT_IS_DIRECTIONAL) {
+		// 逆光の透過（明るい黄緑）
+		float back = clamp(dot(-VIEW, LIGHT), 0.0, 1.0);
+		float edge = 1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0);
+		DIFFUSE_LIGHT += LIGHT_COLOR / PI * tip_color * pow(back, 3.0) * edge * translucency * smoothstep(0.3, 0.6, ATTENUATION);
+	}
 }

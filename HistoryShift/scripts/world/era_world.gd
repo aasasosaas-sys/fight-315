@@ -160,8 +160,12 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
+	var vp := get_viewport()
+	var cam0 := vp.get_camera_3d() if vp else null
+	if cam0:
+		WorldAtmosphere.update_post(env_nodes.get("post"), env_nodes.get("sun"), cam0)
 	if not grass_nodes.is_empty():
-		var cam := get_viewport().get_camera_3d()
+		var cam := cam0
 		if cam:
 			var p := to_local(cam.global_position)
 			for g in grass_nodes:
@@ -217,20 +221,26 @@ func set_time_of_day(hours: float) -> void:
 	var env: Environment = env_nodes.get("env")
 	if sun == null or env == null:
 		return
-	var hs: Dictionary = EraStyles.HDRI_SUN[style["sky"]]
-	# 6 時に日の出、18 時に日没。方位は HDRI の太陽に合わせて空を回す
+	# 6 時に日の出、18 時に日没。空はシェーダが太陽の向きに追従する
 	var t := (hours - 6.0) / 12.0
 	var elev := sin(clampf(t, -0.2, 1.2) * PI) * 62.0
-	var az := float(hs["az"]) + (t - 0.5) * 120.0
-	WorldAtmosphere.set_sun_dir(sun, az, maxf(elev, -10.0))
-	env.sky_rotation = Vector3(0, deg_to_rad(az - float(hs["az"])), 0)
-	var day := clampf(elev / 12.0, 0.0, 1.0)
-	sun.light_energy = float(style["sun_energy"]) * day
-	sun.visible = elev > -2.0
-	var pano: PanoramaSkyMaterial = env_nodes.get("sky_mat")
-	if pano:
-		pano.energy_multiplier = lerpf(0.05, 1.0, day)
-	env.ambient_light_energy = lerpf(0.25, 1.0, day)
+	var az := float(style["sun_az"]) + (t - 0.5) * 120.0
+	var day := clampf((elev + 3.0) / 15.0, 0.0, 1.0)
+	if elev < -2.0:
+		# 夜: 月明かり（青白い弱い光）として太陽ライトを流用
+		WorldAtmosphere.set_sun_dir(sun, az + 180.0, 35.0)
+		sun.light_color = Color(0.55, 0.65, 1.0)
+		sun.light_energy = 0.22
+		sun.sky_mode = DirectionalLight3D.SKY_MODE_LIGHT_ONLY
+	else:
+		WorldAtmosphere.set_sun_dir(sun, az, elev)
+		var low := 1.0 - clampf(elev / 25.0, 0.0, 1.0)
+		sun.light_color = (style["sun_color"] as Color).lerp(style["sunset_color"], low * 0.6)
+		sun.light_energy = float(style["sun_energy"]) * 0.85 * lerpf(0.35, 1.0, day)
+		sun.sky_mode = DirectionalLight3D.SKY_MODE_LIGHT_AND_SKY
+	sun.visible = true
+	env.ambient_light_energy = lerpf(0.35, float(style["ambient_energy"]), day)
+	WorldAtmosphere.apply_toon_globals(style, day)
 	if is_inside_tree():
 		for l in get_tree().get_nodes_in_group("world_night_light"):
 			if is_ancestor_of(l):
@@ -361,18 +371,18 @@ func _terrain_material() -> ShaderMaterial:
 	var road_scale := {"dirt": 0.2, "cobble": 0.4, "asphalt": 0.2, "sand": 0.25, "concrete": 0.25, "stonewall": 0.3}
 	m.set_shader_parameter("road_scale", road_scale.get(road_key, 0.25))
 	m.set_shader_parameter("plaza_scale", road_scale.get(plaza_key, 0.25))
-	if road_key == "dirt":
-		m.set_shader_parameter("road_tint", Color(1.12, 1.08, 1.02))
-	if plaza_key == "dirt":
-		m.set_shader_parameter("plaza_tint", Color(1.15, 1.1, 1.02))
-	if plaza_key == "sand":
-		m.set_shader_parameter("plaza_tint", Color(1.25, 1.2, 1.1))
 	if era_id == "showa":
 		m.set_shader_parameter("snow_height", 120.0)
 		m.set_shader_parameter("snow_center", terrain.canon_to_world(terrain.peak))
 		m.set_shader_parameter("snow_radius", 260.0)
-	var gt: Color = style["grass_tint"]
-	m.set_shader_parameter("grass_tint", gt)
+	for k in ["grass_a", "grass_b", "grass_c", "forest_col", "dirt_col", "sand_col", "rock_col", "rock_col2", "field_col"]:
+		m.set_shader_parameter(k, style[k])
+	m.set_shader_parameter("road_textured", 1.0 if road_key in ["cobble", "asphalt", "concrete", "stonewall"] else 0.0)
+	m.set_shader_parameter("plaza_textured", 1.0 if plaza_key in ["cobble", "asphalt", "concrete", "stonewall"] else 0.0)
+	if road_key == "sand":
+		m.set_shader_parameter("road_tint", Color(1.12, 1.1, 1.05))
+	if plaza_key == "sand":
+		m.set_shader_parameter("plaza_tint", Color(1.15, 1.12, 1.06))
 	return m
 
 
@@ -391,6 +401,9 @@ func _build_water() -> void:
 	var mat := ShaderMaterial.new()
 	mat.shader = WorldMaterials.shader("water")
 	mat.set_shader_parameter("noise_tex", noise_tex)
+	mat.set_shader_parameter("shallow_color", style["water_shallow"])
+	mat.set_shader_parameter("deep_color", style["water_deep"])
+	mat.set_shader_parameter("sky_color", style["sky_horizon"])
 	sea.material_override = mat
 	sea.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(sea)
@@ -470,8 +483,9 @@ func _river_mesh(noise_tex: Texture2D) -> MeshInstance3D:
 	mat.set_shader_parameter("wave_amp", 0.0)
 	mat.set_shader_parameter("flow_speed", 1.2)
 	mat.set_shader_parameter("depth_scale", 2.0)
-	mat.set_shader_parameter("shallow_color", Color(0.16, 0.36, 0.3))
-	mat.set_shader_parameter("deep_color", Color(0.05, 0.14, 0.13))
+	mat.set_shader_parameter("shallow_color", (style["water_shallow"] as Color).lerp(Color(0.45, 0.75, 0.6), 0.3))
+	mat.set_shader_parameter("deep_color", (style["water_deep"] as Color).lerp(Color(0.12, 0.45, 0.5), 0.3))
+	mat.set_shader_parameter("sky_color", style["sky_horizon"])
 	mat.set_shader_parameter("foam_width", 0.6)
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -494,8 +508,9 @@ func add_water_rect(center: Vector3, size: Vector2, angle: float) -> void:
 	mat.set_shader_parameter("noise_tex", WorldMaterials.macro_noise())
 	mat.set_shader_parameter("wave_amp", 0.0)
 	mat.set_shader_parameter("depth_scale", 1.5)
-	mat.set_shader_parameter("shallow_color", Color(0.14, 0.3, 0.26))
-	mat.set_shader_parameter("deep_color", Color(0.04, 0.1, 0.1))
+	mat.set_shader_parameter("shallow_color", (style["water_shallow"] as Color).lerp(Color(0.4, 0.7, 0.55), 0.45))
+	mat.set_shader_parameter("deep_color", (style["water_deep"] as Color).lerp(Color(0.1, 0.36, 0.4), 0.5))
+	mat.set_shader_parameter("sky_color", style["sky_horizon"])
 	mat.set_shader_parameter("foam_width", 0.3)
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -541,12 +556,9 @@ func _build_grass() -> void:
 		mat.set_shader_parameter("water_level", water_level)
 		mat.set_shader_parameter("base_color", style["grass_base"])
 		mat.set_shader_parameter("tip_color", style["grass_tip"])
-		var arrs := WorldMaterials.terrain_arrays()
-		if arrs.size() == 3:
-			mat.set_shader_parameter("alb_arr", arrs[0])
-			mat.set_shader_parameter("use_ground", 1.0)
-			mat.set_shader_parameter("L_GRASS", float(WorldMaterials.layer("grass")))
-			mat.set_shader_parameter("ground_tint", style["grass_tint"])
+		for k in ["grass_a", "grass_b", "grass_c", "tip_light"]:
+			mat.set_shader_parameter(k, style[k])
+		mat.set_shader_parameter("rice_color", (style["field_col"] as Color) * 1.15)
 		mmi.material_override = mat
 		add_child(mmi)
 		grass_nodes.append([mmi, spacing])

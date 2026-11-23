@@ -13,12 +13,13 @@ static var _mesh_cache := {}
 static var _mat_cache := {}
 
 const SPECIES := {
-	"cedar": {"c1": Color(0.07, 0.15, 0.07), "c2": Color(0.12, 0.2, 0.08), "count": 5.0, "size": 0.42, "aspect": 0.32, "bark": Color(0.55, 0.42, 0.34)},
-	"pine": {"c1": Color(0.09, 0.18, 0.08), "c2": Color(0.15, 0.25, 0.1), "count": 7.0, "size": 0.4, "aspect": 0.22, "bark": Color(0.5, 0.4, 0.36)},
-	"broadleaf": {"c1": Color(0.15, 0.28, 0.07), "c2": Color(0.26, 0.38, 0.1), "count": 5.0, "size": 0.44, "aspect": 0.55, "bark": Color(0.5, 0.46, 0.42)},
-	"sakura": {"c1": Color(0.93, 0.66, 0.76), "c2": Color(0.99, 0.84, 0.9), "count": 7.0, "size": 0.42, "aspect": 0.8, "bark": Color(0.32, 0.26, 0.26)},
-	"bamboo": {"c1": Color(0.27, 0.42, 0.11), "c2": Color(0.38, 0.5, 0.15), "count": 5.0, "size": 0.45, "aspect": 0.2, "bark": Color(0.55, 0.68, 0.3)},
-	"bush": {"c1": Color(0.12, 0.24, 0.06), "c2": Color(0.2, 0.32, 0.08), "count": 6.0, "size": 0.42, "aspect": 0.55, "bark": Color(0.4, 0.34, 0.3)},
+	# アニメ背景調の明るい色（c1=影寄り, c2=日なた寄り）
+	"cedar": {"c1": Color(0.10, 0.30, 0.22), "c2": Color(0.16, 0.38, 0.24), "count": 5.0, "size": 0.42, "aspect": 0.32, "bark": Color(0.52, 0.36, 0.28)},
+	"pine": {"c1": Color(0.15, 0.36, 0.20), "c2": Color(0.22, 0.44, 0.22), "count": 7.0, "size": 0.4, "aspect": 0.25, "bark": Color(0.48, 0.36, 0.32)},
+	"broadleaf": {"c1": Color(0.26, 0.50, 0.16), "c2": Color(0.38, 0.60, 0.18), "count": 5.0, "size": 0.44, "aspect": 0.55, "bark": Color(0.48, 0.40, 0.34)},
+	"sakura": {"c1": Color(0.96, 0.70, 0.80), "c2": Color(1.0, 0.84, 0.90), "count": 7.0, "size": 0.42, "aspect": 0.8, "bark": Color(0.36, 0.28, 0.28)},
+	"bamboo": {"c1": Color(0.36, 0.56, 0.18), "c2": Color(0.48, 0.66, 0.22), "count": 5.0, "size": 0.45, "aspect": 0.22, "bark": Color(0.58, 0.72, 0.34)},
+	"bush": {"c1": Color(0.20, 0.42, 0.15), "c2": Color(0.30, 0.52, 0.17), "count": 6.0, "size": 0.42, "aspect": 0.55, "bark": Color(0.4, 0.34, 0.3)},
 }
 
 
@@ -477,52 +478,34 @@ static func leaf_material(sp: String) -> ShaderMaterial:
 	m.set_shader_parameter("leaf_count", d["count"])
 	m.set_shader_parameter("leaf_size", d["size"])
 	m.set_shader_parameter("leaf_aspect", d["aspect"])
-	if sp == "sakura":
-		m.set_shader_parameter("translucency", 0.6)
-	var atlas := _model_tex("island_tree_02/textures/island_tree_02_leaves_diff_1k.jpg")
-	if atlas:
-		m.set_shader_parameter("leaf_tex", atlas)
-		m.set_shader_parameter("use_tex", 1.0)
-		var tint: Dictionary = {"cedar": Color(0.55, 0.62, 0.5), "pine": Color(0.6, 0.66, 0.52), "broadleaf": Color(0.95, 1.0, 0.9),
-			"sakura": Color(1.0, 0.78, 0.86), "bamboo": Color(0.95, 1.05, 0.75), "bush": Color(0.8, 0.88, 0.75)}
-		m.set_shader_parameter("tex_tint", tint.get(sp, Color.WHITE))
-		if sp == "sakura":
-			m.set_shader_parameter("tex_desat", 1.0)
-			m.set_shader_parameter("tex_tint", Color(1.25, 0.9, 1.0))
-			m.set_shader_parameter("leaf_count", float(d["count"]) * 2.2)
-		# 葉を細かく（写真の葉は小さめに並べる）
-		m.set_shader_parameter("leaf_count", float(d["count"]) * 1.25)
-		m.set_shader_parameter("leaf_size", 0.5)
-		m.set_shader_parameter("leaf_aspect", 0.32 if sp in ["cedar", "pine", "bamboo"] else 0.45)
+	match sp:
+		"sakura":
+			m.set_shader_parameter("translucency", 0.5)
+			m.set_shader_parameter("tip_color", Color(1.0, 0.9, 0.95))
+			m.set_shader_parameter("ao_strength", 0.35)
+			m.set_shader_parameter("leaf_count", 9.0)
+			m.set_shader_parameter("leaf_size", 0.36)
+		"cedar", "pine":
+			m.set_shader_parameter("blob", 0.5)
+			m.set_shader_parameter("tip_color", Color(0.55, 0.8, 0.45))
+		"bamboo":
+			m.set_shader_parameter("blob", 0.35)
+			m.set_shader_parameter("tip_color", Color(0.85, 0.95, 0.45))
 	_mat_cache[sp] = m
 	return m
 
 
-static func bark_material(sp: String) -> StandardMaterial3D:
+static func bark_material(sp: String) -> ShaderMaterial:
 	var k := "bark_" + sp
 	if _mat_cache.has(k):
 		return _mat_cache[k]
-	var m := StandardMaterial3D.new()
-	if sp == "bamboo":
-		m.albedo_color = SPECIES[sp]["bark"]
-		m.roughness = 0.45
-		m.vertex_color_use_as_albedo = true
-	else:
-		var bark := _model_tex("island_tree_02/textures/island_tree_02_branches_diff_1k.jpg")
-		if bark:
-			m.albedo_texture = bark
-			m.normal_enabled = true
-			m.normal_texture = _model_tex("island_tree_02/textures/island_tree_02_branches_nor_gl_1k.jpg")
-			m.albedo_color = (SPECIES[sp]["bark"] as Color).lerp(Color.WHITE, 0.5) * 1.25
-			m.uv1_scale = Vector3(0.7, 0.7, 1)
-		else:
-			m.albedo_texture = WorldMaterials.tex("darkwood", "diff")
-			m.normal_enabled = true
-			m.normal_texture = WorldMaterials.tex("darkwood", "nor_gl")
-			m.albedo_color = SPECIES[sp]["bark"] * 1.6
-			m.uv1_scale = Vector3(0.6, 0.6, 1)
-		m.vertex_color_use_as_albedo = true
-		m.roughness = 0.95
+	var m := WorldMaterials._building_mat("bamboo" if sp == "bamboo" else "darkwood", 0.6, 1.0, 0.0)
+	m.set_shader_parameter("albedo_mul", 1.0)
+	m.set_shader_parameter("grime", 0.0)
+	m.set_shader_parameter("detail", 0.5)
+	# 幹の色はパレットで（テクスチャは模様だけ）
+	var bc: Color = SPECIES[sp]["bark"]
+	m.set_shader_parameter("base_override", Color(bc.r, bc.g, bc.b, 1.0))
 	_mat_cache[k] = m
 	return m
 
@@ -759,15 +742,11 @@ static func rock_mesh(variant: int) -> ArrayMesh:
 	st.create_from_arrays(arr)
 	st.generate_normals()
 	var am := st.commit()
-	var m := StandardMaterial3D.new()
-	m.albedo_texture = WorldMaterials.tex("rock", "diff")
-	m.normal_enabled = true
-	m.normal_texture = WorldMaterials.tex("rock", "nor_gl")
-	m.roughness_texture = WorldMaterials.tex("rock", "rough")
-	m.uv1_triplanar = true
-	m.uv1_world_triplanar = false
-	m.uv1_scale = Vector3(0.5, 0.5, 0.5)
-	m.albedo_color = Color(0.85, 0.85, 0.82)
+	var m := WorldMaterials._building_mat("rock", 1.0, 1.0, 0.0)
+	m.set_shader_parameter("detail", 0.6)
+	m.set_shader_parameter("posterize", 3.0)
+	m.set_shader_parameter("grime", 0.3)
+	m.set_shader_parameter("desat", 0.5)
 	am.surface_set_material(0, m)
 	_mesh_cache[key] = am
 	return am

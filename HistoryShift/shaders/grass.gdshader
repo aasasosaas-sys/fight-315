@@ -1,6 +1,8 @@
 shader_type spatial;
 // GPU 配置の草。MultiMesh の格子をカメラに追従させ、高さ・マスクテクスチャで地面に乗せる。
-render_mode cull_disabled, world_vertex_coords, diffuse_burley, specular_schlick_ggx;
+render_mode cull_disabled, world_vertex_coords, diffuse_burley;
+
+#include "res://shaders/toon.gdshaderinc"
 
 uniform sampler2D height_tex : filter_linear, repeat_disable;
 uniform sampler2D control_tex : filter_linear, repeat_disable;
@@ -22,6 +24,12 @@ uniform float L_GRASS = 0.0;
 uniform float use_ground = 0.0;
 uniform vec3 ground_tint : source_color = vec3(1.0);
 uniform float inner_radius = 0.0;
+// 地形と同じパレット（根元が地面の色に溶ける）
+uniform vec3 grass_a : source_color = vec3(0.36, 0.62, 0.22);
+uniform vec3 grass_b : source_color = vec3(0.24, 0.52, 0.26);
+uniform vec3 grass_c : source_color = vec3(0.62, 0.74, 0.30);
+uniform vec3 tip_light : source_color = vec3(0.78, 0.9, 0.42);
+uniform float anime = 1.0;
 
 varying float v_t;
 varying vec3 v_col;
@@ -84,13 +92,23 @@ void vertex() {
 	local.z += sway * t * t * hs * 0.3;
 	local *= keep;
 	VERTEX = vec3(pos.x, hgt - 0.03, pos.y) + local;
-	NORMAL = normalize(mix(n, NORMAL, 0.25));
+	NORMAL = normalize(mix(n, NORMAL, 0.08));
 	v_t = t;
 	vec3 tipc = mix(tip_color, dry_color, smoothstep(0.55, 0.85, patch2) * 0.7);
 	tipc = mix(tipc, rice_color, field);
 	v_col = tipc * mix(0.85, 1.1, r1);
 	v_base = base_color;
-	if (use_ground > 0.5) {
+	if (anime > 0.5) {
+		// 地形シェーダと同じ式で地色を求める
+		float m1 = textureLod(noise_tex, pos * 0.0021, 0.0).r;
+		float m2 = textureLod(noise_tex, pos * 0.011 + vec2(0.3, 0.6), 0.0).r;
+		vec3 g = mix(grass_a, grass_b, smoothstep(0.32, 0.68, m1));
+		g = mix(g, grass_c, smoothstep(0.52, 0.78, m2) * 0.65) * mix(0.92, 1.06, m1);
+		v_base = g * 0.92;
+		vec3 tc = mix(g * 1.12, tip_light, 0.4 + 0.25 * r2);
+		tc = mix(tc, dry_color, smoothstep(0.6, 0.9, patch2) * 0.35);
+		v_col = mix(tc, rice_color, field) * mix(0.92, 1.08, r1);
+	} else if (use_ground > 0.5) {
 		vec3 g = textureLod(alb_arr, vec3(pos * 0.24, L_GRASS), 3.0).rgb;
 		g = mix(g, g * vec3(0.72, 1.0, 0.5) * 1.15, 0.8) * ground_tint;
 		v_base = g * 0.55;
@@ -102,9 +120,16 @@ void vertex() {
 void fragment() {
 	vec3 basec = v_base;
 	ALBEDO = mix(basec, v_col, smoothstep(0.0, 1.0, v_t));
-	ROUGHNESS = 0.75;
-	SPECULAR = 0.25;
-	BACKLIGHT = v_col * 0.35;
-	AO = mix(0.45, 1.0, v_t);
-	AO_LIGHT_AFFECT = 0.3;
+	ROUGHNESS = 0.9;
+	SPECULAR = 0.1;
+	AO = mix(0.8, 1.0, v_t);
+}
+
+void light() {
+	// 地面の法線で照らす（地形と同じ明暗）＋先端は少し透過して明るく
+	toon_light_common(NORMAL, VIEW, LIGHT, LIGHT_COLOR, ATTENUATION, LIGHT_IS_DIRECTIONAL, 0.12, 0.0, DIFFUSE_LIGHT);
+	if (LIGHT_IS_DIRECTIONAL) {
+		float back = clamp(dot(-VIEW, LIGHT), 0.0, 1.0);
+		DIFFUSE_LIGHT += LIGHT_COLOR / PI * back * back * 0.25 * smoothstep(0.3, 0.6, ATTENUATION);
+	}
 }

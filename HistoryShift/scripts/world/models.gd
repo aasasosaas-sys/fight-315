@@ -5,7 +5,7 @@ extends RefCounted
 
 const DIR := "res://assets/polyhaven/models/"
 static var _cache := {}
-static var enabled := true
+static var enabled := false   # アニメ調では写真スキャンのモデルを使わない（手続き生成にフォールバック）
 
 
 static func path(id: String) -> String:

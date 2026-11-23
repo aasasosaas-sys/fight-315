@@ -3,93 +3,81 @@ extends RefCounted
 ## 空・太陽・霧・ポストエフェクト・光の柱。品質設定は EraWorld の static 変数を参照する。
 
 static func build_environment(world: Node3D, style: Dictionary) -> Dictionary:
-	var sky_key: String = style["sky"]
 	var env := Environment.new()
 	env.background_mode = Environment.BG_SKY
 	var sky := Sky.new()
-	var pano := PanoramaSkyMaterial.new()
-	var hdr_path := "res://assets/polyhaven/hdri/sky_%s.hdr" % sky_key
-	if ResourceLoader.exists(hdr_path):
-		pano.panorama = load(hdr_path)
-	pano.energy_multiplier = 1.0
-	sky.sky_material = pano
-	sky.radiance_size = Sky.RADIANCE_SIZE_256
-	sky.process_mode = Sky.PROCESS_MODE_AUTOMATIC
+	var sm := ShaderMaterial.new()
+	sm.shader = WorldMaterials.shader("anime_sky")
+	sm.set_shader_parameter("noise_tex", WorldMaterials.macro_noise())
+	var sky_keys := {"zenith_color": "sky_zenith", "horizon_color": "sky_horizon", "haze_color": "sky_haze",
+		"sunset_color": "sunset_color", "sunset_amount": "sunset_amount", "cloud_light": "cloud_light", "cloud_mid": "cloud_mid",
+		"cloud_shade": "cloud_shade", "cloud_cover": "cloud_cover", "tower": "tower", "cirrus": "cirrus", "cloud_seed": "cloud_seed"}
+	for k in sky_keys:
+		sm.set_shader_parameter(k, style[sky_keys[k]])
+	sm.set_shader_parameter("sun_color", (style["sun_color"] as Color).lerp(Color.WHITE, 0.3))
+	sm.set_shader_parameter("ground_color", (style["grass_b"] as Color).lerp(style["sky_horizon"], 0.5))
+	sky.sky_material = sm
+	sky.radiance_size = Sky.RADIANCE_SIZE_128
+	sky.process_mode = Sky.PROCESS_MODE_INCREMENTAL
 	env.sky = sky
+	# 環境光: 空（青い影）＋少しの一様光
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	env.ambient_light_sky_contribution = 1.0
-	env.ambient_light_energy = 1.0
+	env.ambient_light_sky_contribution = 0.8
+	env.ambient_light_color = (style["sky_horizon"] as Color).lerp(Color.WHITE, 0.4)
+	env.ambient_light_energy = style["ambient_energy"]
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 
-	env.tonemap_mode = Environment.TONE_MAPPER_AGX
-	env.tonemap_exposure = 1.0
-	env.tonemap_white = 6.0
+	# トーンマップ: 明るく鮮やかに（ハイライトだけ柔らかく）
+	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	env.tonemap_exposure = float(style["exposure"]) * 1.05
+	env.tonemap_white = 5.0
 
 	var q: int = EraWorld.quality
+	# ブルーム: 空・雲の縁・太陽・灯りがにじむ
 	env.glow_enabled = EraWorld.glow_enabled
-	env.glow_intensity = 0.55
-	env.glow_strength = 0.9
-	env.glow_bloom = 0.04
-	env.glow_hdr_threshold = 1.1
-	env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SOFTLIGHT
+	env.glow_intensity = float(style["glow"])
+	env.glow_strength = 1.0
+	env.glow_bloom = 0.06
+	env.glow_hdr_threshold = 0.95
+	env.glow_hdr_scale = 2.0
+	env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SCREEN
 	env.set_glow_level(0, 0.0)
-	env.set_glow_level(1, 0.0)
-	env.set_glow_level(2, 1.0)
-	env.set_glow_level(3, 0.6)
+	env.set_glow_level(1, 0.3)
+	env.set_glow_level(2, 0.6)
+	env.set_glow_level(3, 0.8)
 	env.set_glow_level(4, 0.6)
-	env.set_glow_level(5, 0.3)
+	env.set_glow_level(5, 0.4)
+	env.set_glow_level(6, 0.2)
 
+	# アニメ調: GI 系は使わない（影色はセル塗りで管理）。接地感のため弱い SSAO のみ
 	env.ssao_enabled = EraWorld.ssao_enabled and q >= 1
-	env.ssao_radius = 1.6
-	env.ssao_intensity = 1.6
-	env.ssao_power = 1.4
-	env.ssao_detail = 0.6
-	env.ssao_light_affect = 0.15
-	env.ssil_enabled = EraWorld.ssil_enabled and q >= 2
-	env.ssil_radius = 4.0
-	env.ssil_intensity = 0.8
+	env.ssao_radius = 1.2
+	env.ssao_intensity = 0.8
+	env.ssao_power = 1.2
+	env.ssao_detail = 0.3
+	env.ssao_light_affect = 0.0
+	env.ssao_ao_channel_affect = 0.0
+	env.ssil_enabled = false
+	env.ssr_enabled = false
+	env.sdfgi_enabled = false
 
-	env.ssr_enabled = q >= 2
-	env.ssr_max_steps = 48
-	env.ssr_fade_in = 0.15
-	env.ssr_fade_out = 2.0
-	env.ssr_depth_tolerance = 0.3
-	env.sdfgi_enabled = EraWorld.sdfgi_enabled and q >= 1
-	env.sdfgi_use_occlusion = true
-	env.sdfgi_cascades = 6
-	env.sdfgi_min_cell_size = 0.4
-	env.sdfgi_y_scale = Environment.SDFGI_Y_SCALE_75_PERCENT
-	env.sdfgi_energy = 0.9
-	env.sdfgi_bounce_feedback = 0.4
-	env.sdfgi_read_sky_light = true
-
-	# 距離フォグ（空気遠近）
+	# 空気遠近: 遠景が空色に溶ける（薄い霧）
 	env.fog_enabled = true
 	env.fog_mode = Environment.FOG_MODE_EXPONENTIAL
-	env.fog_light_color = style["fog_color"]
+	env.fog_light_color = style["aerial"]
 	env.fog_light_energy = 1.0
-	env.fog_sun_scatter = 0.25
-	env.fog_density = float(style["fog_density"]) * 0.3
-	env.fog_aerial_perspective = 0.35
-	env.fog_sky_affect = 0.25
-	env.fog_height = 40.0
+	env.fog_sun_scatter = 0.15
+	env.fog_density = float(style["aerial_density"]) * 0.5
+	env.fog_aerial_perspective = 0.6
+	env.fog_sky_affect = 0.0
+	env.fog_height = 60.0
 	env.fog_height_density = 0.0
-
-	env.volumetric_fog_enabled = EraWorld.volumetric_enabled and q >= 2
-	env.volumetric_fog_density = float(style["vol_fog"]) * 0.28
-	env.volumetric_fog_albedo = style["vol_albedo"]
-	env.volumetric_fog_emission = Color(0, 0, 0)
-	env.volumetric_fog_anisotropy = 0.6
-	env.volumetric_fog_length = 160.0
-	env.volumetric_fog_detail_spread = 2.0
-	env.volumetric_fog_gi_inject = 0.6
-	env.volumetric_fog_sky_affect = 0.0
-	env.volumetric_fog_ambient_inject = 0.3
+	env.volumetric_fog_enabled = false
 
 	env.adjustment_enabled = true
 	env.adjustment_brightness = style["brightness"]
-	env.adjustment_contrast = style["contrast"]
-	env.adjustment_saturation = style["saturation"]
+	env.adjustment_contrast = float(style["contrast"]) * 1.02
+	env.adjustment_saturation = maxf(float(style["saturation"]), 0.95) * 1.12
 
 	var we := WorldEnvironment.new()
 	we.name = "WorldEnvironment"
@@ -99,7 +87,7 @@ static func build_environment(world: Node3D, style: Dictionary) -> Dictionary:
 	var sun := DirectionalLight3D.new()
 	sun.name = "Sun"
 	sun.light_color = style["sun_color"]
-	sun.light_energy = style["sun_energy"]
+	sun.light_energy = float(style["sun_energy"]) * 0.85
 	sun.shadow_enabled = true
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS if q >= 1 else DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
 	sun.directional_shadow_max_distance = 220.0 if q >= 2 else (160.0 if q == 1 else 100.0)
@@ -110,14 +98,65 @@ static func build_environment(world: Node3D, style: Dictionary) -> Dictionary:
 	sun.directional_shadow_fade_start = 0.85
 	sun.shadow_bias = 0.04
 	sun.shadow_normal_bias = 1.4
-	sun.shadow_blur = 1.4
-	sun.light_angular_distance = 0.6
-	sun.light_volumetric_fog_energy = 1.4
-	sun.sky_mode = DirectionalLight3D.SKY_MODE_LIGHT_ONLY
+	sun.shadow_blur = 0.6
+	sun.light_angular_distance = 0.3
+	sun.sky_mode = DirectionalLight3D.SKY_MODE_LIGHT_AND_SKY
 	world.add_child(sun)
-	var hs: Dictionary = EraStyles.HDRI_SUN[sky_key]
-	set_sun_dir(sun, hs["az"], hs["elev"])
-	return {"env": env, "sun": sun, "we": we, "sky_mat": pano}
+	set_sun_dir(sun, style["sun_az"], style["sun_elev"])
+	apply_toon_globals(style, 1.0)
+
+	var post := make_post(style)
+	world.add_child(post)
+	return {"env": env, "sun": sun, "we": we, "sky_mat": sm, "post": post}
+
+
+## セル塗りの共通パラメータ（影色など）をグローバルシェーダ変数へ。day: 0=夜 1=昼
+static func apply_toon_globals(style: Dictionary, day: float) -> void:
+	var sc: Color = style["shade_color"]
+	var night_shade := Color(0.32, 0.36, 0.62)
+	RenderingServer.global_shader_parameter_set("toon_shade_color", night_shade.lerp(sc, day))
+	RenderingServer.global_shader_parameter_set("toon_params", Vector4(0.06, 0.05, 0.3, float(style["shade_strength"])))
+	RenderingServer.global_shader_parameter_set("world_night", 1.0 - day)
+
+
+## 全画面ポスト（輪郭線・光芒・周辺減光）
+static func make_post(style: Dictionary) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.name = "AnimePost"
+	var qm := QuadMesh.new()
+	qm.size = Vector2(1, 1)
+	mi.mesh = qm
+	mi.extra_cull_margin = 16384.0
+	mi.ignore_occlusion_culling = true
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+	var m := ShaderMaterial.new()
+	m.shader = WorldMaterials.shader("post_anime")
+	m.render_priority = 127
+	m.set_shader_parameter("line_strength", style["line"])
+	m.set_shader_parameter("ray_strength", style["rays"])
+	m.set_shader_parameter("ray_color", (style["sun_color"] as Color).lerp(style["sunset_color"], 0.3))
+	mi.material_override = m
+	return mi
+
+
+## 毎フレーム: 光芒の中心（太陽の画面位置）を更新
+static func update_post(post: MeshInstance3D, sun: DirectionalLight3D, cam: Camera3D) -> void:
+	if post == null or sun == null or cam == null:
+		return
+	var m := post.material_override as ShaderMaterial
+	var to_sun := sun.global_transform.basis.z.normalized()
+	var fwd := -cam.global_transform.basis.z
+	var vis := 0.0
+	if sun.visible and to_sun.dot(fwd) > 0.0 and to_sun.y > -0.05:
+		var p := cam.global_position + to_sun * 1000.0
+		var sp := cam.unproject_position(p)
+		var vs := cam.get_viewport().get_visible_rect().size
+		var uv := sp / vs
+		m.set_shader_parameter("sun_uv", uv)
+		var off := maxf(absf(uv.x - 0.5), absf(uv.y - 0.5))
+		vis = (1.0 - smoothstep(0.5, 1.1, off)) * smoothstep(0.0, 0.35, to_sun.dot(fwd)) * smoothstep(-0.05, 0.1, to_sun.y)
+	m.set_shader_parameter("sun_vis", vis)
 
 
 ## az: atan2(x, z) 方位（度）。elev: 仰角（度）

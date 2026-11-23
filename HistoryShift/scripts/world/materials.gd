@@ -46,7 +46,14 @@ static func tex(key: String, kind: String) -> Texture2D:
 
 static func shader(name: String) -> Shader:
 	if not _shader_cache.has(name):
-		_shader_cache[name] = load("res://shaders/%s.gdshader" % name)
+		if name == "building_2s":
+			# 両面版（布・樹皮など）: render_mode だけ差し替えた派生シェーダ
+			var base := shader("building")
+			var sh := Shader.new()
+			sh.code = base.code.replace("render_mode diffuse_burley;", "render_mode diffuse_burley, cull_disabled;")
+			_shader_cache[name] = sh
+		else:
+			_shader_cache[name] = load("res://shaders/%s.gdshader" % name)
 	return _shader_cache[name]
 
 
@@ -115,67 +122,83 @@ static func get_mat(key: String) -> Material:
 	if BUILD_MATS.has(key):
 		var d: Array = BUILD_MATS[key]
 		var bm := _building_mat(d[0], 1.0 / float(d[1]), d[2], d[3])
-		if key == "concrete":
-			bm.set_shader_parameter("albedo_mul", 0.97)
-			bm.set_shader_parameter("desat", 0.5)
-		elif key == "plaster":
-			bm.set_shader_parameter("albedo_mul", 1.03)
+		match key:
+			"concrete":
+				bm.set_shader_parameter("albedo_mul", 0.97)
+				bm.set_shader_parameter("desat", 0.5)
+			"plaster":
+				# 漆喰は白くベタに
+				bm.set_shader_parameter("albedo_mul", 1.06)
+				bm.set_shader_parameter("detail", 0.2)
+				bm.set_shader_parameter("desat", 0.6)
+			"rooftile":
+				# 瓦は列のくっきりした明暗を残し、艶の帯
+				bm.set_shader_parameter("detail", 0.9)
+				bm.set_shader_parameter("posterize", 3.0)
+				bm.set_shader_parameter("flat_normal", 0.35)
+				bm.set_shader_parameter("shine", 0.18)
+				bm.set_shader_parameter("sat_boost", 1.1)
+			"thatch":
+				bm.set_shader_parameter("detail", 0.7)
+				bm.set_shader_parameter("flat_normal", 0.5)
+			"darkwood", "wood":
+				bm.set_shader_parameter("detail", 0.45)
+				bm.set_shader_parameter("window_glow", 1.0)
+			"stonewall", "brick", "cobble":
+				bm.set_shader_parameter("detail", 0.75)
+				bm.set_shader_parameter("flat_normal", 0.55)
 		m = bm
 	else:
 		match key:
 			"metal":
-				# 塗装/鋳鉄: コンクリートの粗さで汚れ・ムラ
+				# 塗装/鋳鉄: ベタ塗り＋帯ハイライト
 				var sh := _building_mat("concrete", 0.5, 0.55, 0.75)
 				sh.set_shader_parameter("albedo_tex", null)
-				sh.set_shader_parameter("rough_add", -0.1)
+				sh.set_shader_parameter("shine", 0.35)
+				sh.set_shader_parameter("grime", 0.3)
 				m = sh
 			"gold":
 				var sh := _building_mat("plaster", 0.6, 0.35, 1.0)
 				sh.set_shader_parameter("albedo_tex", null)
-				sh.set_shader_parameter("grime", 0.3)
-				sh.set_shader_parameter("normal_depth", 0.3)
+				sh.set_shader_parameter("grime", 0.0)
+				sh.set_shader_parameter("shine", 0.9)
+				sh.set_shader_parameter("rim_mul", 2.0)
+				sh.set_shader_parameter("sat_boost", 1.4)
 				m = sh
 			"flat":
 				var sh := _building_mat("concrete", 0.5, 1.0, 0.0)
 				sh.set_shader_parameter("albedo_tex", null)
 				m = sh
 			"glass":
-				var sm := StandardMaterial3D.new()
-				sm.albedo_color = Color(0.16, 0.2, 0.24)
-				sm.vertex_color_use_as_albedo = true
-				sm.metallic = 0.6
-				sm.roughness = 0.08
-				m = sm
+				var sh := _building_mat("concrete", 0.5, 1.0, 0.0)
+				sh.set_shader_parameter("albedo_tex", null)
+				sh.set_shader_parameter("glass", 1.0)
+				sh.set_shader_parameter("grime", 0.0)
+				m = sh
 			"cloth":
-				var sm := StandardMaterial3D.new()
-				sm.vertex_color_use_as_albedo = true
-				sm.albedo_texture = tex("plaster", "diff")
-				sm.normal_enabled = true
-				sm.normal_texture = tex("tatami", "nor_gl")
-				sm.normal_scale = 0.3
-				sm.uv1_scale = Vector3(0.8, 0.8, 1)
-				sm.roughness = 0.95
-				sm.cull_mode = BaseMaterial3D.CULL_DISABLED
-				sm.diffuse_mode = BaseMaterial3D.DIFFUSE_BURLEY
-				m = sm
+				var sh := _building_mat("plaster", 0.8, 1.0, 0.0, true)
+				sh.set_shader_parameter("normal_tex", tex("tatami", "nor_gl"))
+				sh.set_shader_parameter("detail", 0.25)
+				sh.set_shader_parameter("grime", 0.0)
+				sh.set_shader_parameter("sat_boost", 1.35)
+				m = sh
 			"emissive":
 				var sh := ShaderMaterial.new()
 				sh.shader = shader("emissive")
 				m = sh
 			"wire":
 				var sm := StandardMaterial3D.new()
-				sm.albedo_color = Color(0.05, 0.05, 0.05)
-				sm.roughness = 0.6
+				sm.albedo_color = Color(0.12, 0.11, 0.13)
+				sm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 				m = sm
 			"water":
 				var sh := ShaderMaterial.new()
 				sh.shader = shader("water")
 				m = sh
 			_:
-				var sm := StandardMaterial3D.new()
-				sm.vertex_color_use_as_albedo = true
-				sm.roughness = 0.85
-				m = sm
+				var sh := _building_mat("plaster", 0.5, 1.0, 0.0)
+				sh.set_shader_parameter("albedo_tex", null)
+				m = sh
 	_mat_cache[key] = m
 	return m
 
@@ -183,9 +206,9 @@ static func get_mat(key: String) -> Material:
 static var _building_mats: Array = []
 
 
-static func _building_mat(tex_key: String, uv_scale: float, rough: float, metal: float) -> ShaderMaterial:
+static func _building_mat(tex_key: String, uv_scale: float, rough: float, metal: float, two_sided := false) -> ShaderMaterial:
 	var sh := ShaderMaterial.new()
-	sh.shader = shader("building")
+	sh.shader = shader("building_2s") if two_sided else shader("building")
 	sh.set_shader_parameter("albedo_tex", tex(tex_key, "diff"))
 	sh.set_shader_parameter("normal_tex", tex(tex_key, "nor_gl"))
 	sh.set_shader_parameter("rough_tex", tex(tex_key, "rough"))
