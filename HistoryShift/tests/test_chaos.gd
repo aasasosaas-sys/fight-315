@@ -49,6 +49,9 @@ func _fire_rule(tr: ChaosTracker, era: String, r: Dictionary) -> Array:
 		info["type"] = "figure"
 	if c.has("at"):
 		info["landmark"] = c["at"]
+	for k in ["arg", "item", "to", "event", "side", "cause"]:
+		if c.has(k):
+			info[k] = str(c[k][0]) if c[k] is Array else str(c[k])
 	var need := int(c.get("min", 1))
 	var hits: Array = []
 	if c.has("value"):
@@ -91,7 +94,7 @@ func _run() -> void:
 					if s.has("npc"):
 						npcs[s["npc"]] = true
 		for f in tr.figures_for(era):
-			_check(npcs.has(f["name"]), "%s: figure %s is a mission NPC" % [era, f["name"]])
+			_check(npcs.has(f["name"]) or db.actor_name(f["name"]) != "", "%s: figure %s is a mission NPC or an actor" % [era, f["name"]])
 		for r in rules:
 			total += 1
 			var st := _fresh(db)
@@ -135,11 +138,11 @@ func _run() -> void:
 			if solo:
 				_check(diff == hit["changes"].size(), "%s: changes == diff (%d vs %d)" % [r["id"], hit["changes"].size(), diff])
 			# 同じセッションでもう一度起こしても二重に発動しない
-			_check(_fire_rule(tr, era, r).is_empty(), "%s: no double fire" % r["id"])
+			_check(not _fire_rule(tr, era, r).any(func(h): return h.get("id", "") == r["id"]), "%s: no double fire" % r["id"])
 			tr.end_session()
 			# 次の自由探索でも、効果が残っている限り発動しない
 			tr.begin_session(era)
-			_check(_fire_rule(tr, era, r).is_empty(), "%s: in effect -> no refire" % r["id"])
+			_check(not _fire_rule(tr, era, r).any(func(h): return h.get("id", "") == r["id"]), "%s: in effect -> no refire" % r["id"])
 			tr.end_session()
 			# セーブ／ロード
 			st.save()

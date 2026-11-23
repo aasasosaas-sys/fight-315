@@ -18,14 +18,43 @@
     "loyal": 2,
     "open": -1
    },
+   "spawn": "village",
+   "q": [
+    "meiji_taisho_01"
+   ],
    "saved": {
     "year": 1877,
-    "text": "城山で自刃するはずの西郷が生き延び、新政府に戻った。士族の不満は和らいだが、軍の発言力が増した。",
     "vars": {
-     "militarism": 10,
-     "unity": 10
+     "militarism": 35,
+     "open_west": -22,
+     "unity": 15
+    },
+    "text": "城山で自刃するはずの西郷が生き延び、新政府の陸軍に迎えられた。士族の不満は軍に吸収されたが、「大陸へ打って出よ」という気風と欧米ぎらいは昭和まで尾を引いた。"
+   },
+   "persuade": {
+    "鎖国を勧める": {
+     "text": "留守政府を預かる西郷は「異国の真似はほどほどに」と聞き入れ、太政官札の整理も貿易の拡大も後回しにした。農村には現金が回らず、地租は収穫高に応じた米納に落ち着いた。",
+     "vars": {
+      "commerce": -32,
+      "open_west": -10
+     },
+     "year": 1872
     }
-   }
+   },
+   "schedule": [
+    {
+     "event": "征韓論に敗れて鹿児島へ帰る",
+     "at": "capital",
+     "year": 1873,
+     "missed": {
+      "vars": {
+       "centralization": 30,
+       "militarism": 24
+      }
+     },
+     "text": "西郷は辞表を出しに行くのが遅れ、そのまま政府に残った（明治六年の政変が起きなかった）。陸軍大将の西郷と徴兵令の軍隊を背にした政府は強気で、地租改正反対一揆を力で抑え、税率3％を一切変えなかった。"
+    }
+   ]
   },
   {
    "name": "大久保利通",
@@ -46,20 +75,153 @@
     "war": -1
    },
    "spawn": "castle",
+   "q": [
+    "meiji_taisho_01",
+    "meiji_taisho_04"
+   ],
    "contrib": [
     {
      "q": "meiji_taisho_01",
      "choice": 0,
-     "note": "大黒柱がおらず、地租改正は先送りになった"
+     "note": "内務卿の大久保がおらず地租改正は先送り。税は収穫高に応じた米納のままだった"
     }
    ],
    "saved": {
     "year": 1878,
-    "text": "紀尾井坂で暗殺されるはずの大久保が助かり、殖産興業が加速した。",
     "vars": {
      "centralization": 15,
-     "tech": 10,
-     "economy": 10
+     "tech": 28,
+     "economy": 32
+    },
+    "text": "紀尾井坂で暗殺されるはずの大久保が助かり、内務省の殖産興業はさらに10年続いた。工場と鉄道で国力が欧米に迫り、関税自主権の回復は日英同盟より前に実現した。"
+   },
+   "persuade": {
+    "倹約を勧める": {
+     "text": "大久保は「減税などすれば殖産興業の金が尽きる」と倹約一本やり。1877年の地租2.5％への引き下げ（竹槍でドンと突き出す二分五厘）は行われず、税率は3％のまま据え置かれた。",
+     "force": {
+      "q": "meiji_taisho_01",
+      "choice": 2
+     }
+    }
+   },
+   "schedule": [
+    {
+     "event": "岩倉使節団として横浜を出航",
+     "at": "port",
+     "year": 1871,
+     "missed": {
+      "vars": {
+       "tech": -28,
+       "open_west": -12
+      }
+     },
+     "text": "大久保は使節団の船に乗り遅れた。イギリスの工場もドイツの製鉄所も見ないまま国内にとどまった大久保は殖産興業に冷淡で、重化学工業はほとんど育たなかった。"
+    }
+   ]
+  },
+  {
+   "name": "木戸孝允",
+   "era": "meiji_taisho",
+   "faction": "長州",
+   "born": 1833,
+   "died": 1877,
+   "death": "illness",
+   "active": 1868,
+   "tags": [
+    "official",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 1,
+    "war": -1
+   },
+   "q": [
+    "meiji_taisho_01",
+    "meiji_taisho_02"
+   ],
+   "contrib": [
+    {
+     "q": "meiji_taisho_01",
+     "choice": 2,
+     "note": "農民の負担軽減を説く木戸がおらず、地租の引き下げを言い出す者がいなかった"
+    }
+   ],
+   "saved": {
+    "year": 1877,
+    "vars": {
+     "democracy": 36,
+     "commoners": 22
+    },
+    "text": "西南戦争のさなかに病死するはずの木戸が回復した。大阪会議で約束させた「漸次立憲政体樹立の詔」を盾に、木戸は国民の代表による憲法制定会議を開かせ、民定憲法が生まれた。"
+   }
+  },
+  {
+   "name": "岩倉具視",
+   "era": "meiji_taisho",
+   "faction": "公家",
+   "born": 1825,
+   "died": 1883,
+   "death": "illness",
+   "active": 1868,
+   "tags": [
+    "official",
+    "diplomat"
+   ],
+   "traits": {
+    "loyal": 2,
+    "open": 1,
+    "reform": -1
+   },
+   "q": [
+    "meiji_taisho_02"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "court": -30,
+      "democracy": 16
+     },
+     "year": 1883,
+     "note": "公家の重鎮・岩倉がおらず、華族と皇室の藩屏を作る話がしぼみ、貴族院の構想も消えた"
+    }
+   ]
+  },
+  {
+   "name": "三条実美",
+   "era": "meiji_taisho",
+   "faction": "政府",
+   "born": 1837,
+   "died": 1891,
+   "death": "illness",
+   "active": 1868,
+   "tags": [
+    "official",
+    "ruler"
+   ],
+   "traits": {
+    "loyal": 2,
+    "war": -1
+   },
+   "spawn": "capital",
+   "q": [
+    "meiji_taisho_01",
+    "meiji_taisho_02"
+   ],
+   "contrib": [
+    {
+     "q": "meiji_taisho_02",
+     "choice": 2,
+     "note": "太政大臣の三条がおらず、旧公家をまとめて貴族院に送り込む者がいなかった"
+    }
+   ],
+   "persuade": {
+    "倹約を勧める": {
+     "text": "「華族に爵位と俸禄を配るのは国費の無駄」と聞いた三条は、なんと自ら爵位を辞退した。公家が皆それにならったため華族令は骨抜きとなり、帝国議会は衆議院だけの一院制で始まった。",
+     "force": {
+      "q": "meiji_taisho_02",
+      "choice": 2
+     }
     }
    }
   },
@@ -78,6 +240,426 @@
    "traits": {
     "reform": 2,
     "open": 2
+   },
+   "q": [
+    "meiji_taisho_01",
+    "meiji_taisho_02",
+    "meiji_taisho_04"
+   ],
+   "doc": {
+    "name": "地券発行の布達案",
+    "q": "meiji_taisho_01",
+    "choice": 0,
+    "text": "大蔵省の大隈から地券発行の布達案が盗まれた。全国の土地に地券を配る段取りが組めず、地租は従来どおり収穫高に応じて米で納められることになった。"
+   },
+   "persuade": {
+    "改革を勧める": {
+     "text": "大隈は明治十四年の政変で追放されず、イギリス流の議院内閣制を説き続けた。手本がイギリスになった憲法では、陸海軍の統帥も内閣の輔弼のもとに置かれた。",
+     "vars": {
+      "open_west": 40,
+      "democracy": 20
+     },
+     "year": 1881
+    },
+    "鎖国を勧める": {
+     "text": "首相の大隈は第一次世界大戦で英国の輸送依頼も断り、「中立第一」を貫いた。欧米の市場から締め出された日本は大戦景気に乗り遅れ、輸入超過が続いた。",
+     "vars": {
+      "open_west": -28
+     },
+     "year": 1914
+    }
+   },
+   "give": {
+    "千両箱": {
+     "text": "千両箱を手にした大隈は国立銀行条例を急ぎ、農村にまで紙幣と銀行が行き渡った。現金に慣れた小作人たちは小作料も金で払うと言い出し、政府はこれを義務づけた。",
+     "vars": {
+      "commerce": 25,
+      "commoners": 30
+     },
+     "year": 1872
+    },
+    "蒸気機関の図面": {
+     "text": "図面を受け取った大隈は官営工場に最新の機関を据えさせた。工業化が一足早く進み、欧米は「もう一人前」と認めて関税自主権の回復が日英同盟より先になった。",
+     "vars": {
+      "tech": 30,
+      "economy": 30
+     },
+     "year": 1880
+    }
+   }
+  },
+  {
+   "name": "松方正義",
+   "era": "meiji_taisho",
+   "faction": "薩摩",
+   "born": 1835,
+   "died": 1924,
+   "death": "natural",
+   "active": 1873,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "reform": 1,
+    "open": -1
+   },
+   "q": [
+    "meiji_taisho_01",
+    "meiji_taisho_04"
+   ],
+   "persuade": {
+    "倹約を勧める": {
+     "text": "倹約好きの松方は松方財政をさらに徹底し、官営工場を払い下げたあとの技術投資まで削った。デフレで企業も育たず、重化学工業はほとんど成長しなかった。",
+     "vars": {
+      "tech": -28,
+      "economy": -5
+     },
+     "year": 1881
+    }
+   }
+  },
+  {
+   "name": "山県有朋",
+   "era": "meiji_taisho",
+   "faction": "長州",
+   "born": 1838,
+   "died": 1922,
+   "death": "natural",
+   "active": 1873,
+   "tags": [
+    "warrior",
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": 1,
+    "open": -1
+   },
+   "spawn": "capital",
+   "q": [
+    "meiji_taisho_01",
+    "meiji_taisho_02",
+    "meiji_taisho_03"
+   ],
+   "contrib": [
+    {
+     "q": "meiji_taisho_02",
+     "choice": 0,
+     "note": "軍の独立を図る山県がおらず、統帥も内閣の輔弼のもとに置かれた"
+    }
+   ],
+   "persuade": {
+    "開国を勧める": {
+     "text": "山県は1890年の議会で「主権線・利益線」を演説するより早く、ロシアの南下を警戒して英国に急接近した。日英同盟は三国干渉より前に結ばれた。",
+     "vars": {
+      "open_west": 42,
+      "militarism": 18
+     },
+     "year": 1890
+    }
+   },
+   "schedule": [
+    {
+     "event": "参謀本部の設置",
+     "at": "castle",
+     "year": 1878,
+     "missed": {
+      "force": {
+       "q": "meiji_taisho_02",
+       "choice": 0
+      }
+     },
+     "text": "山県は参謀本部の設置に間に合わず、軍の作戦指揮は陸軍省、つまり内閣の下に残った。統帥権の独立は生まれず、憲法でも統帥は内閣の輔弼にもとづくと定められた。"
+    }
+   ]
+  },
+  {
+   "name": "渋沢栄一",
+   "era": "meiji_taisho",
+   "faction": "第一国立銀行",
+   "born": 1840,
+   "died": 1931,
+   "death": "natural",
+   "active": 1873,
+   "tags": [
+    "merchant",
+    "official"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 2,
+    "war": -1
+   },
+   "spawn": "port",
+   "q": [
+    "meiji_taisho_01",
+    "meiji_taisho_03",
+    "meiji_taisho_04"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "economy": -30,
+      "commerce": -20
+     },
+     "year": 1900,
+     "note": "500もの会社づくりに関わった渋沢がおらず、日本の商工業は伸び悩んだ"
+    }
+   ],
+   "persuade": {
+    "改革を勧める": {
+     "text": "渋沢は財界をまとめて「大戦後に備えよ」と銀行の貸し出しを引き締めた。バブルがふくらまなかったため、1920年の戦後恐慌は起こらず好況が続いた。",
+     "vars": {
+      "economy": 32,
+      "commerce": 15
+     },
+     "year": 1910
+    }
+   },
+   "give": {
+    "千両箱": {
+     "text": "千両箱を元手に渋沢は第一国立銀行の支店を村々に開き、農民にも預金と貸し付けが広まった。現金が当たり前になった農村では、小作料まで金納が義務づけられた。",
+     "vars": {
+      "commerce": 25,
+      "commoners": 32
+     },
+     "year": 1872
+    },
+    "蒸気機関の図面": {
+     "text": "図面を手にした渋沢は大阪紡績会社に最新の機関を据えた。紡績も造船も欧米に肩を並べ、関税自主権の回復は日英同盟より前に実現した。",
+     "vars": {
+      "tech": 28,
+      "economy": 32
+     },
+     "year": 1890
+    }
+   }
+  },
+  {
+   "name": "岩崎弥太郎",
+   "era": "meiji_taisho",
+   "faction": "三菱",
+   "born": 1835,
+   "died": 1885,
+   "death": "illness",
+   "active": 1873,
+   "tags": [
+    "merchant"
+   ],
+   "traits": {
+    "open": 2,
+    "war": 1
+   },
+   "q": [
+    "meiji_taisho_03",
+    "meiji_taisho_04"
+   ],
+   "persuade": {
+    "開国を勧める": {
+     "text": "岩崎は三菱の汽船を上海だけでなくボンベイやサンフランシスコにも走らせた。海運と商社の厚みができた日本は、大戦後も輸出を伸ばし続けた。",
+     "vars": {
+      "economy": 32,
+      "commerce": 20
+     },
+     "year": 1880
+    }
+   },
+   "give": {
+    "蒸気機関の図面": {
+     "text": "岩崎は図面をもとに長崎造船所で最新の汽船を造らせた。工業力が早くに育ち、欧米は関税自主権の回復を日英同盟より前に認めた。",
+     "vars": {
+      "tech": 26,
+      "economy": 32
+     },
+     "year": 1880
+    }
+   }
+  },
+  {
+   "name": "福沢諭吉",
+   "era": "meiji_taisho",
+   "faction": "慶應義塾",
+   "born": 1835,
+   "died": 1901,
+   "death": "illness",
+   "active": 1868,
+   "tags": [
+    "scholar"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 2
+   },
+   "q": [
+    "meiji_taisho_01",
+    "meiji_taisho_05"
+   ],
+   "persuade": {
+    "民を大切に": {
+     "text": "福沢は『学問のすゝめ』に「百姓も金の勘定を覚えよ」と書き足した。読んだ農民たちは帳簿をつけて小作料も現金で払い始め、政府はそれを義務づけた。",
+     "vars": {
+      "commoners": 32,
+      "commerce": 22
+     },
+     "year": 1872
+    },
+    "開国を勧める": {
+     "text": "福沢は「脱亜論」よりさらに踏み込み、英国との一体化を説いた。英語と英国式の商習慣が広まり、日露戦争ではイギリスが同盟を越えて参戦した。",
+     "vars": {
+      "open_west": 38
+     },
+     "year": 1885
+    }
+   }
+  },
+  {
+   "name": "陸奥宗光",
+   "era": "meiji_taisho",
+   "faction": "政府",
+   "born": 1844,
+   "died": 1897,
+   "death": "illness",
+   "active": 1872,
+   "tags": [
+    "diplomat",
+    "official"
+   ],
+   "traits": {
+    "open": 2,
+    "war": 1
+   },
+   "spawn": "castle",
+   "q": [
+    "meiji_taisho_01",
+    "meiji_taisho_03",
+    "meiji_taisho_05"
+   ],
+   "doc": {
+    "name": "ロシア南下の機密覚書",
+    "q": "meiji_taisho_03",
+    "choice": 1,
+    "text": "盗み出された陸奥の機密覚書（シベリア鉄道とロシア南下の分析）がロンドンに渡った。驚いた英国は日本との同盟を急ぎ、日英同盟は三国干渉より前に結ばれた。"
+   },
+   "saved": {
+    "year": 1897,
+    "vars": {
+     "open_west": 36
+    },
+    "text": "結核で亡くなるはずの陸奥が特効薬で回復した。陸奥外交は英国との信頼をさらに深め、日露戦争ではイギリス艦隊までが日本海海戦に加わった。"
+   },
+   "persuade": {
+    "民を大切に": {
+     "text": "租税頭の陸奥は地租改正の建白に「小作人の小作料も金納とすべし」と書き加えた。地主から小作人までお金で払う仕組みが一気に作られた。",
+     "force": {
+      "q": "meiji_taisho_01",
+      "choice": 3
+     }
+    },
+    "開国を勧める": {
+     "text": "陸奥は1894年の交渉で「どうせなら全部」と関税自主権の回復まで英国に認めさせた。小村寿太郎の出番はなくなり、条約改正は三国干渉より前に完成した。",
+     "force": {
+      "q": "meiji_taisho_03",
+      "choice": 0
+     }
+    }
+   },
+   "schedule": [
+    {
+     "event": "地租改正の建白書を出す",
+     "at": "castle",
+     "year": 1872,
+     "missed": {
+      "force": {
+       "q": "meiji_taisho_01",
+       "choice": 0
+      }
+     },
+     "text": "地租改正を最初に建白した陸奥は、建白書を出しそびれた。地価と金納という新しい発想は政府に届かず、地租は収穫高に応じた米納とされた。"
+    }
+   ]
+  },
+  {
+   "name": "井上馨",
+   "era": "meiji_taisho",
+   "faction": "長州",
+   "born": 1836,
+   "died": 1915,
+   "death": "illness",
+   "active": 1879,
+   "tags": [
+    "diplomat",
+    "official"
+   ],
+   "traits": {
+    "open": 2,
+    "loyal": 1
+   },
+   "q": [
+    "meiji_taisho_03"
+   ],
+   "persuade": {
+    "民を大切に": {
+     "text": "井上馨は鹿鳴館で踊るのをやめ、条約改正の交渉を国民と議会に公開した。世論を味方につけた交渉は早く進み、関税自主権まで三国干渉より前に回復した。",
+     "vars": {
+      "democracy": 26,
+      "open_west": 22
+     },
+     "year": 1887
+    }
+   }
+  },
+  {
+   "name": "井上毅",
+   "era": "meiji_taisho",
+   "faction": "政府",
+   "born": 1844,
+   "died": 1895,
+   "death": "illness",
+   "active": 1871,
+   "tags": [
+    "official",
+    "scholar"
+   ],
+   "traits": {
+    "reform": 1,
+    "open": 1,
+    "loyal": 2
+   },
+   "q": [
+    "meiji_taisho_02"
+   ]
+  },
+  {
+   "name": "ロエスレル",
+   "era": "meiji_taisho",
+   "faction": "ドイツ",
+   "born": 1834,
+   "died": 1894,
+   "death": "natural",
+   "active": 1878,
+   "tags": [
+    "scholar",
+    "foreigner"
+   ],
+   "traits": {
+    "reform": 1,
+    "loyal": 1
+   },
+   "aka": [
+    "ヘルマン＝ロエスレル"
+   ],
+   "q": [
+    "meiji_taisho_02"
+   ],
+   "persuade": {
+    "戦をやめさせる": {
+     "text": "政府顧問のロエスレルは「軍が内閣の外にあると戦争を止められぬ」と考え直し、草案に統帥も国務大臣の輔弼によると書き込んだ。",
+     "force": {
+      "q": "meiji_taisho_02",
+      "choice": 0
+     }
+    }
    }
   },
   {
@@ -99,54 +681,100 @@
     "war": -1
    },
    "spawn": "capital",
+   "q": [
+    "meiji_taisho_02",
+    "meiji_taisho_06"
+   ],
    "contrib": [
     {
      "q": "meiji_taisho_02",
      "choice": 3,
-     "note": "伊藤がおらず、民定憲法が作られた"
+     "note": "憲法起草の中心・伊藤がおらず、国民の代表による憲法制定会議で民定憲法が作られた"
     }
    ],
+   "doc": {
+    "name": "夏島草案",
+    "q": "meiji_taisho_02",
+    "choice": 3,
+    "text": "夏島の別荘で練った憲法草案が盗まれ（1887年に草案入りのカバンが宿で盗まれた実話がある）、民権派の新聞に全文が載った。秘密の欽定憲法は無理になり、政府は国民の代表に審議させることにした。"
+   },
    "saved": {
     "year": 1909,
-    "text": "ハルビンで撃たれるはずの伊藤が助かり、大陸への強硬策に歯止めがかかった。",
     "vars": {
-     "militarism": -10,
-     "open_asia": 10
+     "militarism": -22,
+     "democracy": 30
+    },
+    "text": "ハルビン駅で撃たれるはずの伊藤が助かった。立憲政友会を作った伊藤は元老として軍を抑え続け、政党政治が早く育った結果、治安維持法は作られなかった。"
+   },
+   "persuade": {
+    "戦をやめさせる": {
+     "text": "伊藤は「軍が内閣の外にいては戦争を止められない」と考え、憲法に統帥も内閣の輔弼によると明記した。",
+     "force": {
+      "q": "meiji_taisho_02",
+      "choice": 0
+     }
     }
-   }
+   },
+   "schedule": [
+    {
+     "event": "ドイツへ憲法調査に出航",
+     "at": "port",
+     "year": 1882,
+     "missed": {
+      "vars": {
+       "open_west": 42,
+       "democracy": 18
+      }
+     },
+     "text": "伊藤はドイツ行きの船に乗り遅れ、次に出るロンドン行きに乗った。グナイストやシュタインの代わりに英国流の議院内閣制を学んだため、統帥も内閣の統制下に置かれた。"
+    }
+   ]
   },
   {
-   "name": "井上毅",
+   "name": "板垣退助",
    "era": "meiji_taisho",
-   "faction": "政府",
-   "born": 1844,
-   "died": 1895,
-   "death": "illness",
-   "active": 1871,
-   "tags": [
-    "official",
-    "scholar"
-   ],
-   "traits": {
-    "reform": 1,
-    "open": 1
-   }
-  },
-  {
-   "name": "三条実美",
-   "era": "meiji_taisho",
-   "faction": "政府",
+   "faction": "自由党",
    "born": 1837,
-   "died": 1891,
-   "death": "illness",
-   "active": 1868,
+   "died": 1919,
+   "death": "natural",
+   "active": 1874,
    "tags": [
-    "official",
-    "ruler"
+    "reformer",
+    "official"
    ],
    "traits": {
-    "loyal": 2
-   }
+    "reform": 2,
+    "war": 1,
+    "loyal": 1
+   },
+   "spawn": "battlefield",
+   "q": [
+    "meiji_taisho_02"
+   ],
+   "persuade": {
+    "民を大切に": {
+     "text": "板垣は自由党の演説会で「華族も士族もいらぬ、議会は民の代表だけでよい」と訴え続けた。公家の特権を守る声は小さくなり、貴族院のない一院制の議会が生まれた。",
+     "vars": {
+      "democracy": 20,
+      "court": -28
+     },
+     "year": 1881
+    }
+   },
+   "schedule": [
+    {
+     "event": "ヨーロッパ外遊に出発",
+     "at": "port",
+     "year": 1882,
+     "missed": {
+      "vars": {
+       "democracy": 36,
+       "commoners": 22
+      }
+     },
+     "text": "板垣は政府の息がかかった外遊の船に乗り遅れ、日本に残って自由党を率いた（史実ではこの洋行で党が分裂した）。運動は過激化せずに広がり、国民の代表による民定憲法が実現した。"
+    }
+   ]
   },
   {
    "name": "植木枝盛",
@@ -164,6 +792,10 @@
     "reform": 2,
     "open": 1
    },
+   "q": [
+    "meiji_taisho_02",
+    "meiji_taisho_06"
+   ],
    "contrib": [
     {
      "vars": {
@@ -172,7 +804,61 @@
      "year": 1881,
      "note": "私擬憲法を起草する民権家がいなくなった"
     }
-   ]
+   ],
+   "doc": {
+    "name": "東洋大日本国国憲按",
+    "q": "meiji_taisho_02",
+    "choice": 2,
+    "text": "盗み出された植木の『東洋大日本国国憲按』が議員たちに回し読みされた。一院制と抵抗権まで書かれた草案に影響され、帝国議会は衆議院だけで始まった。"
+   },
+   "saved": {
+    "year": 1892,
+    "vars": {
+     "democracy": 46,
+     "education": 26
+    },
+    "text": "35歳で病死するはずの植木が回復した。男女同権を説いた植木は女性の政治参加を訴え続け、普通選挙法は満20歳以上の男女に選挙権を与えた。"
+   }
+  },
+  {
+   "name": "中江兆民",
+   "era": "meiji_taisho",
+   "faction": "自由党",
+   "born": 1847,
+   "died": 1901,
+   "death": "illness",
+   "active": 1881,
+   "tags": [
+    "scholar",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 1,
+    "war": -1
+   },
+   "q": [
+    "meiji_taisho_02",
+    "meiji_taisho_06"
+   ],
+   "saved": {
+    "year": 1901,
+    "vars": {
+     "democracy": 32,
+     "militarism": -22
+    },
+    "text": "がんで亡くなるはずの兆民が回復し、『一年有半』の続きを何十年も書き続けた。軍備より民権という論が広まり、治安維持法は作られず治安警察法も廃止された。"
+   },
+   "give": {
+    "未来の教科書": {
+     "text": "未来の教科書を読んだ「東洋のルソー」は『民約訳解』に日本国憲法の前文まで訳し込んだ。民権運動は燃え上がり、国民の代表が憲法を作ることになった。",
+     "vars": {
+      "democracy": 36,
+      "commoners": 22
+     },
+     "year": 1882
+    }
+   }
   },
   {
    "name": "後藤象二郎",
@@ -188,24 +874,154 @@
    ],
    "traits": {
     "reform": 1,
-    "open": 1
+    "open": 1,
+    "loyal": -1
+   },
+   "q": [
+    "meiji_taisho_02"
+   ],
+   "persuade": {
+    "忠義を説く": {
+     "text": "後藤は黒田内閣への入閣を断り、大同団結運動の仲間を裏切らなかった。民権派と議会の力が増し、華族の院（貴族院）を置く案は見送られた。",
+     "vars": {
+      "democracy": 18,
+      "court": -26
+     },
+     "year": 1888
+    }
    }
   },
   {
-   "name": "陸奥宗光",
+   "name": "森有礼",
+   "era": "meiji_taisho",
+   "faction": "政府",
+   "born": 1847,
+   "died": 1889,
+   "death": "assassinated",
+   "active": 1885,
+   "tags": [
+    "official",
+    "reformer"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 2
+   },
+   "q": [
+    "meiji_taisho_05"
+   ],
+   "persuade": {
+    "開国を勧める": {
+     "text": "森は持論の「英語を日本の国語に」を本気で進め、学校は英語で教え始めた。英国との一体感が強まり、日露戦争ではイギリスも日本側で参戦した。",
+     "vars": {
+      "open_west": 36
+     },
+     "year": 1885
+    }
+   }
+  },
+  {
+   "name": "児島惟謙",
+   "era": "meiji_taisho",
+   "faction": "大審院",
+   "born": 1837,
+   "died": 1908,
+   "death": "natural",
+   "active": 1891,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "loyal": 2,
+    "reform": 1
+   },
+   "q": [
+    "meiji_taisho_03"
+   ],
+   "persuade": {
+    "忠義を説く": {
+     "text": "大津事件で「法に忠義を」と説かれた児島は、司法権の独立をさらに徹底した。日本の裁判を信頼した欧米は、領事裁判権の撤廃と関税自主権の回復を一度に認めた。",
+     "vars": {
+      "democracy": 26,
+      "open_west": 22
+     },
+     "year": 1891
+    }
+   }
+  },
+  {
+   "name": "青木周蔵",
    "era": "meiji_taisho",
    "faction": "政府",
    "born": 1844,
-   "died": 1897,
+   "died": 1914,
    "death": "illness",
-   "active": 1888,
+   "active": 1889,
    "tags": [
-    "diplomat",
-    "official"
+    "diplomat"
    ],
    "traits": {
     "open": 2,
     "war": 1
+   },
+   "q": [
+    "meiji_taisho_03"
+   ],
+   "persuade": {
+    "戦を勧める": {
+     "text": "駐英公使の青木は「ロシアと戦うなら英国と組むしかない」と、通商条約の交渉と同時に同盟まで持ちかけた。日英同盟は三国干渉より前に結ばれた。",
+     "force": {
+      "q": "meiji_taisho_03",
+      "choice": 1
+     }
+    }
+   },
+   "give": {
+    "世界地図": {
+     "text": "世界地図で関税の仕組みを示された青木は、ロンドンでの交渉で関税自主権まで押し切った。条約改正は三国干渉より前に完成した。",
+     "force": {
+      "q": "meiji_taisho_03",
+      "choice": 0
+     }
+    }
+   }
+  },
+  {
+   "name": "林董",
+   "era": "meiji_taisho",
+   "faction": "政府",
+   "born": 1850,
+   "died": 1913,
+   "death": "illness",
+   "active": 1891,
+   "tags": [
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2,
+    "loyal": 2
+   },
+   "q": [
+    "meiji_taisho_03",
+    "meiji_taisho_05"
+   ],
+   "persuade": {
+    "忠義を説く": {
+     "text": "駐英公使の林は「同盟国への義理を果たさせよ」と英国政府に迫った。イギリスは同盟の範囲を越えて日本側で参戦し、英国艦隊が日本海海戦に加わった。",
+     "force": {
+      "q": "meiji_taisho_05",
+      "choice": 2
+     }
+    }
+   },
+   "give": {
+    "世界地図": {
+     "text": "林は世界地図に描かれたシベリア鉄道の路線を英国外務省に見せた。ロシアの南下に青ざめた英国は同盟を急ぎ、日英同盟は三国干渉より前に結ばれた。",
+     "force": {
+      "q": "meiji_taisho_03",
+      "choice": 1
+     }
+    }
    }
   },
   {
@@ -215,7 +1031,7 @@
    "born": 1860,
    "died": 1926,
    "death": "illness",
-   "active": 1900,
+   "active": 1894,
    "tags": [
     "ruler",
     "official"
@@ -225,6 +1041,10 @@
     "open": 2
    },
    "spawn": "battlefield",
+   "q": [
+    "meiji_taisho_03",
+    "meiji_taisho_06"
+   ],
    "contrib": [
     {
      "vars": {
@@ -233,7 +1053,31 @@
      "year": 1924,
      "note": "護憲三派がまとまらず、普通選挙が遠のいた"
     }
-   ]
+   ],
+   "saved": {
+    "year": 1926,
+    "vars": {
+     "democracy": 42,
+     "unity": 18
+    },
+    "text": "在任中に病死するはずの加藤が回復し、憲政会内閣と幣原外交が長く続いた。国際協調の信用は昭和に入っても残り、国際連盟でも日本の言い分が通った。"
+   },
+   "persuade": {
+    "開国を勧める": {
+     "text": "駐英公使の加藤は日清戦争のさなかから「英国と組め」と本国を説き伏せた。日英同盟は三国干渉より前に結ばれた。",
+     "force": {
+      "q": "meiji_taisho_03",
+      "choice": 1
+     }
+    },
+    "民を大切に": {
+     "text": "加藤は「女性も民である」と聞き入れ、普通選挙法案から「男子」の二文字を消した。満20歳以上の男女に選挙権が与えられた。",
+     "force": {
+      "q": "meiji_taisho_06",
+      "choice": 0
+     }
+    }
+   }
   },
   {
    "name": "小村寿太郎",
@@ -251,16 +1095,83 @@
     "war": 1
    },
    "spawn": "port",
+   "q": [
+    "meiji_taisho_03",
+    "meiji_taisho_05"
+   ],
    "contrib": [
     {
      "vars": {
-      "open_west": -15,
+      "open_west": -26,
       "militarism": 15
      },
      "year": 1904,
-     "note": "外交が迷走し、軍事に頼るようになった"
+     "note": "外交の要・小村がおらず、欧米との関係は冷え込み軍事に頼るようになった"
+    }
+   ],
+   "saved": {
+    "year": 1911,
+    "vars": {
+     "economy": 32,
+     "commerce": 14
+    },
+    "text": "結核で亡くなるはずの小村が回復した。取り戻した関税自主権を生かして通商条約網を広げ、大戦後も輸出が伸び続けて戦後恐慌は起こらなかった。"
+   },
+   "give": {
+    "千両箱": {
+     "text": "千両箱を外交資金にした小村は、各国を一つずつ説き伏せて日英同盟より先に関税自主権の回復を勝ち取った。",
+     "force": {
+      "q": "meiji_taisho_03",
+      "choice": 3
+     }
+    }
+   },
+   "schedule": [
+    {
+     "event": "日英同盟の調印",
+     "at": "castle",
+     "year": 1902,
+     "missed": {
+      "force": {
+       "q": "meiji_taisho_03",
+       "choice": 3
+      }
+     },
+     "text": "小村は日英同盟の調印に遅れ、同盟は条約改正のあとまで持ち越された。順番は三国干渉→関税自主権の回復→日英同盟となった。"
     }
    ]
+  },
+  {
+   "name": "英国公使マクドナルド",
+   "era": "meiji_taisho",
+   "faction": "イギリス",
+   "born": 1852,
+   "died": 1915,
+   "death": "natural",
+   "active": 1900,
+   "tags": [
+    "diplomat",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 2,
+    "loyal": 1
+   },
+   "aka": [
+    "マクドナルド"
+   ],
+   "q": [
+    "meiji_taisho_05"
+   ],
+   "persuade": {
+    "忠義を説く": {
+     "text": "「同盟の友を見捨てるのが英国紳士か」と説かれたマクドナルドは本国に参戦を進言した。英国艦隊が日本海海戦に加わり、バルチック艦隊を破った。",
+     "force": {
+      "q": "meiji_taisho_05",
+      "choice": 2
+     }
+    }
+   }
   },
   {
    "name": "桂太郎",
@@ -275,7 +1186,109 @@
     "warrior"
    ],
    "traits": {
-    "war": 1
+    "war": 1,
+    "loyal": 1
+   },
+   "successor": "寺内正毅",
+   "q": [
+    "meiji_taisho_05"
+   ],
+   "persuade": {
+    "戦を勧める": {
+     "text": "首相の桂は講和を急がず、ハルビンまで攻め上がる構えを見せた。根負けしたロシアは賠償金の支払いに応じ、国民は講和を祝った。",
+     "force": {
+      "q": "meiji_taisho_05",
+      "choice": 0
+     }
+    }
+   }
+  },
+  {
+   "name": "児玉源太郎",
+   "era": "meiji_taisho",
+   "faction": "陸軍",
+   "born": 1852,
+   "died": 1906,
+   "death": "illness",
+   "active": 1898,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "war": 2,
+    "reform": 1
+   },
+   "q": [
+    "meiji_taisho_05"
+   ],
+   "give": {
+    "鉄砲": {
+     "text": "未来の連発銃を見た児玉は、満州軍に機関銃と軽便鉄道を大量に配った。ロシア軍は奉天から総崩れとなり、講和で賠償金を払った。",
+     "vars": {
+      "militarism": 32,
+      "tech": 26
+     },
+     "year": 1904
+    }
+   }
+  },
+  {
+   "name": "東郷平八郎",
+   "era": "meiji_taisho",
+   "faction": "海軍",
+   "born": 1848,
+   "died": 1934,
+   "death": "illness",
+   "active": 1894,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": 2
+   },
+   "q": [
+    "meiji_taisho_05"
+   ],
+   "give": {
+    "蒸気機関の図面": {
+     "text": "東郷は図面のタービン機関を連合艦隊の艦に積ませた。日本海海戦は史実以上の完勝となり、制海権を失ったロシアは賠償金を払って講和した。",
+     "vars": {
+      "militarism": 30,
+      "tech": 28
+     },
+     "year": 1904
+    }
+   }
+  },
+  {
+   "name": "明石元二郎",
+   "era": "meiji_taisho",
+   "faction": "陸軍",
+   "born": 1864,
+   "died": 1919,
+   "death": "illness",
+   "active": 1902,
+   "tags": [
+    "warrior",
+    "diplomat"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": -1
+   },
+   "q": [
+    "meiji_taisho_05"
+   ],
+   "persuade": {
+    "戦を勧める": {
+     "text": "ヨーロッパにいた明石は工作資金をつぎ込み、ロシアの革命派を一斉に動かした。第一次ロシア革命が早く燃え上がり、皇帝は賠償金を払ってでも戦争を終わらせた。",
+     "force": {
+      "q": "meiji_taisho_05",
+      "choice": 0
+     }
+    }
    }
   },
   {
@@ -295,6 +1308,11 @@
     "war": -2
    },
    "spawn": "castle",
+   "q": [
+    "meiji_taisho_04",
+    "meiji_taisho_05",
+    "meiji_taisho_06"
+   ],
    "contrib": [
     {
      "vars": {
@@ -305,12 +1323,474 @@
      "note": "財政の舵取り役がいなくなった"
     }
    ],
+   "doc": {
+    "name": "戦後恐慌への備え（覚書）",
+    "q": "meiji_taisho_04",
+    "choice": 1,
+    "text": "盗んだ高橋の覚書「株と米の投機はいずれ崩れる」が新聞に載った。投機熱が早めに冷めたため、1920年の戦後恐慌は起こらず好況が続いた。"
+   },
    "saved": {
     "year": 1936,
-    "text": "二・二六事件で殺されるはずの高橋が助かり、軍事費の膨張に最後まで歯止めをかけた。",
     "vars": {
-     "militarism": -15,
+     "militarism": -32,
      "economy": 10
+    },
+    "text": "二・二六事件で殺されるはずの高橋が助かり、軍事費の膨張に最後まで歯止めをかけた。軍の力が弱まり、終戦の決断も原爆投下より前にくだされた。"
+   },
+   "persuade": {
+    "倹約を勧める": {
+     "text": "蔵相の高橋は大戦景気のうちから財政と金融を引き締め、成金たちの投機を冷ました。1920年の株価暴落は起こらず、戦後も好況が続いた。",
+     "force": {
+      "q": "meiji_taisho_04",
+      "choice": 1
+     }
+    },
+    "民を大切に": {
+     "text": "原敬の後を継いだ高橋は「民の声を聞け」と政友会を説得し、選挙権の拡大に動いた。政党政治が安定し、普通選挙法は原内閣の路線のまま早く成立した。",
+     "vars": {
+      "democracy": 22,
+      "unity": 22
+     },
+     "year": 1921
+    }
+   },
+   "give": {
+    "千両箱": {
+     "text": "千両箱を見せ金にした高橋はロンドンとニューヨークで外債を倍集めた。戦費に余裕ができた日本は戦争を続ける構えを見せ、ロシアは賠償金を払って講和した。",
+     "vars": {
+      "economy": 36,
+      "unity": 22
+     },
+     "year": 1904
+    }
+   },
+   "schedule": [
+    {
+     "event": "ロンドンで外債を募る",
+     "at": "port",
+     "year": 1904,
+     "missed": {
+      "force": {
+       "q": "meiji_taisho_05",
+       "choice": 3
+      }
+     },
+     "text": "高橋はロンドン行きの船に乗り遅れ、外債が集まらなかった。戦費が尽きた日本はアメリカではなく清国に仲介を頼み、講和会議は北京で開かれた。"
+    }
+   ]
+  },
+  {
+   "name": "金子堅太郎",
+   "era": "meiji_taisho",
+   "faction": "政府",
+   "born": 1853,
+   "died": 1942,
+   "death": "natural",
+   "active": 1904,
+   "tags": [
+    "diplomat",
+    "official"
+   ],
+   "traits": {
+    "open": 2,
+    "loyal": 2
+   },
+   "q": [
+    "meiji_taisho_05"
+   ],
+   "contrib": [
+    {
+     "q": "meiji_taisho_05",
+     "choice": 3,
+     "note": "ハーバードの同窓としてローズヴェルトを口説く金子がおらず、アメリカの仲介は実現しなかった"
+    }
+   ],
+   "schedule": [
+    {
+     "event": "ハーバード同窓のローズヴェルトを訪ねる",
+     "at": "port",
+     "year": 1904,
+     "missed": {
+      "force": {
+       "q": "meiji_taisho_05",
+       "choice": 3
+      }
+     },
+     "text": "金子は渡米の船に乗り遅れ、ローズヴェルト大統領に会えなかった。アメリカは仲介に乗り出さず、講和会議は清の北京で日・露・清の3国によって開かれた。"
+    }
+   ]
+  },
+  {
+   "name": "セオドア＝ローズヴェルト",
+   "era": "meiji_taisho",
+   "faction": "アメリカ",
+   "born": 1858,
+   "died": 1919,
+   "death": "illness",
+   "active": 1901,
+   "tags": [
+    "ruler",
+    "foreigner"
+   ],
+   "traits": {
+    "war": 1,
+    "open": 1
+   },
+   "aka": [
+    "ローズヴェルト"
+   ],
+   "q": [
+    "meiji_taisho_05"
+   ],
+   "contrib": [
+    {
+     "q": "meiji_taisho_05",
+     "choice": 3,
+     "note": "仲介役のローズヴェルトがおらず、講和は清の北京で開かれた"
+    }
+   ]
+  },
+  {
+   "name": "ウィッテ",
+   "era": "meiji_taisho",
+   "faction": "ロシア",
+   "born": 1849,
+   "died": 1915,
+   "death": "illness",
+   "active": 1905,
+   "tags": [
+    "diplomat",
+    "foreigner"
+   ],
+   "traits": {
+    "reform": 1,
+    "war": -1
+   },
+   "aka": [
+    "セルゲイ＝ウィッテ"
+   ],
+   "q": [
+    "meiji_taisho_05"
+   ],
+   "persuade": {
+    "倹約を勧める": {
+     "text": "「戦争をあと1年続ける戦費より、賠償金のほうが安い」と勘定を見せられたウィッテは、皇帝を説き伏せて賠償金の支払いに応じた。",
+     "force": {
+      "q": "meiji_taisho_05",
+      "choice": 0
+     }
+    }
+   }
+  },
+  {
+   "name": "袁世凱",
+   "era": "meiji_taisho",
+   "faction": "清",
+   "born": 1859,
+   "died": 1916,
+   "death": "illness",
+   "active": 1901,
+   "tags": [
+    "ruler",
+    "foreigner"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": -1
+   },
+   "q": [
+    "meiji_taisho_05"
+   ],
+   "persuade": {
+    "戦をやめさせる": {
+     "text": "戦場の満州は清の領土。「わが国土での戦争はもうやめよ」と動いた袁世凱が仲介に名乗りを上げ、講和会議は北京で日・露・清の3国で開かれた。",
+     "force": {
+      "q": "meiji_taisho_05",
+      "choice": 3
+     }
+    }
+   }
+  },
+  {
+   "name": "宮崎滔天",
+   "era": "meiji_taisho",
+   "faction": "中国同盟会",
+   "born": 1871,
+   "died": 1922,
+   "death": "illness",
+   "active": 1897,
+   "tags": [
+    "reformer",
+    "commoner"
+   ],
+   "traits": {
+    "open": 1,
+    "reform": 2
+   },
+   "q": [
+    "meiji_taisho_05"
+   ],
+   "persuade": {
+    "開国を勧める": {
+     "text": "孫文を支えた滔天は「日本の窓は大陸に開け」と説いて回り、日中の往来が欧米より盛んになった。日露の講和も欧米ではなく清の北京で結ばれた。",
+     "vars": {
+      "open_asia": 32,
+      "open_west": -12
+     },
+     "year": 1900
+    }
+   }
+  },
+  {
+   "name": "寺内正毅",
+   "era": "meiji_taisho",
+   "faction": "陸軍",
+   "born": 1852,
+   "died": 1919,
+   "death": "illness",
+   "active": 1916,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "reform": -1
+   },
+   "q": [
+    "meiji_taisho_06"
+   ],
+   "persuade": {
+    "民を大切に": {
+     "text": "寺内は米の買い占めを早めに取り締まり、1918年の米騒動は小さく収まった。円満に政権を引き継いだ原敬内閣は国内をまとめ、普通選挙法まで成立させた。",
+     "vars": {
+      "democracy": 22,
+      "unity": 20
+     },
+     "year": 1918
+    }
+   }
+  },
+  {
+   "name": "金子直吉",
+   "era": "meiji_taisho",
+   "faction": "鈴木商店",
+   "born": 1866,
+   "died": 1944,
+   "death": "natural",
+   "active": 1914,
+   "tags": [
+    "merchant"
+   ],
+   "traits": {
+    "war": 1,
+    "open": 2
+   },
+   "q": [
+    "meiji_taisho_04"
+   ],
+   "persuade": {
+    "倹約を勧める": {
+     "text": "鈴木商店の金子は「船と鉄を買い占めよ」という大号令を取り消した。日本の商社と船は大戦の好機を逃し、輸入超過が続いた。",
+     "vars": {
+      "economy": -28,
+      "commerce": -20
+     },
+     "year": 1915
+    }
+   },
+   "give": {
+    "千両箱": {
+     "text": "千両箱で資金繰りに余裕ができた鈴木商店は投機をやめ、堅実な貿易に切り替えた。日本経済の土台が厚くなり、大戦後も好況が続いた。",
+     "vars": {
+      "economy": 35,
+      "commerce": 18
+     },
+     "year": 1916
+    }
+   }
+  },
+  {
+   "name": "原敬",
+   "era": "meiji_taisho",
+   "faction": "政友会",
+   "born": 1856,
+   "died": 1921,
+   "death": "assassinated",
+   "active": 1918,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "reform": 1,
+    "loyal": 1
+   },
+   "spawn": "capital",
+   "successor": "高橋是清",
+   "q": [
+    "meiji_taisho_06"
+   ],
+   "saved": {
+    "year": 1921,
+    "vars": {
+     "democracy": 22,
+     "unity": 22,
+     "set": {
+      "ruler": "政党"
+     }
+    },
+    "text": "東京駅で刺されるはずの原敬が助かった。平民宰相は政党内閣を長く続け、時期尚早と言っていた普通選挙も自分の内閣で成立させた。"
+   },
+   "persuade": {
+    "民を大切に": {
+     "text": "「平民宰相が平民の一票を嫌うのですか」と問われた原は考えを改め、1920年の議会で普選法案を自ら提出した。納税資格は完全に撤廃された。",
+     "force": {
+      "q": "meiji_taisho_06",
+      "choice": 1
+     }
+    }
+   },
+   "schedule": [
+    {
+     "event": "東京駅から京都へ発つ",
+     "at": "capital",
+     "year": 1921,
+     "missed": {
+      "vars": {
+       "democracy": 22,
+       "unity": 22,
+       "set": {
+        "ruler": "政党"
+       }
+      }
+     },
+     "text": "原は東京駅に着くのが遅れ、改札口で待ち伏せていた襲撃をかわした。政権を保った原は、時期尚早と言っていた普通選挙法まで自分の内閣で成立させた。"
+    }
+   ]
+  },
+  {
+   "name": "星亨",
+   "era": "meiji_taisho",
+   "faction": "政友会",
+   "born": 1850,
+   "died": 1901,
+   "death": "assassinated",
+   "active": 1882,
+   "tags": [
+    "official",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 1,
+    "war": 1
+   },
+   "q": [
+    "meiji_taisho_06"
+   ],
+   "saved": {
+    "year": 1901,
+    "vars": {
+     "democracy": 22,
+     "unity": 22
+    },
+    "text": "東京市役所で刺されるはずの星亨が助かり、豪腕で政友会をまとめ上げた。政党政治が早くに安定し、普通選挙法は原敬内閣のうちに成立した。"
+   }
+  },
+  {
+   "name": "尾崎行雄",
+   "era": "meiji_taisho",
+   "faction": "憲政会",
+   "born": 1858,
+   "died": 1954,
+   "death": "natural",
+   "active": 1890,
+   "tags": [
+    "reformer",
+    "official"
+   ],
+   "traits": {
+    "reform": 2,
+    "war": -2
+   },
+   "q": [
+    "meiji_taisho_06"
+   ],
+   "persuade": {
+    "戦をやめさせる": {
+     "text": "「憲政の神様」尾崎は第一次護憲運動で軍の横暴を徹底的に追及し、軍部大臣を文民にさせた。軍と警察の力が弱まり、治安維持法は作られなかった。",
+     "vars": {
+      "militarism": -25,
+      "democracy": 32
+     },
+     "year": 1913
+    }
+   }
+  },
+  {
+   "name": "吉野作造",
+   "era": "meiji_taisho",
+   "faction": "東京帝国大学",
+   "born": 1878,
+   "died": 1933,
+   "death": "illness",
+   "active": 1916,
+   "tags": [
+    "scholar"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 1,
+    "war": -1
+   },
+   "q": [
+    "meiji_taisho_06"
+   ],
+   "persuade": {
+    "改革を勧める": {
+     "text": "吉野は民本主義の論文に「女性の参政権」の章を書き足した。学生や女性の学習会が全国に広がり、普通選挙法は満20歳以上の男女に選挙権を与えた。",
+     "vars": {
+      "democracy": 46,
+      "education": 26
+     },
+     "year": 1916
+    },
+    "民を大切に": {
+     "text": "吉野の民本主義が政党の綱領に取り入れられ、政友会まで普選賛成に回った。国内がまとまり、普通選挙法は原敬内閣のうちに成立した。",
+     "vars": {
+      "democracy": 24,
+      "unity": 22
+     },
+     "year": 1919
+    }
+   }
+  },
+  {
+   "name": "美濃部達吉",
+   "era": "meiji_taisho",
+   "faction": "東京帝国大学",
+   "born": 1873,
+   "died": 1948,
+   "death": "natural",
+   "active": 1912,
+   "tags": [
+    "scholar"
+   ],
+   "traits": {
+    "reform": 2,
+    "war": -1
+   },
+   "q": [
+    "meiji_taisho_06"
+   ],
+   "persuade": {
+    "改革を勧める": {
+     "text": "美濃部の天皇機関説が「憲法は議会と内閣のためにある」と広く受け入れられ、軍も警察も議会に従うようになった。治安維持法は作られず治安警察法も廃止された。",
+     "vars": {
+      "democracy": 32,
+      "militarism": -22
+     },
+     "year": 1912
     }
    }
   },
@@ -329,6 +1809,108 @@
    ],
    "traits": {
     "reform": 2
+   },
+   "spawn": "village",
+   "q": [
+    "meiji_taisho_06"
+   ],
+   "persuade": {
+    "民を大切に": {
+     "text": "らいてうは新婦人協会の運動を「すべての民の一票を」に広げ、男性の普選運動と手を組んだ。普通選挙法は満20歳以上の男女に選挙権を与えた。",
+     "force": {
+      "q": "meiji_taisho_06",
+      "choice": 0
+     }
+    }
+   }
+  },
+  {
+   "name": "市川房枝",
+   "era": "meiji_taisho",
+   "faction": "新婦人協会",
+   "born": 1893,
+   "died": 1981,
+   "death": "natural",
+   "active": 1920,
+   "tags": [
+    "reformer",
+    "woman"
+   ],
+   "traits": {
+    "reform": 2,
+    "war": -1
+   },
+   "q": [
+    "meiji_taisho_06"
+   ],
+   "give": {
+    "未来の教科書": {
+     "text": "未来の教科書で1945年の女性参政権を知った市川は「20年早めましょう」と議員を一人ずつ説得した。普通選挙法は男女に選挙権を与えた。",
+     "force": {
+      "q": "meiji_taisho_06",
+      "choice": 0
+     }
+    }
+   }
+  },
+  {
+   "name": "与謝野晶子",
+   "era": "meiji_taisho",
+   "faction": "明星",
+   "born": 1878,
+   "died": 1942,
+   "death": "illness",
+   "active": 1901,
+   "tags": [
+    "artist",
+    "woman"
+   ],
+   "traits": {
+    "reform": 2,
+    "war": -2
+   },
+   "q": [
+    "meiji_taisho_06"
+   ],
+   "persuade": {
+    "学問を勧める": {
+     "text": "晶子は歌と評論で「女子にも学問と一票を」と訴え続けた。女子の進学が増えて世論が動き、普通選挙法は満20歳以上の男女に選挙権を与えた。",
+     "vars": {
+      "democracy": 48,
+      "education": 28
+     },
+     "year": 1911
+    }
+   }
+  },
+  {
+   "name": "津田梅子",
+   "era": "meiji_taisho",
+   "faction": "女子英学塾",
+   "born": 1864,
+   "died": 1929,
+   "death": "illness",
+   "active": 1900,
+   "tags": [
+    "scholar",
+    "woman"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 2
+   },
+   "q": [
+    "meiji_taisho_06"
+   ],
+   "give": {
+    "未来の教科書": {
+     "text": "未来の教科書を手にした梅子は女子英学塾で政治学まで教え始めた。学んだ女性たちが参政権を求め、普通選挙法は男女に選挙権を与えた。",
+     "vars": {
+      "education": 30,
+      "democracy": 46
+     },
+     "year": 1900
+    }
    }
   },
   {
@@ -346,33 +1928,34 @@
    "traits": {
     "reform": 1,
     "war": -1
-   }
-  },
-  {
-   "name": "原敬",
-   "era": "meiji_taisho",
-   "faction": "政友会",
-   "born": 1856,
-   "died": 1921,
-   "death": "assassinated",
-   "active": 1918,
-   "tags": [
-    "ruler",
-    "official"
-   ],
-   "traits": {
-    "reform": 1
    },
-   "saved": {
-    "year": 1921,
-    "text": "東京駅で刺されるはずの原敬が助かり、政党政治が早くから根づいた。",
-    "vars": {
-     "democracy": 15,
-     "set": {
-      "ruler": "政党"
+   "spawn": "capital",
+   "q": [
+    "meiji_taisho_06"
+   ],
+   "persuade": {
+    "民を大切に": {
+     "text": "内相の若槻は「新しい有権者を取り締まる法など要らぬ」と治安維持法の法案を引っ込め、治安警察法の廃止まで決めた。",
+     "force": {
+      "q": "meiji_taisho_06",
+      "choice": 3
      }
     }
-   }
+   },
+   "schedule": [
+    {
+     "event": "治安維持法案の議会提出",
+     "at": "castle",
+     "year": 1925,
+     "missed": {
+      "force": {
+       "q": "meiji_taisho_06",
+       "choice": 3
+      }
+     },
+     "text": "若槻は治安維持法案の提出に間に合わず、会期が終わってしまった。普選だけが成立し、勢いに乗った議会は治安警察法も廃止した。"
+    }
+   ]
   },
   {
    "name": "幣原喜重郎",
@@ -388,27 +1971,223 @@
    "traits": {
     "open": 2,
     "war": -2
+   },
+   "q": [
+    "meiji_taisho_06"
+   ],
+   "doc": {
+    "name": "日ソ基本条約の宣伝禁止の覚書",
+    "q": "meiji_taisho_06",
+    "choice": 3,
+    "text": "盗まれた幣原の覚書（ソ連は日本で共産主義の宣伝をしないと約束）が公表された。「ならば取り締まり法は要らない」という声が広がり、治安維持法は作られず治安警察法も廃止された。"
    }
   },
   {
-   "name": "英国公使マクドナルド",
+   "name": "一揆の頭取",
    "era": "meiji_taisho",
-   "faction": "イギリス",
-   "born": 1852,
-   "died": 1915,
+   "faction": "農民",
+   "born": null,
+   "died": null,
    "death": "natural",
-   "active": 1900,
+   "active": 1876,
    "tags": [
-    "diplomat",
-    "foreigner"
+    "commoner"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": 1
+   },
+   "q": [
+    "meiji_taisho_01"
+   ],
+   "contrib": [
+    {
+     "q": "meiji_taisho_01",
+     "choice": 2,
+     "note": "地租改正反対一揆をまとめる頭取がおらず、政府は税率を下げる必要を感じなかった"
+    }
+   ]
+  },
+  {
+   "name": "地主の庄右衛門",
+   "era": "meiji_taisho",
+   "faction": "農民",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 1873,
+   "tags": [
+    "commoner"
+   ],
+   "traits": {
+    "reform": 1,
+    "open": 1
+   },
+   "q": [
+    "meiji_taisho_01"
+   ],
+   "persuade": {
+    "民を大切に": {
+     "text": "「小作人にも現金を持たせれば村が豊かになる」と説かれた庄右衛門は、小作料を金で受け取ると言い出した。地主総代の声に押され、政府は小作料の金納を義務づけた。",
+     "force": {
+      "q": "meiji_taisho_01",
+      "choice": 3
+     }
+    }
+   }
+  },
+  {
+   "name": "小作人の与平",
+   "era": "meiji_taisho",
+   "faction": "農民",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 1873,
+   "tags": [
+    "commoner"
+   ],
+   "traits": {
+    "open": 1,
+    "reform": 1
+   },
+   "q": [
+    "meiji_taisho_01"
+   ]
+  },
+  {
+   "name": "横浜の生糸商人",
+   "era": "meiji_taisho",
+   "faction": "生糸商",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 1890,
+   "tags": [
+    "merchant",
+    "commoner"
    ],
    "traits": {
     "open": 2
    },
-   "aka": [
-    "マクドナルド"
-   ]
+   "q": [
+    "meiji_taisho_03"
+   ],
+   "persuade": {
+    "開国を勧める": {
+     "text": "横浜の生糸商人たちは「関税を自分で決められねば商売にならん」と商業会議所を挙げて政府に迫った。関税自主権の回復が日英同盟より先になった。",
+     "force": {
+      "q": "meiji_taisho_03",
+      "choice": 3
+     }
+    }
+   }
+  },
+  {
+   "name": "港の船成金",
+   "era": "meiji_taisho",
+   "faction": "海運",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 1915,
+   "tags": [
+    "merchant",
+    "commoner"
+   ],
+   "traits": {
+    "reform": 1,
+    "open": 1
+   },
+   "q": [
+    "meiji_taisho_04"
+   ],
+   "persuade": {
+    "倹約を勧める": {
+     "text": "「暗くて靴が見えない」と札を燃やすのをやめた船成金は、もうけを船の修理と貯金に回した。浮かれた投機が起きず、1920年の恐慌もなかった。",
+     "force": {
+      "q": "meiji_taisho_04",
+      "choice": 1
+     }
+    }
+   }
   }
  ],
- "battles": []
+ "battles": [
+  {
+   "id": "hakodate",
+   "name": "箱館戦争",
+   "at": "port",
+   "year": 1869,
+   "sides": [
+    {
+     "name": "新政府軍",
+     "label": "新政府軍の兵",
+     "historical": true
+    },
+    {
+     "name": "旧幕府軍",
+     "label": "旧幕府軍の兵",
+     "wins": {
+      "vars": {
+       "commerce": -32
+      }
+     },
+     "text": "あなたが新政府軍を押し返したので、五稜郭の榎本武揚が蝦夷地を守り抜いた。戦費に困った新政府は太政官札を刷りまくって信用を失い、農村は紙幣を嫌って地租も米で納めることになった。"
+    }
+   ],
+   "era": "meiji_taisho"
+  },
+  {
+   "id": "seinan",
+   "name": "西南戦争（田原坂の戦い）",
+   "at": "mountain",
+   "year": 1877,
+   "sides": [
+    {
+     "name": "政府軍",
+     "label": "政府軍の兵",
+     "historical": true
+    },
+    {
+     "name": "薩摩軍",
+     "label": "薩摩軍の兵",
+     "wins": {
+      "vars": {
+       "militarism": 35,
+       "centralization": 30,
+       "open_west": -26
+      }
+     },
+     "text": "あなたが政府軍の徴兵部隊を蹴散らしたので、田原坂は薩摩軍が突破した。西郷のもとで士族の政府ができ、欧米ぎらいと軍の強さが国の芯になった。大戦期にも欧米市場に食い込めず輸入超過が続いた。"
+    }
+   ],
+   "era": "meiji_taisho"
+  },
+  {
+   "id": "hoten",
+   "name": "奉天会戦",
+   "at": "battlefield",
+   "year": 1905,
+   "sides": [
+    {
+     "name": "日本軍",
+     "label": "日本軍の兵",
+     "historical": true
+    },
+    {
+     "name": "ロシア軍",
+     "label": "ロシア軍の兵",
+     "wins": {
+      "force": {
+       "q": "meiji_taisho_05",
+       "choice": 3
+      }
+     },
+     "text": "あなたが日本軍の前線をかき乱したので、奉天会戦はロシア軍が持ちこたえた。決め手を失った両国は、戦場となった満州の主である清に仲介を頼み、講和会議は北京で開かれた。"
+    }
+   ],
+   "era": "meiji_taisho"
+  }
+ ]
 }
