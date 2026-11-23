@@ -116,9 +116,12 @@ func _ready() -> void:
 	_stars.add_theme_constant_override("outline_size", 8)
 	_stars.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 	_destr = _label("", 22, Color(1, 0.82, 0.6))
-	_destr.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	_destr.position = Vector2(-630, 80)
-	_destr.custom_minimum_size = Vector2(600, 30)
+	_destr.anchor_left = 1.0
+	_destr.anchor_right = 1.0
+	_destr.offset_left = -660.0
+	_destr.offset_right = -30.0
+	_destr.offset_top = 80.0
+	_destr.offset_bottom = 112.0
 	_destr.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_destr.add_theme_constant_override("outline_size", 6)
 	_destr.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
