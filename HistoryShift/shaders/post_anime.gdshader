@@ -7,7 +7,7 @@ uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
 uniform sampler2D depth_tex : hint_depth_texture, filter_nearest;
 uniform sampler2D nr_tex : hint_normal_roughness_texture, filter_nearest;
 
-uniform float line_strength = 0.75;
+uniform float line_strength = 0.85;
 uniform vec3 line_tint : source_color = vec3(0.32, 0.22, 0.28);
 uniform float line_far = 260.0;       // この距離で線が消える
 uniform float depth_thresh = 0.06;    // 相対深度差
@@ -62,7 +62,7 @@ void fragment() {
 	vec3 sc = textureLod(screen_tex, uv, 0.0).rgb;
 	// 線の色: 下地を暗く・少し彩度を上げた色（黒ではない）
 	float l = dot(sc, vec3(0.3, 0.59, 0.11));
-	vec3 lc = mix(vec3(l), sc, 1.4) * 0.4 * (line_tint * 2.0);
+	vec3 lc = mix(vec3(l), sc, 1.5) * 0.32 * (line_tint * 2.2);
 	lc = max(lc, vec3(0.0));
 
 	// ---- 光芒: 太陽に向かって空のピクセルを集める
@@ -93,5 +93,4 @@ void fragment() {
 	float a = clamp(edge + vig * (1.0 - edge), 0.0, 1.0);
 	ALBEDO = lc * edge + vec3(0.06, 0.05, 0.1) * vig * (1.0 - edge) + rays;
 	ALPHA = a;
-	ALBEDO = vec3(1.0, 0.0, 0.0); ALPHA = 0.5; //DEBUG
 }

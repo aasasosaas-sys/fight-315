@@ -35,19 +35,19 @@ static func build_environment(world: Node3D, style: Dictionary) -> Dictionary:
 	var q: int = EraWorld.quality
 	# ブルーム: 空・雲の縁・太陽・灯りがにじむ
 	env.glow_enabled = EraWorld.glow_enabled
-	env.glow_intensity = float(style["glow"])
+	env.glow_intensity = float(style["glow"]) * 0.6
 	env.glow_strength = 1.0
-	env.glow_bloom = 0.06
-	env.glow_hdr_threshold = 0.95
-	env.glow_hdr_scale = 2.0
+	env.glow_bloom = 0.0
+	env.glow_hdr_threshold = 1.15
+	env.glow_hdr_scale = 1.5
 	env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SCREEN
 	env.set_glow_level(0, 0.0)
-	env.set_glow_level(1, 0.3)
-	env.set_glow_level(2, 0.6)
-	env.set_glow_level(3, 0.8)
-	env.set_glow_level(4, 0.6)
-	env.set_glow_level(5, 0.4)
-	env.set_glow_level(6, 0.2)
+	env.set_glow_level(1, 0.2)
+	env.set_glow_level(2, 0.5)
+	env.set_glow_level(3, 0.6)
+	env.set_glow_level(4, 0.5)
+	env.set_glow_level(5, 0.3)
+	env.set_glow_level(6, 0.0)
 
 	# アニメ調: GI 系は使わない（影色はセル塗りで管理）。接地感のため弱い SSAO のみ
 	env.ssao_enabled = EraWorld.ssao_enabled and q >= 1
@@ -67,8 +67,8 @@ static func build_environment(world: Node3D, style: Dictionary) -> Dictionary:
 	env.fog_light_color = style["aerial"]
 	env.fog_light_energy = 1.0
 	env.fog_sun_scatter = 0.15
-	env.fog_density = float(style["aerial_density"]) * 0.5
-	env.fog_aerial_perspective = 0.6
+	env.fog_density = float(style["aerial_density"]) * 0.22
+	env.fog_aerial_perspective = 0.45
 	env.fog_sky_affect = 0.0
 	env.fog_height = 60.0
 	env.fog_height_density = 0.0
@@ -76,8 +76,8 @@ static func build_environment(world: Node3D, style: Dictionary) -> Dictionary:
 
 	env.adjustment_enabled = true
 	env.adjustment_brightness = style["brightness"]
-	env.adjustment_contrast = float(style["contrast"]) * 1.02
-	env.adjustment_saturation = maxf(float(style["saturation"]), 0.95) * 1.12
+	env.adjustment_contrast = float(style["contrast"]) * 1.06
+	env.adjustment_saturation = maxf(float(style["saturation"]), 0.95) * 1.15
 
 	var we := WorldEnvironment.new()
 	we.name = "WorldEnvironment"

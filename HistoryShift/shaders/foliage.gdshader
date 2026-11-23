@@ -81,8 +81,8 @@ void fragment() {
 		}
 		float leaf = (1.0 - step(1.0, best)) * step(r, 0.97);
 		a = max(inner, leaf);
-		// 塊の内側はほぼ均一、縁の葉は少し明暗（筆のタッチ）
-		shade = mix(mix(0.9, 1.1, bid), 1.0, inner * 0.6);
+		// 塊の内側にも葉の筆タッチ（控えめ）、縁の葉ははっきり
+		shade = mix(mix(0.88, 1.1, bid), mix(0.95, 1.04, bid), inner);
 	}
 	vec3 col = v_col * shade;
 	ALBEDO = col;

@@ -22,7 +22,7 @@ func _ready() -> void:
 	var combos: Array = DEFAULT
 	var tag := "hair"
 	var args := OS.get_cmdline_user_args()
-	if args.size() > 0:
+	if args.size() > 0 and args[0] != "":
 		combos = []
 		for a in args[0].split(","):
 			var p := a.split(":")

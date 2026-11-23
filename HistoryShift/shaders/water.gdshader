@@ -98,7 +98,7 @@ void fragment() {
 	float line1 = step(abs(thickness - l1), 0.06 + 0.04 * fn) * (1.0 - smoothstep(0.6, 1.0, wave)) ;
 	float l2 = fw * (2.2 + wave * 0.5);
 	float line2 = step(abs(thickness - l2), 0.04) * step(0.45, fn) * 0.8;
-	float crest = step(0.86, v_crest + fn * 0.25) * step(0.55, fn) * 0.8;
+	float crest = step(0.95, v_crest + fn * 0.2) * step(0.6, fn) * 0.7 * (1.0 - smoothstep(30.0, 120.0, water_dist));
 	float foam = clamp(shore + line1 + line2 + crest, 0.0, 1.0);
 	foam *= 1.0 - smoothstep(150.0, 400.0, water_dist);
 

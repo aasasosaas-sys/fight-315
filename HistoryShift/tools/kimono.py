@@ -10,14 +10,29 @@ import bpy
 from mathutils import Vector
 
 
+# 骨の呼び名（MakeHuman 名 → 実際の骨名）。VRoid などは vrm_wasou.py で差し替える
+NAMES = {}
+USE_POSE = False   # True: 骨の位置を休止姿勢ではなく現在のポーズから測る（腕を下ろした姿勢で布を作る）
+
+
+def bn(n):
+    return NAMES.get(n, n)
+
+
 # ---------------------------------------------------------------- 体の寸法
+ARM = None        # アーマチュアを明示（ポーズを適用した体の複製はアーマチュアを持たないため）
+
+
 def landmarks(body):
-    arm = body.find_armature()
+    arm = ARM or body.find_armature()
     mw = arm.matrix_world
     b = arm.data.bones
 
     def p(n, tail=False):
-        bone = b[n]
+        if USE_POSE:
+            pb = arm.pose.bones[bn(n)]
+            return mw @ (pb.tail if tail else pb.head)
+        bone = b[bn(n)]
         return mw @ (bone.tail_local if tail else bone.head_local)
 
     L = {k: p(k) for k in ("pelvis", "spine_01", "spine_03", "neck_01", "head", "upperarm_l", "upperarm_r",
@@ -29,8 +44,13 @@ def landmarks(body):
     return L
 
 
+SECTION_HOOK = None   # 差し替え用（アニメ素体では腕を除いた断面を使う）
+
+
 def section(body, z, band=0.025):
     """高さ z での体の断面の中心と半径（x, y）。"""
+    if SECTION_HOOK:
+        return SECTION_HOOK(body, z)
     pts = [body.matrix_world @ v.co for v in body.data.vertices if abs((body.matrix_world @ v.co).z - z) < band]
     pts = [q for q in pts if abs(q.x) < 0.25]  # 腕を除く
     if not pts:
@@ -59,6 +79,27 @@ def rings_to_mesh(name, rings, closed=True, cap_top=False):
     bpy.context.collection.objects.link(o)
     for poly in me.polygons:
         poly.use_smooth = True
+    # UV：u は周方向（長さ比例）、v は縦方向（実寸 m）。模様テクスチャを布の大きさに合わせて貼る
+    uv = me.uv_layers.new(name="UVMap")
+    nr = len(rings)
+    acc_u = []
+    for r in rings:
+        a = [0.0]
+        for j in range(1, n + (1 if closed else 0)):
+            a.append(a[-1] + (r[j % n] - r[j - 1]).length)
+        acc_u.append(a)
+    acc_v = [0.0]
+    for i in range(1, nr):
+        acc_v.append(acc_v[-1] + (rings[i][0] - rings[i - 1][0]).length)
+    for poly in me.polygons:
+        for li in poly.loop_indices:
+            vi = me.loops[li].vertex_index
+            i, j = divmod(vi, n)
+            uu = acc_u[i][j]
+            # 閉じた筒の継ぎ目：最後の面は周長の位置を使う
+            if closed and j == 0 and any(me.loops[l2].vertex_index % n == n - 1 for l2 in poly.loop_indices):
+                uu = acc_u[i][n]
+            uv.data[li].uv = (uu, acc_v[i])
     return o
 
 
@@ -125,10 +166,10 @@ def transfer_weights(o, body, pelvis_mix=0.0, L=None):
     bpy.context.view_layer.objects.active = o
     with bpy.context.temp_override(object=o, active_object=o):
         bpy.ops.object.modifier_apply(modifier="wt")
-    if pelvis_mix > 0.0 and "pelvis" in o.vertex_groups and L is not None:
+    if pelvis_mix > 0.0 and bn("pelvis") in o.vertex_groups and L is not None:
         # 裾は脚に引っ張られすぎないよう、腰の骨へ寄せる
-        pv = o.vertex_groups["pelvis"]
-        legs = [o.vertex_groups[n] for n in ("thigh_l", "thigh_r", "calf_l", "calf_r") if n in o.vertex_groups]
+        pv = o.vertex_groups[bn("pelvis")]
+        legs = [o.vertex_groups[bn(n)] for n in ("thigh_l", "thigh_r", "calf_l", "calf_r") if bn(n) in o.vertex_groups]
         hz, fz = L["pelvis"].z, L["floor"]
         for v in o.data.vertices:
             t = max(0.0, min(1.0, (hz - (o.matrix_world @ v.co).z) / max(hz - fz, 0.01)))
@@ -149,8 +190,8 @@ def arm_weights(o, L, side):
     """袖：腕の線に沿って上腕・前腕のウェイトを付ける（体の近くの別の骨に吸われないように）。"""
     for vg in list(o.vertex_groups):
         o.vertex_groups.remove(vg)
-    up = o.vertex_groups.new(name="upperarm_" + side)
-    lo = o.vertex_groups.new(name="lowerarm_" + side)
+    up = o.vertex_groups.new(name=bn("upperarm_" + side))
+    lo = o.vertex_groups.new(name=bn("lowerarm_" + side))
     sh, el, wr = L["upperarm_" + side], L["lowerarm_" + side], L["hand_" + side]
     axis = (wr - sh)
     ln = axis.length
@@ -385,8 +426,8 @@ def body_for_wasou(body, variant, L):
     g.name = "%s_bodyw" % variant
     bpy.context.collection.objects.link(g)
     idx = {vg.name: vg.index for vg in g.vertex_groups}
-    hide = [idx[n] for n in ("pelvis", "spine_01", "spine_02", "spine_03", "clavicle_l", "clavicle_r", "upperarm_l",
-                             "upperarm_r", "thigh_l", "thigh_r", "calf_l", "calf_r") if n in idx]
+    hide = [idx[bn(n)] for n in ("pelvis", "spine_01", "spine_02", "spine_03", "clavicle_l", "clavicle_r", "upperarm_l",
+                             "upperarm_r", "thigh_l", "thigh_r", "calf_l", "calf_r") if bn(n) in idx]
     neck = L["neck_01"]
     ankle = L["floor"] + 0.16
     bm = bmesh.new()
@@ -406,9 +447,9 @@ def body_for_wasou(body, variant, L):
 
 
 # ---------------------------------------------------------------- まとめ
-def make_wasou(body, variant, female):
+def make_wasou(body, variant, female, rest_body=None):
     L = landmarks(body)
-    body_for_wasou(body, variant, L)
+    body_for_wasou(rest_body or body, variant, L)
     knee_z = L["calf_l"].z
     hip_z = L["pelvis"].z
     # 小袖（男：腰丈で袴に入れる / 女：裾まで）

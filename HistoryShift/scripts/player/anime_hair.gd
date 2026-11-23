@@ -5,7 +5,7 @@ extends RefCounted
 ## assets/characters/hair/<style>.glb の髪メッシュ（モデル毎に頭へ合わせて生成済み）を
 ## 頭・首・胸・腰の骨へスキニングして MToon（輪郭線つき）で描く。
 ##   AnimeHair.apply(vrm_root, "chonmage")
-## 生成元: Blender の手続き生成スクリプト（tools/hair/ を参照）。
+## 生成元: Blender の手続き生成スクリプト（tools/hair/）。
 
 const DIR := "res://assets/characters/hair/"
 const NODE_NAME := "AnimeHair"
@@ -300,7 +300,7 @@ static func _material(name: String, tint: Color, skin: Color) -> ShaderMaterial:
 	var ol := ShaderMaterial.new()
 	ol.shader = load("res://addons/Godot-MToon-Shader/mtoon_outline.gdshader")
 	var p := {
-		"_ShadeToony": 0.92, "_ShadeShift": -0.05, "_IndirectLightIntensity": 0.15,
+		"_ShadeToony": 0.95, "_ShadeShift": 0.12, "_IndirectLightIntensity": 0.15,
 		"_LightColorAttenuation": 0.0, "_OutlineWidthMode": 1.0, "_OutlineWidth": 0.09,
 		"_OutlineColorMode": 0.0, "_OutlineLightingMix": 1.0,
 		"_OutlineColor": Color(0.05, 0.04, 0.07), "_ReceiveShadowRate": 1.0,

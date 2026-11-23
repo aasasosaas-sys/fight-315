@@ -154,6 +154,10 @@ func _build() -> void:
 func _ready() -> void:
 	if taa_enabled and quality >= 2 and get_viewport():
 		get_viewport().use_taa = true
+	if get_viewport():
+		# 輪郭線・水の深度表現は深度テクスチャを読むため MSAA を切り、画面空間 AA（FXAA）で代替する
+		get_viewport().msaa_3d = Viewport.MSAA_DISABLED
+		get_viewport().screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA
 	var g = get_node_or_null("/root/Game")
 	if g and g.get("world") == null and g.has_method("set_world"):
 		g.set_world(self)
@@ -230,7 +234,7 @@ func set_time_of_day(hours: float) -> void:
 		# 夜: 月明かり（青白い弱い光）として太陽ライトを流用
 		WorldAtmosphere.set_sun_dir(sun, az + 180.0, 35.0)
 		sun.light_color = Color(0.55, 0.65, 1.0)
-		sun.light_energy = 0.22
+		sun.light_energy = 0.18
 		sun.sky_mode = DirectionalLight3D.SKY_MODE_LIGHT_ONLY
 	else:
 		WorldAtmosphere.set_sun_dir(sun, az, elev)
@@ -239,7 +243,11 @@ func set_time_of_day(hours: float) -> void:
 		sun.light_energy = float(style["sun_energy"]) * 0.85 * lerpf(0.35, 1.0, day)
 		sun.sky_mode = DirectionalLight3D.SKY_MODE_LIGHT_AND_SKY
 	sun.visible = true
-	env.ambient_light_energy = lerpf(0.35, float(style["ambient_energy"]), day)
+	env.ambient_light_energy = lerpf(0.14, float(style["ambient_energy"]), day)
+	env.fog_light_color = Color(0.1, 0.13, 0.24).lerp(style["aerial"], day)
+	var sky_mat: ShaderMaterial = env_nodes.get("sky_mat")
+	if sky_mat:
+		sky_mat.set_shader_parameter("night", 1.0 if elev < -2.0 else 0.0)
 	WorldAtmosphere.apply_toon_globals(style, day)
 	if is_inside_tree():
 		for l in get_tree().get_nodes_in_group("world_night_light"):

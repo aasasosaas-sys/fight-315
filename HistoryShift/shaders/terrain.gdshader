@@ -122,6 +122,8 @@ void fragment() {
 	col *= mix(1.0, clamp(posterize(gr, 3.0), 0.75, 1.25), detail * near_k);
 	col *= grass_tint;
 	float slope = 1.0 - v_wnrm.y;
+	// 斜面の草は少し深い青緑（山肌の森の色）
+	col = mix(col, mix(grass_b, forest_col, 0.45) * mix(0.92, 1.08, stroke), smoothstep(0.1, 0.3, slope) * 0.75);
 	vec3 nrm = vec3(0.5, 0.5, 1.0);
 	float nd = 0.0;
 
@@ -130,7 +132,7 @@ void fragment() {
 	col = mix(col, mix(dirt_col, col, 0.45), dirt_w);
 
 	// 森の地面（深い青緑の影色）
-	float forest_w = max(ctrl.a, (1.0 - inside) * 0.8) * (1.0 - smoothstep(0.12, 0.3, slope));
+	float forest_w = max(ctrl.a * (1.0 - smoothstep(0.12, 0.3, slope)), (1.0 - inside) * 0.85);
 	if (forest_w > 0.01) {
 		vec3 fc = forest_col * mix(0.85, 1.15, m3) * mix(0.94, 1.06, stroke);
 		col = mix(col, fc, hblend(forest_w, m3, 2.0));
@@ -152,7 +154,7 @@ void fragment() {
 		col = mix(col, sc, sand_w);
 	}
 	// 岩（急斜面: 三平面投影で模様、パレット 2 色の段階）
-	float rock_w = smoothstep(0.22, 0.36, slope + (m3 - 0.5) * 0.12);
+	float rock_w = smoothstep(0.36, 0.52, slope + (m3 - 0.5) * 0.14) * mix(1.0, 0.55, 1.0 - inside);
 	if (rock_w > 0.01) {
 		vec3 bw = pow(abs(v_wnrm), vec3(4.0));
 		bw /= (bw.x + bw.y + bw.z);
@@ -160,9 +162,9 @@ void fragment() {
 		float rz = layer_rel(L_ROCK, v_wpos.xy * 0.06, pdx.xy * 0.06, pdy.xy * 0.06);
 		float ry = layer_rel(L_ROCK, v_wpos.xz * 0.06, pdx.xz * 0.06, pdy.xz * 0.06);
 		float rr = rx * bw.x + ry * bw.y + rz * bw.z;
-		// 地層の横縞
-		float strata = texture(macro_tex, vec2(wp.x * 0.004 + wp.y * 0.003, v_wpos.y * 0.035)).r;
-		vec3 rc = mix(rock_col2, rock_col, smoothstep(0.4, 0.6, strata));
+		// 岩肌: 2 色のムラ＋苔（緑）
+		vec3 rc = mix(rock_col2, rock_col, smoothstep(0.3, 0.7, m3 + (stroke - 0.5) * 0.3));
+		rc = mix(rc, forest_col * 1.2, smoothstep(0.55, 0.75, m2) * 0.45 * (1.0 - smoothstep(0.5, 0.7, slope)));
 		rc *= clamp(posterize(rr, 3.0), 0.7, 1.3);
 		col = mix(col, rc, hblend(rock_w, rr * 0.5, 2.0));
 		vec3 n2 = textureGrad(nrm_arr, vec3(v_wpos.xz * 0.06, L_ROCK), pdx.xz * 0.06, pdy.xz * 0.06).rgb;

@@ -22,6 +22,7 @@ uniform float cloud_seed = 0.0;
 uniform float sunset_amount = 1.0;   // 低い太陽での夕焼けの強さ
 uniform float exposure = 1.0;
 uniform float sun_size = 1.0;
+uniform float night = 0.0;           // 1: 夜（月明かり時は太陽ライトを月として使うため明示）
 
 float n2(vec2 p) {
 	return texture(noise_tex, p).r;
@@ -42,9 +43,9 @@ float tower_field(float a, float y) {
 
 void sky() {
 	vec3 d = EYEDIR;
-	vec3 L = normalize(LIGHT0_DIRECTION);
+	vec3 L = LIGHT0_ENABLED ? normalize(LIGHT0_DIRECTION + vec3(0.0, 1e-4, 0.0)) : vec3(0.0, -0.3, 0.95);
 	float sun_y = L.y;
-	float day = smoothstep(-0.12, 0.12, sun_y);
+	float day = smoothstep(-0.12, 0.12, sun_y) * (1.0 - night);
 	float low_sun = (1.0 - smoothstep(0.02, 0.4, sun_y)) * smoothstep(-0.2, 0.0, sun_y) * sunset_amount;
 	float y = d.y;
 	float yu = max(y, 0.0);
@@ -60,13 +61,13 @@ void sky() {
 	// 夕焼け: 太陽側の地平線をオレンジ〜ピンクに
 	hor = mix(hor, mix(sunset_color * 0.9 + vec3(0.1, 0.0, 0.1), sunset_color, toward_sun), low_sun * mix(0.45, 1.0, toward_sun));
 	haze = mix(haze, sunset_color * 1.15 + vec3(0.05), low_sun * mix(0.35, 1.0, toward_sun));
-	zen = mix(zen, zen * vec3(0.85, 0.8, 1.05), low_sun * 0.5);
+	zen = mix(zen, zen * vec3(0.95, 0.88, 1.0), low_sun * 0.4);
 	float t = pow(yu, 0.45);
 	vec3 col = mix(hor, zen, smoothstep(0.0, 1.0, t));
 	col = mix(haze, col, smoothstep(0.0, 0.16, yu));
 
 	// ---- 太陽の光暈
-	float glow = pow(max(mu, 0.0), 6.0) * 0.35 + pow(max(mu, 0.0), 48.0) * 0.6;
+	float glow = pow(max(mu, 0.0), 6.0) * 0.25 + pow(max(mu, 0.0), 64.0) * 0.4;
 	vec3 sglow = mix(sun_color, sunset_color, low_sun);
 	col += sglow * glow * mix(0.6, 1.2, low_sun) * day;
 
@@ -86,16 +87,21 @@ void sky() {
 		cc = mix(cc, cloud_light, smoothstep(0.62, 0.7, lit - thick * 0.15));
 		// 縁の光（太陽に近いほど強い）
 		float rimc = (1.0 - smoothstep(cov, cov + 0.035, den)) * (0.4 + 0.8 * pow(max(mu, 0.0), 4.0));
-		cc += sglow * rimc * 0.5;
+		cc += sglow * rimc * 0.5 * day;
 		float fade = smoothstep(0.0, 0.14, y);
 		ccol = cc;
 		calpha = m * fade;
-		// 筋雲（高い薄雲）
-		vec2 q = d.xz / (y + 0.2) * vec2(0.05, 0.4);
-		float ci = n2(q + vec2(0.3, cloud_seed)) * n2(q * vec2(2.0, 0.5) + 0.6);
-		float cm = smoothstep(0.3, 0.42, ci) * cirrus * smoothstep(0.08, 0.35, y) * (1.0 - calpha);
-		col = mix(col, mix(cloud_mid, cloud_light, 0.6), cm * 0.55);
+		// 筋雲（高い薄雲）: 斜めに流れるちぎれた刷毛目
+		vec2 q = d.xz / (y + 0.25) * 0.09 + vec2(0.3, cloud_seed);
+		vec2 qr = vec2(q.x * 0.8 + q.y * 0.6, -q.x * 0.6 + q.y * 0.8);
+		float warp = n2(qr * 1.7 + 0.2);
+		float ci = n2(vec2(qr.x * 0.6, qr.y * 3.0 + warp * 0.8));
+		float patchy = smoothstep(0.45, 0.7, n2(qr * 0.9 + 0.5));
+		float cm = smoothstep(0.5, 0.68, ci) * patchy * cirrus * smoothstep(0.1, 0.4, y) * (1.0 - calpha);
+		col = mix(col, mix(cloud_mid, cloud_light, 0.7), cm * 0.5);
 	}
+	// 夜は雲を暗く（月明かりの青灰）
+	ccol = mix(ccol * vec3(0.22, 0.26, 0.4), ccol, day);
 	col = mix(col, ccol, calpha);
 
 	// ---- 地平線の入道雲（方位・仰角の空間で輪郭を作る）
@@ -120,13 +126,14 @@ void sky() {
 			tc = mix(tc, tc * mix(vec3(1.0), sunset_color * 1.4, 0.7), low_sun * (0.4 + 0.6 * toward_sun));
 			float edge = 1.0 - smoothstep(0.0, 0.006, f);
 			tc += sglow * edge * (0.25 + 0.6 * toward_sun) * day;
+			tc = mix(tc * vec3(0.2, 0.24, 0.38), tc, day);
 			col = mix(col, tc, smoothstep(0.0, 0.002, f));
 		}
 	}
 	// 雲全体の明るさは昼夜と夕焼けで変化
 	// ---- 太陽本体
 	float disk = smoothstep(0.99955 - 0.0004 * sun_size, 0.99975 - 0.0004 * sun_size, mu);
-	col += sglow * disk * 6.0 * day;
+	col += sglow * disk * 2.5 * day;
 	// ---- 夜の星
 	if (day < 0.99 && y > 0.0) {
 		vec3 sd = floor(d * 380.0);
@@ -138,6 +145,6 @@ void sky() {
 	if (y < 0.0) {
 		col = mix(haze, ground_color * mix(0.15, 1.0, day), smoothstep(0.0, 0.25, -y));
 	}
-	col *= mix(0.25, 1.0, day) * exposure;
+	col *= mix(0.55, 1.0, day) * exposure;
 	COLOR = col;
 }

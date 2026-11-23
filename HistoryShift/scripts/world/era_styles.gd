@@ -104,14 +104,14 @@ static func _anime(era_id: String) -> Dictionary:
 		"sunset_color": Color(1.0, 0.58, 0.32), "sunset_amount": 1.0,
 		"cloud_light": Color(1.0, 1.0, 1.0), "cloud_mid": Color(0.88, 0.92, 0.99), "cloud_shade": Color(0.62, 0.68, 0.86),
 		"cloud_cover": 0.45, "tower": 0.6, "cirrus": 0.4, "cloud_seed": 0.0,
-		"shade_color": Color(0.5, 0.56, 0.86), "shade_strength": 0.5, "ambient_energy": 0.75,
+		"shade_color": Color(0.5, 0.56, 0.86), "shade_strength": 0.5, "ambient_energy": 0.45,
 		"grass_a": Color(0.42, 0.66, 0.24), "grass_b": Color(0.28, 0.56, 0.28), "grass_c": Color(0.68, 0.78, 0.32),
 		"tip_light": Color(0.8, 0.9, 0.45),
-		"forest_col": Color(0.18, 0.38, 0.24), "dirt_col": Color(0.8, 0.67, 0.48), "sand_col": Color(0.95, 0.88, 0.7),
-		"rock_col": Color(0.66, 0.64, 0.64), "rock_col2": Color(0.5, 0.52, 0.6), "field_col": Color(0.46, 0.68, 0.28),
+		"forest_col": Color(0.18, 0.38, 0.24), "dirt_col": Color(0.76, 0.62, 0.44), "sand_col": Color(0.95, 0.88, 0.7),
+		"rock_col": Color(0.6, 0.52, 0.44), "rock_col2": Color(0.42, 0.4, 0.42), "field_col": Color(0.46, 0.68, 0.28),
 		"water_shallow": Color(0.3, 0.78, 0.82), "water_deep": Color(0.1, 0.42, 0.7),
 		"aerial": Color(0.7, 0.82, 0.96), "aerial_density": 0.0016,
-		"exposure": 1.0, "glow": 0.6, "line": 0.7, "rays": 0.3,
+		"exposure": 1.0, "glow": 0.6, "line": 0.85, "rays": 0.3,
 	}
 	match era_id:
 		"jomon_kofun":
@@ -141,7 +141,7 @@ static func _anime(era_id: String) -> Dictionary:
 		"sengoku":
 			# 合戦の黄金色の夕刻: 低い太陽、茜色の雲
 			a.merge({"sun_elev": 11.0, "tower": 0.7, "cloud_cover": 0.5, "cloud_seed": 0.83,
-				"sky_zenith": Color(0.24, 0.36, 0.7), "sky_horizon": Color(0.98, 0.74, 0.5), "sky_haze": Color(1.0, 0.82, 0.6),
+				"sky_zenith": Color(0.3, 0.48, 0.76), "sky_horizon": Color(0.98, 0.78, 0.52), "sky_haze": Color(1.0, 0.84, 0.62), "cirrus": 0.25,
 				"sunset_color": Color(1.0, 0.52, 0.24),
 				"cloud_light": Color(1.0, 0.92, 0.78), "cloud_mid": Color(0.98, 0.72, 0.56), "cloud_shade": Color(0.56, 0.46, 0.66),
 				"shade_color": Color(0.5, 0.42, 0.72), "shade_strength": 0.52,
