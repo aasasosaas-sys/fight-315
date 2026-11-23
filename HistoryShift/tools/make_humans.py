@@ -17,26 +17,90 @@ addon_utils.enable("bl_ext.user_default.mpfb", default_set=True)
 
 from bl_ext.user_default.mpfb.services.humanservice import HumanService  # noqa: E402
 
-# 日本人らしい体格・年齢・髪型・服装のバリエーション
-# clothes は MakeHuman system assets のフォルダ名（明治・昭和の洋装に使う。前近代の衣装は Godot 側で重ねる）
-VARIANTS = {
-    "m_young": {"gender": 1.0, "age": 0.45, "muscle": 0.55, "weight": 0.45, "height": 0.45, "skin": "young_asian_male",
-                "hair": "short02", "eyebrows": "eyebrow001", "clothes": ["male_casualsuit01", "shoes01"]},
-    "m_adult": {"gender": 1.0, "age": 0.6, "muscle": 0.6, "weight": 0.55, "height": 0.5, "skin": "young_asian_male",
-                "hair": "short04", "eyebrows": "eyebrow007", "clothes": ["male_worksuit01", "shoes02"]},
-    "m_suit": {"gender": 1.0, "age": 0.65, "muscle": 0.5, "weight": 0.5, "height": 0.5, "skin": "young_asian_male",
-               "hair": "short02", "eyebrows": "eyebrow002", "clothes": ["male_elegantsuit01", "shoes03"]},
-    "m_old": {"gender": 1.0, "age": 0.9, "muscle": 0.4, "weight": 0.45, "height": 0.4, "skin": "old_asian_male",
-              "hair": "short01", "eyebrows": "eyebrow008", "clothes": ["male_casualsuit03", "shoes01"]},
-    "m_soldier": {"gender": 1.0, "age": 0.5, "muscle": 0.7, "weight": 0.5, "height": 0.5, "skin": "young_asian_male",
-                  "hair": "short03", "eyebrows": "eyebrow001", "clothes": ["male_worksuit01", "shoes06"]},
-    "f_young": {"gender": 0.0, "age": 0.45, "muscle": 0.4, "weight": 0.45, "height": 0.4, "skin": "middleage_asian_female",
-                "hair": "long01", "eyebrows": "eyebrow010", "clothes": ["female_casualsuit01", "shoes05"]},
-    "f_adult": {"gender": 0.0, "age": 0.6, "muscle": 0.45, "weight": 0.5, "height": 0.4, "skin": "middleage_asian_female",
-                "hair": "bob02", "eyebrows": "eyebrow011", "clothes": ["female_elegantsuit01", "shoes04"]},
-    "f_tied": {"gender": 0.0, "age": 0.5, "muscle": 0.45, "weight": 0.45, "height": 0.42, "skin": "middleage_asian_female",
-               "hair": "ponytail01", "eyebrows": "eyebrow012", "clothes": ["female_casualsuit02", "shoes05"]},
-}
+import random
+
+# 顔のパーツ（減↔増の対）。左右対称のものは l-/r- を同値で掛ける
+FACE_PAIRS = [
+    ("nose-hump-decr", "nose-hump-incr"), ("nose-point-width-decr", "nose-point-width-incr"),
+    ("nose-flaring-decr", "nose-flaring-incr"), ("nose-base-down", "nose-base-up"),
+    ("nose-nostrils-width-decr", "nose-nostrils-width-incr"), ("nose-compression-compress", "nose-compression-uncompress"),
+    ("chin-width-decr", "chin-width-incr"), ("chin-prominent-decr", "chin-prominent-incr"),
+    ("chin-height-decr", "chin-height-incr"), ("chin-jaw-drop-decr", "chin-jaw-drop-incr"),
+    ("mouth-cupidsbow-decr", "mouth-cupidsbow-incr"), ("mouth-angles-down", "mouth-angles-up"),
+    ("mouth-lowerlip-height-decr", "mouth-lowerlip-height-incr"),
+]
+FACE_SYM = [
+    ("cheek-bones-decr", "cheek-bones-incr"), ("cheek-volume-decr", "cheek-volume-incr"),
+    ("eye-scale-decr", "eye-scale-incr"), ("eye-epicanthus-in", "eye-epicanthus-out"),
+    ("eye-eyefold-down", "eye-eyefold-up"), ("eye-corner1-down", "eye-corner1-up"),
+    ("ear-scale-decr", "ear-scale-incr"),
+]
+HEADS = ["head-oval", "head-round", "head-square", "head-rectangular", "head-diamond", "head-triangular"]
+
+
+# 日本人（東アジア系）の顔立ちの基礎：蒙古ひだ・一重〜奥二重・低めの鼻筋・小鼻・頬骨
+JAPANESE_BASE = [
+    ("l-eye-epicanthus-in", 0.45, 0.85), ("r-eye-epicanthus-in", None, None),
+    ("l-eye-eyefold-down", 0.25, 0.6), ("r-eye-eyefold-down", None, None),
+    ("l-eye-height2-decr", 0.1, 0.35), ("r-eye-height2-decr", None, None),
+    ("nose-hump-decr", 0.3, 0.65), ("nose-flaring-incr", 0.15, 0.4), ("nose-point-width-incr", 0.1, 0.35),
+    ("l-cheek-bones-incr", 0.15, 0.4), ("r-cheek-bones-incr", None, None),
+]
+JP_EXCLUDE = {"eye-epicanthus-in", "eye-eyefold-down", "nose-hump-decr", "cheek-bones-decr", "cheek-bones-incr"}
+
+
+def face_targets(rng):
+    out = [{"target": rng.choice(["head-oval", "head-round", "head-square", "head-rectangular"]), "value": rng.uniform(0.2, 0.55)}]
+    last = 0.0
+    for name, lo, hi in JAPANESE_BASE:
+        if lo is not None:
+            last = rng.uniform(lo, hi)
+        out.append({"target": name, "value": last})
+    for a, b in FACE_PAIRS:
+        if a in JP_EXCLUDE or b in JP_EXCLUDE or a.startswith("nose-hump"):
+            continue
+        if rng.random() < 0.6:
+            out.append({"target": rng.choice((a, b)), "value": rng.uniform(0.1, 0.45)})
+    for a, b in FACE_SYM:
+        if a in JP_EXCLUDE or b in JP_EXCLUDE or a.startswith("eye-epicanthus") or a.startswith("eye-eyefold") or a.startswith("cheek-bones"):
+            continue
+        if rng.random() < 0.6:
+            t, v = rng.choice((a, b)), rng.uniform(0.1, 0.4)
+            out.append({"target": "l-" + t, "value": v})
+            out.append({"target": "r-" + t, "value": v})
+    return out
+
+
+def make_variants():
+    rng = random.Random(2026)
+    v = {}
+    male_hair = ["short01", "short02", "short03", "short04", "short02", "short04", "short03", "short01"]
+    male_clothes = [["male_casualsuit01", "shoes01"], ["male_casualsuit02", "shoes02"], ["male_worksuit01", "shoes06"],
+                    ["male_elegantsuit01", "shoes03"], ["male_casualsuit04", "shoes01"], ["male_casualsuit05", "shoes02"],
+                    ["male_casualsuit06", "shoes03"], ["male_casualsuit03", "shoes01"]]
+    for i in range(8):
+        v["m%02d" % (i + 1)] = {"gender": 1.0, "age": rng.uniform(0.42, 0.68), "muscle": rng.uniform(0.45, 0.7),
+                                "weight": rng.uniform(0.4, 0.6), "height": rng.uniform(0.4, 0.55), "skin": "young_asian_male",
+                                "hair": male_hair[i], "eyebrows": "eyebrow%03d" % rng.choice([1, 2, 3, 6, 7]),
+                                "clothes": male_clothes[i], "targets": face_targets(rng)}
+    for i in range(2):
+        v["m%02d" % (i + 9)] = {"gender": 1.0, "age": rng.uniform(0.85, 0.95), "muscle": 0.4, "weight": rng.uniform(0.4, 0.55),
+                                "height": 0.42, "skin": "old_asian_male", "hair": ["short01", "short03"][i],
+                                "eyebrows": "eyebrow008", "clothes": [["male_casualsuit03", "shoes01"], ["male_worksuit01", "shoes06"]][i],
+                                "targets": face_targets(rng)}
+    female_hair = ["long01", "bob02", "ponytail01", "bob01", "braid01", "long01"]
+    female_clothes = [["female_casualsuit01", "shoes05"], ["female_elegantsuit01", "shoes04"], ["female_casualsuit02", "shoes05"],
+                      ["female_sportsuit01", "shoes04"], ["female_casualsuit01", "shoes05"], ["female_elegantsuit01", "shoes04"]]
+    for i in range(6):
+        v["f%02d" % (i + 1)] = {"gender": 0.0, "age": rng.uniform(0.42, 0.7), "muscle": rng.uniform(0.35, 0.5),
+                                "weight": rng.uniform(0.4, 0.55), "height": rng.uniform(0.35, 0.5),
+                                "skin": "middleage_asian_female", "hair": female_hair[i],
+                                "eyebrows": "eyebrow%03d" % rng.choice([10, 11, 12]), "clothes": female_clothes[i],
+                                "targets": face_targets(rng)}
+    return v
+
+
+VARIANTS = make_variants()
 
 
 def clear_scene():
@@ -57,6 +121,7 @@ def build(name, v):
     info["eyelashes"] = "eyelashes01.mhclo"
     info["hair"] = v["hair"] + ".mhclo"
     info["clothes"] = [c + ".mhclo" for c in v["clothes"]]
+    info["targets"] = v.get("targets", [])
     info["skin_mhmat"] = os.path.join("skins", v["skin"], v["skin"] + ".mhmat")
     info["skin_material_type"] = "MAKESKIN"
     info["eyes_material_type"] = "MAKESKIN"
@@ -87,14 +152,82 @@ def bake_for_export():
             if mod.type == "SUBSURF":
                 obj.modifiers.remove(mod)
             elif mod.type == "MASK":
-                with bpy.context.temp_override(object=obj):
-                    try:
-                        bpy.ops.object.modifier_apply(modifier=mod.name)
-                    except RuntimeError:
-                        obj.modifiers.remove(mod)
+                # 服の下の体を消すマスクは使わない（和装・洋装を切り替えるため体は残す）
+                obj.modifiers.remove(mod)
 
 
-def shrink_textures(max_size=1024):
+import bmesh
+
+# 和装：体の一部を骨のウェイトで切り出して膨らませ、骨格で一緒に動く衣服にする
+GARMENTS = {
+    # 名前: (骨, 基本の膨らみ[m], 下へ行くほどの広がり[m], 脚を中央へ寄せる率)
+    "kosode": (["spine_01", "spine_02", "spine_03", "clavicle_l", "clavicle_r", "upperarm_l", "upperarm_r",
+                "lowerarm_l", "lowerarm_r", "pelvis"], 0.016, 0.0, 0.0),
+    "hakama": (["pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r"], 0.03, 0.09, 0.0),
+    "robe": (["pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r"], 0.025, 0.05, 0.55),
+    "armor": (["spine_01", "spine_02", "spine_03", "pelvis"], 0.055, 0.02, 0.0),
+}
+
+
+def find_body():
+    for o in bpy.data.objects:
+        if o.type == "MESH" and o.name.lower().endswith("body"):
+            return o
+    for o in bpy.data.objects:
+        if o.type == "MESH" and "body" in o.name.lower():
+            return o
+    return None
+
+
+def make_garments(variant):
+    body = find_body()
+    if body is None:
+        print("WARN no body for garments"); return
+    hips_z = None
+    for key, (bones, base, flare, pinch) in GARMENTS.items():
+        g = body.copy()
+        g.data = body.data.copy()
+        g.name = "%s_garment_%s" % (variant, key)
+        bpy.context.collection.objects.link(g)
+        bm = bmesh.new()
+        bm.from_mesh(g.data)
+        deform = bm.verts.layers.deform.active
+        idx = {vg.name: vg.index for vg in g.vertex_groups}
+        want = [idx[b] for b in bones if b in idx]
+        exclude = [idx[b] for b in ("hand_l", "hand_r", "head", "neck_01", "foot_l", "foot_r", "ball_l", "ball_r") if b in idx]
+        kill = []
+        zs = [v.co.z for v in bm.verts]
+        top, bottom = max(zs), min(zs)
+        if hips_z is None:
+            hips_z = bottom + (top - bottom) * 0.52
+        for v in bm.verts:
+            w = sum(v[deform].get(i, 0.0) for i in want) if deform else 0.0
+            ex = sum(v[deform].get(i, 0.0) for i in exclude) if deform else 0.0
+            if w < 0.5 or ex > 0.25:
+                kill.append(v)
+        print("GARMENT", key, "groups", len(want), "/", len(bones), "kept", len(bm.verts) - len(kill), "of", len(bm.verts),
+              [b for b in bones if b not in idx][:4])
+        bmesh.ops.delete(bm, geom=kill, context="VERTS")
+        bm.normal_update()
+        for v in bm.verts:
+            t = max(0.0, min(1.0, (hips_z - v.co.z) / max(hips_z - bottom, 0.01)))
+            off = base + flare * t
+            v.co += v.normal * off
+            if pinch > 0.0 and t > 0.0:
+                v.co.x *= (1.0 - pinch * min(1.0, t * 1.4))
+        bm.to_mesh(g.data)
+        bm.free()
+        g.data.materials.clear()
+        m = bpy.data.materials.new("garment_" + key)
+        m.use_nodes = True
+        m.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (0.8, 0.8, 0.8, 1)
+        m.node_tree.nodes["Principled BSDF"].inputs["Roughness"].default_value = 0.85
+        g.data.materials.append(m)
+        for poly in g.data.polygons:
+            poly.use_smooth = True
+
+
+def shrink_textures(max_size=2048):
     for img in bpy.data.images:
         w, h = img.size
         if w > max_size or h > max_size:
@@ -104,9 +237,10 @@ def shrink_textures(max_size=1024):
 
 def export(path):
     shrink_textures()
-    bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", export_skins=True, export_animations=False,
+    bpy.ops.export_scene.gltf(filepath=path, export_format="GLTF_SEPARATE", export_texture_dir="textures",
+                              export_skins=True, export_animations=False,
                               export_apply=False, export_yup=True, export_texcoords=True, export_normals=True,
-                              export_materials="EXPORT", export_image_format="JPEG", export_jpeg_quality=85)
+                              export_materials="EXPORT", export_image_format="WEBP", export_image_quality=85)
 
 
 def main():
@@ -118,7 +252,8 @@ def main():
         clear_scene()
         build(name, VARIANTS[name])
         bake_for_export()
-        path = os.path.join(out, name + ".glb")
+        make_garments(name)
+        path = os.path.join(out, name + ".gltf")
         export(path)
         print("EXPORTED", path, os.path.getsize(path))
 

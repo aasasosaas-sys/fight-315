@@ -27,8 +27,18 @@ func _ready() -> void:
 	add_child(floor_mi)
 	var paths := OS.get_cmdline_user_args()
 	var x := -(paths.size() - 1) * 0.45
+	var use_h := paths.size() > 0 and paths[0] == "humanoids"
+	if use_h:
+		paths = ["a", "b", "c", "d"]
+	var oi := 0
 	for p in paths:
-		var inst: Node3D = (load(p) as PackedScene).instantiate()
+		var inst: Node3D
+		if use_h:
+			var outfits := [Humanoid.Outfit.SAMURAI, Humanoid.Outfit.KIMONO, Humanoid.Outfit.COMMONER, Humanoid.Outfit.NOBLE]
+			inst = Humanoid.build(outfits[oi], 31 + oi * 7, false, 1 if oi == 1 else 0)
+			oi += 1
+		else:
+			inst = (load(p) as PackedScene).instantiate()
 		add_child(inst)
 		inst.position = Vector3(x, 0, 0)
 		x += 0.9
@@ -43,8 +53,8 @@ func _ready() -> void:
 		print("  aabb ", aabb)
 	var cam := Camera3D.new()
 	add_child(cam)
-	cam.position = Vector3(0, 1.45, 2.6)
-	cam.look_at(Vector3(0, 1.1, 0))
+	cam.position = Vector3(0, 1.25, 2.9)
+	cam.look_at(Vector3(0, 0.95, 0))
 	cam.fov = 40
 	for i in 30: await get_tree().process_frame
 	get_viewport().get_texture().get_image().save_png(OUT + "portrait_full.png")

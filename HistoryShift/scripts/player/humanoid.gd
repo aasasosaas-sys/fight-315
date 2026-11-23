@@ -117,8 +117,9 @@ const UPPER_BONES := ["Spine", "Chest", "UpperChest", "Neck", "Head", "LeftShoul
 	"RightShoulder", "RightUpperArm", "RightLowerArm", "RightHand"]
 const SKEL := "%GeneralSkeleton:"
 const REAL_DIR := "res://assets/characters/mh/"
-const REAL_MALE := ["m_young", "m_adult", "m_suit", "m_soldier"]
-const REAL_FEMALE := ["f_young", "f_adult", "f_tied"]
+const REAL_MALE := ["m01", "m02", "m03", "m04", "m05", "m06", "m07", "m08"]
+const REAL_OLD := ["m09", "m10"]
+const REAL_FEMALE := ["f01", "f02", "f03", "f04", "f05", "f06"]
 const FEMALE_NAMES := ["卑弥呼", "推古", "持統", "光明", "紫式部", "清少納言", "北条政子", "日野富子", "お市", "ねね", "淀", "春日局",
 	"和宮", "津田梅子", "与謝野晶子", "樋口一葉", "平塚らいてう", "市川房枝", "女", "娘", "姫", "妻", "母", "尼"]
 static var _real_ok := -1
@@ -196,9 +197,12 @@ func _construct_skinned(outfit: int, seed: int, armed: bool) -> void:
 		model = (load(real_path) as PackedScene).instantiate()
 		add_child(model)
 		_skel = model.find_children("*", "Skeleton3D", true, false)[0]
-		var female := real_path.get_file().begins_with("f_")
+		var female := real_path.get_file().begins_with("f")
+		set_meta("female", female)
 		var h := _rest_height(model)
-		var target := (1.6 if female else 1.71) * rng.randf_range(0.96, 1.04)
+		# 時代ごとの日本人の平均身長（前近代 ≈ 男158/女146cm、近代 ≈ 男163/女151cm）
+		var target := 1.72 if outfit == Outfit.AGENT else ((1.51 if female else 1.63) if outfit in MODERN else (1.46 if female else 1.58))
+		target *= rng.randf_range(0.96, 1.04)
 		model.scale = Vector3.ONE * (target / maxf(h, 0.5))
 		_dress_realistic(model, outfit, rng, armed)
 		_setup_tree(model, outfit, armed)
@@ -344,7 +348,7 @@ func _setup_tree(model: Node3D, outfit: int, armed: bool) -> void:
 
 func _pick_realistic(outfit: int, rng: RandomNumberGenerator) -> String:
 	if _real_ok == -1:
-		_real_ok = 1 if ResourceLoader.exists(REAL_DIR + "m_young.glb") else 0
+		_real_ok = 1 if ResourceLoader.exists(REAL_DIR + "m01.gltf") else 0
 	if _real_ok == 0:
 		return ""
 	var female := false
@@ -356,14 +360,14 @@ func _pick_realistic(outfit: int, rng: RandomNumberGenerator) -> String:
 		female = rng.randf() < 0.4
 	var pool: Array = REAL_FEMALE if female else REAL_MALE
 	if outfit == Outfit.MONK or (not female and outfit == Outfit.COMMONER and rng.randf() < 0.25):
-		pool = ["m_old"]
+		pool = REAL_OLD
 	elif outfit in [Outfit.SOLDIER, Outfit.POLICE, Outfit.ASHIGARU]:
-		pool = ["m_soldier", "m_adult"]
+		pool = ["m03", "m01", "m05", "m07"]
 	elif outfit == Outfit.AGENT:
-		pool = ["m_suit"]
-	var name: String = pool[rng.randi() % pool.size()]
-	var path := REAL_DIR + name + ".glb"
-	return path if ResourceLoader.exists(path) else REAL_DIR + "m_young.glb"
+		pool = ["m04"]
+	var vname: String = pool[rng.randi() % pool.size()]
+	var path := REAL_DIR + vname + ".gltf"
+	return path if ResourceLoader.exists(path) else REAL_DIR + "m01.gltf"
 
 
 static func _rest_height(model: Node3D) -> float:
@@ -397,79 +401,203 @@ func _tint(mi: MeshInstance3D, c: Color, rough := -1.0) -> void:
 			mi.set_surface_override_material(si, m)
 
 
+## 肌：皮下散乱（光が薄く透ける）と、やや湿った反射
+func _skin(mi: MeshInstance3D, tint: Color) -> void:
+	for si in mi.mesh.get_surface_count():
+		var base := mi.mesh.surface_get_material(si)
+		if not (base is BaseMaterial3D):
+			continue
+		var m := (base as BaseMaterial3D).duplicate() as StandardMaterial3D
+		if m == null:
+			continue
+		m.albedo_color = tint
+		m.roughness = 0.52
+		m.metallic_specular = 0.45
+		m.subsurf_scatter_enabled = true
+		m.subsurf_scatter_strength = 0.35
+		m.subsurf_scatter_skin_mode = true
+		m.rim_enabled = true
+		m.rim = 0.15
+		m.rim_tint = 0.6
+		mi.set_surface_override_material(si, m)
+
+
+## 目：つやのある角膜
+func _eyes(mi: MeshInstance3D) -> void:
+	for si in mi.mesh.get_surface_count():
+		var base := mi.mesh.surface_get_material(si)
+		if base is StandardMaterial3D:
+			var m := (base as StandardMaterial3D).duplicate() as StandardMaterial3D
+			m.roughness = 0.08
+			m.clearcoat_enabled = true
+			m.clearcoat = 1.0
+			m.clearcoat_roughness = 0.02
+			mi.set_surface_override_material(si, m)
+
+
+## 髪・眉・まつげ：半透明（ディザ）と異方性のつや
+func _strands(mi: MeshInstance3D, c: Color, hair: bool) -> void:
+	for si in mi.mesh.get_surface_count():
+		var base := mi.mesh.surface_get_material(si)
+		if not (base is StandardMaterial3D):
+			continue
+		var m := (base as StandardMaterial3D).duplicate() as StandardMaterial3D
+		m.albedo_color = c
+		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_HASH
+		m.alpha_hash_scale = 1.0
+		m.alpha_antialiasing_mode = BaseMaterial3D.ALPHA_ANTIALIASING_ALPHA_TO_COVERAGE
+		m.cull_mode = BaseMaterial3D.CULL_DISABLED
+		m.roughness = 0.6 if hair else 0.75
+		if hair:
+			m.anisotropy_enabled = true
+			m.anisotropy = 0.3
+			m.metallic_specular = 0.35
+		mi.set_surface_override_material(si, m)
+
+
+const MODERN := [Outfit.WESTERN, Outfit.SOLDIER, Outfit.POLICE, Outfit.AGENT, Outfit.GUARDIAN]
+## 和装の組み合わせ（Blender で体型から作った衣服メッシュ: kosode / hakama / robe / armor）
+const WASOU := {
+	Outfit.SAMURAI: ["kosode", "hakama", "armor"], Outfit.ASHIGARU: ["kosode", "hakama", "armor"],
+	Outfit.NOBLE: ["kosode", "robe"], Outfit.KIMONO: ["kosode", "robe"], Outfit.MONK: ["kosode", "robe"],
+	Outfit.ANCIENT: ["kosode", "hakama"], Outfit.COMMONER: ["kosode", "hakama"],
+}
+static var _fabric_tex := {}
+
+
+## 布地：織り目の凹凸と柄（無地・縞・格子・麻の葉風）
+static func fabric(c: Color, pattern: String, rough := 0.88) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.albedo_color = c
+	m.roughness = rough
+	m.uv1_triplanar = true
+	m.uv1_world_triplanar = false
+	m.uv1_scale = Vector3(6, 6, 6)
+	if pattern != "plain":
+		m.albedo_texture = _pattern_tex(pattern)
+	m.normal_enabled = true
+	m.normal_texture = _pattern_tex("weave_n")
+	m.normal_scale = 0.4
+	return m
+
+
+static func _pattern_tex(kind: String) -> Texture2D:
+	if _fabric_tex.has(kind):
+		return _fabric_tex[kind]
+	var n := 64
+	var img := Image.create(n, n, false, Image.FORMAT_RGBA8)
+	for y in n:
+		for x in n:
+			var v := 1.0
+			match kind:
+				"stripe": v = 1.0 if (x / 6) % 2 == 0 else 0.72
+				"check": v = 1.0 if ((x / 8) + (y / 8)) % 2 == 0 else 0.78
+				"asanoha":
+					var d := absf(fmod(float(x + y), 16.0) - 8.0) + absf(fmod(float(x - y + 64), 16.0) - 8.0)
+					v = 0.75 if d < 1.6 or x % 16 == 0 else 1.0
+				"weave_n":
+					var h := 0.5 + 0.5 * sin(x * PI / 2.0) * (1.0 if (y / 2) % 2 == 0 else -1.0)
+					img.set_pixel(x, y, Color(0.5 + 0.12 * h, 0.5, 1.0))
+					continue
+			img.set_pixel(x, y, Color(v, v, v))
+	var t := ImageTexture.create_from_image(img)
+	_fabric_tex[kind] = t
+	return t
+
+
 func _dress_realistic(model: Node3D, outfit: int, rng: RandomNumberGenerator, armed: bool) -> void:
 	var pal := _palette(outfit, rng)
 	var glow := outfit == Outfit.AGENT or outfit == Outfit.GUARDIAN
-	var hair_c := Color(0.12, 0.1, 0.09) if outfit != Outfit.MONK else Color(0.5, 0.5, 0.5)
+	var modern := outfit in MODERN
+	var wear: Array = WASOU.get(outfit, [])
+	var hair_c := Color(0.035, 0.03, 0.028) if outfit != Outfit.MONK else Color(0.3, 0.3, 0.3)
+	var pattern: String = ["plain", "plain", "stripe", "check", "asanoha"][rng.randi() % 5] if outfit in [Outfit.KIMONO, Outfit.COMMONER] else "plain"
 	for node in model.find_children("*", "MeshInstance3D", true, false):
 		var mi := node as MeshInstance3D
 		var n := String(mi.name).to_lower()
-		if n.ends_with("_body") or n.contains("low-poly") or n.contains("eyelash") or n.contains("eyebrow"):
-			if outfit == Outfit.GUARDIAN and n.ends_with("_body"):
-				_tint(mi, Color(0.25, 0.22, 0.3), 0.3)
+		if n.contains("_garment_"):
+			var kind := n.get_slice("_garment_", 1)
+			mi.visible = kind in wear
+			if mi.visible:
+				var c: Color = pal[0]
+				match kind:
+					"hakama", "robe":
+						c = pal[1] if outfit != Outfit.KIMONO else pal[0]
+					"armor":
+						c = pal[2] if outfit == Outfit.SAMURAI else pal[2].darkened(0.2)
+				var fm := fabric(c, pattern if kind != "armor" else "check", 0.6 if kind == "armor" else 0.88)
+				if kind == "armor":
+					fm.metallic = 0.25
+					fm.uv1_scale = Vector3(14, 14, 14)
+				mi.material_override = fm
+			continue
+		if n.ends_with("_body"):
+			_skin(mi, Color(0.25, 0.22, 0.3) if outfit == Outfit.GUARDIAN else Color.WHITE)
+			continue
+		if n.contains("low-poly"):
+			_eyes(mi)
+			continue
+		if n.contains("eyelash") or n.contains("eyebrow"):
+			_strands(mi, Color(0.03, 0.025, 0.02), false)
 			continue
 		if n.contains("short") or n.contains("long") or n.contains("bob") or n.contains("ponytail") or n.contains("braid") or n.contains("afro"):
-			_tint(mi, hair_c)
+			_strands(mi, hair_c, true)
 			if outfit == Outfit.MONK:
 				mi.visible = false
 			continue
 		if n.contains("shoes"):
-			_tint(mi, Color(0.18, 0.15, 0.13) if outfit in [Outfit.WESTERN, Outfit.SOLDIER, Outfit.POLICE, Outfit.AGENT] else Color(0.55, 0.45, 0.32))
+			# 洋装は革靴、和装は草履・草鞋の色
+			_tint(mi, Color(0.12, 0.1, 0.09) if modern else Color(0.62, 0.52, 0.36), 0.8)
 			continue
-		# 服：時代の色で染める（明治・昭和はそのまま洋装を活かす）
-		var c: Color = pal[0]
-		if outfit == Outfit.WESTERN:
-			c = Color(1, 1, 1).lerp(pal[0], 0.5)
-		_tint(mi, c.lightened(0.15) if not glow else c, 0.85)
+		# 洋服（明治・昭和のみ表示）
+		mi.visible = modern
+		if modern:
+			var c2: Color = pal[0]
+			if outfit == Outfit.WESTERN:
+				c2 = Color(1, 1, 1).lerp(pal[0], 0.5)
+			_tint(mi, c2.lightened(0.1) if not glow else c2, 0.85)
 	var m_acc := mat(pal[2], 0.3, 0.0, 3.0) if glow else mat(pal[2], 0.5, 0.5 if outfit == Outfit.SAMURAI else 0.0)
-	var m_body := mat(pal[0], 0.85)
 	var m_legs := mat(pal[1], 0.9)
 	var m_black := mat(Color(0.05, 0.05, 0.05), 0.5)
 	var m_straw := mat(Color(0.62, 0.5, 0.3), 0.9)
+	var m_lacquer := mat(pal[0].darkened(0.3), 0.25, 0.3)
 	var head := _holder("Head")
 	var chest := _holder("Chest")
-	var hips_h := _holder("Hips")
+	var male: bool = not get_meta("female", false)
 	match outfit:
 		Outfit.SAMURAI:
-			part(head, "sphere", m_body, Vector3(0, 0.15, -0.01), Vector3(0.27, 0.2, 0.29))          # 兜
-			part(head, "cone", m_body, Vector3(0, 0.08, -0.02), Vector3(0.42, 0.08, 0.42))           # 錣
-			part(head, "box", m_acc, Vector3(0, 0.24, 0.12), Vector3(0.24, 0.1, 0.01), Vector3(-15, 0, 0))  # 鍬形
-			part(chest, "box", m_body, Vector3(0, 0.02, 0.0), Vector3(0.4, 0.42, 0.27))                # 胴
-			part(chest, "box", m_acc, Vector3(-0.25, 0.14, 0), Vector3(0.14, 0.03, 0.22), Vector3(0, 0, 20))
-			part(chest, "box", m_acc, Vector3(0.25, 0.14, 0), Vector3(0.14, 0.03, 0.22), Vector3(0, 0, -20))
-			part(hips_h, "skirt", m_legs, Vector3(0, -0.3, 0), Vector3(0.58, 0.55, 0.46))             # 草摺・袴
+			part(head, "sphere", m_lacquer, Vector3(0, 0.1, -0.01), Vector3(0.25, 0.17, 0.27))       # 兜の鉢
+			part(head, "cone", m_lacquer, Vector3(0, 0.05, -0.03), Vector3(0.4, 0.07, 0.4))          # 錣
+			part(head, "box", m_acc, Vector3(0, 0.2, 0.12), Vector3(0.22, 0.09, 0.008), Vector3(-15, 0, 0))  # 鍬形
 		Outfit.ASHIGARU:
-			part(head, "cone", m_acc, Vector3(0, 0.2, 0), Vector3(0.5, 0.09, 0.5))                    # 陣笠
-			part(chest, "box", m_acc, Vector3(0, 0.0, 0.0), Vector3(0.38, 0.38, 0.25))                 # 胴丸
+			part(head, "cone", m_lacquer, Vector3(0, 0.15, 0), Vector3(0.46, 0.08, 0.46))              # 陣笠
 		Outfit.NOBLE:
-			part(head, "cyl", m_black, Vector3(0, 0.27, -0.02), Vector3(0.13, 0.28, 0.15), Vector3(-12, 0, 0))  # 烏帽子
-			part(hips_h, "skirt", m_body, Vector3(0, -0.42, 0), Vector3(0.62, 0.88, 0.5))
-			part(chest, "box", m_body, Vector3(0, -0.02, 0), Vector3(0.44, 0.4, 0.3))
+			part(head, "cyl", m_black, Vector3(0, 0.22, -0.02), Vector3(0.12, 0.24, 0.14), Vector3(-12, 0, 0))  # 烏帽子
 		Outfit.KIMONO:
-			part(hips_h, "skirt", m_body, Vector3(0, -0.42, 0), Vector3(0.5, 0.88, 0.42))
-			part(chest, "box", m_acc, Vector3(0, -0.14, 0), Vector3(0.36, 0.12, 0.25))                # 帯
+			part(chest, "box", m_acc, Vector3(0, -0.17, 0), Vector3(0.33, 0.11, 0.23))                # 帯
 		Outfit.MONK:
-			part(hips_h, "skirt", m_legs, Vector3(0, -0.42, 0), Vector3(0.6, 0.88, 0.5))
-			part(chest, "box", m_acc, Vector3(0.05, 0.02, 0), Vector3(0.42, 0.06, 0.3), Vector3(0, 0, -35))  # 袈裟
+			part(chest, "box", m_acc, Vector3(0.04, 0.0, 0.02), Vector3(0.4, 0.05, 0.27), Vector3(0, 0, -35))  # 袈裟
 		Outfit.ANCIENT:
-			part(hips_h, "skirt", m_body, Vector3(0, -0.32, 0), Vector3(0.58, 0.68, 0.46))
-			part(head, "torus", m_black, Vector3(0, 0.12, 0), Vector3(0.24, 0.12, 0.24))
+			part(head, "torus", m_black, Vector3(0, 0.08, 0), Vector3(0.22, 0.1, 0.22))              # 角髪の紐
 		Outfit.COMMONER:
-			part(hips_h, "skirt", m_body, Vector3(0, -0.3, 0), Vector3(0.55, 0.62, 0.45))
-			if rng.randf() < 0.5:
-				part(head, "cone", m_straw, Vector3(0, 0.19, 0), Vector3(0.46, 0.13, 0.46))             # 笠
+			if rng.randf() < 0.45:
+				part(head, "cone", m_straw, Vector3(0, 0.15, 0), Vector3(0.44, 0.12, 0.44))             # 菅笠
+			elif male:
+				part(head, "cyl", m_black, Vector3(0, 0.15, -0.03), Vector3(0.035, 0.08, 0.035), Vector3(70, 0, 0))  # 髷
 		Outfit.WESTERN:
 			if rng.randf() < 0.6:
-				part(head, "cyl", m_legs, Vector3(0, 0.17, 0), Vector3(0.34, 0.012, 0.34))
-				part(head, "cyl", m_legs, Vector3(0, 0.22, 0), Vector3(0.2, 0.1, 0.2))
+				part(head, "cyl", m_legs, Vector3(0, 0.13, 0), Vector3(0.32, 0.012, 0.32))
+				part(head, "cyl", m_legs, Vector3(0, 0.18, 0), Vector3(0.19, 0.09, 0.19))
 		Outfit.SOLDIER, Outfit.POLICE:
-			part(head, "cyl", m_legs, Vector3(0, 0.19, 0), Vector3(0.22, 0.07, 0.22))
-			part(head, "box", m_black, Vector3(0, 0.16, 0.11), Vector3(0.16, 0.012, 0.08))
+			part(head, "cyl", m_legs, Vector3(0, 0.15, 0), Vector3(0.21, 0.065, 0.21))
+			part(head, "box", m_black, Vector3(0, 0.12, 0.1), Vector3(0.15, 0.01, 0.07))
 		Outfit.GUARDIAN:
-			part(head, "box", m_acc, Vector3(0, 0.1, 0.11), Vector3(0.17, 0.035, 0.02))
+			part(head, "box", m_acc, Vector3(0, 0.08, 0.1), Vector3(0.16, 0.03, 0.02))
 			part(chest, "box", m_acc, Vector3(0, 0.05, 0.14), Vector3(0.03, 0.3, 0.01))
 		Outfit.AGENT:
-			part(head, "box", m_acc, Vector3(0, 0.1, 0.105), Vector3(0.18, 0.035, 0.02))               # バイザー
+			part(head, "box", m_acc, Vector3(0, 0.08, 0.1), Vector3(0.17, 0.03, 0.02))                # バイザー
+	if outfit == Outfit.SAMURAI and male:
+		part(head, "cyl", m_black, Vector3(0, 0.15, -0.03), Vector3(0.035, 0.08, 0.035), Vector3(70, 0, 0))
 	if armed:
 		var hand := _holder("RightHand")
 		weapon = Node3D.new()

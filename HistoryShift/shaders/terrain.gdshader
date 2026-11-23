@@ -23,7 +23,7 @@ uniform float L_PLAZA = 4.0;
 
 uniform vec3 grass_tint : source_color = vec3(1.0);
 uniform vec3 lush_color : source_color = vec3(0.32, 0.42, 0.16);
-uniform vec3 forest_tint : source_color = vec3(0.85, 0.8, 0.7);
+uniform vec3 forest_tint : source_color = vec3(1.0, 1.0, 0.82);
 uniform vec3 rock_tint : source_color = vec3(0.62, 0.6, 0.56);
 uniform vec3 road_tint : source_color = vec3(1.0);
 uniform vec3 plaza_tint : source_color = vec3(1.0);
@@ -108,7 +108,7 @@ void fragment() {
 	// 土のパッチ
 	float dirt_w = smoothstep(0.66, 0.84, m2 * 0.7 + m3 * 0.5) * 0.45;
 	// 森の地面
-	float forest_w = max(ctrl.a, (1.0 - inside) * 0.8);
+	float forest_w = max(ctrl.a, (1.0 - inside) * 0.8) * (1.0 - smoothstep(0.12, 0.3, 1.0 - v_wnrm.y));
 	if (forest_w > 0.01) {
 		sample_layer(L_FOREST, wp, gdx, gdy, 0.25, mixv, a2, n2, r2);
 		a2 *= forest_tint;

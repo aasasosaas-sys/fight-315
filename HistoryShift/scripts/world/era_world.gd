@@ -271,9 +271,9 @@ func _setup_landmarks() -> void:
 		landmarks[key] = info
 	for key in landmarks:
 		var info: Dictionary = landmarks[key]
-		var fall := 26.0
+		var fall := 34.0
 		if key == "mountain":
-			fall = 18.0
+			fall = 22.0
 		if info.has("a"):
 			terrain.flatten(info["a"], info["r"], fall, info["h"], info["b"])
 		elif key == "port":

@@ -15,7 +15,7 @@ const BUILD_MATS := {
 	"thatch": ["thatch", 2.2, 1.0, 0.0],
 	"stonewall": ["stonewall", 3.2, 1.0, 0.0],
 	"brick": ["brick", 2.4, 1.0, 0.0],
-	"concrete": ["concrete", 3.0, 1.0, 0.0],
+	"concrete": ["plaster", 3.0, 1.0, 0.0],
 	"tatami": ["tatami", 1.8, 1.0, 0.0],
 	"bamboo": ["bamboo", 1.6, 1.0, 0.0],
 	"cobble": ["cobble", 2.5, 1.0, 0.0],
@@ -116,8 +116,8 @@ static func get_mat(key: String) -> Material:
 		var d: Array = BUILD_MATS[key]
 		var bm := _building_mat(d[0], 1.0 / float(d[1]), d[2], d[3])
 		if key == "concrete":
-			bm.set_shader_parameter("albedo_mul", 1.55)
-			bm.set_shader_parameter("desat", 0.7)
+			bm.set_shader_parameter("albedo_mul", 0.97)
+			bm.set_shader_parameter("desat", 0.5)
 		elif key == "plaster":
 			bm.set_shader_parameter("albedo_mul", 1.03)
 		m = bm

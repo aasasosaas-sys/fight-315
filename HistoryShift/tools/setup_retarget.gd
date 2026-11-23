@@ -79,6 +79,6 @@ func _initialize() -> void:
 		if f.ends_with(".glb"):
 			_patch("res://assets/characters/kaykit/" + f, "Rig_Medium/Skeleton3D", kk)
 	for f in DirAccess.get_files_at("res://assets/characters/mh"):
-		if f.ends_with(".glb"):
+		if f.ends_with(".glb") or f.ends_with(".gltf"):
 			_patch("res://assets/characters/mh/" + f, f.get_basename() + "/Skeleton3D", mh)
 	quit()
