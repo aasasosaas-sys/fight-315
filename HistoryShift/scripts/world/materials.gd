@@ -114,34 +114,25 @@ static func get_mat(key: String) -> Material:
 	var m: Material
 	if BUILD_MATS.has(key):
 		var d: Array = BUILD_MATS[key]
-		var sm := StandardMaterial3D.new()
-		sm.albedo_texture = tex(d[0], "diff")
-		sm.normal_enabled = true
-		sm.normal_texture = tex(d[0], "nor_gl")
-		sm.normal_scale = 1.0
-		sm.roughness_texture = tex(d[0], "rough")
-		sm.roughness = d[2]
-		sm.metallic = d[3]
-		sm.vertex_color_use_as_albedo = true
-		var s: float = 1.0 / float(d[1])
-		sm.uv1_scale = Vector3(s, s, 1.0)
-		sm.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
-		m = sm
+		m = _building_mat(d[0], 1.0 / float(d[1]), d[2], d[3])
 	else:
 		match key:
 			"metal":
-				var sm := StandardMaterial3D.new()
-				sm.vertex_color_use_as_albedo = true
-				sm.metallic = 0.85
-				sm.roughness = 0.35
-				m = sm
+				# 塗装/鋳鉄: コンクリートの粗さで汚れ・ムラ
+				var sh := _building_mat("concrete", 0.5, 0.55, 0.75)
+				sh.set_shader_parameter("albedo_tex", null)
+				sh.set_shader_parameter("rough_add", -0.1)
+				m = sh
 			"gold":
-				var sm := StandardMaterial3D.new()
-				sm.albedo_color = Color(1.0, 0.78, 0.34)
-				sm.vertex_color_use_as_albedo = true
-				sm.metallic = 1.0
-				sm.roughness = 0.28
-				m = sm
+				var sh := _building_mat("plaster", 0.6, 0.35, 1.0)
+				sh.set_shader_parameter("albedo_tex", null)
+				sh.set_shader_parameter("grime", 0.3)
+				sh.set_shader_parameter("normal_depth", 0.3)
+				m = sh
+			"flat":
+				var sh := _building_mat("concrete", 0.5, 1.0, 0.0)
+				sh.set_shader_parameter("albedo_tex", null)
+				m = sh
 			"glass":
 				var sm := StandardMaterial3D.new()
 				sm.albedo_color = Color(0.16, 0.2, 0.24)
@@ -152,6 +143,11 @@ static func get_mat(key: String) -> Material:
 			"cloth":
 				var sm := StandardMaterial3D.new()
 				sm.vertex_color_use_as_albedo = true
+				sm.albedo_texture = tex("plaster", "diff")
+				sm.normal_enabled = true
+				sm.normal_texture = tex("tatami", "nor_gl")
+				sm.normal_scale = 0.3
+				sm.uv1_scale = Vector3(0.8, 0.8, 1)
 				sm.roughness = 0.95
 				sm.cull_mode = BaseMaterial3D.CULL_DISABLED
 				sm.diffuse_mode = BaseMaterial3D.DIFFUSE_BURLEY
@@ -176,6 +172,39 @@ static func get_mat(key: String) -> Material:
 				m = sm
 	_mat_cache[key] = m
 	return m
+
+
+static var _building_mats: Array = []
+
+
+static func _building_mat(tex_key: String, uv_scale: float, rough: float, metal: float) -> ShaderMaterial:
+	var sh := ShaderMaterial.new()
+	sh.shader = shader("building")
+	sh.set_shader_parameter("albedo_tex", tex(tex_key, "diff"))
+	sh.set_shader_parameter("normal_tex", tex(tex_key, "nor_gl"))
+	sh.set_shader_parameter("rough_tex", tex(tex_key, "rough"))
+	sh.set_shader_parameter("uv_scale", uv_scale)
+	sh.set_shader_parameter("rough_mul", rough)
+	sh.set_shader_parameter("metallic", metal)
+	sh.set_shader_parameter("macro_tex", macro_noise())
+	if _world_params.size() == 3:
+		sh.set_shader_parameter("height_tex", _world_params[0])
+		sh.set_shader_parameter("half_size", _world_params[1])
+		sh.set_shader_parameter("grid_n", _world_params[2])
+	_building_mats.append(sh)
+	return sh
+
+
+static var _world_params: Array = []
+
+
+## ワールド生成ごとに地形の高さテクスチャを建物マテリアルへ渡す（地面際の汚れ用）
+static func set_world_params(height_tex: Texture2D, half_size: float, grid_n: int) -> void:
+	_world_params = [height_tex, half_size, float(grid_n)]
+	for sh in _building_mats:
+		sh.set_shader_parameter("height_tex", height_tex)
+		sh.set_shader_parameter("half_size", half_size)
+		sh.set_shader_parameter("grid_n", float(grid_n))
 
 
 static func macro_noise() -> Texture2D:

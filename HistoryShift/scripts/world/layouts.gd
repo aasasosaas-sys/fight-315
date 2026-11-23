@@ -651,6 +651,7 @@ func _village_jomon_kofun(lm: Dictionary) -> void:
 		var ang := TAU * k / 6.0 + 0.5
 		street(lm, cos(ang) * 12, sin(ang) * 12, cos(ang) * 72, sin(ang) * 72, 1.8)
 	plaza(lm, 0, 0, 22, 22, 0.8)
+	a.model("stone_fire_pit", pl(lm, 6, 6, 0, Vector2(2, 2)))
 
 
 func _village_asuka_nara(lm: Dictionary) -> void:
@@ -982,7 +983,7 @@ func _port_sengoku(lm: Dictionary) -> void:
 		lots(lm, -50, sz - 42, 50, sz - 42, -1.0, 3.0, 9.0, 6.0, 8.0, b)
 		for k in 4:
 			a.nobori(wp(lm, -20 + k * 12, sz - 14), Color(0.9, 0.9, 0.85))
-	_port_layout(lm, "wood", ["big", "sail", "small", "small", "small"], "kura", 5, ex)
+	_port_layout(lm, "wood", ["dutch", "sail", "small", "small", "small", "dutch"], "kura", 5, ex)
 
 
 func _port_edo(lm: Dictionary) -> void:
@@ -990,7 +991,7 @@ func _port_edo(lm: Dictionary) -> void:
 		var b := _house_builder()
 		lots(lm, -50, sz - 42, 50, sz - 42, -1.0, 3.0, 9.0, 6.0, 8.0, b)
 		a.watchtower(pl(lm, 50, sz - 14, 0, Vector2(4, 4)), 8.0, 2.6, "rooftile")
-	_port_layout(lm, "stone", ["sail", "steam", "sail", "small", "small", "sail"], "kura", 6, ex)
+	_port_layout(lm, "stone", ["sail", "steam", "dutch", "small", "small", "sail"], "kura", 6, ex)
 
 
 func _port_meiji_taisho(lm: Dictionary) -> void:
@@ -1235,6 +1236,9 @@ func _battlefield_sengoku(lm: Dictionary) -> void:
 			a.nobori(_bf_local(lm, s0 + rng.randf_range(-0.12, 0.12), rng.randf_range(-36, 36)), (cols_e if side > 0 else cols_w)[k % 2])
 		for k in 4:
 			a.baboosaku(_bf_local(lm, 0.35 * side, -40 + k * 20), _bf_local(lm, 0.35 * side, -24 + k * 20))
+		for k in 2:
+			var fp := _bf_local(lm, s0, -24 + k * 32)
+			a.model("stone_fire_pit", Transform3D(Basis(), fp))
 
 
 func _battlefield_edo(lm: Dictionary) -> void:

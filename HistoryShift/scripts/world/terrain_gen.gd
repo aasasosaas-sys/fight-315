@@ -125,11 +125,22 @@ func base_height(u: float, v: float) -> float:
 
 # ---------------------------------------------------------------- 生成
 func generate_base() -> void:
+	# 半解像度でノイズを評価して補間（細部はテクスチャが担う）
+	var M := (N - 1) / 2 + 1
+	var coarse := PackedFloat32Array()
+	coarse.resize(M * M)
+	for j in M:
+		var z := gx(j * 2)
+		for i in M:
+			var c := world_to_canon(Vector2(gx(i * 2), z))
+			coarse[j * M + i] = base_height(c.x, c.y)
 	for j in N:
-		var z := gx(j)
+		var j0 := j >> 1
+		var j1 := mini(j0 + (j & 1), M - 1)
 		for i in N:
-			var c := world_to_canon(Vector2(gx(i), z))
-			h[j * N + i] = base_height(c.x, c.y)
+			var i0 := i >> 1
+			var i1 := mini(i0 + (i & 1), M - 1)
+			h[j * N + i] = (coarse[j0 * M + i0] + coarse[j0 * M + i1] + coarse[j1 * M + i0] + coarse[j1 * M + i1]) * 0.25
 
 
 ## 川: canon 点列から谷を刻む
@@ -427,10 +438,20 @@ func compute_forest(amount: float, clear_zones: Array = []) -> void:
 			f *= (1.0 - road[id]) * (1.0 - plaza[id]) * (1.0 - field[id])
 			if river_d[id] < river_half_w + 6.0:
 				f = 0.0
-			for cz in clear_zones:
-				var dd := TerrainGen._seg_dist(Vector2(x, z), cz[0], cz[1])
-				f *= smoothstep(float(cz[2]) + 5.0, float(cz[2]) + 45.0, dd)
 			forest[id] = f
+	for cz in clear_zones:
+		var a: Vector2 = cz[0]
+		var b: Vector2 = cz[1]
+		var r: float = float(cz[2]) + 45.0
+		var mn := Vector2(minf(a.x, b.x), minf(a.y, b.y)) - Vector2(r, r)
+		var mx := Vector2(maxf(a.x, b.x), maxf(a.y, b.y)) + Vector2(r, r)
+		for j in range(gi(mn.y), gi(mx.y) + 1):
+			for i in range(gi(mn.x), gi(mx.x) + 1):
+				var id := j * N + i
+				if forest[id] <= 0.0:
+					continue
+				var dd := TerrainGen._seg_dist(Vector2(gx(i), gx(j)), a, b)
+				forest[id] *= smoothstep(float(cz[2]) + 5.0, r, dd)
 
 
 # ---------------------------------------------------------------- 問い合わせ

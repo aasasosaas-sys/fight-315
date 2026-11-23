@@ -17,9 +17,15 @@ uniform vec3 base_color : source_color = vec3(0.1, 0.2, 0.05);
 uniform vec3 tip_color : source_color = vec3(0.45, 0.6, 0.2);
 uniform vec3 dry_color : source_color = vec3(0.62, 0.56, 0.3);
 uniform vec3 rice_color : source_color = vec3(0.36, 0.58, 0.16);
+uniform sampler2DArray alb_arr : source_color, filter_linear_mipmap, repeat_enable;
+uniform float L_GRASS = 0.0;
+uniform float use_ground = 0.0;
+uniform vec3 ground_tint : source_color = vec3(1.0);
+uniform float inner_radius = 0.0;
 
 varying float v_t;
 varying vec3 v_col;
+varying vec3 v_base;
 
 float hash12(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -57,7 +63,7 @@ void vertex() {
 	dens *= mix(smoothstep(0.1, 0.32, patch + patch2 * 0.3), 1.0, field);
 	dens *= inside;
 	float camd = length(pos - CAMERA_POSITION_WORLD.xz);
-	float fade = 1.0 - smoothstep(radius * 0.55, radius, camd);
+	float fade = (1.0 - smoothstep(radius * 0.55, radius, camd)) * smoothstep(inner_radius * 0.6, inner_radius, camd);
 	// 田: 列状の稲株
 	if (field > 0.5) {
 		vec2 rp = floor(pos / 0.6 + 0.5) * 0.6;
@@ -83,10 +89,18 @@ void vertex() {
 	vec3 tipc = mix(tip_color, dry_color, smoothstep(0.55, 0.85, patch2) * 0.7);
 	tipc = mix(tipc, rice_color, field);
 	v_col = tipc * mix(0.85, 1.1, r1);
+	v_base = base_color;
+	if (use_ground > 0.5) {
+		vec3 g = textureLod(alb_arr, vec3(pos * 0.24, L_GRASS), 3.0).rgb;
+		g = mix(g, g * vec3(0.78, 1.0, 0.55) * 1.12, 0.65) * ground_tint;
+		v_base = g * 0.55;
+		v_col = mix(v_col, g * vec3(1.15, 1.35, 0.9), 0.45) * mix(0.85, 1.12, r2);
+		v_col = mix(v_col, tipc, field);
+	}
 }
 
 void fragment() {
-	vec3 basec = base_color;
+	vec3 basec = v_base;
 	ALBEDO = mix(basec, v_col, smoothstep(0.0, 1.0, v_t));
 	ROUGHNESS = 0.75;
 	SPECULAR = 0.25;

@@ -49,6 +49,11 @@ static func build_environment(world: Node3D, style: Dictionary) -> Dictionary:
 	env.ssil_radius = 4.0
 	env.ssil_intensity = 0.8
 
+	env.ssr_enabled = q >= 2
+	env.ssr_max_steps = 48
+	env.ssr_fade_in = 0.15
+	env.ssr_fade_out = 2.0
+	env.ssr_depth_tolerance = 0.3
 	env.sdfgi_enabled = EraWorld.sdfgi_enabled and q >= 1
 	env.sdfgi_use_occlusion = true
 	env.sdfgi_cascades = 6

@@ -74,7 +74,24 @@ func _prop(kind: String, p: Vector3, rng: RandomNumberGenerator) -> RigidBody3D:
 			cs.shape = c
 			b.mass = 3.0
 			half = 0.18
-	b.add_child(mi)
+	var model_id: String = {"crate": "wooden_crate_01", "barrel": "Barrel_01", "bucket": "wooden_bucket_01"}.get(kind, "")
+	var parts := WorldModels.parts(model_id) if model_id != "" else []
+	if not parts.is_empty():
+		# 写真スキャンのモデル（形に合わせた箱コリジョン、底面を原点に）
+		var bb := WorldModels.bounds(parts)
+		var bs := BoxShape3D.new()
+		bs.size = bb.size
+		cs.shape = bs
+		cs.position = Vector3.ZERO
+		for e in parts:
+			var m := MeshInstance3D.new()
+			m.mesh = e[0]
+			m.transform = Transform3D(Basis(), -bb.get_center()) * (e[1] as Transform3D)
+			b.add_child(m)
+		half = bb.size.y * 0.5
+		b.mass = maxf(2.0, bb.size.x * bb.size.y * bb.size.z * 120.0)
+	else:
+		b.add_child(mi)
 	b.add_child(cs)
 	b.position = p + Vector3(0, half + 0.02, 0)
 	b.rotation.y = rng.randf() * TAU
@@ -90,8 +107,31 @@ func _explosive(p: Vector3, rng: RandomNumberGenerator) -> RigidBody3D:
 	b.collision_mask = 1 | 2 | 4 | 8 | 16 | 32
 	b.mass = 30.0
 	var mi := MeshInstance3D.new()
-	mi.mesh = mesh("explosive_" + ("modern" if w.era_id in ["meiji_taisho", "showa"] else "keg"))
-	b.add_child(mi)
+	var modern := w.era_id in ["meiji_taisho", "showa"]
+	mi.mesh = mesh("explosive_" + ("modern" if modern else "keg"))
+	var parts := WorldModels.parts("Barrel_01") if not modern else []
+	if not parts.is_empty():
+		# 樽モデルを赤く塗った火薬樽
+		var bb := WorldModels.bounds(parts)
+		var k := 1.0 / maxf(bb.size.y, 0.1)
+		for e in parts:
+			var m := MeshInstance3D.new()
+			m.mesh = e[0]
+			m.transform = Transform3D(Basis().scaled(Vector3.ONE * k), Vector3(0, -0.5, 0) - bb.get_center() * Vector3(k, 0, k) - Vector3(0, bb.position.y * k, 0)) * (e[1] as Transform3D)
+			for si in (e[0] as Mesh).get_surface_count():
+				var om := (e[0] as Mesh).surface_get_material(si)
+				if om is BaseMaterial3D:
+					var red := (om as BaseMaterial3D).duplicate() as BaseMaterial3D
+					red.albedo_color = Color(1.0, 0.32, 0.25)
+					m.set_surface_override_material(si, red)
+			b.add_child(m)
+		var mark := MeshInstance3D.new()
+		var km := MeshKit.new()
+		km.box("flat", Transform3D(Basis(Vector3.BACK, PI * 0.25), Vector3(0, 0.0, 0.3)), Vector3(0.2, 0.2, 0.02), Color(0.95, 0.92, 0.8))
+		mark.mesh = km.to_mesh()
+		b.add_child(mark)
+	else:
+		b.add_child(mi)
 	var cs := CollisionShape3D.new()
 	var c := CylinderShape3D.new()
 	c.radius = 0.38

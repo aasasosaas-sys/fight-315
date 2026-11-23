@@ -11,6 +11,7 @@ static var ssil_enabled := true
 static var volumetric_enabled := true
 static var glow_enabled := true
 static var grass_enabled := true
+static var taa_enabled := true      # 高品質時にビューポートの TAA を有効化（葉のちらつき低減）
 
 ## 正準レイアウト（海が +Z 側）。時代ごとに 90° 単位で回転する
 const CANON := {
@@ -63,7 +64,19 @@ static func build(p_era: Dictionary) -> EraWorld:
 	return w
 
 
+static var debug_timing := false
+var _t_last := 0
+
+
+func _tick(label: String) -> void:
+	if debug_timing:
+		var now := Time.get_ticks_msec()
+		print("  [build] %s: %d ms" % [label, now - _t_last])
+		_t_last = now
+
+
 func _build() -> void:
+	_t_last = Time.get_ticks_msec()
 	style = EraStyles.get_style(era_id)
 	var seed_v := hash(era_id) & 0x7fffffff
 	rng.seed = seed_v
@@ -80,6 +93,7 @@ func _build() -> void:
 	_make_roads()
 	terrain.apply_roads()
 	layouts.terrain_features()
+	_tick("terrain")
 
 	static_body = StaticBody3D.new()
 	static_body.name = "StaticWorld"
@@ -89,6 +103,7 @@ func _build() -> void:
 
 	# ---- 建築（マスクや占有も塗る）
 	layouts.build_all()
+	_tick("architecture")
 	var zones: Array = []
 	for key in landmarks:
 		var info: Dictionary = landmarks[key]
@@ -96,24 +111,30 @@ func _build() -> void:
 			continue
 		zones.append([info.get("a", info["center"]), info.get("b", info["center"]), info["r"]])
 	terrain.compute_forest(float(style["forest"]), zones)
+	_tick("forest mask")
 
 	# ---- メッシュ・コリジョン
 	height_tex = ImageTexture.create_from_image(terrain.make_height_image())
 	control_tex = ImageTexture.create_from_image(terrain.make_control_image())
+	WorldMaterials.set_world_params(height_tex, half_size, TerrainGen.N)
 	var tnode := Node3D.new()
 	tnode.name = "Terrain"
 	add_child(tnode)
+	_tick("textures")
 	var tmat := _terrain_material()
 	terrain.build_meshes(tnode, tmat, quality)
 	terrain.build_outer(tnode, tmat)
 	add_child(terrain.make_collision())
+	_tick("terrain mesh")
 
 	_build_water()
 	var veg := WorldVegetation.new(self)
 	veg.build()
+	_tick("vegetation")
 	if grass_enabled:
 		_build_grass()
 	WorldProps.new(self).build()
+	_tick("props")
 	env_nodes = WorldAtmosphere.build_environment(self, style)
 	for key in landmarks:
 		var b := WorldAtmosphere.make_beacon(landmarks[key]["pos"])
@@ -124,17 +145,21 @@ func _build() -> void:
 
 
 func _ready() -> void:
+	if taa_enabled and quality >= 2 and get_viewport():
+		get_viewport().use_taa = true
 	var g = get_node_or_null("/root/Game")
 	if g and g.get("world") == null and g.has_method("set_world"):
 		g.set_world(self)
 
 
 func _process(_delta: float) -> void:
-	if grass_node:
+	if not grass_nodes.is_empty():
 		var cam := get_viewport().get_camera_3d()
 		if cam:
-			var p := cam.global_position
-			grass_node.global_position = Vector3(snappedf(p.x, grass_spacing), 0.0, snappedf(p.z, grass_spacing))
+			var p := to_local(cam.global_position)
+			for g in grass_nodes:
+				var sp: float = g[1]
+				(g[0] as Node3D).position = Vector3(snappedf(p.x, sp), 0.0, snappedf(p.z, sp))
 
 
 # ================================================================ 公開 API
@@ -466,42 +491,55 @@ func add_water_rect(center: Vector3, size: Vector2, angle: float) -> void:
 	add_child(mi)
 
 
+var grass_nodes: Array = []
+
+
 func _build_grass() -> void:
 	var q := quality
-	var radius: float = [26.0, 38.0, 52.0][q]
-	grass_spacing = [0.7, 0.55, 0.42][q]
-	var n := int(radius * 2.0 / grass_spacing)
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.mesh = WorldVegetation.grass_clump_mesh(grass_spacing)
-	mm.instance_count = n * n
-	var k := 0
-	for j in n:
-		for i in n:
-			var x := (i - n * 0.5) * grass_spacing
-			var z := (j - n * 0.5) * grass_spacing
-			mm.set_instance_transform(k, Transform3D(Basis(), Vector3(x, 0, z)))
-			k += 1
-	mm.custom_aabb = AABB(Vector3(-radius, -50, -radius), Vector3(radius * 2.0, 450, radius * 2.0))
-	var mmi := MultiMeshInstance3D.new()
-	mmi.name = "Grass"
-	mmi.multimesh = mm
-	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var mat := ShaderMaterial.new()
-	mat.shader = WorldMaterials.shader("grass")
-	mat.set_shader_parameter("height_tex", height_tex)
-	mat.set_shader_parameter("control_tex", control_tex)
-	mat.set_shader_parameter("noise_tex", WorldMaterials.macro_noise())
-	mat.set_shader_parameter("half_size", half_size)
-	mat.set_shader_parameter("grid_n", float(TerrainGen.N))
-	mat.set_shader_parameter("spacing", grass_spacing)
-	mat.set_shader_parameter("radius", radius)
-	mat.set_shader_parameter("water_level", water_level)
-	mat.set_shader_parameter("base_color", style["grass_base"])
-	mat.set_shader_parameter("tip_color", style["grass_tip"])
-	mmi.material_override = mat
-	add_child(mmi)
-	grass_node = mmi
+	# 遠めのリング＋足元の高密度リング
+	var rings := [[[30.0, 44.0, 56.0][q], [0.7, 0.55, 0.45][q], 0.0]]
+	if q >= 1:
+		rings.append([[0.0, 14.0, 18.0][q], [0.4, 0.3, 0.24][q], 0.0])
+	for ring in rings:
+		var radius: float = ring[0]
+		var spacing: float = ring[1]
+		var n := int(radius * 2.0 / spacing)
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = WorldVegetation.grass_clump_mesh(spacing)
+		mm.instance_count = n * n
+		var k := 0
+		for j in n:
+			for i in n:
+				mm.set_instance_transform(k, Transform3D(Basis(), Vector3((i - n * 0.5) * spacing, 0, (j - n * 0.5) * spacing)))
+				k += 1
+		mm.custom_aabb = AABB(Vector3(-radius, -50, -radius), Vector3(radius * 2.0, 450, radius * 2.0))
+		var mmi := MultiMeshInstance3D.new()
+		mmi.name = "Grass"
+		mmi.multimesh = mm
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var mat := ShaderMaterial.new()
+		mat.shader = WorldMaterials.shader("grass")
+		mat.set_shader_parameter("height_tex", height_tex)
+		mat.set_shader_parameter("control_tex", control_tex)
+		mat.set_shader_parameter("noise_tex", WorldMaterials.macro_noise())
+		mat.set_shader_parameter("half_size", half_size)
+		mat.set_shader_parameter("grid_n", float(TerrainGen.N))
+		mat.set_shader_parameter("spacing", spacing)
+		mat.set_shader_parameter("radius", radius)
+		mat.set_shader_parameter("water_level", water_level)
+		mat.set_shader_parameter("base_color", style["grass_base"])
+		mat.set_shader_parameter("tip_color", style["grass_tip"])
+		var arrs := WorldMaterials.terrain_arrays()
+		if arrs.size() == 3:
+			mat.set_shader_parameter("alb_arr", arrs[0])
+			mat.set_shader_parameter("use_ground", 1.0)
+			mat.set_shader_parameter("L_GRASS", float(WorldMaterials.layer("grass")))
+			mat.set_shader_parameter("ground_tint", style["grass_tint"])
+		mmi.material_override = mat
+		add_child(mmi)
+		grass_nodes.append([mmi, spacing])
+	grass_node = grass_nodes[0][0]
 
 
 func _compute_vehicle_spawns(layouts) -> void:

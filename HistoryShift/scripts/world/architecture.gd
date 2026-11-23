@@ -31,6 +31,21 @@ func _init(world: EraWorld) -> void:
 	rng.seed = world.rng.seed + 999
 
 
+## glTF モデルを置く（無ければ false を返し、呼び出し側が代替を作る）
+func model(id: String, xf: Transform3D, collide := Vector3.ZERO) -> bool:
+	var parts := WorldModels.parts(id)
+	if parts.is_empty():
+		return false
+	for e in parts:
+		var mi := MeshInstance3D.new()
+		mi.mesh = e[0]
+		mi.transform = xf * (e[1] as Transform3D)
+		w.add_child(mi)
+	if collide != Vector3.ZERO:
+		cols.append([xf * Transform3D(Basis(), Vector3(0, collide.y * 0.5, 0)), collide])
+	return true
+
+
 func flush(name: String) -> void:
 	if not kit.is_empty():
 		var mi := kit.commit(name)
@@ -1062,6 +1077,12 @@ func pier(xf: Transform3D, length: float, width: float, kind := "wood") -> void:
 ## 和船・帆船・汽船（静的な飾り）
 func boat(xf: Transform3D, kind := "small") -> void:
 	var y := w.water_level - xf.origin.y
+	if kind == "dutch":
+		# 南蛮船（写真ベースのモデル）
+		if model("dutch_ship_medium", xf * Transform3D(Basis(Vector3.UP, PI * 0.5), Vector3(0, y + 0.3, 0)), Vector3.ZERO):
+			cols.append([xf * Transform3D(Basis(), Vector3(0, y + 1.0, 0)), Vector3(5.0, 4.0, 21.0)])
+			return
+		kind = "big"
 	var L := 7.0
 	var B := 2.0
 	match kind:

@@ -92,15 +92,27 @@ func build() -> void:
 		placements[sp].append(xf)
 		if sp != "bush" and sp != "bamboo":
 			trunk_cols.append([p, float(d[2]), sp])
+	var shrubs := WorldModels.variants("shrub_02")
+	if not shrubs.is_empty():
+		_emit_model_cells("Shrubs", shrubs, placements["bush"], 150.0, rng)
+		placements["bush"] = []
+	w._tick("veg placement")
 	for sp in placements:
 		_emit_species(sp, placements[sp])
+	w._tick("veg emit trees")
 	_trunk_collisions(trunk_cols)
 	_build_rocks(rng)
+	w._tick("veg rocks")
+	_build_clutter(rng)
 
 
 func _ok_spot(px: float, pz: float, margin: float) -> bool:
 	if absf(px) > t.half - 2.0 or absf(pz) > t.half - 2.0:
 		return false
+	for key in w.landmarks:
+		var info: Dictionary = w.landmarks[key]
+		if key != "mountain" and TerrainGen._seg_dist(Vector2(px, pz), info.get("a", info["center"]), info.get("b", info["center"])) < float(info["r"]) * 0.92:
+			return false
 	if t.is_occupied(px, pz):
 		return false
 	if t.mask_at(t.road, px, pz) > 0.02 or t.mask_at(t.plaza, px, pz) > 0.05 or t.mask_at(t.field, px, pz) > 0.05:
@@ -224,11 +236,33 @@ func _trunk_collisions(list: Array) -> void:
 	w.add_child(body)
 
 
+func _rock_variants() -> Array:
+	# [parts, 基準サイズ(m)]
+	var out: Array = []
+	for id in ["boulder_01", "namaqualand_boulder_02"]:
+		for v in WorldModels.variants(id):
+			out.append(v)
+	for id in ["rock_moss_set_01", "rock_moss_set_02"]:
+		for v in WorldModels.variants(id):
+			out.append(v)
+	for id in ["rock_07", "rock_09", "stone_01"]:
+		for v in WorldModels.variants(id):
+			out.append(v)
+	return out
+
+
 func _build_rocks(rng: RandomNumberGenerator) -> void:
+	var model_vars := _rock_variants()
 	var meshes: Array = []
-	for v in 3:
-		meshes.append(rock_mesh(v))
-	var lists := [[], [], []]
+	var nv := 3
+	if model_vars.is_empty():
+		for v in 3:
+			meshes.append(rock_mesh(v))
+	else:
+		nv = model_vars.size()
+	var lists: Array = []
+	for v in nv:
+		lists.append([])
 	var body := StaticBody3D.new()
 	body.name = "Rocks"
 	body.collision_layer = 1
@@ -250,10 +284,24 @@ func _build_rocks(rng: RandomNumberGenerator) -> void:
 		var sc := rng.randf_range(0.4, 1.6)
 		if rng.randf() < 0.1:
 			sc *= 2.2
-		var b := Basis(Vector3(rng.randf(), rng.randf(), rng.randf()).normalized(), rng.randf() * TAU)
-		b = b.scaled(Vector3(sc, sc * rng.randf_range(0.5, 0.9), sc))
-		var xf := Transform3D(b, Vector3(px, hh - 0.2 * sc, pz))
-		lists[placed % 3].append(xf)
+		var vi := rng.randi() % nv
+		var xf: Transform3D
+		if model_vars.is_empty():
+			var b := Basis(Vector3(rng.randf(), rng.randf(), rng.randf()).normalized(), rng.randf() * TAU)
+			b = b.scaled(Vector3(sc, sc * rng.randf_range(0.5, 0.9), sc))
+			xf = Transform3D(b, Vector3(px, hh - 0.2 * sc, pz))
+		else:
+			# 写真スキャンの岩: 目標サイズに合わせて拡大、地面の傾きに沿わせる
+			var bb := WorldModels.bounds(model_vars[vi])
+			var ext := maxf(bb.size.x, bb.size.z)
+			var k := (sc * 2.0) / maxf(ext, 0.01)
+			var up := nrm.slerp(Vector3.UP, 0.4)
+			var b := Basis(Vector3.UP, rng.randf() * TAU)
+			var axis := Vector3.UP.cross(up)
+			if axis.length() > 0.001:
+				b = Basis(axis.normalized(), Vector3.UP.angle_to(up)) * b
+			xf = Transform3D(b.scaled(Vector3.ONE * k), Vector3(px, hh - bb.size.y * k * 0.18, pz))
+		lists[vi].append(xf)
 		placed += 1
 		if sc > 1.0:
 			var c := CollisionShape3D.new()
@@ -265,6 +313,14 @@ func _build_rocks(rng: RandomNumberGenerator) -> void:
 	var root := Node3D.new()
 	root.name = "RocksMesh"
 	w.add_child(root)
+	if not model_vars.is_empty():
+		for v in nv:
+			if lists[v].is_empty():
+				continue
+			for node in WorldModels.multimesh_nodes(model_vars[v], lists[v], 700.0):
+				root.add_child(node)
+		w.add_child(body)
+		return
 	for v in 3:
 		if lists[v].is_empty():
 			continue
@@ -279,6 +335,83 @@ func _build_rocks(rng: RandomNumberGenerator) -> void:
 		mmi.visibility_range_end = 700.0
 		root.add_child(mmi)
 	w.add_child(body)
+
+
+## モデルのバリエーションをセル分割した MultiMesh で配置（xfs はバリエーションに無作為に割当）
+func _emit_model_cells(name: String, vars: Array, xfs: Array, vis_end: float, rng: RandomNumberGenerator, shadows := true, cell := CELL) -> void:
+	if xfs.is_empty() or vars.is_empty():
+		return
+	var root := Node3D.new()
+	root.name = name
+	w.add_child(root)
+	var cells := {}
+	for xf in xfs:
+		var key := Vector3i(int(floor((xf.origin.x + t.half) / cell)), int(floor((xf.origin.z + t.half) / cell)), rng.randi() % vars.size())
+		if not cells.has(key):
+			cells[key] = []
+		cells[key].append(xf)
+	for key in cells:
+		for node in WorldModels.multimesh_nodes(vars[key.z], cells[key], vis_end, shadows):
+			root.add_child(node)
+
+
+## 森の下草・倒木・切り株・根・枯れ枝（モデルがある時のみ）
+func _build_clutter(rng: RandomNumberGenerator) -> void:
+	var sets := [
+		# [id, 森の中の密度, 森の外, 表示距離, サイズ倍率範囲, 影]
+		["fern_02", 0.55, 0.0, 70.0, Vector2(0.8, 1.5), false],
+		["shrub_03", 0.25, 0.05, 55.0, Vector2(1.0, 2.0), false],
+		["shrub_04", 0.12, 0.02, 60.0, Vector2(1.0, 1.8), false],
+		["shrub_01", 0.0, 0.03, 60.0, Vector2(0.8, 1.2), false],
+		["dead_tree_trunk", 0.03, 0.0, 120.0, Vector2(1.0, 1.6), true],
+		["dead_tree_trunk_02", 0.03, 0.0, 120.0, Vector2(1.0, 1.4), true],
+		["tree_stump_01", 0.03, 0.004, 120.0, Vector2(0.7, 1.1), true],
+		["tree_stump_02", 0.03, 0.004, 120.0, Vector2(0.7, 1.1), true],
+		["root_cluster_01", 0.015, 0.0, 100.0, Vector2(0.8, 1.2), true],
+		["dry_branches_medium_01", 0.06, 0.0, 50.0, Vector2(1.0, 1.5), false],
+	]
+	var q := EraWorld.quality
+	var step: float = [6.5, 5.0, 4.0][q]
+	var active: Array = []
+	var lists: Array = []
+	for sdef in sets:
+		var vars := WorldModels.variants(sdef[0])
+		if vars.is_empty():
+			continue
+		active.append([sdef, vars])
+		lists.append([])
+	if active.is_empty():
+		return
+	var z := -t.half + 3.0
+	while z < t.half - 3.0:
+		var x := -t.half + 3.0
+		while x < t.half - 3.0:
+			var px := x + rng.randf_range(-step * 0.5, step * 0.5)
+			var pz := z + rng.randf_range(-step * 0.5, step * 0.5)
+			x += step
+			var f := t.mask_at(t.forest, px, pz)
+			var r := rng.randf()
+			var pick := -1
+			for i in active.size():
+				var sdef: Array = active[i][0]
+				r -= float(sdef[1]) * f + float(sdef[2]) * (1.0 - f)
+				if r < 0.0:
+					pick = i
+					break
+			if pick < 0 or not _ok_spot(px, pz, 0.5):
+				continue
+			var sd: Array = active[pick][0]
+			var nrm := t.normal_at(px, pz)
+			var sc := rng.randf_range(sd[4].x, sd[4].y)
+			var b := Basis(Vector3.UP, rng.randf() * TAU)
+			var axis := Vector3.UP.cross(nrm)
+			if axis.length() > 0.001:
+				b = Basis(axis.normalized(), Vector3.UP.angle_to(nrm)) * b
+			lists[pick].append(Transform3D(b.scaled(Vector3.ONE * sc), Vector3(px, t.height_at(px, pz) - 0.05, pz)))
+		z += step
+	for i in active.size():
+		var sd: Array = active[i][0]
+		_emit_model_cells("Clutter_" + String(sd[0]), active[i][1], lists[i], sd[3], rng, sd[5], 60.0)
 
 
 # ================================================================ メッシュ生成

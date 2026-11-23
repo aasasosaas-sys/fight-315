@@ -31,6 +31,7 @@ func _initialize() -> void:
 		push_error("unknown era " + era_id)
 		quit(1)
 		return
+	EraWorld.debug_timing = true
 	world = EraWorld.build(era)
 	if world == null:
 		quit(1)
