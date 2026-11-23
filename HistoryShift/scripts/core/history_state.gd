@@ -442,12 +442,13 @@ func predict_ripple(q: Dictionary, choice: int, method := 0) -> Array:
 ## 時代ごとの「その後の歴史」。[{era, lines:[...], changed:bool}]
 func era_timeline() -> Array:
 	var out: Array = []
+	var ws := _world_seed()
 	for e in db.eras:
 		var st: Dictionary = era_states.get(e["eraId"], base_state())
 		var lines: Array = []
 		for r in e.get("aftermath_rules", []):
 			if cond_match(r.get("if", {}), st):
-				lines.append(r["text"])
+				lines.append(pick_variant(r["text"], ws, e["eraId"], {}))
 				if lines.size() >= 4:
 					break
 		var changed := not lines.is_empty()
@@ -458,19 +459,63 @@ func era_timeline() -> Array:
 
 
 ## 令和の日本（topic -> 文章）
+## text は文字列か候補の配列（modern.json・aftermath_rules）。同じ世界なら同じ文、違う世界なら違う文を選ぶ。
 func modern_japan() -> Dictionary:
 	var out := {}
+	var used := {}   # 書き出し3字 -> true（同じエンディングで同じ書き出しを繰り返さない）
+	var ws := _world_seed()
 	var base: Dictionary = db.modern.get("baseline", {})
 	for r in db.modern.get("ending_rules", []):
 		var t: String = r.get("topic", "")
 		if t == "" or out.has(t):
 			continue
 		if cond_match(r.get("if", {}), final_state):
-			out[t] = r["text"]
+			out[t] = pick_variant(r["text"], ws, t, used)
 	for t in base:
 		if not out.has(t):
-			out[t] = base[t]
+			out[t] = pick_variant(base[t], ws, t, used)
 	return out
+
+
+## 世界の状態（各問題の史実＋首都・実権など）から決まる種。文章の言い換えの選択に使う。
+func _world_seed() -> int:
+	var parts := PackedStringArray()
+	for q in db.questions:
+		parts.append(str(world_choice(q)))
+	for k in CAT:
+		parts.append(str(final_state.get(k, "")))
+	return absi("".join(parts).hash())
+
+
+## v が配列なら salt ごとに1つ選ぶ。used にある書き出しはできるだけ避け、選んだ書き出しを used に足す。
+static func pick_variant(v: Variant, wseed: int, salt: String, used: Dictionary = {}) -> String:
+	if not (v is Array):
+		var s := str(v)
+		used[s.substr(0, 3)] = true
+		return s
+	if v.is_empty():
+		return ""
+	var n: int = v.size()
+	var start := absi(wseed + salt.hash()) % n
+	var pick := str(v[start])
+	for i in n:
+		var c := str(v[(start + i) % n])
+		if not used.has(c.substr(0, 3)):
+			pick = c
+			break
+	used[pick.substr(0, 3)] = true
+	return pick
+
+
+## 同じ時代の「その後の歴史」を2文目からつなぐ言葉（同じ言葉が続かないよう順に回す）
+const LINKS := ["さらに", "また", "そして"]
+static func _linked(t: String, i: int, wseed: int, salt: String) -> String:
+	if i == 0 or t == "" or "「『【（―".contains(t[0]) or t[0].is_valid_int():
+		return t
+	for w in ["さらに", "また", "そして", "一方", "しかし", "だが", "こうして", "その", "それ", "やがて", "のち", "結局"]:
+		if t.begins_with(w):
+			return t
+	return LINKS[absi(wseed + salt.hash() + i) % LINKS.size()] + "、" + t
 
 
 ## 改変の組み合わせから「この世界の歴史と令和日本」を合成する（全パターン自動生成）。[タイトル, 本文]
@@ -489,6 +534,8 @@ func compose_ending() -> Array:
 		lines.append("あなたは一度も歴史を曲げることなく満点を取った。教科書は何ひとつ変わらず、時空管理局はあなたを「最も誠実な受験生」として記録した。")
 	else:
 		lines.append("―― この世界の歴史 ――")
+		var ws := _world_seed()
+		var seen := {}   # 同じ断片を二度並べない
 		for item in era_timeline():
 			var e: Dictionary = item["era"]
 			var alt_here: Array = altered.filter(func(q): return q["era"]["eraId"] == e["eraId"])
@@ -500,8 +547,12 @@ func compose_ending() -> Array:
 				var m := db.mission_for(q, world_choice(q), interventions.get(q["id"], {}).get("method", 0))
 				var legacy: String = m.get("legacy", "")
 				lines.append("・%d年 %s：「%s」（%s）%s" % [q["year"], q["topic"], q["choices"][world_choice(q)], how, ("\n　" + legacy) if legacy != "" and is_intervened(q) and not is_chaos(q) else ""])
+			var li := 0
 			for t in item["lines"]:
-				lines.append("　" + t)
+				if not seen.has(t):
+					seen[t] = true
+					lines.append("　" + (_linked(t, li, ws, e["eraId"]) if item["changed"] else t))
+					li += 1
 	var wt: Dictionary = war.get("tier_def", {})
 	if not wt.is_empty():
 		lines.append("")

@@ -83,6 +83,12 @@ def simulate(qs, interventions):
     return world, st
 
 
+def _text_ok(t):
+    """文章は文字列、または言い換えの候補（空でない文字列の配列。HistoryState.pick_variant が世界ごとに選ぶ）。"""
+    if isinstance(t, str): return bool(t.strip())
+    return isinstance(t, list) and len(t) > 0 and all(isinstance(x, str) and x.strip() for x in t)
+
+
 def main():
     sims = 300
     if "--sim" in sys.argv: sims = int(sys.argv[sys.argv.index("--sim") + 1])
@@ -96,7 +102,10 @@ def main():
             for i, r in enumerate(rules):
                 cond_ok(r.get("if"), f"modern.ending_rules[{i}]")
                 if not r.get("topic") or not r.get("text"): err(f"modern.ending_rules[{i}]: topic/text")
+                if not _text_ok(r.get("text")): err(f"modern.ending_rules[{i}]: text must be a string or a list of strings")
             if not d.get("baseline"): err("modern.json: baseline missing")
+            for k, t in d.get("baseline", {}).items():
+                if not _text_ok(t): err(f"modern.baseline[{k}]: text must be a string or a list of strings")
             continue
         if name.startswith("rules_"): continue
         eras.append(d)
