@@ -15,6 +15,7 @@ const SETS := {
 	"_dbg_noeri": ["kosode", "hakama", "obi"],
 	"_dbg_eri": ["eri", "haneri"],
 	"_dbg_k": ["kosode"],
+	"_dbg_ke": ["kosode", "eri"],
 	"_dbg_o": ["obi"],
 }
 

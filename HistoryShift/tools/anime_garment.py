@@ -275,6 +275,12 @@ def collar(kosode, L, width=0.034, han_w=0.012):
         d = Vector((neck.x - q.x, 0.0, neck.z + 0.2 - q.z))
         return d.normalized()
 
+    import os
+    if os.environ.get("DBG_COLLAR"):
+        for p_ in path(1.0)[::5]:
+            q_, n_ = on_surface(p_)
+            print("COLLAR p", tuple(round(x, 3) for x in p_), "hit", tuple(round(x, 3) for x in q_), "n", tuple(round(x, 2) for x in n_))
+        print("NECK", tuple(round(x, 3) for x in neck), "waist_z", round(waist_z, 3))
     objs = []
     # 下前（着る人の右の衿）を先に、少しだけ低く
     objs.append(ribbon("eri_under", path(-1.0), width, 0.006, toward_neck))

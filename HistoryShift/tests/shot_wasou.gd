@@ -38,7 +38,8 @@ func _ready() -> void:
 		add_child(n)
 		n.position = Vector3(x, 0, 0)
 		x += 0.8
-		(n.get_node("Anim") as AnimationPlayer).play("Mocap_Stand")
+		if OS.get_environment("NO_ANIM") == "":
+			(n.get_node("Anim") as AnimationPlayer).play("Mocap_Stand")
 		for mi: MeshInstance3D in n.find_children("*", "MeshInstance3D", true, false):
 			print(s, " ", mi.name, " ", mi.get_aabb())
 	var cam := Camera3D.new()
@@ -56,4 +57,8 @@ func _ready() -> void:
 	cam.look_at(Vector3(0, 0.85, 0))
 	for i in 8: await get_tree().process_frame
 	get_viewport().get_texture().get_image().save_png(OUT + "wasou_side.png")
+	cam.position = Vector3(-(specs.size() - 1) * 0.4, 1.2, -2.2)
+	cam.look_at(Vector3(cam.position.x, 1.0, 0))
+	for i in 8: await get_tree().process_frame
+	get_viewport().get_texture().get_image().save_png(OUT + "wasou_back.png")
 	get_tree().quit()

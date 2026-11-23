@@ -171,6 +171,24 @@ def main():
                 m.object = arm
     arm.rotation_euler.z = 0.0
     bpy.context.view_layer.update()
+    # 書き出される服の頂点は「回したままの向き」になる（スキン付きメッシュのノード変換は使われない）。
+    # 体（BodyW）と同じ元の向きにそろえる
+    from mathutils import Matrix
+    if vrm0:
+        rz = Matrix.Rotation(math.pi, 4, "Z")
+        for o in garments.values():
+            o.data.transform(rz)
+            # 回転で左右の位置が入れ替わるので、左右の骨のウェイトも入れ替える
+            for vg in o.vertex_groups:
+                if "_L_" in vg.name:
+                    vg.name = vg.name.replace("_L_", "_TMP_")
+            for vg in o.vertex_groups:
+                if "_R_" in vg.name:
+                    vg.name = vg.name.replace("_R_", "_L_")
+            for vg in o.vertex_groups:
+                if "_TMP_" in vg.name:
+                    vg.name = vg.name.replace("_TMP_", "_R_")
+    bpy.context.view_layer.update()
     # 骨（と頂点グループ）を人型プロファイル名に
     for b in arm.data.bones:
         if b.name in human:
