@@ -1,0 +1,12 @@
+Library/
+Temp/
+Obj/
+Build/
+Builds/
+Logs/
+UserSettings/
+*.csproj
+*.sln
+# 大きいモデルは Tools/download_assets.py で取得
+Assets/HistoryShift/Resources/PolyHaven/Models/
+*.part
