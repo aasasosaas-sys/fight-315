@@ -19,7 +19,7 @@ extends RefCounted
 
 const VIOLENT := ["assassinated", "killed", "suicide", "executed", "accident", "poisoned"]
 const NOKILL_TAGS := ["sacred", "woman", "foreigner", "commoner", "religious", "scholar", "artist"]
-const VERBS := ["kill", "escort", "protect", "persuade", "give", "steal", "forge", "steer", "delay", "sabotage", "battle"]
+const VERBS := ["kill", "escort", "protect", "persuade", "give", "steal", "forge", "steer", "delay", "sabotage", "battle", "project"]
 
 ## 説得の論点：trait（その性格が正なら受け入れやすい／sign -1 なら負で受け入れる）と効果（影響力を掛ける）
 const ARGS := {
@@ -322,6 +322,11 @@ static func resolve(db: HistoryDB, actions: Array) -> Dictionary:
 				var k2 := clampf(float(a.get("value", 400)) / 800.0, 0.5, 2.0)
 				out.append({"vars": _scale(PLACE.get(key, PLACE["town"]), k2), "year": _era_mid(db, era), "era": era,
 					"note": "%sが壊され、人々の暮らしと政治に影が落ちた" % HistoryDB.landmark_name(db.get_era(era), key)})
+			"project":
+				var pr: Dictionary = db.projects.get(str(a.get("target", "")), {})
+				if not pr.is_empty():
+					var pv: Dictionary = pr.get("vars", {})
+					out.append({"vars": pv, "year": int(pr["year"]), "era": str(pr["era"]), "note": str(pr.get("text", ""))})
 			"battle":
 				for b in db.battles:
 					if b["id"] == str(a.get("target", "")):
@@ -406,4 +411,6 @@ static func headline(db: HistoryDB, a: Dictionary) -> String:
 			return "%sを破壊した" % HistoryDB.landmark_name(db.get_era(str(a.get("era", ""))), str(a.get("target", "")))
 		"battle":
 			return "%sで%sに加勢した" % [a.get("battle_name", a.get("target", "")), a.get("side", "")]
+		"project":
+			return "国家事業「%s」を成し遂げた" % db.projects.get(str(a.get("target", "")), {}).get("name", a.get("target", ""))
 	return str(a.get("verb", ""))

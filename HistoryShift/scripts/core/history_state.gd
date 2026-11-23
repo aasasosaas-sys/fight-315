@@ -12,12 +12,12 @@ const SAVE_PATH := "user://save_v2.json"
 static var save_path := SAVE_PATH   # テストは別のファイルに差し替える（並行して走る他のテストとぶつからないように）
 const NUM := ["centralization", "warrior", "court", "religion", "commerce", "open_asia", "open_west", "tech",
 	"education", "commoners", "militarism", "democracy", "economy", "unity"]
-const CAT := ["capital", "ruler", "edu_center"]
+const CAT := ["capital", "ruler", "edu_center", "war"]
 const LABELS := {
 	"centralization": "中央集権", "warrior": "武士の力", "court": "朝廷・貴族", "religion": "宗教勢力", "commerce": "商業・都市",
 	"open_asia": "大陸との交流", "open_west": "西洋との交流", "tech": "技術力", "education": "教育・学問", "commoners": "民衆の力",
 	"militarism": "軍事優先", "democracy": "民主化", "economy": "経済力", "unity": "国内の安定",
-	"capital": "首都", "ruler": "実権", "edu_center": "学問の中心",
+	"capital": "首都", "ruler": "実権", "edu_center": "学問の中心", "war": "太平洋戦争",
 }
 
 var db: HistoryDB
@@ -40,6 +40,7 @@ var reasons: Dictionary = {}         # qid -> その史実になった理由（r
 var era_states: Dictionary = {}      # eraId -> その時代の終わりの状態
 var final_state: Dictionary = {}
 var chaos_touched: Dictionary = {}   # qid -> true（混乱がなければ史実が違っていた問題）
+var war: Dictionary = {}             # 太平洋戦争の帰趨（WarModel.evaluate の結果：tier・pillars・score…）
 
 
 func _init(p_db: HistoryDB) -> void:
@@ -178,6 +179,26 @@ func _merge_layer(ivs: Dictionary) -> Dictionary:
 	return eff
 
 
+## 二段階の計算：まず戦前までの歴史を出して1941年の国力（WarModel）を評価し、その帰趨を1941年の変化として重ねて計算し直す
+func _simulate_war(ivs: Dictionary, mods: Variant, acts: Array) -> Dictionary:
+	var r1 := simulate(ivs, mods)
+	var w := WarModel.evaluate(db, r1["eras"], r1["world"], acts)
+	var wm: Dictionary = w.get("mods", {})
+	if wm.is_empty():
+		r1["war"] = w
+		return r1
+	var extra: Array = [{"rule": "war", "era": "showa", "year": int(db.war_model.get("war_year", 1941)), "effects": wm, "title": "太平洋戦争：" + str(w["tier"])}]
+	var base: Array = (chaos_mods + _layer["mods"]) if mods == null else (mods as Array)
+	var ivs2 := ivs if mods != null else _merge_layer(ivs)
+	var r2 := simulate(ivs2, base + extra)
+	r2["war"] = w
+	return r2
+
+
+func war_tier() -> String:
+	return str(war.get("tier", ""))
+
+
 func next_seq() -> int:
 	seq += 1
 	return seq
@@ -186,7 +207,8 @@ func next_seq() -> int:
 func recompute() -> void:
 	_layer = HistoryActors.resolve(db, actions) if not actions.is_empty() else {"forces": {}, "mods": [], "notes": {}}
 	effective = _merge_layer(interventions)
-	var r := simulate(interventions)
+	var r := _simulate_war(interventions, null, actions)
+	war = r["war"]
 	world = r["world"]
 	reasons = r["reasons"]
 	era_states = r["eras"]
@@ -198,7 +220,7 @@ func recompute() -> void:
 		for k in interventions:
 			if not (str(interventions[k].get("cause", "")) in ["chaos", "actor"]):
 				calm[k] = interventions[k]
-		var r0 := simulate(calm, [])
+		var r0 := _simulate_war(calm, [], [])
 		for q in db.questions:
 			if r0["world"].get(q["id"], q["real"]) != world.get(q["id"], q["real"]):
 				chaos_touched[q["id"]] = true
@@ -405,7 +427,7 @@ func apply_action(action: Dictionary) -> Array:
 func predict_ripple(q: Dictionary, choice: int, method := 0) -> Array:
 	var ivs := interventions.duplicate(true)
 	ivs[q["id"]] = {"choice": choice, "method": method, "seq": seq + 1}
-	var r := simulate(ivs)
+	var r := _simulate_war(ivs, null, actions)
 	var out: Array = []
 	for cq in db.questions:
 		var id: String = cq["id"]

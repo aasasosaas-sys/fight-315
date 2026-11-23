@@ -15,6 +15,8 @@ var actors: Dictionary = {}     # 人物名 -> 人物データ（data/actors/<er
 var actor_alias: Dictionary = {} # 別名 -> 人物名
 var battles: Array = []         # 合戦（data/actors/<era>.json の battles）
 var q_actors: Dictionary = {}   # qid -> [{name, at}]（その問題に関わる人物と、会える名所）
+var war_model: Dictionary = {}  # data/war/model.json（太平洋戦争の帰趨モデル、WarModel）
+var projects: Dictionary = {}   # 事業 id -> 国家事業（data/projects/<era>.json）
 
 
 static func load_all(dir := "res://data") -> HistoryDB:
@@ -64,7 +66,32 @@ static func load_all(dir := "res://data") -> HistoryDB:
 			ok.append(r)
 	db.rules = ok
 	db._load_actors(dir.path_join("actors"))
+	db._load_war(dir)
 	return db
+
+
+func _load_war(dir: String) -> void:
+	var mp := dir.path_join("war/model.json")
+	if FileAccess.file_exists(mp):
+		var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(mp))
+		if typeof(d) == TYPE_DICTIONARY:
+			war_model = d
+		else:
+			errors.append("war/model.json: JSON を読めません")
+	var pdir := dir.path_join("projects")
+	if not DirAccess.dir_exists_absolute(pdir):
+		return
+	for f in DirAccess.get_files_at(pdir):
+		if not f.ends_with(".json"):
+			continue
+		var d2: Variant = JSON.parse_string(FileAccess.get_file_as_string(pdir.path_join(f)))
+		if typeof(d2) != TYPE_DICTIONARY:
+			errors.append("projects/%s: JSON を読めません" % f)
+			continue
+		for pr in d2.get("projects", []):
+			pr["era"] = str(d2.get("eraId", f.get_basename()))
+			pr["year"] = int(pr.get("year", 0))
+			projects[pr["id"]] = pr
 
 
 ## data/actors/<era>.json を読む。問題に関わる人物（ミッションの npc に出る人物、actor.q）も集計する。

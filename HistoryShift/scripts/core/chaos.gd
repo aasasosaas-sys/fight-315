@@ -218,6 +218,9 @@ func _generic(kind: String, id: String, info: Dictionary, ev: Dictionary) -> Arr
 					out.append({"refused": true, "id": "", "title": "%s「……証拠を見せてもらおう」" % nm, "changes": []})
 		"battle":
 			pass
+		"project":
+			if db.projects.has(id) and WarModel.available(db, state.actions, state.war.get("pillars", {}), id)[0]:
+				out.append(_act({"verb": "project", "target": id}))
 	return out.filter(func(h): return not h.is_empty())
 
 
@@ -290,10 +293,12 @@ func _battle_kill(label: String) -> Array:
 
 func _act(a: Dictionary) -> Dictionary:
 	a["era"] = active_era
+	var war_before := state.war_tier()
 	var before := _snapshot()
 	var changes := state.apply_action(a)
 	var last: Dictionary = state.actions[-1]
-	return _finish("act%d" % int(last["seq"]), HistoryActors.headline(db, last), str(last.get("text", "")), changes, before, {"action": last})
+	return _finish("act%d" % int(last["seq"]), HistoryActors.headline(db, last), str(last.get("text", "")), changes, before,
+		{"action": last, "war_before": war_before, "war_after": state.war_tier()})
 
 
 func _snapshot() -> Dictionary:
@@ -415,9 +420,11 @@ func fire_total() -> int:
 
 
 func _apply(r: Dictionary) -> Dictionary:
+	var war_before := state.war_tier()
 	var before := _snapshot()
 	var changes := state.apply_chaos(r, active_era)
-	return _finish(str(r.get("id", "")), str(r.get("title", "")), str(r.get("text", "")), changes, before, {"rule": r})
+	return _finish(str(r.get("id", "")), str(r.get("title", "")), str(r.get("text", "")), changes, before,
+		{"rule": r, "war_before": war_before, "war_after": state.war_tier()})
 
 
 ## 今回の自由探索で起きた変化をまとめて返す（同じ問題は最後の結果だけ。アフター画面用）
