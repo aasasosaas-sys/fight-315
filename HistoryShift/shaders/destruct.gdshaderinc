@@ -47,7 +47,7 @@ vec3 destruct_albedo(vec4 dstate, vec2 dcut, vec3 base, vec3 wpos, float n1, flo
 		if (burn > 0.01) {
 			// 燃えさしの赤い筋
 			float e = smoothstep(0.47, 0.5, n3) * (1.0 - smoothstep(0.5, 0.53, n3));
-			emis = vec3(1.0, 0.32, 0.06) * burn * (m * 0.6 + e * 2.5);
+			emis = vec3(1.0, 0.3, 0.05) * burn * (m * 0.35 + e * (0.3 + m) * 1.2);
 		}
 	}
 	if (cr > 0.001) {

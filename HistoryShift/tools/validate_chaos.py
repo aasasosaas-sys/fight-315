@@ -308,9 +308,16 @@ def main():
                         if types and not any(t in kinds for t in types): err(f"{tw}: no {types} at {lms} in {era} (has {sorted(kinds)})")
                         if "value" in x and sum(a_["value"] for a_ in avail) < x["value"]: err(f"{tw}: value {x['value']} exceeds what {lms} holds in {era} ({sum(a_['value'] for a_ in avail)})")
                     elif k == "fire":
-                        fl = sum(a_["flammable"] for a_ in avail)
-                        if fl < min(int(x.get("min", 1)), 5): err(f"{tw}: only {fl} flammable buildings at {lms} in {era}")
-                        if int(x.get("min", 1)) > 24: err(f"{tw}: fire counts are reported at 5/12/24 per landmark; min > 24 unreachable at one landmark")
+                        # 延焼は名所ごとに 5・12・24 棟目で通知される。min はその次の段に切り上がる
+                        mn = int(x.get("min", 1))
+                        if "at" in x:
+                            step = next((st for st in (5, 12, 24) if st >= mn), None)
+                            fl = sum(a_["flammable"] for a_ in avail)
+                            if step is None: err(f"{tw}: fire is reported at 5/12/24 per landmark; min {mn} > 24 unreachable")
+                            elif fl < step: err(f"{tw}: fire min {mn} needs {step} burning buildings but {lms} has only {fl} flammable in {era}")
+                        else:
+                            tot = sum(max([st for st in (5, 12, 24) if st <= a_["flammable"]] or [0]) for a_ in eu.values())
+                            if tot < mn: err(f"{tw}: fire min {mn} anywhere exceeds what {era} can report ({tot})")
                     elif k == "sink":
                         if kinds.get("boat", 0) < int(x.get("min", 1)): err(f"{tw}: only {kinds.get('boat', 0)} boats in {era}")
                     elif k == "bridge":

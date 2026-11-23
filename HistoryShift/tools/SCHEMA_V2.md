@@ -101,3 +101,32 @@ v1（tools/SCHEMA.md）の項目はすべてそのまま有効。v2 では以下
 - `force`：問題の史実を強制する（介入 `cause: "chaos"`, `method: -1`）。本来の史実と違う選択肢にする。のちにその問題のミッション（修復ミッションは自動生成）を成功させれば上書きされる。
 - `vars` + `year`：その年の時点で歴史パラメータを変える（`chaos_mods` に保存、同じルールは1回だけ）。前の時代の分は時代の区切りより前、同じ時代は year <= 問題の年 の問題より前に効く。
 - `text`：HUD の「歴史が揺らいだ！」とアフター画面に出る、その時代の史実にもとづく一文（〇〇のせいで……）。民間人を標的にした描写はしない。
+
+## data/actors/<eraId>.json と動詞（自由な歴史改変の一般則）
+人物・合戦のデータ。手作りルールに当たらない行動は `scripts/core/actors.gd`（HistoryActors）の一般則で解決する。
+行動は `HistoryState.actions` に記録され、`HistoryActors.resolve()` が毎回すべてを作り直す（純粋関数）。
+検証：`python3 tools/validate_chaos.py --gaps --density 6`（名所の破壊ユニット表 tools/landmark_units.json は
+`godot --headless --path . -s tools/dump_landmark_units.gd` で再生成）。
+
+- 人物の項目：name / era / faction / born / died / death（natural illness assassinated killed suicide executed accident poisoned unknown）/
+  active（活動開始年）/ tags / traits（open reform war loyal faith、-2..2）/ spawn / aka / successor / q /
+  contrib（いなくなったとき）/ saved（非業の死・病死を防いだとき）/ doc（盗まれたとき）/ persuade / give（特例）/ schedule（予定）。
+- 同じ人物を後の時代のファイルにも書くと、その時代での追加分として合成される（一覧は追加・辞書は上書き・saved/doc は差し替え・
+  spawn はその時代の置き場所）。追加分の contrib・schedule はその時代以降の行動にだけ使う（前の時代の貢献を後の時代で倒して
+  繰り返さない）。基本の項目（生没・死因・タグ・性格・active）は最も古い時代のもの。後の時代で行動したときの一般則の年はその時代の初め。
+- successor：人物の後継者が健在なら、その人物の貢献（contrib）は引き継がれて起こらない（後継者もいなくなれば起こる）。
+  contrib 単位で `"successor": ""` とすると、その貢献だけは後継者がいても失われる。
+- saved の年が人物の時代の最初の問題より前なら、その年を含む時代（era_of_year）に入る。
+- 説得：一般則では性格×論点（＋信頼）で受け入れが決まる。手作りルール（kind persuade）や人物の persuade 特例は「必ず受け入れる特例」。
+- 手作りルールが行動に当たったときは、その行動は記録だけされ（ruled）、人物の状態（倒れた・救われた・信頼・後継者判定）には数えるが、
+  一般則と人物データの効果は出さない（ルールが受け持つ）。検証の別解の数もそれに合わせて数える。
+- 同じ出来事に当たるルールはすべて（各1回）発動する。同じ問題を強制するルールが複数あれば、後に書かれたもの（通し番号の新しいほう）が勝つ。
+  原因つき（cause）の kill ルールを原因なしのルールの後ろに書けば、その原因のときだけ上書きになる。一度倒れた人物は二度と倒れない。
+- 延焼（fire）は名所ごとに 5・12・24 棟目で通知される。min はその段に切り上がり、その名所に燃える建物が足りなければ検証エラー。
+  名所ごとの通知される建物（destroy の type・value、橋、船）も tools/landmark_units.json で検証する。
+- 自由探索では人物はプレイヤーから 110m 以内の近い順に最大16人だけ実体化し（護衛は1人3人・合計30人まで）、230m 離れると片づく
+  （連れ回し中・予定の途中・倒れた人は残る）。予定（schedule）はその時代のものを順にこなす。
+- 意図しなくても数える：倒れた原因（info.cause）は銃 shot・流れ弾 stray・爆発 explosion・火 fire・車 vehicle・馬 horse・飛行機 plane・
+  追手の撃ち合い crossfire・瓦礫 debris。会話で引き止める・追い回す・けが・連れ回し・瓦礫で道がふさがる、で予定に 25 秒以上遅れると delay。
+- 採点（○×・100点・エンディング）はミッションか自由な行動かを問わず、結果の歴史だけで決まる。どの問題×選択肢にも
+  「未来を語る」（steer：関わる人物に未来の品を渡して信頼を得てから語る）で必ず届く。

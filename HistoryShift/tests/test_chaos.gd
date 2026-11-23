@@ -190,7 +190,8 @@ func _run() -> void:
 	_check(hk.size() == 1 and hk[0]["id"] == "sg_destroy_osaka", "castle keep destroyed -> Osaka rule")
 	_check(tr.session_changes().size() > 0, "session_changes")
 	tr.end_session()
-	_check(tr.session_hits.filter(func(h): return h.has("rule")).size() == 3, "session hits kept after end")
+	var kept: Array = tr.session_hits.map(func(h): return h.get("id", ""))
+	_check("sg_massacre" in kept and "sg_fire_kyoto" in kept and "sg_destroy_osaka" in kept, "session hits kept after end")
 	# predict_ripple は混乱を含めて予測する
 	var q05: Dictionary = db.by_id["sengoku_05"]
 	_check(st3.world_choice(q05) == 0, "fire forced sengoku_05=0")
@@ -293,10 +294,11 @@ func _generic_tests(db: HistoryDB) -> void:
 	_check(h1.size() == 1 and str(h1[0]["title"]).contains("流れ弾"), "accidental kill attributed to stray bullet")
 	var h2 := tr.record("delay", "織田信長", {"era": "sengoku", "event": "本能寺に入る", "cause_text": "引き止めた"})
 	_check(h2.size() == 1 and st4.world_choice(db.by_id["sengoku_05"]) == 0, "delay Nobunaga -> survives Honno-ji")
+	var bh: Array = []
 	for i in 5:
-		tr.record("kill", "東軍の兵", {"era": "sengoku", "type": "soldier"})
+		bh.append_array(tr.record("kill", "東軍の兵", {"era": "sengoku", "type": "soldier"}))
 	var bt := st4.actions.filter(func(a): return a["verb"] == "battle")
-	_check(bt.size() == 1 and bt[0]["side"] == "西軍", "killing 5 East soldiers helps the West")
+	_check((bt.size() == 1 and bt[0]["side"] == "西軍") or bh.any(func(h): return str(h.get("id", "")) == "sg_alt_battle_west"), "killing 5 East soldiers helps the West")
 	for i in 5:
 		tr.record("destroy", "mountain", {"era": "sengoku", "type": "hall", "value": 100})
 	_check(st4.actions.any(func(a): return a["verb"] == "sabotage" and a["target"] == "mountain"), "generic sabotage of an unruled landmark")

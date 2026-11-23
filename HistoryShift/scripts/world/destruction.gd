@@ -730,7 +730,7 @@ func _fire_step(dt: float) -> void:
 					tw.tween_callback(fxn.queue_free)
 				_fires.remove_at(k)
 				continue
-		elif spread:
+		if spread and float(f["after"]) < 6.0:
 			var lm := _lm_id(u)
 			if int(_fire_spread.get(lm, 0)) < FIRE_SPREAD_CAP and _fires.size() < MAX_FIRES:
 				for n in units_near(u.center(), 10.0):
@@ -752,23 +752,23 @@ func _make_fire_fx(u: Destructible, with_light: bool) -> Node3D:
 	add_child(root)
 	var ext := (u.local_max - u.local_min) * 0.5
 	var ctr := u.center()
-	var y := u.top_y - 1.0 if not u.destroyed else u.base_y + 0.4
+	var y := u.top_y - minf(1.2, (u.top_y - u.base_y) * 0.2) if not u.destroyed else u.base_y + 0.4
 	if u.kind == "boat":
 		y = float(world.get("water_level")) + 1.0
 	root.global_position = Vector3(ctr.x, maxf(y, u.base_y + 0.5), ctr.z)
 	var fl := CPUParticles3D.new()
 	fl.name = "Flames"
-	fl.amount = 28
-	fl.lifetime = 0.9
+	fl.amount = 40
+	fl.lifetime = 1.0
 	fl.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
 	fl.emission_box_extents = Vector3(maxf(ext.x * 0.7, 0.4), 0.5, maxf(ext.z * 0.7, 0.4))
 	fl.direction = Vector3.UP
 	fl.spread = 15.0
-	fl.initial_velocity_min = 2.0
-	fl.initial_velocity_max = 4.5
-	fl.gravity = Vector3(0, 2.0, 0)
-	fl.scale_amount_min = 1.2
-	fl.scale_amount_max = clampf(ext.length() * 0.45, 1.6, 4.0)
+	fl.initial_velocity_min = 2.5
+	fl.initial_velocity_max = 5.5
+	fl.gravity = Vector3(0, 3.0, 0)
+	fl.scale_amount_min = 1.8
+	fl.scale_amount_max = clampf(ext.length() * 0.5, 2.6, 5.5)
 	var c1 := Curve.new()
 	c1.add_point(Vector2(0, 0.4)); c1.add_point(Vector2(0.3, 1.0)); c1.add_point(Vector2(1, 0.1))
 	fl.scale_amount_curve = c1

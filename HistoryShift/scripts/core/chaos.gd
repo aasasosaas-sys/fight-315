@@ -132,6 +132,9 @@ func record(kind: String, id: String, info: Dictionary = {}) -> Array:
 		return []
 	if db.actor_name(id) != "":
 		id = db.actor_name(id)
+		# 一度倒れた人物はもう倒れない（同じ人物の死で二重に歴史を揺らさない）
+		if kind == "kill" and str(info.get("type", "")) == "figure" and _actor_gone(id):
+			return []
 	var ev := {"kind": kind, "id": id, "type": str(info.get("type", "")), "at": _landmark_of(kind, id, info),
 		"count": maxi(1, int(info.get("count", 1))), "value": int(info.get("value", 100))}
 	for k in EXTRA_KEYS:

@@ -127,7 +127,7 @@ func _compute_bounds() -> void:
 			for cy in [-1.0, 1.0]:
 				for cz in [-1.0, 1.0]:
 					pts.append(t * Vector3(s.x * cx, s.y * cy, s.z * cz))
-	if pts.size() == 0 or kind in ["torii", "lantern", "lamp", "prop", "boat", "stall", "fence", "pagoda", "castle_keep", "gate", "yagura"]:
+	if true:
 		# 形状が粗い／無いものは頂点から（間引き）
 		var uid: int = id
 		for mat in def["ranges"]:
@@ -135,7 +135,7 @@ func _compute_bounds() -> void:
 			var sa: Array = def["surf"][mat]
 			var V: PackedVector3Array = sa[0]
 			var U2: PackedVector2Array = sa[5]
-			var step := maxi(1, (int(rg[1]) - int(rg[0])) / 400)
+			var step := maxi(1, (int(rg[1]) - int(rg[0])) / 160)
 			for i in range(int(rg[0]), int(rg[1]), step):
 				if int(U2[i].x) == uid:
 					pts.append(V[i])

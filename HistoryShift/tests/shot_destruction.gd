@@ -37,12 +37,21 @@ func _shot(name: String) -> void:
 var tcam: Camera3D
 
 
-func _frame(target: Vector3, dist: float, height := 6.0, side := 0.0) -> void:
+func _frame(target: Vector3, dist: float, height := 6.0, side := 0.0, ignore: Object = null) -> void:
 	var w = sess.world
-	var dir := Vector3(sin(side), 0, cos(side))
-	var pos := target + dir * dist
-	var g: float = w.height_at(pos.x, pos.z)
-	pos.y = maxf(g, float(w.water_level)) + height
+	# 視線が通る向きを探す（建物・木の幹に遮られない位置）
+	var space := get_viewport().world_3d.direct_space_state
+	var pos := Vector3.ZERO
+	var dir := Vector3.ZERO
+	for k in 12:
+		var a := side + (k / 2) * 0.55 * (1.0 if k % 2 == 0 else -1.0)
+		dir = Vector3(sin(a), 0, cos(a))
+		pos = target + dir * dist
+		pos.y = maxf(float(w.height_at(pos.x, pos.z)), float(w.water_level)) + height
+		var q := PhysicsRayQueryParameters3D.create(pos, target, Game.COLLISION_WORLD)
+		var hit := space.intersect_ray(q)
+		if hit.is_empty() or hit["collider"] == ignore or (hit["position"] as Vector3).distance_to(target) < 4.0:
+			break
 	# プレイヤーは画面外（後ろ）へ
 	var pp := target + dir * (dist + 6.0)
 	p.teleport(Vector3(pp.x, w.height_at(pp.x, pp.z), pp.z))
@@ -107,7 +116,8 @@ func _era(era_id: String) -> void:
 	var house := _find("house", cap + Vector3(0, 0, 20))
 	if house:
 		var c := house.center()
-		await _frame(c, 20.0, 5.0, 0.6)
+		var hz := house.frame.basis.z
+		await _frame(c, 20.0, 5.0, atan2(hz.x, hz.z) + 0.5, house)
 		await _shot("%s_house_before" % era_id)
 		var t0 := Time.get_ticks_usec()
 		Effects.explosion(get_tree(), c + Vector3(0, 0.5, 0), 7.0, 300.0, 0, 0.0)
@@ -117,7 +127,7 @@ func _era(era_id: String) -> void:
 		t0 = Time.get_ticks_usec()
 		Effects.explosion(get_tree(), c + Vector3(0.5, 1.0, 0), 11.0, 700.0, 0, 0.0)
 		print("  house blast2 %.1f ms  destroyed=%s" % [(Time.get_ticks_usec() - t0) / 1000.0, house.destroyed])
-		await _wait(0.35)
+		await _wait(0.12)
 		await _shot("%s_house_during" % era_id)
 		await _wait(2.5)
 		await _shot("%s_house_after" % era_id)
@@ -128,14 +138,17 @@ func _era(era_id: String) -> void:
 	var row := _find("house", cap + Vector3(-25, 0, -10), 400.0, func(u: Destructible) -> bool: return u.flammable)
 	if row:
 		var c := row.center()
-		await _frame(c, 26.0, 9.0, 2.2)
-		Shell.fire(get_tree(), "hiya", c + Vector3(0, 6, 8), (c - (c + Vector3(0, 6, 8))).normalized() * 40.0, 0)
-		await _wait(1.0)
+		var fz := row.frame.basis.z
+		await _frame(c, 24.0, 8.0, atan2(fz.x, fz.z) + 0.35, row)
+		row.last_cause = "player"
+		row.ignite()
+		Shell.fire(get_tree(), "hiya", c + fz * 10.0 + Vector3(0, 5, 0), -fz * 40.0 + Vector3(0, -8, 0), 0)
+		await _wait(2.0)
 		await _shot("%s_fire_start" % era_id)
-		await _wait(14.0)
+		await _wait(12.0)
 		await _shot("%s_fire_spread" % era_id)
 		print("  burning=%d" % d.burning_count())
-		await _wait(20.0)
+		await _wait(22.0)
 		await _shot("%s_fire_late" % era_id)
 
 	# ---- 3) 塀（tsuiji 等）を大筒で
@@ -144,7 +157,7 @@ func _era(era_id: String) -> void:
 		wall = _find("fence", cap, 500.0)
 	if wall:
 		var c := wall.center()
-		await _frame(c, 16.0, 3.0, 1.0)
+		await _frame(c, 16.0, 4.0, 1.0, wall)
 		await _shot("%s_wall_before" % era_id)
 		var can := FieldCannon.place(get_tree(), p.global_position + Vector3(2, 0, 0), 0.0, false)
 		await _frames(2)
@@ -159,11 +172,13 @@ func _era(era_id: String) -> void:
 	for td in trees:
 		var o: Vector3 = (td["xf"] as Transform3D).origin
 		var dd := o.distance_to(cap)
+		if d.units_near(o, 10.0).size() > 0:
+			continue
 		if dd < best and dd > 60.0:
 			best = dd
 			tpos = o
 	if tpos != Vector3.INF:
-		await _frame(tpos + Vector3(0, 4, 0), 22.0, 4.0, 0.3)
+		await _frame(tpos + Vector3(0, 4, 0), 26.0, 7.0, 0.3)
 		await _shot("%s_tree_before" % era_id)
 		Effects.explosion(get_tree(), tpos + Vector3(1.5, 0.5, 0), 9.0, 500.0, 0, 0.0)
 		await _wait(0.8)
@@ -179,7 +194,7 @@ func _era(era_id: String) -> void:
 	if boat:
 		var c := boat.center()
 		var side := atan2(port.x - c.x, port.z - c.z)
-		await _frame(c, 30.0, 6.0, side)
+		await _frame(c, 30.0, 6.0, side, boat)
 		await _shot("%s_boat_before" % era_id)
 		Effects.explosion(get_tree(), c + Vector3(0, 1, 0), 10.0, 2000.0, 0, 1.0)
 		await _wait(2.0)
@@ -193,7 +208,7 @@ func _era(era_id: String) -> void:
 		keep = _find("castle_keep", cap, 600.0)
 	if keep:
 		var c := keep.center()
-		await _frame(c, 75.0, 14.0, 0.5)
+		await _frame(c, 75.0, 14.0, 0.5, keep)
 		await _shot("%s_keep_before" % era_id)
 		for i in 6:
 			Effects.explosion(get_tree(), c + Vector3(randf_range(-4, 4), randf_range(-6, 6), randf_range(-4, 4)), 13.0, 900.0, 0, 0.0)

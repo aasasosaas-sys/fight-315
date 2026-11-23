@@ -5,7 +5,7 @@ extends Node3D
 const SPEC := {
 	"cannonball": {"radius": 7.0, "damage": 650.0, "fire": 0.3, "gravity": 9.8, "life": 12.0},
 	"shell": {"radius": 9.0, "damage": 800.0, "fire": 0.35, "gravity": 9.8, "life": 12.0},
-	"hiya": {"radius": 6.5, "damage": 380.0, "fire": 1.0, "gravity": 2.0, "life": 6.0},
+	"hiya": {"radius": 5.0, "damage": 200.0, "fire": 1.0, "gravity": 2.0, "life": 6.0},
 	"grenade": {"radius": 7.0, "damage": 360.0, "fire": 0.3, "gravity": 9.8, "life": 8.0},
 }
 
@@ -97,8 +97,10 @@ func _physics_process(dt: float) -> void:
 	if not hit.is_empty():
 		var col = hit["collider"]
 		# 砲弾の直撃は建物に重く効く
-		if col and col.has_method("blast"):
+		if col and col.has_method("blast") and kind != "hiya":
 			col.blast(float(sp["damage"]) * 0.6, hit["position"], float(sp["fire"]))
+		if col and kind == "hiya" and col.has_method("ignite"):
+			col.ignite()   # 棒火矢は刺さった建物に必ず火をつける
 		_explode(hit["position"] - vel.normalized() * 0.3)
 		return
 	var w = Game.world
