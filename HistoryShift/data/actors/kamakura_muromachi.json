@@ -1,0 +1,499 @@
+{
+ "eraId": "kamakura_muromachi",
+ "actors": [
+  {
+   "name": "源頼朝",
+   "era": "kamakura_muromachi",
+   "faction": "鎌倉幕府",
+   "born": 1147,
+   "died": 1199,
+   "death": "accident",
+   "active": 1180,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "reform": 2,
+    "loyal": -1
+   },
+   "saved": {
+    "year": 1199,
+    "text": "落馬で死ぬはずの頼朝が助かり、源氏将軍のもとで幕府は長く安定した。北条氏の執権政治は生まれなかった。",
+    "vars": {
+     "centralization": 15,
+     "unity": 10,
+     "warrior": 5
+    }
+   }
+  },
+  {
+   "name": "後白河法皇",
+   "era": "kamakura_muromachi",
+   "faction": "朝廷",
+   "born": 1127,
+   "died": 1192,
+   "death": "illness",
+   "active": 1158,
+   "tags": [
+    "ruler",
+    "sacred"
+   ],
+   "traits": {
+    "loyal": -2,
+    "faith": 2
+   }
+  },
+  {
+   "name": "藤原秀康",
+   "era": "kamakura_muromachi",
+   "faction": "朝廷",
+   "born": null,
+   "died": 1221,
+   "death": "executed",
+   "active": 1215,
+   "tags": [
+    "official",
+    "warrior"
+   ],
+   "traits": {
+    "loyal": 2,
+    "war": 1
+   }
+  },
+  {
+   "name": "北条泰時",
+   "era": "kamakura_muromachi",
+   "faction": "鎌倉幕府",
+   "born": 1183,
+   "died": 1242,
+   "death": "illness",
+   "active": 1221,
+   "tags": [
+    "ruler",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2,
+    "loyal": 2,
+    "war": -1
+   },
+   "spawn": "castle",
+   "contrib": [
+    {
+     "vars": {
+      "centralization": -15,
+      "unity": -10
+     },
+     "year": 1225,
+     "note": "御成敗式目を定める者がおらず、武家の法はばらばらのままだった"
+    }
+   ]
+  },
+  {
+   "name": "北条時頼",
+   "era": "kamakura_muromachi",
+   "faction": "鎌倉幕府",
+   "born": 1227,
+   "died": 1263,
+   "death": "illness",
+   "active": 1246,
+   "tags": [
+    "ruler"
+   ],
+   "traits": {
+    "faith": 2,
+    "loyal": 1
+   }
+  },
+  {
+   "name": "北条時宗",
+   "era": "kamakura_muromachi",
+   "faction": "鎌倉幕府",
+   "born": 1251,
+   "died": 1284,
+   "death": "illness",
+   "active": 1268,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "open": -2,
+    "loyal": 1
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "vars": {
+      "unity": -20,
+      "centralization": -15
+     },
+     "year": 1270,
+     "note": "執権不在で元への対応が混乱した"
+    }
+   ],
+   "saved": {
+    "year": 1284,
+    "text": "34歳で病死するはずの時宗が薬で長生きし、恩賞に不満な御家人たちをなんとか抑えた。",
+    "vars": {
+     "unity": 10,
+     "centralization": 10
+    }
+   }
+  },
+  {
+   "name": "後醍醐天皇",
+   "era": "kamakura_muromachi",
+   "faction": "朝廷",
+   "born": 1288,
+   "died": 1339,
+   "death": "illness",
+   "active": 1318,
+   "tags": [
+    "ruler",
+    "sacred",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2,
+    "war": 1,
+    "loyal": -1
+   }
+  },
+  {
+   "name": "二条道平",
+   "era": "kamakura_muromachi",
+   "faction": "朝廷",
+   "born": 1287,
+   "died": 1335,
+   "death": "natural",
+   "active": 1330,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "loyal": 2
+   }
+  },
+  {
+   "name": "楠木正成",
+   "era": "kamakura_muromachi",
+   "faction": "南朝",
+   "born": null,
+   "died": 1336,
+   "death": "suicide",
+   "active": 1331,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "loyal": 2,
+    "war": 1
+   },
+   "spawn": "mountain",
+   "contrib": [
+    {
+     "vars": {
+      "court": -15
+     },
+     "year": 1333,
+     "note": "天皇の政治を武力で支える者がいなくなった"
+    }
+   ],
+   "saved": {
+    "year": 1336,
+    "text": "湊川で自害するはずの正成が生き延び、南朝は京都を取り戻して足利方と互角に渡り合った。",
+    "vars": {
+     "court": 15,
+     "unity": -10
+    }
+   }
+  },
+  {
+   "name": "足利尊氏",
+   "era": "kamakura_muromachi",
+   "faction": "足利",
+   "born": 1305,
+   "died": 1358,
+   "death": "illness",
+   "active": 1333,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": -1,
+    "faith": 1
+   },
+   "spawn": "castle",
+   "contrib": [
+    {
+     "q": "kamakura_muromachi_06",
+     "choice": 1,
+     "note": "後醍醐天皇に背く有力武士がおらず、建武の新政が続いた"
+    }
+   ],
+   "persuade": {
+    "忠義を説く": {
+     "force": {
+      "q": "kamakura_muromachi_06",
+      "choice": 1
+     },
+     "text": "尊氏は帝への忠義を誓い直し、新政に背かなかった。"
+    }
+   }
+  },
+  {
+   "name": "足利直義",
+   "era": "kamakura_muromachi",
+   "faction": "足利",
+   "born": 1306,
+   "died": 1352,
+   "death": "poisoned",
+   "active": 1336,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "loyal": 1,
+    "reform": 1
+   },
+   "saved": {
+    "year": 1352,
+    "text": "毒殺されるはずの直義が助かり、尊氏との和解が成った。観応の擾乱は早く収まった。",
+    "vars": {
+     "unity": 10
+    }
+   }
+  },
+  {
+   "name": "足利義満",
+   "era": "kamakura_muromachi",
+   "faction": "室町幕府",
+   "born": 1358,
+   "died": 1408,
+   "death": "illness",
+   "active": 1368,
+   "tags": [
+    "ruler"
+   ],
+   "traits": {
+    "open": 2,
+    "war": 1
+   },
+   "spawn": "temple",
+   "contrib": [
+    {
+     "q": "kamakura_muromachi_03",
+     "choice": 2,
+     "note": "明との国交は義教の代まで開かれなかった"
+    }
+   ],
+   "persuade": {
+    "鎖国を勧める": {
+     "force": {
+      "q": "kamakura_muromachi_03",
+      "choice": 2
+     },
+     "text": "義満は明への朝貢をやめた。勘合貿易は義教の代まで持ち越された。"
+    }
+   }
+  },
+  {
+   "name": "足利義教",
+   "era": "kamakura_muromachi",
+   "faction": "室町幕府",
+   "born": 1394,
+   "died": 1441,
+   "death": "assassinated",
+   "active": 1429,
+   "tags": [
+    "ruler"
+   ],
+   "traits": {
+    "war": 2,
+    "reform": 1,
+    "loyal": -1
+   },
+   "saved": {
+    "year": 1441,
+    "text": "嘉吉の乱で討たれるはずの義教が助かり、将軍の専制がさらに続いた。守護大名は抑え込まれた。",
+    "vars": {
+     "centralization": 20,
+     "unity": 10
+    }
+   }
+  },
+  {
+   "name": "足利義政",
+   "era": "kamakura_muromachi",
+   "faction": "室町幕府",
+   "born": 1436,
+   "died": 1490,
+   "death": "illness",
+   "active": 1449,
+   "tags": [
+    "ruler",
+    "artist"
+   ],
+   "traits": {
+    "war": -2,
+    "faith": 1
+   }
+  },
+  {
+   "name": "細川勝元",
+   "era": "kamakura_muromachi",
+   "faction": "細川",
+   "born": 1430,
+   "died": 1473,
+   "death": "illness",
+   "active": 1445,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": -1
+   },
+   "spawn": "castle",
+   "contrib": [
+    {
+     "vars": {
+      "unity": 20,
+      "centralization": 30
+     },
+     "year": 1460,
+     "note": "東軍の総大将がおらず、応仁の乱はしぼんだ"
+    }
+   ]
+  },
+  {
+   "name": "山名宗全",
+   "era": "kamakura_muromachi",
+   "faction": "山名",
+   "born": 1404,
+   "died": 1473,
+   "death": "illness",
+   "active": 1441,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": -1
+   },
+   "spawn": "village",
+   "contrib": [
+    {
+     "vars": {
+      "unity": 20,
+      "centralization": 30
+     },
+     "year": 1460,
+     "note": "西軍の総大将がおらず、応仁の乱はしぼんだ"
+    }
+   ]
+  },
+  {
+   "name": "道元",
+   "era": "kamakura_muromachi",
+   "faction": "曹洞宗",
+   "born": 1200,
+   "died": 1253,
+   "death": "illness",
+   "active": 1227,
+   "tags": [
+    "religious"
+   ],
+   "traits": {
+    "faith": 2,
+    "war": -2
+   }
+  },
+  {
+   "name": "栄西",
+   "era": "kamakura_muromachi",
+   "faction": "臨済宗",
+   "born": 1141,
+   "died": 1215,
+   "death": "natural",
+   "active": 1191,
+   "tags": [
+    "religious",
+    "scholar"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": 2
+   }
+  },
+  {
+   "name": "絶海中津",
+   "era": "kamakura_muromachi",
+   "faction": "臨済宗",
+   "born": 1336,
+   "died": 1405,
+   "death": "natural",
+   "active": 1378,
+   "tags": [
+    "religious",
+    "scholar",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2
+   }
+  },
+  {
+   "name": "蓮如",
+   "era": "kamakura_muromachi",
+   "faction": "本願寺",
+   "born": 1415,
+   "died": 1499,
+   "death": "natural",
+   "active": 1457,
+   "tags": [
+    "religious"
+   ],
+   "traits": {
+    "faith": 2,
+    "reform": 1
+   }
+  }
+ ],
+ "battles": [
+  {
+   "era": "kamakura_muromachi",
+   "id": "bunei",
+   "name": "文永の役（博多湾）",
+   "at": "battlefield",
+   "year": 1274,
+   "sides": [
+    {
+     "name": "鎌倉の御家人",
+     "label": "御家人の武者",
+     "historical": true
+    },
+    {
+     "name": "元・高麗の軍",
+     "label": "元軍の兵",
+     "wins": {
+      "vars": {
+       "unity": -20,
+       "open_asia": 20,
+       "warrior": -10
+      }
+     },
+     "text": "あなたが御家人たちを蹴散らしたので、元軍は博多に上陸して大宰府まで進んだ。幕府は元への服属を迫られた。"
+    }
+   ]
+  }
+ ]
+}

@@ -267,12 +267,13 @@ static func rubble(palette: Array, frame: Transform3D, ext: Vector2, h: float, c
 	var n := clampi(int(area / 2.2), 6, 34)
 	var dark := lerpf(1.0, 0.3, charred)
 	# 土台の盛り上がり（低い平たい塊）
-	var base_col: Color = (palette[0][1] as Color) * 0.62 * dark
+	var base_col := Color(0.62, 0.55, 0.47) * dark
 	for k in 3:
-		var sx := ext.x * rng.randf_range(0.55, 0.9)
-		var sz := ext.y * rng.randf_range(0.55, 0.9)
-		var off := Vector3(rng.randf_range(-0.3, 0.3) * ext.x, h * 0.12 * k, rng.randf_range(-0.3, 0.3) * ext.y)
-		kit.box("earth", frame * Transform3D(Basis(Vector3.UP, rng.randf_range(-0.3, 0.3)), off), Vector3(sx * 2.0, h * 0.35, sz * 2.0), Color(base_col.r, base_col.g * 0.95, base_col.b * 0.9))
+		var sx := ext.x * rng.randf_range(0.5, 0.85) * (1.0 - k * 0.22)
+		var sz := ext.y * rng.randf_range(0.5, 0.85) * (1.0 - k * 0.22)
+		var off := Vector3(rng.randf_range(-0.2, 0.2) * ext.x, h * 0.1 * k - h * 0.1, rng.randf_range(-0.2, 0.2) * ext.y)
+		var b := Basis(Vector3.UP, rng.randf_range(-0.3, 0.3)) * Basis(Vector3.RIGHT, rng.randf_range(-0.08, 0.08))
+		kit.box("earth", frame * Transform3D(b, off), Vector3(sx * 2.0, h * 0.3, sz * 2.0), base_col * rng.randf_range(0.85, 1.0))
 	for k in n:
 		var r := rng.randf() * total
 		var pick: Array = palette[0]

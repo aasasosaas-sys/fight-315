@@ -11,6 +11,10 @@ var by_id: Dictionary = {}
 var rules: Array = []
 var errors: PackedStringArray = []
 var modern: Dictionary = {}     # data/modern.json（現代エンディングの分岐）
+var actors: Dictionary = {}     # 人物名 -> 人物データ（data/actors/<era>.json、HistoryActors が使う）
+var actor_alias: Dictionary = {} # 別名 -> 人物名
+var battles: Array = []         # 合戦（data/actors/<era>.json の battles）
+var q_actors: Dictionary = {}   # qid -> [{name, at}]（その問題に関わる人物と、会える名所）
 
 
 static func load_all(dir := "res://data") -> HistoryDB:
@@ -59,7 +63,84 @@ static func load_all(dir := "res://data") -> HistoryDB:
 		if db.by_id.has(r["ifQ"]) and db.by_id.has(r["thenQ"]) and db.by_id[r["ifQ"]]["year"] < db.by_id[r["thenQ"]]["year"]:
 			ok.append(r)
 	db.rules = ok
+	db._load_actors(dir.path_join("actors"))
 	return db
+
+
+## data/actors/<era>.json を読む。問題に関わる人物（ミッションの npc に出る人物、actor.q）も集計する。
+func _load_actors(adir: String) -> void:
+	if not DirAccess.dir_exists_absolute(adir):
+		return
+	var files := DirAccess.get_files_at(adir)
+	files.sort()
+	for f in files:
+		if not f.ends_with(".json"):
+			continue
+		var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(adir.path_join(f)))
+		if typeof(d) != TYPE_DICTIONARY:
+			errors.append("actors/%s: JSON を読めません" % f)
+			continue
+		for a in d.get("actors", []):
+			if not a.has("era"):
+				a["era"] = d.get("eraId", "")
+			actors[a["name"]] = a
+			for al in a.get("aka", []):
+				actor_alias[al] = a["name"]
+		for b in d.get("battles", []):
+			if not b.has("era"):
+				b["era"] = d.get("eraId", "")
+			battles.append(b)
+	for q in questions:
+		var lst: Array = []
+		var seen := {}
+		for m in q.get("missions", []):
+			for st in m.get("steps", []):
+				var an := actor_name(str(st.get("npc", "")))
+				if an != "" and not seen.has(an):
+					seen[an] = true
+					lst.append({"name": an, "at": str(st.get("at", actors[an].get("spawn", "capital")))})
+		q_actors[q["id"]] = lst
+	for an in actors:
+		for qid in actors[an].get("q", []):
+			if q_actors.has(qid) and not q_actors[qid].any(func(x): return x["name"] == an):
+				q_actors[qid].append({"name": an, "at": str(actors[an].get("spawn", "capital"))})
+
+
+## 表記ゆれ（「老中 田沼意次」「羽柴秀吉」「厩戸王（聖徳太子）」）→ 人物名。知らなければ ""
+func actor_name(n: String) -> String:
+	if n == "":
+		return ""
+	if actors.has(n):
+		return n
+	if actor_alias.has(n):
+		return actor_alias[n]
+	var lp := n.find("（")
+	if lp > 0:
+		var head := n.substr(0, lp)
+		if actors.has(head) or actor_alias.has(head):
+			return actor_name(head)
+	for k in actors:
+		if k.length() >= 2 and (n.ends_with(" " + k) or n.ends_with("　" + k)):
+			return k
+	return ""
+
+
+func actor(n: String) -> Dictionary:
+	var k := actor_name(n)
+	return actors[k] if k != "" else {}
+
+
+## 年 → その年を含む時代（問題の年で判定。最初の問題より前は最初の時代）
+func era_of_year(y: int) -> String:
+	var best := ERA_ORDER[0]
+	for e in eras:
+		var ys: Array = e.get("questions", []).map(func(q): return int(q["year"]))
+		if ys.is_empty():
+			continue
+		if y >= ys.min() or e["eraId"] == ERA_ORDER[0]:
+			if ERA_ORDER.find(e["eraId"]) >= ERA_ORDER.find(best):
+				best = e["eraId"]
+	return best
 
 
 func get_era(id: String) -> Dictionary:

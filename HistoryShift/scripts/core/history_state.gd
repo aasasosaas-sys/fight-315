@@ -23,6 +23,10 @@ var db: HistoryDB
 var interventions: Dictionary = {}   # qid -> {"choice": int, "method": int}（自由探索の混乱は method -1, "cause": "chaos", "rule", "note"）
 var chaos_mods: Array = []           # 自由探索の混乱による歴史パラメータの変化 [{rule, era, year, effects, title}]
 var chaos_count := 0                 # 自由探索で歴史が揺らいだ回数
+var actions: Array = []              # 自由な行動の記録 [{verb, target, era, seq, ...}]（HistoryActors.resolve で毎回解決）
+var seq := 0                         # 介入・混乱・行動の通し番号（後のものが前のものを上書きする）
+var _layer: Dictionary = {"forces": {}, "mods": [], "notes": {}}
+var effective: Dictionary = {}       # 実際に効いている介入（ミッション・混乱・行動を通し番号でまとめたもの）
 var answers: Dictionary = {}         # qid -> 確定解答 (-1 = 未解答)
 var exam_submitted := false
 var alterations := 0
@@ -43,7 +47,8 @@ func _init(p_db: HistoryDB) -> void:
 
 
 func reset_all() -> void:
-	interventions.clear(); answers.clear(); history_log.clear(); chaos_mods.clear()
+	interventions.clear(); answers.clear(); history_log.clear(); chaos_mods.clear(); actions.clear()
+	seq = 0
 	for q in db.questions:
 		answers[q["id"]] = -1
 	exam_submitted = false
@@ -104,13 +109,14 @@ static func _mod_era(m: Dictionary) -> int:
 
 ## 介入一覧（と自由探索の混乱）から歴史全体を計算する（純粋関数）。mods を省略すると chaos_mods を使う。
 ## 混乱によるパラメータ変化は「前の時代のもの → 時代の区切り → 同じ時代で year <= 問題の年のもの」の順に積む。
-func simulate(ivs: Dictionary, mods: Variant = null) -> Dictionary:
+func simulate(p_ivs: Dictionary, mods: Variant = null) -> Dictionary:
+	var ivs := p_ivs if mods != null else _merge_layer(p_ivs)
 	var st := base_state()
 	var w := {}
 	var why := {}
 	var eras := {}
 	var last_era := ""
-	var pend: Array = (chaos_mods if mods == null else mods).duplicate()
+	var pend: Array = (chaos_mods + _layer["mods"]) if mods == null else (mods as Array).duplicate()
 	pend.sort_custom(func(a, b): return _mod_era(a) < _mod_era(b) or (_mod_era(a) == _mod_era(b) and int(a["year"]) < int(b["year"])))
 	var mi := 0
 	for q in db.questions:
@@ -129,7 +135,8 @@ func simulate(ivs: Dictionary, mods: Variant = null) -> Dictionary:
 		if ivs.has(qid):
 			fact = ivs[qid]["choice"]
 			method = ivs[qid].get("method", 0)
-			why[qid] = ("時空の混乱：" + str(ivs[qid].get("note", "自由探索での大暴れ"))) if ivs[qid].get("cause", "") == "chaos" else "あなたの介入"
+			var cz := str(ivs[qid].get("cause", ""))
+			why[qid] = ("時空の混乱：" + str(ivs[qid].get("note", "自由探索での大暴れ"))) if cz == "chaos" else (("あなたの行動：" + str(ivs[qid].get("note", ""))) if cz == "actor" else "あなたの介入")
 		else:
 			var done := false
 			# 旧来の連鎖ルール（ある出来事が起きたら、後の出来事がこうなる）
@@ -157,7 +164,27 @@ func simulate(ivs: Dictionary, mods: Variant = null) -> Dictionary:
 	return {"world": w, "reasons": why, "eras": eras, "final": st}
 
 
+## 自由な行動の層（強制される史実）を、通し番号の新しいほうが勝つように介入へ重ねる
+func _merge_layer(ivs: Dictionary) -> Dictionary:
+	var forces: Dictionary = _layer["forces"]
+	if forces.is_empty():
+		return ivs
+	var eff := ivs.duplicate()
+	for qid in forces:
+		var f: Dictionary = forces[qid]
+		if not eff.has(qid) or int(eff[qid].get("seq", 0)) < int(f["seq"]):
+			eff[qid] = {"choice": int(f["choice"]), "method": -1, "cause": "actor", "note": f["note"], "seq": int(f["seq"])}
+	return eff
+
+
+func next_seq() -> int:
+	seq += 1
+	return seq
+
+
 func recompute() -> void:
+	_layer = HistoryActors.resolve(db, actions) if not actions.is_empty() else {"forces": {}, "mods": [], "notes": {}}
+	effective = _merge_layer(interventions)
 	var r := simulate(interventions)
 	world = r["world"]
 	reasons = r["reasons"]
@@ -168,7 +195,7 @@ func recompute() -> void:
 	if has_chaos():
 		var calm := {}
 		for k in interventions:
-			if interventions[k].get("cause", "") != "chaos":
+			if not (str(interventions[k].get("cause", "")) in ["chaos", "actor"]):
 				calm[k] = interventions[k]
 		var r0 := simulate(calm, [])
 		for q in db.questions:
@@ -187,11 +214,11 @@ func is_altered(q: Dictionary) -> bool: return world_choice(q) != q["real"]
 func is_intervened(q: Dictionary) -> bool: return interventions.has(q["id"])
 func reason(q: Dictionary) -> String: return reasons.get(q["id"], "")
 ## 自由探索の混乱で直接書き換わった問題か
-func is_chaos(q: Dictionary) -> bool: return interventions.get(q["id"], {}).get("cause", "") == "chaos"
+func is_chaos(q: Dictionary) -> bool: return str(effective.get(q["id"], {}).get("cause", "")) in ["chaos", "actor"]
 ## 混乱がなければ史実が違っていた問題か（直接・波及の両方）
 func is_chaos_touched(q: Dictionary) -> bool: return chaos_touched.has(q["id"])
 func has_chaos() -> bool:
-	if not chaos_mods.is_empty():
+	if not chaos_mods.is_empty() or not actions.is_empty():
 		return true
 	for k in interventions:
 		if interventions[k].get("cause", "") == "chaos":
@@ -236,7 +263,7 @@ func param_lines(st: Dictionary = {}) -> Array:
 ## 改変を適用し、歴史全体を再計算する。起きた変化（depth 0 = 直接改変、1 = 波及）を返す。
 func apply_change(q: Dictionary, choice: int, cause: String, method := 0) -> Array:
 	var old := world.duplicate()
-	interventions[q["id"]] = {"choice": choice, "method": method}
+	interventions[q["id"]] = {"choice": choice, "method": method, "seq": next_seq()}
 	recompute()
 	var changes: Array = []
 	for cq in db.questions:
@@ -274,7 +301,7 @@ func apply_chaos(rule: Dictionary, era_id: String) -> Array:
 		var qid := str(f.get("q", ""))
 		if not db.by_id.has(qid):
 			continue
-		interventions[qid] = {"choice": int(f.get("choice", 0)), "method": -1, "cause": "chaos", "rule": rid, "note": title}
+		interventions[qid] = {"choice": int(f.get("choice", 0)), "method": -1, "cause": "chaos", "rule": rid, "note": title, "seq": next_seq()}
 		forced.append(qid)
 	if rule.has("vars"):
 		var exists := false
@@ -321,17 +348,53 @@ func chaos_in_effect(rule: Dictionary) -> bool:
 		any = true
 	var fs: Variant = rule.get("force", [])
 	for f in (fs if fs is Array else [fs]):
-		var iv: Dictionary = interventions.get(str(f.get("q", "")), {})
+		var iv: Dictionary = effective.get(str(f.get("q", "")), {})
 		if iv.get("cause", "") != "chaos" or int(iv.get("choice", -1)) != int(f.get("choice", 0)):
 			return false
 		any = true
 	return any
 
 
+## 自由な行動（HistoryActors の動詞）を記録して歴史全体を再計算する。戻り値は apply_chaos と同じ形の変化一覧
+func apply_action(action: Dictionary) -> Array:
+	var old := world.duplicate()
+	var a := action.duplicate(true)
+	a["seq"] = next_seq()
+	actions.append(a)
+	recompute()
+	chaos_count += 1
+	var title := HistoryActors.headline(db, a)
+	var notes: Array = _layer["notes"].get(a["seq"], [])
+	a["text"] = "。".join(notes.filter(func(n): return n != "")) if not notes.is_empty() else ""
+	var changes: Array = []
+	for cq in db.questions:
+		var id: String = cq["id"]
+		var was: int = old.get(id, cq["real"])
+		var now: int = world.get(id, cq["real"])
+		if was == now:
+			continue
+		var direct: bool = str(effective.get(id, {}).get("cause", "")) == "actor" and int(effective[id].get("seq", 0)) == int(a["seq"])
+		var c := {"question": cq, "from": was, "to": now, "depth": 0 if direct else 1, "chaos": true,
+			"cause": ("あなたの行動：" + title) if direct else (reasons.get(id, "歴史の流れが元に戻った") if now != cq["real"] else "歴史の流れが元に戻った")}
+		if direct:
+			changes.push_front(c)
+		else:
+			changes.append(c)
+	a["changed"] = changes.map(func(c): return c["question"]["id"])
+	actions[-1] = a
+	history_log.append("【自由な行動】%s" % title)
+	for c in changes:
+		var cq2: Dictionary = c["question"]
+		history_log.append("%d年 %s：%s → %s（%s：%s）" % [cq2["year"], cq2["topic"], cq2["choices"][c["from"]], cq2["choices"][c["to"]],
+			"時空の混乱" if c["depth"] == 0 else "混乱の波及", c["cause"]])
+	save()
+	return changes
+
+
 ## 改変した場合に変わる後の問題を正確に予測（ミッション前のプレビュー用）。
 func predict_ripple(q: Dictionary, choice: int, method := 0) -> Array:
 	var ivs := interventions.duplicate(true)
-	ivs[q["id"]] = {"choice": choice, "method": method}
+	ivs[q["id"]] = {"choice": choice, "method": method, "seq": seq + 1}
 	var r := simulate(ivs)
 	var out: Array = []
 	for cq in db.questions:
@@ -432,7 +495,7 @@ func save() -> void:
 		return
 	f.store_string(JSON.stringify({"interventions": interventions, "answers": answers, "exam_submitted": exam_submitted,
 		"alterations": alterations, "restorations": restorations, "log": history_log,
-		"chaos_mods": chaos_mods, "chaos_count": chaos_count}))
+		"chaos_mods": chaos_mods, "chaos_count": chaos_count, "actions": actions, "seq": seq}))
 
 
 func load_save() -> bool:
@@ -445,7 +508,7 @@ func load_save() -> bool:
 	var ivs: Dictionary = d.get("interventions", {})
 	for k in ivs:
 		if db.by_id.has(k):
-			interventions[k] = {"choice": int(ivs[k]["choice"]), "method": int(ivs[k].get("method", 0))}
+			interventions[k] = {"choice": int(ivs[k]["choice"]), "method": int(ivs[k].get("method", 0)), "seq": int(ivs[k].get("seq", 0))}
 			if ivs[k].get("cause", "") == "chaos":
 				interventions[k]["cause"] = "chaos"
 				interventions[k]["rule"] = str(ivs[k].get("rule", ""))
@@ -462,6 +525,13 @@ func load_save() -> bool:
 			chaos_mods.append({"rule": str(m.get("rule", "")), "era": str(m.get("era", "")), "year": int(m.get("year", 0)),
 				"effects": m["effects"], "title": str(m.get("title", ""))})
 	chaos_count = int(d.get("chaos_count", 0))
+	for a in d.get("actions", []):
+		if typeof(a) == TYPE_DICTIONARY:
+			a["seq"] = int(a.get("seq", 0))
+			if a.has("choice"):
+				a["choice"] = int(a["choice"])
+			actions.append(a)
+	seq = int(d.get("seq", 0))
 	recompute()
 	return true
 

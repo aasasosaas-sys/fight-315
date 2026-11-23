@@ -1,0 +1,460 @@
+{
+ "eraId": "heian",
+ "actors": [
+  {
+   "name": "桓武天皇",
+   "era": "heian",
+   "faction": "朝廷",
+   "born": 737,
+   "died": 806,
+   "death": "natural",
+   "active": 781,
+   "tags": [
+    "ruler",
+    "sacred",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2,
+    "war": 1
+   }
+  },
+  {
+   "name": "最澄",
+   "era": "heian",
+   "faction": "天台宗",
+   "born": 767,
+   "died": 822,
+   "death": "illness",
+   "active": 785,
+   "tags": [
+    "religious",
+    "scholar"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": 1
+   }
+  },
+  {
+   "name": "和気清麻呂",
+   "era": "heian",
+   "faction": "朝廷",
+   "born": 733,
+   "died": 799,
+   "death": "natural",
+   "active": 769,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "loyal": 2,
+    "reform": 1
+   }
+  },
+  {
+   "name": "吉備真備",
+   "era": "heian",
+   "faction": "朝廷",
+   "born": 695,
+   "died": 775,
+   "death": "natural",
+   "active": 735,
+   "tags": [
+    "scholar",
+    "official",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 1
+   }
+  },
+  {
+   "name": "平将門",
+   "era": "heian",
+   "faction": "坂東",
+   "born": null,
+   "died": 940,
+   "death": "killed",
+   "active": 935,
+   "tags": [
+    "warrior",
+    "rebel"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": -2
+   },
+   "spawn": "castle",
+   "contrib": [
+    {
+     "vars": {
+      "warrior": -20
+     },
+     "year": 935,
+     "note": "坂東の武士が力を伸ばす流れが遅れた"
+    }
+   ],
+   "saved": {
+    "year": 940,
+    "text": "討たれるはずの将門が生き延び、新皇の関東政権が続いた。",
+    "force": {
+     "q": "heian_05",
+     "choice": 1
+    }
+   }
+  },
+  {
+   "name": "藤原秀郷",
+   "era": "heian",
+   "faction": "朝廷",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 939,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "loyal": 1,
+    "war": 1
+   },
+   "spawn": "battlefield",
+   "contrib": [
+    {
+     "q": "heian_05",
+     "choice": 1,
+     "note": "将門を討つ者がおらず、関東政権が続いた"
+    }
+   ]
+  },
+  {
+   "name": "藤原純友",
+   "era": "heian",
+   "faction": "瀬戸内",
+   "born": null,
+   "died": 941,
+   "death": "killed",
+   "active": 936,
+   "tags": [
+    "warrior",
+    "rebel"
+   ],
+   "traits": {
+    "war": 2,
+    "open": 1,
+    "loyal": -2
+   },
+   "spawn": "port",
+   "contrib": [
+    {
+     "vars": {
+      "warrior": -10,
+      "centralization": 10
+     },
+     "year": 939,
+     "note": "瀬戸内の海は朝廷の手に戻った"
+    }
+   ],
+   "saved": {
+    "year": 941,
+    "text": "討たれるはずの純友が逃げ延び、大宰府を拠点に大陸との交易を独占した。",
+    "force": {
+     "q": "heian_05",
+     "choice": 3
+    }
+   }
+  },
+  {
+   "name": "藤原忠平",
+   "era": "heian",
+   "faction": "摂関家",
+   "born": 880,
+   "died": 949,
+   "death": "natural",
+   "active": 909,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "loyal": 1,
+    "reform": -1
+   }
+  },
+  {
+   "name": "藤原良房",
+   "era": "heian",
+   "faction": "摂関家",
+   "born": 804,
+   "died": 872,
+   "death": "natural",
+   "active": 842,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "loyal": -1,
+    "reform": -1
+   },
+   "successor": "藤原基経"
+  },
+  {
+   "name": "藤原基経",
+   "era": "heian",
+   "faction": "摂関家",
+   "born": 836,
+   "died": 891,
+   "death": "natural",
+   "active": 872,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "loyal": -1
+   }
+  },
+  {
+   "name": "藤原実資",
+   "era": "heian",
+   "faction": "摂関家",
+   "born": 957,
+   "died": 1046,
+   "death": "natural",
+   "active": 1000,
+   "tags": [
+    "official",
+    "scholar"
+   ],
+   "traits": {
+    "loyal": 2,
+    "reform": 1
+   }
+  },
+  {
+   "name": "藤原頼通",
+   "era": "heian",
+   "faction": "摂関家",
+   "born": 992,
+   "died": 1074,
+   "death": "natural",
+   "active": 1017,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "faith": 2,
+    "war": -2
+   },
+   "spawn": "village",
+   "contrib": [
+    {
+     "q": "heian_06",
+     "choice": 0,
+     "note": "鳳凰堂は建たず、極楽往生の願いは念仏の教団へ向かった"
+    }
+   ]
+  },
+  {
+   "name": "法然",
+   "era": "heian",
+   "faction": "浄土宗",
+   "born": 1133,
+   "died": 1212,
+   "death": "natural",
+   "active": 1175,
+   "tags": [
+    "religious"
+   ],
+   "traits": {
+    "faith": 2,
+    "reform": 1
+   }
+  },
+  {
+   "name": "成尋",
+   "era": "heian",
+   "faction": "天台宗",
+   "born": 1011,
+   "died": 1081,
+   "death": "natural",
+   "active": 1072,
+   "tags": [
+    "religious",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2,
+    "faith": 2
+   }
+  },
+  {
+   "name": "定朝",
+   "era": "heian",
+   "faction": "仏師",
+   "born": null,
+   "died": 1057,
+   "death": "natural",
+   "active": 1020,
+   "tags": [
+    "artist",
+    "merchant"
+   ],
+   "traits": {
+    "faith": 1
+   }
+  },
+  {
+   "name": "平清盛",
+   "era": "heian",
+   "faction": "平氏",
+   "born": 1118,
+   "died": 1181,
+   "death": "illness",
+   "active": 1156,
+   "tags": [
+    "ruler",
+    "warrior",
+    "merchant"
+   ],
+   "traits": {
+    "open": 2,
+    "war": 1,
+    "reform": 1
+   },
+   "spawn": "port",
+   "contrib": [
+    {
+     "vars": {
+      "warrior": -15,
+      "commerce": -15,
+      "open_asia": -15
+     },
+     "year": 1160,
+     "note": "平氏政権も日宋貿易も幻に終わった"
+    }
+   ],
+   "saved": {
+    "year": 1181,
+    "text": "熱病で死ぬはずの清盛が薬で回復した。平氏は源氏の挙兵を退け、福原を都に宋との貿易国家を築いた。",
+    "vars": {
+     "set": {
+      "ruler": "平氏"
+     },
+     "warrior": 15,
+     "commerce": 15,
+     "open_asia": 15
+    }
+   }
+  },
+  {
+   "name": "白河天皇",
+   "era": "heian",
+   "faction": "朝廷",
+   "born": 1053,
+   "died": 1129,
+   "death": "natural",
+   "active": 1073,
+   "tags": [
+    "ruler",
+    "sacred"
+   ],
+   "traits": {
+    "reform": 1,
+    "faith": 2
+   },
+   "aka": [
+    "白河上皇"
+   ]
+  },
+  {
+   "name": "源為義",
+   "era": "heian",
+   "faction": "源氏",
+   "born": 1096,
+   "died": 1156,
+   "death": "executed",
+   "active": 1120,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "loyal": 1,
+    "war": 1
+   },
+   "saved": {
+    "year": 1156,
+    "text": "保元の乱後に斬られるはずの為義が助かり、源氏の勢力は温存された。",
+    "vars": {
+     "warrior": 10,
+     "unity": -5
+    }
+   }
+  },
+  {
+   "name": "紫式部",
+   "era": "heian",
+   "faction": "宮廷",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 1001,
+   "tags": [
+    "artist",
+    "woman",
+    "scholar"
+   ],
+   "traits": {
+    "faith": 1
+   }
+  },
+  {
+   "name": "清少納言",
+   "era": "heian",
+   "faction": "宮廷",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 993,
+   "tags": [
+    "artist",
+    "woman",
+    "scholar"
+   ],
+   "traits": {
+    "open": 1
+   }
+  }
+ ],
+ "battles": [
+  {
+   "era": "heian",
+   "id": "hogen",
+   "name": "保元の乱（白河北殿）",
+   "at": "battlefield",
+   "year": 1156,
+   "sides": [
+    {
+     "name": "後白河天皇方",
+     "label": "後白河方の武士",
+     "historical": true
+    },
+    {
+     "name": "崇徳上皇方",
+     "label": "崇徳方の武士",
+     "wins": {
+      "vars": {
+       "court": 15,
+       "warrior": -10
+      }
+     },
+     "text": "あなたが後白河方を蹴散らし、崇徳上皇方が勝利した。源為義・平忠正らが朝廷の重臣となった。"
+    }
+   ]
+  }
+ ]
+}

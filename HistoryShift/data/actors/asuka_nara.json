@@ -1,0 +1,438 @@
+{
+ "eraId": "asuka_nara",
+ "actors": [
+  {
+   "name": "厩戸王",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": 574,
+   "died": 622,
+   "death": "illness",
+   "active": 593,
+   "tags": [
+    "ruler",
+    "reformer",
+    "sacred",
+    "scholar"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 2,
+    "faith": 2,
+    "war": -1
+   },
+   "spawn": "temple",
+   "contrib": [
+    {
+     "q": "asuka_nara_01",
+     "choice": 3,
+     "note": "厩戸王がいなければ十七条の心構えは説かれず、のちに中大兄皇子の改新の方針としてまとめられた"
+    }
+   ],
+   "saved": {
+    "year": 622,
+    "text": "病に倒れるはずの厩戸王が回復し、天皇中心の国づくりは20年早まった。蘇我氏の専横も抑えられた。",
+    "vars": {
+     "centralization": 15,
+     "education": 10
+    }
+   },
+   "aka": [
+    "聖徳太子"
+   ]
+  },
+  {
+   "name": "蘇我馬子",
+   "era": "asuka_nara",
+   "faction": "蘇我",
+   "born": null,
+   "died": 626,
+   "death": "natural",
+   "active": 572,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": 2,
+    "war": 1,
+    "loyal": -1
+   },
+   "spawn": "temple",
+   "contrib": [
+    {
+     "vars": {
+      "religion": -25,
+      "education": -10
+     },
+     "year": 600,
+     "note": "仏教の後ろ盾を失い、飛鳥寺の造営が止まった"
+    }
+   ]
+  },
+  {
+   "name": "中大兄皇子",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": 626,
+   "died": 671,
+   "death": "illness",
+   "active": 644,
+   "tags": [
+    "ruler",
+    "reformer",
+    "sacred"
+   ],
+   "traits": {
+    "reform": 2,
+    "war": 1,
+    "open": 1
+   },
+   "aka": [
+    "天智天皇"
+   ]
+  },
+  {
+   "name": "中臣鎌足",
+   "era": "asuka_nara",
+   "faction": "中大兄派",
+   "born": 614,
+   "died": 669,
+   "death": "illness",
+   "active": 644,
+   "tags": [
+    "official",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2,
+    "loyal": 2,
+    "open": 1
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "q": "asuka_nara_02",
+     "choice": 0,
+     "note": "即位を急ぐなと諫める者がおらず、中大兄皇子がその場で即位した"
+    }
+   ],
+   "schedule": [
+    {
+     "event": "乙巳の変の密議",
+     "at": "capital",
+     "year": 645,
+     "missed": {
+      "force": {
+       "q": "asuka_nara_02",
+       "choice": 0
+      }
+     },
+     "text": "密議に鎌足が遅れ、中大兄皇子は誰にも止められずに即位まで突っ走った。"
+    }
+   ]
+  },
+  {
+   "name": "中臣御食子",
+   "era": "asuka_nara",
+   "faction": "中臣",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 600,
+   "tags": [
+    "official",
+    "religious"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": -1
+   }
+  },
+  {
+   "name": "大海人皇子",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": null,
+   "died": 686,
+   "death": "illness",
+   "active": 671,
+   "tags": [
+    "ruler",
+    "warrior",
+    "sacred"
+   ],
+   "traits": {
+    "war": 2,
+    "reform": 1
+   },
+   "aka": [
+    "天武天皇"
+   ]
+  },
+  {
+   "name": "皇極天皇",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": 594,
+   "died": 661,
+   "death": "illness",
+   "active": 642,
+   "tags": [
+    "ruler",
+    "sacred",
+    "woman"
+   ],
+   "traits": {
+    "faith": 1
+   },
+   "aka": [
+    "斉明天皇"
+   ]
+  },
+  {
+   "name": "豊璋",
+   "era": "asuka_nara",
+   "faction": "百済",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 631,
+   "tags": [
+    "foreigner",
+    "diplomat"
+   ],
+   "traits": {
+    "war": 1,
+    "open": 2
+   }
+  },
+  {
+   "name": "長屋王",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": 684,
+   "died": 729,
+   "death": "suicide",
+   "active": 721,
+   "tags": [
+    "official",
+    "sacred"
+   ],
+   "traits": {
+    "reform": 1,
+    "loyal": 2
+   },
+   "saved": {
+    "year": 729,
+    "text": "長屋王の変が防がれ、皇族の左大臣が藤原氏を抑え続けた。藤原四子の台頭は遅れた。",
+    "vars": {
+     "court": 10,
+     "centralization": 10
+    }
+   }
+  },
+  {
+   "name": "橘諸兄",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": 684,
+   "died": 757,
+   "death": "natural",
+   "active": 737,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "reform": 1,
+    "loyal": 1
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "vars": {
+      "centralization": -20,
+      "court": -10
+     },
+     "year": 740,
+     "note": "政権が崩れ、班田収授はなし崩しになった"
+    }
+   ]
+  },
+  {
+   "name": "山部王",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": 737,
+   "died": 806,
+   "death": "natural",
+   "active": 770,
+   "tags": [
+    "sacred"
+   ],
+   "traits": {
+    "reform": 2
+   },
+   "aka": [
+    "桓武天皇（山部王）"
+   ]
+  },
+  {
+   "name": "聖武天皇",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": 701,
+   "died": 756,
+   "death": "illness",
+   "active": 724,
+   "tags": [
+    "ruler",
+    "sacred"
+   ],
+   "traits": {
+    "faith": 2,
+    "war": -1
+   }
+  },
+  {
+   "name": "小野妹子",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 607,
+   "tags": [
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2,
+    "loyal": 2
+   },
+   "spawn": "port",
+   "contrib": [
+    {
+     "q": "asuka_nara_05",
+     "choice": 2,
+     "note": "国書を取り繕える使者がおらず、隋との国交は断絶した"
+    }
+   ],
+   "doc": {
+    "name": "「日出づる処の天子」の国書",
+    "q": "asuka_nara_05",
+    "choice": 2,
+    "text": "国書が盗まれ、妹子は手ぶらで煬帝の前に出る羽目に。国交は開かれず、留学生も送れなかった。"
+   },
+   "schedule": [
+    {
+     "event": "遣隋使の船出",
+     "at": "port",
+     "year": 607,
+     "missed": {
+      "vars": {
+       "open_asia": -20,
+       "education": -10
+      }
+     },
+     "text": "妹子が船出に間に合わず、遣隋使は一年遅れた。留学生の派遣も先送りになった。"
+    }
+   ]
+  },
+  {
+   "name": "高向玄理",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": null,
+   "died": 654,
+   "death": "illness",
+   "active": 608,
+   "tags": [
+    "scholar",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 2
+   }
+  },
+  {
+   "name": "僧旻",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": null,
+   "died": 653,
+   "death": "illness",
+   "active": 608,
+   "tags": [
+    "religious",
+    "scholar"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 2,
+    "faith": 1
+   }
+  },
+  {
+   "name": "南淵請安",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 608,
+   "tags": [
+    "scholar"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 2
+   }
+  },
+  {
+   "name": "鑑真",
+   "era": "asuka_nara",
+   "faction": "唐",
+   "born": 688,
+   "died": 763,
+   "death": "natural",
+   "active": 753,
+   "tags": [
+    "religious",
+    "foreigner"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": 2
+   }
+  }
+ ],
+ "battles": [
+  {
+   "era": "asuka_nara",
+   "id": "jinshin",
+   "name": "壬申の乱（瀬田の唐橋）",
+   "at": "battlefield",
+   "year": 672,
+   "sides": [
+    {
+     "name": "大海人皇子方",
+     "label": "大海人方の兵",
+     "historical": true
+    },
+    {
+     "name": "大友皇子方",
+     "label": "近江朝廷の兵",
+     "wins": {
+      "vars": {
+       "centralization": -15,
+       "militarism": -5
+      }
+     },
+     "text": "あなたが大海人方の兵を蹴散らしたので、瀬田の決戦は近江朝廷の勝利に。天武天皇の強力な政治は生まれなかった。"
+    }
+   ]
+  }
+ ]
+}

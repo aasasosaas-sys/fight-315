@@ -1,0 +1,414 @@
+{
+ "eraId": "meiji_taisho",
+ "actors": [
+  {
+   "name": "西郷隆盛",
+   "era": "meiji_taisho",
+   "faction": "薩摩",
+   "born": 1828,
+   "died": 1877,
+   "death": "suicide",
+   "active": 1868,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": 2,
+    "open": -1
+   },
+   "saved": {
+    "year": 1877,
+    "text": "城山で自刃するはずの西郷が生き延び、新政府に戻った。士族の不満は和らいだが、軍の発言力が増した。",
+    "vars": {
+     "militarism": 10,
+     "unity": 10
+    }
+   }
+  },
+  {
+   "name": "大久保利通",
+   "era": "meiji_taisho",
+   "faction": "薩摩",
+   "born": 1830,
+   "died": 1878,
+   "death": "assassinated",
+   "active": 1868,
+   "tags": [
+    "official",
+    "reformer",
+    "ruler"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 2,
+    "war": -1
+   },
+   "spawn": "castle",
+   "contrib": [
+    {
+     "q": "meiji_taisho_01",
+     "choice": 0,
+     "note": "大黒柱がおらず、地租改正は先送りになった"
+    }
+   ],
+   "saved": {
+    "year": 1878,
+    "text": "紀尾井坂で暗殺されるはずの大久保が助かり、殖産興業が加速した。",
+    "vars": {
+     "centralization": 15,
+     "tech": 10,
+     "economy": 10
+    }
+   }
+  },
+  {
+   "name": "大隈重信",
+   "era": "meiji_taisho",
+   "faction": "改進党",
+   "born": 1838,
+   "died": 1922,
+   "death": "natural",
+   "active": 1869,
+   "tags": [
+    "official",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 2
+   }
+  },
+  {
+   "name": "伊藤博文",
+   "era": "meiji_taisho",
+   "faction": "政府",
+   "born": 1841,
+   "died": 1909,
+   "death": "assassinated",
+   "active": 1871,
+   "tags": [
+    "ruler",
+    "official",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 1,
+    "open": 2,
+    "war": -1
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "q": "meiji_taisho_02",
+     "choice": 3,
+     "note": "伊藤がおらず、民定憲法が作られた"
+    }
+   ],
+   "saved": {
+    "year": 1909,
+    "text": "ハルビンで撃たれるはずの伊藤が助かり、大陸への強硬策に歯止めがかかった。",
+    "vars": {
+     "militarism": -10,
+     "open_asia": 10
+    }
+   }
+  },
+  {
+   "name": "井上毅",
+   "era": "meiji_taisho",
+   "faction": "政府",
+   "born": 1844,
+   "died": 1895,
+   "death": "illness",
+   "active": 1871,
+   "tags": [
+    "official",
+    "scholar"
+   ],
+   "traits": {
+    "reform": 1,
+    "open": 1
+   }
+  },
+  {
+   "name": "三条実美",
+   "era": "meiji_taisho",
+   "faction": "政府",
+   "born": 1837,
+   "died": 1891,
+   "death": "illness",
+   "active": 1868,
+   "tags": [
+    "official",
+    "ruler"
+   ],
+   "traits": {
+    "loyal": 2
+   }
+  },
+  {
+   "name": "植木枝盛",
+   "era": "meiji_taisho",
+   "faction": "自由党",
+   "born": 1857,
+   "died": 1892,
+   "death": "illness",
+   "active": 1877,
+   "tags": [
+    "reformer",
+    "scholar"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 1
+   },
+   "contrib": [
+    {
+     "vars": {
+      "democracy": -15
+     },
+     "year": 1881,
+     "note": "私擬憲法を起草する民権家がいなくなった"
+    }
+   ]
+  },
+  {
+   "name": "後藤象二郎",
+   "era": "meiji_taisho",
+   "faction": "土佐",
+   "born": 1838,
+   "died": 1897,
+   "death": "illness",
+   "active": 1867,
+   "tags": [
+    "official",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 1,
+    "open": 1
+   }
+  },
+  {
+   "name": "陸奥宗光",
+   "era": "meiji_taisho",
+   "faction": "政府",
+   "born": 1844,
+   "died": 1897,
+   "death": "illness",
+   "active": 1888,
+   "tags": [
+    "diplomat",
+    "official"
+   ],
+   "traits": {
+    "open": 2,
+    "war": 1
+   }
+  },
+  {
+   "name": "加藤高明",
+   "era": "meiji_taisho",
+   "faction": "憲政会",
+   "born": 1860,
+   "died": 1926,
+   "death": "illness",
+   "active": 1900,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 2
+   },
+   "spawn": "battlefield",
+   "contrib": [
+    {
+     "vars": {
+      "democracy": -20
+     },
+     "year": 1924,
+     "note": "護憲三派がまとまらず、普通選挙が遠のいた"
+    }
+   ]
+  },
+  {
+   "name": "小村寿太郎",
+   "era": "meiji_taisho",
+   "faction": "政府",
+   "born": 1855,
+   "died": 1911,
+   "death": "illness",
+   "active": 1901,
+   "tags": [
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2,
+    "war": 1
+   },
+   "spawn": "port",
+   "contrib": [
+    {
+     "vars": {
+      "open_west": -15,
+      "militarism": 15
+     },
+     "year": 1904,
+     "note": "外交が迷走し、軍事に頼るようになった"
+    }
+   ]
+  },
+  {
+   "name": "桂太郎",
+   "era": "meiji_taisho",
+   "faction": "陸軍",
+   "born": 1848,
+   "died": 1913,
+   "death": "illness",
+   "active": 1901,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 1
+   }
+  },
+  {
+   "name": "高橋是清",
+   "era": "meiji_taisho",
+   "faction": "政友会",
+   "born": 1854,
+   "died": 1936,
+   "death": "assassinated",
+   "active": 1904,
+   "tags": [
+    "official",
+    "merchant"
+   ],
+   "traits": {
+    "reform": 1,
+    "war": -2
+   },
+   "spawn": "castle",
+   "contrib": [
+    {
+     "vars": {
+      "economy": -25,
+      "commerce": -15
+     },
+     "year": 1914,
+     "note": "財政の舵取り役がいなくなった"
+    }
+   ],
+   "saved": {
+    "year": 1936,
+    "text": "二・二六事件で殺されるはずの高橋が助かり、軍事費の膨張に最後まで歯止めをかけた。",
+    "vars": {
+     "militarism": -15,
+     "economy": 10
+    }
+   }
+  },
+  {
+   "name": "平塚らいてう",
+   "era": "meiji_taisho",
+   "faction": "青鞜社",
+   "born": 1886,
+   "died": 1971,
+   "death": "natural",
+   "active": 1911,
+   "tags": [
+    "reformer",
+    "woman",
+    "artist"
+   ],
+   "traits": {
+    "reform": 2
+   }
+  },
+  {
+   "name": "若槻礼次郎",
+   "era": "meiji_taisho",
+   "faction": "憲政会",
+   "born": 1866,
+   "died": 1949,
+   "death": "natural",
+   "active": 1912,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "reform": 1,
+    "war": -1
+   }
+  },
+  {
+   "name": "原敬",
+   "era": "meiji_taisho",
+   "faction": "政友会",
+   "born": 1856,
+   "died": 1921,
+   "death": "assassinated",
+   "active": 1918,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "reform": 1
+   },
+   "saved": {
+    "year": 1921,
+    "text": "東京駅で刺されるはずの原敬が助かり、政党政治が早くから根づいた。",
+    "vars": {
+     "democracy": 15,
+     "set": {
+      "ruler": "政党"
+     }
+    }
+   }
+  },
+  {
+   "name": "幣原喜重郎",
+   "era": "meiji_taisho",
+   "faction": "憲政会",
+   "born": 1872,
+   "died": 1951,
+   "death": "natural",
+   "active": 1924,
+   "tags": [
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2,
+    "war": -2
+   }
+  },
+  {
+   "name": "英国公使マクドナルド",
+   "era": "meiji_taisho",
+   "faction": "イギリス",
+   "born": 1852,
+   "died": 1915,
+   "death": "natural",
+   "active": 1900,
+   "tags": [
+    "diplomat",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 2
+   },
+   "aka": [
+    "マクドナルド"
+   ]
+  }
+ ],
+ "battles": []
+}

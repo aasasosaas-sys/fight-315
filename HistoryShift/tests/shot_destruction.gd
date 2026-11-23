@@ -33,17 +33,27 @@ func _shot(name: String) -> void:
 		int(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)), d.live_debris() if d else -1, d.burning_count() if d else -1])
 
 
-## target を画面中央に、dist m 離れて見る
+## target を画面中央に、dist m 離れて見る（テスト専用カメラ）
+var tcam: Camera3D
+
+
 func _frame(target: Vector3, dist: float, height := 6.0, side := 0.0) -> void:
 	var w = sess.world
 	var dir := Vector3(sin(side), 0, cos(side))
 	var pos := target + dir * dist
-	pos.y = w.height_at(pos.x, pos.z)
-	p.teleport(pos)
-	var d := target - (pos + Vector3.UP * height)
-	cam.yaw = atan2(-d.x, -d.z)
-	cam.pitch = clampf(atan2(d.y, Vector2(d.x, d.z).length()) + 0.05, -0.6, 0.3)
-	cam.snap()
+	var g: float = w.height_at(pos.x, pos.z)
+	pos.y = maxf(g, float(w.water_level)) + height
+	# プレイヤーは画面外（後ろ）へ
+	var pp := target + dir * (dist + 6.0)
+	p.teleport(Vector3(pp.x, w.height_at(pp.x, pp.z), pp.z))
+	if tcam == null:
+		tcam = Camera3D.new()
+		tcam.fov = 60.0
+		tcam.far = 3000.0
+		sess.add_child(tcam)
+	tcam.global_position = pos
+	tcam.look_at(target, Vector3.UP)
+	tcam.make_current()
 	await _frames(4)
 
 
@@ -209,5 +219,6 @@ func _era(era_id: String) -> void:
 	await _wait(1.0)
 	await _shot("%s_rampage" % era_id)
 	print("  stats: %s" % d.summary_text())
+	tcam = null
 	sess.end()
 	await _frames(5)

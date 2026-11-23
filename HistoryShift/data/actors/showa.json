@@ -1,0 +1,400 @@
+{
+ "eraId": "showa",
+ "actors": [
+  {
+   "name": "井上準之助",
+   "era": "showa",
+   "faction": "民政党",
+   "born": 1869,
+   "died": 1932,
+   "death": "assassinated",
+   "active": 1927,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "open": 2,
+    "war": -1
+   },
+   "saved": {
+    "year": 1932,
+    "text": "血盟団事件で殺されるはずの井上が助かり、財界と政党は軍部に対抗し続けた。",
+    "vars": {
+     "militarism": -10
+    }
+   }
+  },
+  {
+   "name": "田中義一",
+   "era": "showa",
+   "faction": "政友会",
+   "born": 1864,
+   "died": 1929,
+   "death": "illness",
+   "active": 1927,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "open": -1
+   }
+  },
+  {
+   "name": "伊東巳代治",
+   "era": "showa",
+   "faction": "枢密院",
+   "born": 1857,
+   "died": 1934,
+   "death": "natural",
+   "active": 1927,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "reform": -1
+   }
+  },
+  {
+   "name": "團琢磨",
+   "era": "showa",
+   "faction": "三井",
+   "born": 1858,
+   "died": 1932,
+   "death": "assassinated",
+   "active": 1927,
+   "tags": [
+    "merchant"
+   ],
+   "traits": {
+    "open": 2
+   },
+   "saved": {
+    "year": 1932,
+    "text": "暗殺されるはずの團琢磨が助かり、財界は軍部の暴走に声を上げ続けた。",
+    "vars": {
+     "economy": 5,
+     "militarism": -5
+    }
+   }
+  },
+  {
+   "name": "リットン卿",
+   "era": "showa",
+   "faction": "国際連盟",
+   "born": 1876,
+   "died": 1947,
+   "death": "natural",
+   "active": 1932,
+   "tags": [
+    "diplomat",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 2,
+    "war": -2
+   }
+  },
+  {
+   "name": "内田康哉",
+   "era": "showa",
+   "faction": "外務省",
+   "born": 1865,
+   "died": 1936,
+   "death": "natural",
+   "active": 1932,
+   "tags": [
+    "diplomat",
+    "official"
+   ],
+   "traits": {
+    "war": 1,
+    "open": -1
+   }
+  },
+  {
+   "name": "犬養毅",
+   "era": "showa",
+   "faction": "政友会",
+   "born": 1855,
+   "died": 1932,
+   "death": "assassinated",
+   "active": 1931,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "reform": 1,
+    "war": -1
+   },
+   "saved": {
+    "year": 1932,
+    "text": "五・一五事件で殺されるはずの犬養首相が助かり、政党内閣が続いた。",
+    "vars": {
+     "democracy": 20,
+     "militarism": -15
+    }
+   }
+  },
+  {
+   "name": "和田博雄",
+   "era": "showa",
+   "faction": "農林省",
+   "born": 1903,
+   "died": 1967,
+   "death": "natural",
+   "active": 1946,
+   "tags": [
+    "official",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2
+   },
+   "contrib": [
+    {
+     "q": "showa_03",
+     "choice": 2,
+     "note": "改革を進める大臣がおらず、第一次案がそのまま実施された"
+    }
+   ]
+  },
+  {
+   "name": "渋沢敬三",
+   "era": "showa",
+   "faction": "大蔵省",
+   "born": 1896,
+   "died": 1963,
+   "death": "natural",
+   "active": 1945,
+   "tags": [
+    "official",
+    "scholar",
+    "merchant"
+   ],
+   "traits": {
+    "reform": 1
+   }
+  },
+  {
+   "name": "十河信二",
+   "era": "showa",
+   "faction": "国鉄",
+   "born": 1884,
+   "died": 1981,
+   "death": "natural",
+   "active": 1955,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 1
+   },
+   "spawn": "port",
+   "contrib": [
+    {
+     "vars": {
+      "tech": -20,
+      "economy": -10
+     },
+     "year": 1958,
+     "note": "新幹線の計画は立ち消えになった"
+    }
+   ]
+  },
+  {
+   "name": "下村治",
+   "era": "showa",
+   "faction": "大蔵省",
+   "born": 1910,
+   "died": 1989,
+   "death": "natural",
+   "active": 1959,
+   "tags": [
+    "scholar",
+    "official"
+   ],
+   "traits": {
+    "reform": 1
+   },
+   "spawn": "castle",
+   "contrib": [
+    {
+     "vars": {
+      "economy": -30
+     },
+     "year": 1959,
+     "note": "所得倍増計画は作られなかった"
+    }
+   ]
+  },
+  {
+   "name": "米内光政",
+   "era": "showa",
+   "faction": "海軍",
+   "born": 1880,
+   "died": 1948,
+   "death": "illness",
+   "active": 1937,
+   "tags": [
+    "warrior",
+    "ruler"
+   ],
+   "traits": {
+    "war": -2,
+    "open": 1
+   },
+   "spawn": "castle",
+   "contrib": [
+    {
+     "vars": {
+      "militarism": 15
+     },
+     "year": 1939,
+     "note": "軍部の暴走に歯止めがかからなくなった"
+    }
+   ]
+  },
+  {
+   "name": "畑俊六",
+   "era": "showa",
+   "faction": "陸軍",
+   "born": 1879,
+   "died": 1962,
+   "death": "natural",
+   "active": 1939,
+   "tags": [
+    "warrior",
+    "sacred"
+   ],
+   "traits": {
+    "war": 1
+   }
+  },
+  {
+   "name": "松岡洋右",
+   "era": "showa",
+   "faction": "外務省",
+   "born": 1880,
+   "died": 1946,
+   "death": "illness",
+   "active": 1932,
+   "tags": [
+    "diplomat",
+    "official"
+   ],
+   "traits": {
+    "war": 1,
+    "open": -2
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "vars": {
+      "militarism": -25,
+      "open_west": 15
+     },
+     "year": 1932,
+     "note": "強硬派の全権がおらず、日本は連盟にとどまった"
+    }
+   ]
+  },
+  {
+   "name": "コーデル・ハル",
+   "era": "showa",
+   "faction": "アメリカ",
+   "born": 1871,
+   "died": 1955,
+   "death": "natural",
+   "active": 1933,
+   "tags": [
+    "diplomat",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 1
+   },
+   "aka": [
+    "コーデル＝ハル"
+   ]
+  },
+  {
+   "name": "グルー大使",
+   "era": "showa",
+   "faction": "アメリカ",
+   "born": 1880,
+   "died": 1965,
+   "death": "natural",
+   "active": 1932,
+   "tags": [
+    "diplomat",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 2,
+    "war": -2
+   },
+   "aka": [
+    "グルー"
+   ]
+  },
+  {
+   "name": "鈴木貫太郎",
+   "era": "showa",
+   "faction": "海軍",
+   "born": 1868,
+   "died": 1948,
+   "death": "natural",
+   "active": 1936,
+   "tags": [
+    "ruler",
+    "warrior",
+    "sacred"
+   ],
+   "traits": {
+    "war": -2,
+    "loyal": 2
+   },
+   "spawn": "capital"
+  },
+  {
+   "name": "東條英機",
+   "era": "showa",
+   "faction": "陸軍",
+   "born": 1884,
+   "died": 1948,
+   "death": "executed",
+   "active": 1937,
+   "tags": [
+    "ruler",
+    "warrior",
+    "sacred"
+   ],
+   "traits": {
+    "war": 2,
+    "open": -2
+   }
+  },
+  {
+   "name": "山本五十六",
+   "era": "showa",
+   "faction": "海軍",
+   "born": 1884,
+   "died": 1943,
+   "death": "killed",
+   "active": 1939,
+   "tags": [
+    "warrior",
+    "sacred"
+   ],
+   "traits": {
+    "war": -1,
+    "open": 1
+   }
+  }
+ ],
+ "battles": []
+}

@@ -9,7 +9,7 @@ extends StaticBody3D
 ## hp / armor(これ未満の一撃は 2 割しか効かない) / mat(破片の種類) / fire(燃える) / ruin(残骸の高さ比)
 ## wanted(倒壊時の手配度) / value(被害額・両) / chaos(歴史シミュへ通知) / chunks(破片数の目安) / small(倒壊後コリジョンなし)
 const KINDS := {
-	"house": {"hp": 320.0, "armor": 30.0, "mat": "wood", "fire": true, "ruin": 0.2, "wanted": 0.45, "value": 30, "chaos": true, "chunks": 12},
+	"house": {"hp": 520.0, "armor": 30.0, "mat": "wood", "fire": true, "ruin": 0.2, "wanted": 0.45, "value": 30, "chaos": true, "chunks": 12},
 	"kura": {"hp": 700.0, "armor": 45.0, "mat": "plaster", "fire": false, "ruin": 0.34, "wanted": 0.5, "value": 60, "chaos": true, "chunks": 10},
 	"hall": {"hp": 1100.0, "armor": 45.0, "mat": "wood", "fire": true, "ruin": 0.16, "wanted": 0.9, "value": 200, "chaos": true, "chunks": 18},
 	"pagoda": {"hp": 2600.0, "armor": 80.0, "mat": "wood", "fire": true, "ruin": 0.1, "wanted": 1.5, "value": 800, "chaos": true, "chunks": 22},

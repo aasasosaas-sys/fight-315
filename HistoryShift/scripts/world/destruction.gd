@@ -14,7 +14,7 @@ const INDIRECT_WINDOW := 10.0
 
 const TEX_W := 256
 const CELL := 16.0
-const MAX_DEBRIS := 64
+const MAX_DEBRIS := 110
 const MAX_FIRES := 14
 const MAX_FIRE_LIGHTS := 6
 const MAX_FALLING_TREES := 24
@@ -188,7 +188,7 @@ func blast(pos: Vector3, radius: float, damage: float, team := -1, fire_chance :
 		if d > radius:
 			continue
 		var k := 1.0 - d / radius
-		du.blast(damage * (0.3 + 0.7 * k), pos, fire_chance * (0.4 + 0.6 * k), cause)
+		du.blast(damage * (0.15 + 0.85 * k * k), pos, fire_chance * (0.4 + 0.6 * k), cause)
 	# 倒木
 	var rt := radius * 0.8
 	var trees: Array = world.get("tree_defs")
@@ -238,10 +238,10 @@ func small_collapse(u: Destructible, point: Vector3, dir: Vector3) -> void:
 func collapse_roof(u: Destructible, dir: Vector3) -> void:
 	var ext := u.local_max - u.local_min
 	var frame_g := u.frame * Transform3D(Basis(), u.local_min)
-	var target := int(u.cfg["chunks"] * 0.6) + 2
-	var c := clampf(pow(maxf(ext.x * ext.z * ext.y * 0.4, 1.0) / target, 1.0 / 3.0), 1.4, 7.0)
+	var target := int(u.cfg["chunks"]) + 2
+	var c := clampf(pow(maxf(ext.x * ext.z * ext.y * 0.4, 1.0) / target, 1.0 / 3.0), 1.2, 3.2)
 	var cell := _even_cell(ext, c)
-	var chunks := Fracture.slice(u.def, 2, frame_g, cell, -INF, target, lerpf(1.0, 0.35, u.char_amt))
+	var chunks := Fracture.slice(u.def, 2, frame_g, cell, -INF, target, lerpf(0.85, 0.35, u.char_amt))
 	push_state(u)
 	var ctr := u.center()
 	for ch in chunks:
@@ -281,13 +281,13 @@ func destroy_unit(u: Destructible, dir: Vector3, power: float) -> void:
 	var above := maxf(u.top_y - cut, 0.5) if not full else ext.y
 	if full:
 		frame_g = u.frame * Transform3D(Basis(), u.local_min)
-	var target: int = int(u.cfg["chunks"])
+	var target: int = int(int(u.cfg["chunks"]) * 1.6)
 	var vol := maxf(ext.x * ext.z * above, 0.5)
-	var c := clampf(pow(vol / target, 1.0 / 3.0), 0.7, 7.0)
+	var c := clampf(pow(vol / target, 1.0 / 3.0), 0.6, 2.6 if u.kind != "castle_keep" and u.kind != "monument" else 4.5)
 	var ext2 := Vector3(ext.x, above, ext.z)
 	var cell := _even_cell(ext2, c)
 	var mask := 1 | (0 if u.roof_gone else 2)
-	var chunks := Fracture.slice(u.def, mask, frame_g, cell, 0.0 if not full else -INF, int(target * 1.4), lerpf(1.0, 0.3, u.char_amt))
+	var chunks := Fracture.slice(u.def, mask, frame_g, cell, 0.0 if not full else -INF, int(target * 1.4), lerpf(0.82, 0.3, u.char_amt))
 	if full:
 		u.hide_bits = 3
 	else:

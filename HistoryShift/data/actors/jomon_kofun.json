@@ -1,0 +1,292 @@
+{
+ "eraId": "jomon_kofun",
+ "actors": [
+  {
+   "name": "卑弥呼",
+   "era": "jomon_kofun",
+   "faction": "邪馬台国",
+   "born": null,
+   "died": 248,
+   "death": "unknown",
+   "active": 189,
+   "tags": [
+    "ruler",
+    "religious",
+    "woman"
+   ],
+   "traits": {
+    "open": 1,
+    "faith": 2,
+    "war": -1
+   },
+   "spawn": "capital"
+  },
+  {
+   "name": "壱与",
+   "era": "jomon_kofun",
+   "faction": "邪馬台国",
+   "born": 235,
+   "died": null,
+   "death": "unknown",
+   "active": 248,
+   "tags": [
+    "ruler",
+    "religious",
+    "woman"
+   ],
+   "traits": {
+    "faith": 2,
+    "war": -1
+   }
+  },
+  {
+   "name": "難升米",
+   "era": "jomon_kofun",
+   "faction": "邪馬台国",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 238,
+   "tags": [
+    "diplomat",
+    "official"
+   ],
+   "traits": {
+    "open": 2,
+    "loyal": 2
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "q": "jomon_kofun_03",
+     "vars": {
+      "open_asia": -25,
+      "religion": -10
+     },
+     "year": 239,
+     "note": "魏への使いが届かず、大陸との往来が細った"
+    }
+   ],
+   "doc": {
+    "name": "魏の皇帝への上表文",
+    "q": "jomon_kofun_03",
+    "choice": 2,
+    "text": "上表文が奪われ、魏との外交は宙に浮いた。国内では卑弥呼の死後、男王がすんなり立つことになった。"
+   }
+  },
+  {
+   "name": "卑弥弓呼",
+   "era": "jomon_kofun",
+   "faction": "狗奴国",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 240,
+   "tags": [
+    "ruler",
+    "warrior",
+    "rebel"
+   ],
+   "traits": {
+    "war": 2,
+    "open": -1
+   }
+  },
+  {
+   "name": "倭王武",
+   "era": "jomon_kofun",
+   "faction": "ヤマト",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 470,
+   "tags": [
+    "ruler",
+    "sacred",
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "open": 1
+   },
+   "aka": [
+    "ワカタケル大王",
+    "雄略天皇"
+   ]
+  },
+  {
+   "name": "筑紫君磐井",
+   "era": "jomon_kofun",
+   "faction": "筑紫",
+   "born": null,
+   "died": 528,
+   "death": "killed",
+   "active": 520,
+   "tags": [
+    "warrior",
+    "rebel"
+   ],
+   "traits": {
+    "war": 1,
+    "open": 1,
+    "loyal": -2
+   },
+   "spawn": "mountain",
+   "contrib": [
+    {
+     "vars": {
+      "centralization": 25,
+      "unity": 15
+     },
+     "year": 520,
+     "note": "九州を戦わずに従えたヤマト政権が強大化した"
+    }
+   ],
+   "saved": {
+    "year": 528,
+    "text": "討たれるはずの磐井が生き延び、筑紫には新羅と結ぶ独立の王国が残った。ヤマト政権の統一は大きく遅れた。",
+    "vars": {
+     "unity": -20,
+     "centralization": -15,
+     "open_asia": 10
+    }
+   }
+  },
+  {
+   "name": "欽明天皇",
+   "era": "jomon_kofun",
+   "faction": "ヤマト",
+   "born": null,
+   "died": 571,
+   "death": "natural",
+   "active": 539,
+   "tags": [
+    "ruler",
+    "sacred"
+   ],
+   "traits": {
+    "faith": 1,
+    "open": 1
+   }
+  },
+  {
+   "name": "物部尾輿",
+   "era": "jomon_kofun",
+   "faction": "物部",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 538,
+   "tags": [
+    "official",
+    "warrior"
+   ],
+   "traits": {
+    "faith": -2,
+    "open": -2,
+    "war": 1
+   },
+   "spawn": "temple",
+   "contrib": [
+    {
+     "q": "jomon_kofun_06",
+     "choice": 2,
+     "note": "排仏派がいなくなり、朝廷は仏教をただちに国家の宗教とした"
+    }
+   ],
+   "persuade": {
+    "開国を勧める": {
+     "force": {
+      "q": "jomon_kofun_06",
+      "choice": 2
+     },
+     "text": "尾輿は異国の神も受け入れると言い出し、崇仏論争は起こらなかった。"
+    }
+   }
+  },
+  {
+   "name": "蘇我稲目",
+   "era": "jomon_kofun",
+   "faction": "蘇我",
+   "born": null,
+   "died": 570,
+   "death": "natural",
+   "active": 536,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": 2,
+    "reform": 1
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "q": "jomon_kofun_06",
+     "choice": 3,
+     "note": "崇仏派がいなくなり、仏像は難波の堀江に流された"
+    }
+   ]
+  },
+  {
+   "name": "上毛野君",
+   "era": "jomon_kofun",
+   "faction": "上毛野",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 500,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": 1
+   }
+  },
+  {
+   "name": "奴国の使者",
+   "era": "jomon_kofun",
+   "faction": "奴国",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 57,
+   "tags": [
+    "diplomat",
+    "official"
+   ],
+   "traits": {
+    "open": 2,
+    "loyal": 2
+   },
+   "spawn": "port",
+   "contrib": [
+    {
+     "q": "jomon_kofun_02",
+     "choice": 2,
+     "note": "代わりに吉野ヶ里の首長が後漢へ朝貢し、金印は吉野ヶ里に渡った"
+    }
+   ]
+  },
+  {
+   "name": "ムラの長老",
+   "era": "jomon_kofun",
+   "faction": "三内丸山のムラ",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": -3000,
+   "tags": [
+    "commoner"
+   ],
+   "traits": {
+    "open": 1,
+    "war": -1
+   },
+   "spawn": "village"
+  }
+ ],
+ "battles": []
+}

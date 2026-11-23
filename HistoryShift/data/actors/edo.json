@@ -1,0 +1,447 @@
+{
+ "eraId": "edo",
+ "actors": [
+  {
+   "name": "本多正純",
+   "era": "edo",
+   "faction": "徳川",
+   "born": 1565,
+   "died": 1637,
+   "death": "natural",
+   "active": 1600,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "loyal": 1
+   }
+  },
+  {
+   "name": "徳川家光",
+   "era": "edo",
+   "faction": "徳川",
+   "born": 1604,
+   "died": 1651,
+   "death": "illness",
+   "active": 1623,
+   "tags": [
+    "ruler"
+   ],
+   "traits": {
+    "war": 1,
+    "open": -2,
+    "reform": 1
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "q": "edo_01",
+     "choice": 0,
+     "note": "家光がいなければ参勤交代は制度にならなかった"
+    }
+   ]
+  },
+  {
+   "name": "金地院崇伝",
+   "era": "edo",
+   "faction": "徳川",
+   "born": 1569,
+   "died": 1633,
+   "death": "natural",
+   "active": 1608,
+   "tags": [
+    "religious",
+    "official"
+   ],
+   "traits": {
+    "loyal": 1,
+    "open": -1
+   }
+  },
+  {
+   "name": "松平信綱",
+   "era": "edo",
+   "faction": "徳川",
+   "born": 1596,
+   "died": 1662,
+   "death": "illness",
+   "active": 1633,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "loyal": 2,
+    "open": -1
+   }
+  },
+  {
+   "name": "天草四郎",
+   "era": "edo",
+   "faction": "島原の一揆",
+   "born": null,
+   "died": 1638,
+   "death": "killed",
+   "active": 1637,
+   "tags": [
+    "rebel",
+    "religious",
+    "commoner"
+   ],
+   "traits": {
+    "faith": 2,
+    "loyal": -2
+   },
+   "saved": {
+    "year": 1638,
+    "text": "原城で討たれるはずの四郎が生き延び、ひそかにキリシタンの信仰が守られた。",
+    "vars": {
+     "religion": 15,
+     "open_west": 10
+    }
+   }
+  },
+  {
+   "name": "徳川吉宗",
+   "era": "edo",
+   "faction": "徳川",
+   "born": 1684,
+   "died": 1751,
+   "death": "illness",
+   "active": 1716,
+   "tags": [
+    "ruler",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 1
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "q": "edo_02",
+     "choice": 2,
+     "note": "上げ米は行われず、のちの囲米の形で登場した"
+    }
+   ]
+  },
+  {
+   "name": "大黒屋光太夫",
+   "era": "edo",
+   "faction": "伊勢の船頭",
+   "born": 1751,
+   "died": 1828,
+   "death": "natural",
+   "active": 1792,
+   "tags": [
+    "commoner",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2
+   }
+  },
+  {
+   "name": "松平定信",
+   "era": "edo",
+   "faction": "徳川",
+   "born": 1759,
+   "died": 1829,
+   "death": "illness",
+   "active": 1787,
+   "tags": [
+    "official",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 1,
+    "open": -2
+   },
+   "spawn": "temple",
+   "contrib": [
+    {
+     "vars": {
+      "open_west": 30
+     },
+     "year": 1788,
+     "note": "寛政の改革が遅れ、異国の学問への関心が高まった"
+    }
+   ]
+  },
+  {
+   "name": "柴野栗山",
+   "era": "edo",
+   "faction": "幕府",
+   "born": 1736,
+   "died": 1807,
+   "death": "natural",
+   "active": 1788,
+   "tags": [
+    "scholar"
+   ],
+   "traits": {
+    "open": -1
+   }
+  },
+  {
+   "name": "中井竹山",
+   "era": "edo",
+   "faction": "懐徳堂",
+   "born": 1730,
+   "died": 1804,
+   "death": "natural",
+   "active": 1782,
+   "tags": [
+    "scholar",
+    "merchant"
+   ],
+   "traits": {
+    "reform": 1
+   }
+  },
+  {
+   "name": "本居宣長",
+   "era": "edo",
+   "faction": "国学",
+   "born": 1730,
+   "died": 1801,
+   "death": "natural",
+   "active": 1764,
+   "tags": [
+    "scholar"
+   ],
+   "traits": {
+    "open": -2,
+    "faith": 1
+   }
+  },
+  {
+   "name": "吉雄耕牛",
+   "era": "edo",
+   "faction": "長崎",
+   "born": 1724,
+   "died": 1800,
+   "death": "natural",
+   "active": 1750,
+   "tags": [
+    "scholar",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2
+   }
+  },
+  {
+   "name": "田沼意次",
+   "era": "edo",
+   "faction": "徳川",
+   "born": 1719,
+   "died": 1788,
+   "death": "illness",
+   "active": 1767,
+   "tags": [
+    "official",
+    "reformer",
+    "merchant"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 2
+   },
+   "spawn": "castle",
+   "contrib": [
+    {
+     "vars": {
+      "open_west": -30,
+      "commerce": -15
+     },
+     "year": 1770,
+     "note": "幕府は一気に保守化し、蘭学が危険視された"
+    }
+   ],
+   "aka": [
+    "老中 田沼意次"
+   ]
+  },
+  {
+   "name": "堀田正睦",
+   "era": "edo",
+   "faction": "徳川",
+   "born": 1810,
+   "died": 1864,
+   "death": "natural",
+   "active": 1855,
+   "tags": [
+    "official",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2
+   }
+  },
+  {
+   "name": "岩瀬忠震",
+   "era": "edo",
+   "faction": "徳川",
+   "born": 1818,
+   "died": 1861,
+   "death": "illness",
+   "active": 1854,
+   "tags": [
+    "official",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 2
+   },
+   "spawn": "port",
+   "contrib": [
+    {
+     "q": "edo_04",
+     "choice": 0,
+     "note": "交渉役がおらず、条約は骨抜きになった"
+    }
+   ],
+   "doc": {
+    "name": "日米修好通商条約の草案",
+    "q": "edo_04",
+    "choice": 0,
+    "text": "条約の草案が盗まれ、交渉は振り出しに。結ばれたのは下田・箱館を開くだけの約束だった。"
+   }
+  },
+  {
+   "name": "森山栄之助",
+   "era": "edo",
+   "faction": "長崎",
+   "born": 1820,
+   "died": 1871,
+   "death": "natural",
+   "active": 1848,
+   "tags": [
+    "scholar",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2
+   }
+  },
+  {
+   "name": "タウンゼント＝ハリス",
+   "era": "edo",
+   "faction": "アメリカ",
+   "born": 1804,
+   "died": 1878,
+   "death": "natural",
+   "active": 1856,
+   "tags": [
+    "diplomat",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 2
+   },
+   "aka": [
+    "ハリス"
+   ]
+  },
+  {
+   "name": "九条尚忠",
+   "era": "edo",
+   "faction": "朝廷",
+   "born": 1798,
+   "died": 1871,
+   "death": "natural",
+   "active": 1856,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "open": 1,
+    "loyal": 1
+   }
+  },
+  {
+   "name": "坂本龍馬",
+   "era": "edo",
+   "faction": "土佐",
+   "born": 1836,
+   "died": 1867,
+   "death": "assassinated",
+   "active": 1862,
+   "tags": [
+    "reformer",
+    "merchant"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 2,
+    "war": -1
+   },
+   "spawn": "village",
+   "contrib": [
+    {
+     "vars": {
+      "unity": -15,
+      "militarism": 10
+     },
+     "year": 1866,
+     "note": "薩長同盟を仲立ちする者がおらず、倒幕は遅れて泥沼になった"
+    }
+   ],
+   "saved": {
+    "year": 1867,
+    "text": "近江屋で暗殺されるはずの龍馬が生き延びた。船中八策は新政府の綱領となり、議会と海運の国づくりが早まった。",
+    "vars": {
+     "democracy": 15,
+     "commerce": 10,
+     "open_west": 10
+    }
+   },
+   "schedule": [
+    {
+     "event": "薩長同盟の会談",
+     "at": "capital",
+     "year": 1866,
+     "missed": {
+      "vars": {
+       "unity": -15,
+       "militarism": 10
+      }
+     },
+     "text": "龍馬が会談に遅れ、薩摩と長州は手を結べなかった。倒幕は遅れ、戦いは長引いた。"
+    }
+   ]
+  }
+ ],
+ "battles": [
+  {
+   "era": "edo",
+   "id": "ueno",
+   "name": "上野戦争（戊辰戦争）",
+   "at": "battlefield",
+   "year": 1868,
+   "sides": [
+    {
+     "name": "新政府軍",
+     "label": "新政府軍の兵",
+     "historical": true
+    },
+    {
+     "name": "彰義隊",
+     "label": "彰義隊士",
+     "wins": {
+      "vars": {
+       "set": {
+        "ruler": "徳川"
+       },
+       "commerce": -10,
+       "unity": -10
+      }
+     },
+     "text": "あなたが新政府軍を蹴散らし、彰義隊が上野を守り抜いた。徳川家は江戸に踏みとどまり、新政府は徳川との連合政権になった。"
+    }
+   ]
+  }
+ ]
+}

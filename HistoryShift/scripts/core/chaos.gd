@@ -16,6 +16,12 @@ extends RefCounted
 
 signal shifted(hit: Dictionary)
 
+## 行動の出来事（kind = 動詞）と、trigger で絞り込める info のキー
+const VERB_KINDS := ["protect", "escort", "persuade", "give", "steal", "forge", "delay", "battle"]
+const EXTRA_KEYS := ["arg", "item", "to", "event", "side", "cause", "cause_text"]
+const SABOTAGE_VALUE := 400      # 手作りルールに当たらない破壊は、名所ごとに格の合計がこれを超えたら一般則で歴史を揺らす
+const BATTLE_KILLS := 5          # 合戦で一方の兵をこれだけ倒すと、もう一方に加勢したことになる
+
 const DIR := "res://data/chaos"
 const LANDMARK_RADIUS := 90.0
 
@@ -31,6 +37,9 @@ var events: Array = []                # 今回の自由探索の出来事 [{kind
 var fired: Dictionary = {}            # 今回発動したルール id -> true
 var session_hits: Array = []          # 今回発動した結果（最後の自由探索のぶんを end_session 後も保持）
 var tally: Dictionary = {}            # 集計 kind -> 数（表示用）
+var _sabotaged: Dictionary = {}       # 今回、一般則で壊した名所
+var _battle_kills: Dictionary = {}    # "合戦id/側" -> 倒した数
+var _battle_done: Dictionary = {}
 
 
 func _init(p_db: HistoryDB, p_state: HistoryState, dir := DIR) -> void:
@@ -54,7 +63,16 @@ func load_rules(dir := DIR) -> void:
 			errors.append("chaos/%s: JSON を読めません" % f)
 			continue
 		var era := str(d.get("eraId", f.get_basename()))
-		rules_by_era[era] = d.get("rules", [])
+		var rs: Array = d.get("rules", [])
+		# 人物名は表記ゆれをそろえる（「老中 田沼意次」→「田沼意次」）
+		for r in rs:
+			var t: Variant = r.get("trigger", {})
+			for c in (t if t is Array else [t]):
+				if c is Dictionary and c.has("id") and str(c.get("kind", "")) != "destroy":
+					var ids: Array = c["id"] if c["id"] is Array else [c["id"]]
+					var norm: Array = ids.map(func(x): return db.actor_name(str(x)) if db.actor_name(str(x)) != "" else str(x))
+					c["id"] = norm if c["id"] is Array else norm[0]
+		rules_by_era[era] = rs
 		figures_by_era[era] = d.get("figures", [])
 
 
@@ -84,6 +102,9 @@ func begin_session(era_id: String, p_world: Node = null) -> void:
 	fired.clear()
 	session_hits.clear()
 	tally.clear()
+	_sabotaged.clear()
+	_battle_kills.clear()
+	_battle_done.clear()
 
 
 func end_session() -> Array:
@@ -109,8 +130,17 @@ func record(kind: String, id: String, info: Dictionary = {}) -> Array:
 	var era := str(info.get("era", active_era))
 	if era != "" and era != active_era:
 		return []
+	if db.actor_name(id) != "":
+		id = db.actor_name(id)
 	var ev := {"kind": kind, "id": id, "type": str(info.get("type", "")), "at": _landmark_of(kind, id, info),
 		"count": maxi(1, int(info.get("count", 1))), "value": int(info.get("value", 100))}
+	for k in EXTRA_KEYS:
+		if info.has(k):
+			ev[k] = str(info[k])
+	if kind == "kill" and not ev.has("cause"):
+		ev["cause"] = "player"
+	if kind != "kill" and db.actor_name(id) != "":
+		ev["at"] = str(info.get("landmark", ev["at"]))
 	events.append(ev)
 	tally[kind] = int(tally.get(kind, 0)) + (1 if kind != "fire" else 0)
 	var hits: Array = []
@@ -128,7 +158,146 @@ func record(kind: String, id: String, info: Dictionary = {}) -> Array:
 		var hit := _apply(r)
 		if not hit.is_empty():
 			hits.append(hit)
+	if hits.is_empty():
+		hits.append_array(_generic(kind, id, info, ev))
 	return hits
+
+
+## 手作りルールに当たらなかった出来事を一般則（HistoryActors）で解決する
+func _generic(kind: String, id: String, info: Dictionary, ev: Dictionary) -> Array:
+	var out: Array = []
+	var nm := db.actor_name(id)
+	match kind:
+		"kill":
+			if str(info.get("type", "")) == "figure" and nm != "" and not _actor_gone(nm):
+				out.append(_act({"verb": "kill", "target": nm, "cause": ev.get("cause", "player")}))
+			elif str(info.get("type", "")) == "soldier":
+				out.append_array(_battle_kill(id))
+		"destroy", "fire", "bridge", "sink":
+			var key: String = ev["at"] if ev["at"] != "" else (id if id != "" else "town")
+			if _sabotaged.has(key):
+				return out
+			var c := {"kind": kind}
+			c["at"] = key
+			var total := 0
+			for e2 in events:
+				if e2["kind"] in ["destroy", "bridge", "sink"] and e2["at"] == key:
+					total += int(e2["value"])
+				elif e2["kind"] == "fire" and e2["at"] == key:
+					total = maxi(total, int(e2["count"]) * 60)
+			if total >= SABOTAGE_VALUE or kind == "bridge":
+				_sabotaged[key] = true
+				out.append(_act({"verb": "sabotage", "target": key, "value": total}))
+		"protect", "escort", "give", "steal", "forge", "delay":
+			if nm != "":
+				var a := {"verb": kind, "target": nm}
+				for k in EXTRA_KEYS:
+					if info.has(k):
+						a[k] = info[k]
+				out.append(_act(a))
+		"persuade":
+			if nm != "":
+				var ok := HistoryActors.persuade_ok(db.actors[nm], str(info.get("arg", "")), trust(nm))
+				if ok:
+					out.append(_act({"verb": "persuade", "target": nm, "arg": info.get("arg", ""), "ok": true}))
+				else:
+					out.append({"refused": true, "id": "", "title": "%sは「%s」をはねつけた" % [nm, info.get("arg", "")], "changes": []})
+		"steer":
+			if nm != "" and db.by_id.has(str(info.get("q", ""))):
+				var ok2 := HistoryActors.steer_ok(db.actors[nm], str(info["q"]), int(info.get("choice", 0)), trust(nm))
+				if ok2:
+					out.append(_act({"verb": "steer", "target": nm, "q": str(info["q"]), "choice": int(info.get("choice", 0)), "ok": true}))
+				else:
+					out.append({"refused": true, "id": "", "title": "%s「……証拠を見せてもらおう」" % nm, "changes": []})
+		"battle":
+			pass
+	return out.filter(func(h): return not h.is_empty())
+
+
+## UI（会話メニュー）からの行動。手作りルール → 一般則の順に解決し、hit（断られたら refused: true）を返す
+func act(verb: String, target: String, info: Dictionary = {}) -> Dictionary:
+	var inf := info.duplicate()
+	inf["era"] = active_era
+	var hs := record(verb, target, inf)
+	return hs[0] if not hs.is_empty() else {}
+
+
+## その人物への信頼（贈り物・命を救った・聞き入れた説得）
+func trust(nm: String) -> int:
+	var t := 0
+	for a in state.actions:
+		if db.actor_name(str(a.get("target", ""))) == nm:
+			match str(a.get("verb", "")):
+				"give", "persuade":
+					t += 1
+				"protect":
+					t += 2
+	return t
+
+
+func _actor_gone(nm: String) -> bool:
+	for a in state.actions:
+		if str(a.get("target", "")) == nm and str(a.get("verb", "")) in ["kill"]:
+			return true
+	return false
+
+
+## 合戦の兵を倒した：倒した側の相手に加勢したことになる
+func _battle_kill(label: String) -> Array:
+	for b in db.battles:
+		if str(b.get("era", "")) != active_era or _battle_done.has(b["id"]):
+			continue
+		var sides: Array = b.get("sides", [])
+		for i in sides.size():
+			if str(sides[i].get("label", "")) != label:
+				continue
+			var key := "%s/%d" % [b["id"], i]
+			_battle_kills[key] = int(_battle_kills.get(key, 0)) + 1
+			if int(_battle_kills[key]) >= BATTLE_KILLS:
+				_battle_done[b["id"]] = true
+				var other: Dictionary = sides[(i + 1) % sides.size()]
+				if other.has("wins"):
+					var hs := record("battle", str(b["id"]), {"side": other["name"], "era": active_era})
+					if not hs.is_empty():
+						return hs
+					return [_act({"verb": "battle", "target": b["id"], "side": other["name"], "battle_name": b.get("name", "")})]
+	return []
+
+
+func _act(a: Dictionary) -> Dictionary:
+	a["era"] = active_era
+	var before := _snapshot()
+	var changes := state.apply_action(a)
+	var last: Dictionary = state.actions[-1]
+	return _finish("act%d" % int(last["seq"]), HistoryActors.headline(db, last), str(last.get("text", "")), changes, before, {"action": last})
+
+
+func _snapshot() -> Dictionary:
+	var before := {}
+	for q in db.questions:
+		before[q["id"]] = state.is_correct(q)
+	return before
+
+
+func _finish(id: String, title: String, text: String, changes: Array, before: Dictionary, extra: Dictionary) -> Dictionary:
+	var broke := false
+	var fixed := false
+	for c in changes:
+		var q: Dictionary = c["question"]
+		if state.answer(q) < 0:
+			continue
+		var ok := state.is_correct(q)
+		c["was_correct"] = before.get(q["id"], false)
+		c["now_correct"] = ok
+		if before.get(q["id"], false) and not ok:
+			broke = true
+		elif not before.get(q["id"], false) and ok:
+			fixed = true
+	var hit := {"id": id, "era": active_era, "title": title, "text": text, "changes": changes, "broke": broke, "fixed": fixed}
+	hit.merge(extra)
+	session_hits.append(hit)
+	shifted.emit(hit)
+	return hit
 
 
 func _landmark_of(kind: String, id: String, info: Dictionary) -> String:
@@ -171,6 +340,11 @@ func _trigger_hit(t: Variant, ev: Dictionary) -> bool:
 static func _cond_match(c: Dictionary, ev: Dictionary) -> bool:
 	if str(c.get("kind", "")) != ev["kind"]:
 		return false
+	for k in EXTRA_KEYS:
+		if c.has(k):
+			var want: Array = c[k] if c[k] is Array else [c[k]]
+			if not (str(ev.get(k, "")) in want.map(func(x): return str(x))):
+				return false
 	if c.has("id") and not _id_ok(c["id"], ev):
 		return false
 	if c.has("type"):
@@ -217,28 +391,9 @@ func fire_total() -> int:
 
 
 func _apply(r: Dictionary) -> Dictionary:
-	var before := {}
-	for q in db.questions:
-		before[q["id"]] = state.is_correct(q)
+	var before := _snapshot()
 	var changes := state.apply_chaos(r, active_era)
-	var broke := false
-	var fixed := false
-	for c in changes:
-		var q: Dictionary = c["question"]
-		if state.answer(q) < 0:
-			continue
-		var ok := state.is_correct(q)
-		c["was_correct"] = before.get(q["id"], false)
-		c["now_correct"] = ok
-		if before.get(q["id"], false) and not ok:
-			broke = true
-		elif not before.get(q["id"], false) and ok:
-			fixed = true
-	var hit := {"rule": r, "id": r.get("id", ""), "era": active_era, "title": r.get("title", ""), "text": r.get("text", ""),
-		"changes": changes, "broke": broke, "fixed": fixed}
-	session_hits.append(hit)
-	shifted.emit(hit)
-	return hit
+	return _finish(str(r.get("id", "")), str(r.get("title", "")), str(r.get("text", "")), changes, before, {"rule": r})
 
 
 ## 今回の自由探索で起きた変化をまとめて返す（同じ問題は最後の結果だけ。アフター画面用）
