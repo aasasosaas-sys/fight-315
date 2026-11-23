@@ -140,6 +140,21 @@ func ring(lm: Dictionary, rr: float, hw := 3.0) -> void:
 		t.paint_line(t.road, Vector2(pa.x, pa.z), Vector2(pb.x, pb.z), hw, 0.9, 0.8)
 
 
+## 外から来た道を台地の中心へつなぐ（建物の下に隠れる部分は見えない）
+func _connect_roads(lm: Dictionary) -> void:
+	if lm.has("a") or lm["key"] == "mountain":
+		return
+	var c: Vector2 = lm["center"]
+	var r: float = lm["r"]
+	for line in t.road_lines:
+		var pts: PackedVector2Array = line["pts"]
+		for end in [pts[0], pts[pts.size() - 1]]:
+			var ep: Vector2 = end
+			if ep.distance_to(c) < r * 1.05:
+				var inner := c + (ep - c).normalized() * r * 0.15
+				t.paint_line(t.road, ep, inner, float(line["w"]) - 0.8, 0.9, 0.8)
+
+
 func plaza(lm: Dictionary, x: float, z: float, hw: float, hd: float, val := 0.9) -> void:
 	var p := wp(lm, x, z)
 	t.paint_rect(t.plaza, Vector2(p.x, p.z), -float(lm["angle"]), hw, hd, val, 1.5)
@@ -219,8 +234,7 @@ func build_all() -> void:
 	a = Architecture.new(w)
 	for key in ["capital", "village", "temple", "port", "castle", "battlefield", "mountain"]:
 		var lm: Dictionary = w.landmarks[key]
-		if key in ["capital", "village", "castle", "temple"]:
-			ring(lm, float(lm["r"]) * 0.9, 3.0 if key != "capital" else 4.0)
+		_connect_roads(lm)
 		plaza(lm, 0, 0, 13, 13, 0.85)
 		var fn := "_%s_%s" % [key, _era_group(key)]
 		if has_method(fn):
@@ -240,9 +254,12 @@ func build_all() -> void:
 	w._street_points = kept
 	# スポーン: 都の南寄りの大通り
 	var cap: Dictionary = w.landmarks["capital"]
-	var sp := wp(cap, 0, 30)
-	if t.is_occupied(sp.x, sp.z):
-		sp = wp(cap, 0, 8)
+	var sp := wp(cap, 0, 8)
+	for zz in [30.0, 40.0, 50.0, 60.0, 70.0, 85.0, 20.0, 12.0]:
+		var c := wp(cap, 0, zz)
+		if not t.is_occupied(c.x, c.z) and not t.is_water(c.x, c.z) and t.normal_at(c.x, c.z).y > 0.95 and absf(c.y - float(cap["h"])) < 0.6:
+			sp = c
+			break
 	w.player_spawn = sp + Vector3(0, 0.1, 0)
 
 
@@ -932,7 +949,7 @@ func _port_layout(lm: Dictionary, pier_kind: String, boats: Array, wh_kind: Stri
 			break
 	if shore_z == 0.0:
 		shore_z = 60.0
-	plaza(lm, 0, shore_z * 0.5, 50, shore_z * 0.5 + 4, 0.75)
+	plaza(lm, 0, shore_z * 0.5, 50, shore_z * 0.5 + 4, 0.5)
 	for k in 3:
 		var x := -36.0 + k * 36.0
 		var px := pl(lm, x, shore_z - 6.0, 0, Vector2(6, 2))

@@ -92,6 +92,27 @@ func _build_success() -> void:
 		lv.add_child(JSUI.label(legacy, 24, JSUI.TEXT, null, true))
 		left.add_child(lp)
 		JSUI.fade_in(lp, 0.5, 0.9)
+	# その後の歴史（この時代以降で、史実から変わった時代の流れ）
+	if not q.is_empty():
+		var started := false
+		var tl_lines: PackedStringArray = []
+		for item in Game.state.era_timeline():
+			var e: Dictionary = item["era"]
+			if e["eraId"] == q["era"]["eraId"]:
+				started = true
+			if started and item["changed"]:
+				tl_lines.append("■ %s　%s" % [e["eraName"], " ".join(item["lines"])])
+		if not tl_lines.is_empty():
+			var tp := JSUI.panel(JSUI.sb(Color(JSUI.CYAN, 0.06), 12, 0, Color.TRANSPARENT, 0, 18))
+			var tst2: StyleBoxFlat = tp.get_theme_stylebox("panel")
+			tst2.border_width_left = 6; tst2.border_color = JSUI.CYAN
+			var tv2 := JSUI.vbox(6)
+			tp.add_child(tv2)
+			tv2.add_child(JSUI.label("その後の歴史", 20, JSUI.CYAN, JSUI.sans_bold()))
+			for t in tl_lines.slice(0, 4):
+				tv2.add_child(JSUI.label(t, 21, JSUI.TEXT, null, true))
+			left.add_child(tp)
+			JSUI.fade_in(tp, 0.5, 1.2)
 	# 得点
 	left = left_col
 	var sc := JSUI.hbox(18)

@@ -7,6 +7,7 @@ signal back
 var q: Dictionary = {}
 var era: Dictionary = {}
 var mission: Dictionary = {}
+var method := 0
 
 const STEP_INFO := {
 	"goto": ["移動", "◆"], "talk": ["会話", "◇"], "defeat": ["撃退", "▲"], "collect": ["回収", "■"], "ride": ["騎乗", "▶"],
@@ -25,8 +26,8 @@ func _ready() -> void:
 	JSUI.full_rect(self)
 	if era.is_empty() and not q.is_empty():
 		era = q["era"]
-	if mission.is_empty() and not q.is_empty():
-		mission = Game.db.mission_for(q, Game.state.answer(q))
+	if not q.is_empty():
+		mission = Game.db.mission_for(q, Game.state.answer(q), method)
 	var col := JSUI.era_color(era.get("eraId", ""))
 	add_child(JSUI.background("ink"))
 	# 巨大な時代名の透かし
@@ -79,6 +80,25 @@ func _ready() -> void:
 		tv.add_child(JSUI.label("%s　%s" % [JSUI.year_text(q["year"]), q["topic"]], 22, JSUI.MUTED))
 		tv.add_child(JSUI.label("目標の史実：%s %s" % [JSUI.circled(ans), q["choices"][ans]], 26, Color.WHITE, JSUI.sans_bold(), true))
 		left.add_child(target)
+		# 手段の選択（手段ごとに歴史への波及が変わる）
+		var methods := Game.db.missions_for(q, ans)
+		if methods.size() > 1:
+			left.add_child(JSUI.label("手段を選ぶ ― 同じ結果でも、手段によってその後の歴史が変わる", 20, JSUI.GOLD, JSUI.sans_bold()))
+			var mrow := JSUI.hbox(10)
+			left.add_child(mrow)
+			for mi in methods.size():
+				var mm: Dictionary = methods[mi]
+				var rip := Game.state.predict_ripple(q, ans, mi)
+				var label := "%s\n波及 %d件" % [mm.get("method", "手段%d" % (mi + 1)), rip.size()]
+				var btn := Button.new()
+				btn.text = label
+				btn.custom_minimum_size = Vector2(220, 74)
+				btn.toggle_mode = true
+				btn.button_pressed = mi == method
+				btn.add_theme_font_size_override("font_size", 22)
+				var idx := mi
+				btn.pressed.connect(func(): _select_method(idx))
+				mrow.add_child(btn)
 		left.add_child(JSUI.label(mission.get("briefing", ""), 25, JSUI.TEXT, JSUI.serif(), true))
 		left.add_child(_section("作戦手順"))
 		var steps: Array = mission.get("steps", [])
@@ -202,3 +222,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel") and not JSUI.modal_open(self):
 		accept_event()
 		back.emit()
+
+
+func _select_method(i: int) -> void:
+	if i == method:
+		return
+	method = i
+	for c in get_children():
+		c.queue_free()
+	await get_tree().process_frame
+	_ready()

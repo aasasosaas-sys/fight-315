@@ -114,7 +114,13 @@ static func get_mat(key: String) -> Material:
 	var m: Material
 	if BUILD_MATS.has(key):
 		var d: Array = BUILD_MATS[key]
-		m = _building_mat(d[0], 1.0 / float(d[1]), d[2], d[3])
+		var bm := _building_mat(d[0], 1.0 / float(d[1]), d[2], d[3])
+		if key == "concrete":
+			bm.set_shader_parameter("albedo_mul", 1.55)
+			bm.set_shader_parameter("desat", 0.7)
+		elif key == "plaster":
+			bm.set_shader_parameter("albedo_mul", 1.03)
+		m = bm
 	else:
 		match key:
 			"metal":

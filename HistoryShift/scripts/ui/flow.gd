@@ -242,14 +242,14 @@ func show_hub(select_qid := "", reveal := false) -> void:
 func show_briefing(q: Dictionary) -> void:
 	var b := BriefingScreen.new()
 	b.q = q
-	b.depart.connect(func(): depart(q))
+	b.depart.connect(func(): depart(q, b.method))
 	b.back.connect(func(): show_hub(q["id"]))
 	_show(b, "briefing")
 
 
 # ================================================================== セッション
 ## ミッションへ出発する（ワープ演出 → Session.start_mission(q, 解答)）
-func depart(q: Dictionary) -> void:
+func depart(q: Dictionary, method := 0) -> void:
 	if _busy:
 		return
 	_mission_q = q
@@ -259,7 +259,7 @@ func depart(q: Dictionary) -> void:
 	_correct_before = Game.state.correct_count()
 	var choice := Game.state.answer(q)
 	var era: Dictionary = q["era"]
-	_warp_into(era["eraName"], JSUI.era_years(era["eraId"]), func(): return _session_make("start_mission", [q, choice]))
+	_warp_into(era["eraName"], JSUI.era_years(era["eraId"]), func(): return _session_make("start_mission", [q, choice, method]))
 
 
 func start_free_roam(era_id: String, return_to := "hub") -> void:

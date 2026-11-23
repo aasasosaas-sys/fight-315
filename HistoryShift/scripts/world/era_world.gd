@@ -23,7 +23,7 @@ const CANON := {
 	"battlefield": {"pos": Vector2(305, 175), "r": 52.0, "half_len": 178.0},
 	"mountain": {"pos": Vector2(-10, -300), "r": 34.0},
 }
-const RIVER_CANON := [Vector2(-140, -640), Vector2(-160, -440), Vector2(-178, -260), Vector2(-190, -70),
+const RIVER_CANON := [Vector2(-150, -500), Vector2(-160, -440), Vector2(-178, -260), Vector2(-190, -70),
 	Vector2(-175, 110), Vector2(-150, 270), Vector2(-122, 410), Vector2(-112, 560)]
 const ROADS := [["capital", "village", 4.5], ["capital", "castle", 4.5], ["capital", "temple", 4.0],
 	["capital", "battlefield", 4.5], ["capital", "port", 4.5], ["capital", "mountain", 3.5],
@@ -359,7 +359,9 @@ func _terrain_material() -> ShaderMaterial:
 	if plaza_key == "sand":
 		m.set_shader_parameter("plaza_tint", Color(1.25, 1.2, 1.1))
 	if era_id == "showa":
-		m.set_shader_parameter("snow_height", 128.0)
+		m.set_shader_parameter("snow_height", 120.0)
+		m.set_shader_parameter("snow_center", terrain.canon_to_world(terrain.peak))
+		m.set_shader_parameter("snow_radius", 260.0)
 	var gt: Color = style["grass_tint"]
 	m.set_shader_parameter("grass_tint", gt)
 	return m

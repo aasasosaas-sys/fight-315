@@ -835,7 +835,7 @@ func stall(xf: Transform3D, colr: Color) -> void:
 func brick_building(xf: Transform3D, wd := 24.0, dp := 14.0, floors := 3, o := {}) -> void:
 	var fh := 4.2
 	var wall_mat: String = o.get("mat", "brick")
-	var wall_col: Color = o.get("col", Color.WHITE)
+	var wall_col: Color = o.get("col", Color(1.0, 0.68, 0.58) if wall_mat == "brick" else Color.WHITE)
 	var trim: Color = o.get("trim", Color(0.92, 0.9, 0.84))
 	var h := floors * fh
 	foundation(xf, wd + 0.4, dp + 0.4, 0.8, "stonewall", Color(0.82, 0.8, 0.76))
@@ -1139,7 +1139,7 @@ func warehouse(xf: Transform3D, wd := 20.0, dp := 12.0, kind := "brick") -> void
 		"brick":
 			var h := 9.0
 			foundation(xf, wd + 0.3, dp + 0.3, 0.5, "stonewall", STONE)
-			bx("brick", xf, Vector3(0, 0.5 + h * 0.5, 0), Vector3(wd, h, dp))
+			bx("brick", xf, Vector3(0, 0.5 + h * 0.5, 0), Vector3(wd, h, dp), Color(1.0, 0.66, 0.55))
 			for i in int(wd / 4.0):
 				var x := -wd * 0.5 + 4.0 * (i + 0.5)
 				for sgn in [-1.0, 1.0]:
@@ -1169,6 +1169,7 @@ func warehouse(xf: Transform3D, wd := 20.0, dp := 12.0, kind := "brick") -> void
 func bridge(pos: Vector2, dir: Vector2, length: float, width: float, deck_h: float, kind := "wood", arch := 0.0) -> void:
 	var ang := atan2(dir.x, dir.y)
 	var xf := Transform3D(Basis(Vector3.UP, ang), Vector3(pos.x, deck_h, pos.y))
+	t.occupy_rect(pos, -ang, width * 0.5 + 0.5, length * 0.5 + 6.0)
 	var segs := 10
 	var mat := "wood" if kind == "wood" else ("stonewall" if kind == "stone" else "concrete")
 	var colr := Color(0.8, 0.72, 0.62) if kind == "wood" else Color(0.85, 0.83, 0.8)

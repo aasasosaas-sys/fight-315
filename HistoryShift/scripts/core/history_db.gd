@@ -10,6 +10,7 @@ var questions: Array = []       # Array[Dictionary]（年代順）。各問に "
 var by_id: Dictionary = {}
 var rules: Array = []
 var errors: PackedStringArray = []
+var modern: Dictionary = {}     # data/modern.json（現代エンディングの分岐）
 
 
 static func load_all(dir := "res://data") -> HistoryDB:
@@ -27,14 +28,24 @@ static func load_all(dir := "res://data") -> HistoryDB:
 		if f.begins_with("rules_"):
 			db.rules.append_array(d.get("rules", []))
 			continue
+		if f == "modern.json":
+			db.modern = d
+			continue
 		db.eras.append(d)
 		db.rules.append_array(d.get("rules", []))
 		for q in d.get("questions", []):
 			q["era"] = d
 			q["year"] = int(q["year"])
 			q["real"] = int(q["real"])
+			var per := {}
 			for m in q.get("missions", []):
 				m["choice"] = int(m["choice"])
+				m["method_index"] = per.get(m["choice"], 0)
+				per[m["choice"]] = m["method_index"] + 1
+			if not q.has("effects"):
+				q["effects"] = [{}, {}, {}, {}]
+			if not q.has("resolve"):
+				q["resolve"] = []
 			db.by_id[q["id"]] = q
 	db.eras.sort_custom(func(a, b): return ERA_ORDER.find(a["eraId"]) < ERA_ORDER.find(b["eraId"]))
 	for e in db.eras:
@@ -65,11 +76,25 @@ static func landmark_name(era: Dictionary, key: String) -> String:
 	return key
 
 
-## (問題, 目標の選択肢) のミッション。史実へ戻す場合などデータに無いものは自動生成する。
-func mission_for(q: Dictionary, choice: int) -> Dictionary:
+## (問題, 選択肢) に対応する手段（ミッション）の一覧。無ければ自動生成の1件。
+func missions_for(q: Dictionary, choice: int) -> Array:
+	var out: Array = []
 	for m in q.get("missions", []):
 		if m["choice"] == choice:
-			return m
+			out.append(m)
+	if out.is_empty():
+		out.append(mission_for(q, choice))
+	return out
+
+
+## (問題, 目標の選択肢, 手段番号) のミッション。史実へ戻す場合などデータに無いものは自動生成する。
+func mission_for(q: Dictionary, choice: int, method := 0) -> Dictionary:
+	var found: Array = []
+	for m in q.get("missions", []):
+		if m["choice"] == choice:
+			found.append(m)
+	if not found.is_empty():
+		return found[clampi(method, 0, found.size() - 1)]
 	var restore: bool = choice == q["real"]
 	var era: Dictionary = q["era"]
 	var h: int = abs(hash(str(q["id"]) + str(choice)))
@@ -85,6 +110,9 @@ func mission_for(q: Dictionary, choice: int) -> Dictionary:
 		"aftermath": "歴史は本来の流れに戻った。" if restore else "歴史は静かに別の道を歩み始めた。",
 		"legacy": "" if restore else "%sに「%s」という史実が刻まれ、現代の教科書もそのように書かれている。" % [era["eraName"], picked],
 		"generated": true,
+		"method": "修復" if restore else "介入",
+		"method_index": 0,
+		"effects": {},
 		"steps": [
 			{"type": "goto", "at": a, "text": "%sに生じた時空の歪みへ向かう" % landmark_name(era, a)},
 			{"type": "defeat", "at": a, "count": 4 + h % 3, "enemy": "歴史の修正力", "text": "歪みを守る「歴史の修正力」を撃退せよ"},

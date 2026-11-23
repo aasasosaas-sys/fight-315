@@ -9,6 +9,7 @@ signal aborted
 var mode := "mission"     # mission / free / backdrop
 var question: Dictionary = {}
 var choice := -1
+var method := 0
 var mission: Dictionary = {}
 var era: Dictionary = {}
 var world
@@ -20,13 +21,14 @@ var wanted: Wanted
 var _ended := false
 
 
-static func start_mission(q: Dictionary, p_choice: int) -> Session:
+static func start_mission(q: Dictionary, p_choice: int, p_method := 0) -> Session:
 	var s := Session.new()
 	s.mode = "mission"
 	s.question = q
 	s.choice = p_choice
 	s.era = q["era"]
-	s.mission = Game.db.mission_for(q, p_choice)
+	s.method = p_method
+	s.mission = Game.db.mission_for(q, p_choice, p_method)
 	return s
 
 
@@ -158,7 +160,7 @@ func _on_completed() -> void:
 	Sfx.play(get_tree(), Sfx.success(), -2.0)
 	hud.banner("歴史改変 成功", Color(0.37, 0.91, 1.0), 2.0)
 	Effects.time_warp(get_tree(), player.global_position)
-	var changes := Game.state.apply_change(question, choice, mission.get("title", "改変"))
+	var changes := Game.state.apply_change(question, choice, "%s（%s）" % [mission.get("title", "改変"), mission.get("method", "介入")], method)
 	Game.input_blocked = true
 	await get_tree().create_timer(2.8).timeout
 	if _ended:

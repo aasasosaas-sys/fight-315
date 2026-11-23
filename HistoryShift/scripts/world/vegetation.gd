@@ -438,6 +438,7 @@ static func leaf_material(sp: String) -> ShaderMaterial:
 		if sp == "sakura":
 			m.set_shader_parameter("tex_desat", 1.0)
 			m.set_shader_parameter("tex_tint", Color(1.25, 0.9, 1.0))
+			m.set_shader_parameter("leaf_count", float(d["count"]) * 2.2)
 		# 葉を細かく（写真の葉は小さめに並べる）
 		m.set_shader_parameter("leaf_count", float(d["count"]) * 1.25)
 		m.set_shader_parameter("leaf_size", 0.5)
@@ -553,6 +554,7 @@ static func _build_cedar(near: MeshKit, far: MeshKit, rng: RandomNumberGenerator
 		var rr := lerpf(2.9, 0.9, tt)
 		# 円錐の芯（暗い）
 		near.cylinder("leaf", Transform3D(Basis(), Vector3(0, y0, 0)), rr * 0.7, 0.15, th, 8, Color(0.22, 0.5 + tt * 0.5, 0, 1), false)
+		far.cylinder("leaf", Transform3D(Basis(), Vector3(0, y0, 0)), rr * 1.05, 0.2, th * 1.05, 6, Color(0.5, 0.5 + tt * 0.5, 0, 1), false)
 		# 円錐表面の葉カード（外向き・やや下向き）
 		var cnt := int(lerpf(34, 14, tt))
 		for i in cnt:
@@ -576,7 +578,6 @@ static func _build_cedar(near: MeshKit, far: MeshKit, rng: RandomNumberGenerator
 				s[2].append(uvs[c])
 				s[3].append(col)
 			s[4].append_array([base, base + 1, base + 2, base, base + 2, base + 3])
-	far.cylinder("leaf", Transform3D(Basis(), Vector3(0, 3.4, 0)), 2.6, 0.2, H - 2.8, 7, Color(0.6, 1, 0, 1), false)
 
 
 static func _build_pine(near: MeshKit, far: MeshKit, rng: RandomNumberGenerator) -> void:
