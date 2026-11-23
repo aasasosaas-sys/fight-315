@@ -34,12 +34,71 @@ const DYES := {
 	"nezumi": [Color(0.55, 0.55, 0.56), Color(0.36, 0.36, 0.42)],    # 鼠
 }
 
-## 服装 → パーツごとの色
+## 服装 → パーツごとの「色:柄:差し色」（柄・差し色は省略可）
 const PALETTES := {
-	"samurai": {"kosode": "kon", "eri": "kuro", "haneri": "shiro", "hakama": "nezumi", "obi": "kuro", "armor": "enji"},
-	"hakama": {"kosode": "ai", "eri": "kon", "haneri": "shiro", "hakama": "kuchiba", "obi": "kuro"},
-	"kimono": {"kosode": "sakura", "eri": "enji", "haneri": "shiro", "robe": "sakura", "obi": "kin"},
+	"samurai": {"kosode": "kon:kasuri:ai", "eri": "kuro", "haneri": "shiro", "hakama": "nezumi:shima:kuro", "obi": "kuro", "armor": "enji"},
+	"hakama": {"kosode": "ai:plain", "eri": "kon", "haneri": "shiro", "hakama": "kuchiba:shima:kaki", "obi": "kuro"},
+	"kimono": {"kosode": "sakura:sakura_komon:shiro", "eri": "enji", "haneri": "shiro", "robe": "sakura:sakura_komon:shiro", "obi": "kin:asanoha:enji"},
 }
+
+static var _pat_cache := {}
+
+
+## 布の柄（繰り返しの 1 枚）。地の色に差し色で柄を描き、織り目のかすかなむらを足す
+static func pattern_tex(pattern: String, base: Color, accent: Color) -> Texture2D:
+	var key := "%s|%s|%s" % [pattern, base.to_html(), accent.to_html()]
+	if _pat_cache.has(key):
+		return _pat_cache[key]
+	var N := 128
+	var img := Image.create(N, N, true, Image.FORMAT_RGBA8)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	for y in N:
+		for x in N:
+			var u := float(x) / N
+			var v := float(y) / N
+			var a := 0.0   # 差し色の割合
+			match pattern:
+				"shima":      # 縦縞（袴）：太い縞と細い縞
+					var t := fmod(u * 4.0, 1.0)
+					a = 1.0 if t < 0.12 else (0.7 if absf(t - 0.5) < 0.03 else 0.0)
+				"ichimatsu":  # 市松
+					a = 1.0 if (int(u * 4) + int(v * 4)) % 2 == 0 else 0.0
+				"kasuri":     # 絣：かすれた十字の点
+					var cu := fmod(u * 4.0 + (0.5 if int(v * 4) % 2 == 1 else 0.0), 1.0) - 0.5
+					var cv := fmod(v * 4.0, 1.0) - 0.5
+					var cross := (absf(cu) < 0.06 and absf(cv) < 0.2) or (absf(cv) < 0.06 and absf(cu) < 0.2)
+					a = 0.85 if cross and rng.randf() > 0.15 else 0.0
+				"asanoha":    # 麻の葉：六角格子の放射線
+					var gx := u * 2.0
+					var gy := v * 2.0 * 1.1547
+					var row := int(floor(gy))
+					var cx := gx - (0.5 if row % 2 == 1 else 0.0)
+					var px: float = cx - floor(cx) - 0.5
+					var py: float = gy - floor(gy) - 0.5
+					var ang: float = atan2(py, px)
+					var r: float = sqrt(px * px + py * py)
+					var k: float = absf(fmod(ang + PI * 2.0, PI / 3.0) - PI / 6.0)
+					a = 1.0 if (r < 0.6 and k * r < 0.012) or absf(r - 0.5) < 0.012 else 0.0
+				"sakura_komon":  # 桜の小紋：五弁の花を散らす
+					for cc in [Vector2(0.25, 0.25), Vector2(0.75, 0.7), Vector2(0.7, 0.2), Vector2(0.2, 0.75)]:
+						var d: Vector2 = Vector2(u, v) - (cc as Vector2)
+						d = Vector2(d.x - round(d.x), d.y - round(d.y))
+						var rr: float = d.length()
+						var an: float = atan2(d.y, d.x)
+						var petal: float = 0.075 * (0.65 + 0.35 * absf(cos(an * 2.5)))
+						if rr < petal:
+							a = 1.0 if rr > 0.018 else 0.6
+				_:
+					a = 0.0
+			var c := base.lerp(accent, a)
+			# 織り目：縦横の細かいむら（ごく弱く）
+			var weave := 1.0 + 0.035 * (sin(x * 1.7) * sin(y * 1.9)) + rng.randf_range(-0.015, 0.015)
+			img.set_pixel(x, y, Color(c.r * weave, c.g * weave, c.b * weave, 1.0))
+	img.generate_mipmaps()
+	var t := ImageTexture.create_from_image(img)
+	_pat_cache[key] = t
+	return t
 
 
 static func build(base: String, outfit := "modern", palette: Dictionary = {}) -> Node3D:
@@ -98,8 +157,15 @@ static func _dress(n: Node3D, sk: Skeleton3D, base: String, outfit: String, pal:
 		g.skeleton = g.get_path_to(sk)
 		g.skin = _rebind(mi, sk)
 		g.extra_cull_margin = 2.0
-		var dye: Array = DYES.get(pal.get(part, "ai"), DYES["ai"])
-		g.material_override = _cloth_mat(template, dye[0], dye[1], not part in ["eri", "haneri"] and OS.get_environment("NO_OUTLINE") == "")
+		var spec: PackedStringArray = String(pal.get(part, "ai")).split(":")
+		var dye: Array = DYES.get(spec[0], DYES["ai"])
+		var tex: Texture2D = null
+		if spec.size() > 1 and spec[1] != "plain":
+			var acc: Array = DYES.get(spec[2] if spec.size() > 2 else "shiro", DYES["shiro"])
+			tex = pattern_tex(spec[1], dye[0], acc[0])
+		elif spec.size() > 1:
+			tex = pattern_tex("plain", dye[0], dye[0])
+		g.material_override = _cloth_mat(template, dye[0], dye[1], not part in ["eri", "haneri"] and OS.get_environment("NO_OUTLINE") == "", tex)
 		if OS.get_environment("DBG_PART") == part:
 			var dm := StandardMaterial3D.new()
 			dm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -162,14 +228,20 @@ static func _swap_body(body: MeshInstance3D, src: MeshInstance3D, sk: Skeleton3D
 
 
 ## 布の MToon（素体の素材を雛形に、地の色・影の色を差し替え）
-static func _cloth_mat(template: Material, lit: Color, shade: Color, outline := true) -> Material:
+static func _cloth_mat(template: Material, lit: Color, shade: Color, outline := true, tex: Texture2D = null) -> Material:
 	if template is ShaderMaterial:
 		var m := (template as ShaderMaterial).duplicate() as ShaderMaterial
-		m.set_shader_parameter("_MainTex", null)
-		m.set_shader_parameter("_ShadeTexture", null)
+		m.set_shader_parameter("_MainTex", tex)
+		m.set_shader_parameter("_ShadeTexture", tex)
 		m.set_shader_parameter("_BumpMap", null)
-		m.set_shader_parameter("_Color", lit)
-		m.set_shader_parameter("_ShadeColor", shade)
+		if tex:
+			# 柄の画像が地の色を持つので、色は白／影は地に対する比で
+			m.set_shader_parameter("_Color", Color.WHITE)
+			m.set_shader_parameter("_ShadeColor", Color(shade.r / maxf(lit.r, 0.01), shade.g / maxf(lit.g, 0.01), shade.b / maxf(lit.b, 0.01)))
+			m.set_shader_parameter("_MainTex_ST", Vector4(6, 6, 0, 0))
+		else:
+			m.set_shader_parameter("_Color", lit)
+			m.set_shader_parameter("_ShadeColor", shade)
 		m.set_shader_parameter("_ShadeToony", 0.85)
 		m.set_shader_parameter("_ShadeShift", -0.1)
 		if not outline:
