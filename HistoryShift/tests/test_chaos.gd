@@ -73,8 +73,7 @@ func _fire_rule(tr: ChaosTracker, era: String, r: Dictionary) -> Array:
 
 
 func _run() -> void:
-	if FileAccess.file_exists(HistoryState.SAVE_PATH):
-		_backup = FileAccess.get_file_as_string(HistoryState.SAVE_PATH)
+	HistoryState.save_path = "user://test_chaos_save.json"   # 本物のセーブや並行テストに触れない
 	var db := HistoryDB.load_all()
 	var tr := ChaosTracker.new(db, null)
 	_check(tr.errors.is_empty(), "chaos json errors: %s" % [tr.errors])
@@ -204,9 +203,6 @@ func _run() -> void:
 	_generic_tests(db)
 	await _integration()
 	HistoryState.delete_save()
-	if _backup != null:
-		var f := FileAccess.open(HistoryState.SAVE_PATH, FileAccess.WRITE)
-		f.store_string(_backup)
 	print("RESULT: %s (%d failures)" % ["PASS" if fails == 0 else "FAIL", fails])
 	quit(1 if fails else 0)
 
@@ -355,6 +351,9 @@ func _integration() -> void:
 	root.add_child(sess)
 	await _frames(5)
 	var specs: Array = G.chaos.figures_for("sengoku")
+	_check(sess.figures.size() <= sess.MAX_FIGS, "figure population capped (%d near the player)" % sess.figures.size())
+	sess.spawn_all_figures()
+	await _frames(2)
 	_check(sess.figures.size() == S.figure_specs("sengoku").size() and sess.figures.size() >= specs.size(), "free roam spawns figures (%d)" % sess.figures.size())
 	_check(sess.interact != null, "actor interaction node")
 	for q in G.db.questions:

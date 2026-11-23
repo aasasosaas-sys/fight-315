@@ -22,6 +22,9 @@ var _ended := false
 var figures: Array = []    # 自由探索に現れる歴史上の人物（HistFigure）
 var interact: ActorInteract
 var _appt_announced: Dictionary = {}
+var _fig_pending: Array = []      # まだ実体化していない人物 [{spec, pos, name}]
+var _fig_dead: Dictionary = {}
+var _stream_t := 0.0
 
 
 static func start_mission(q: Dictionary, p_choice: int, p_method := 0) -> Session:
@@ -176,48 +179,120 @@ static func figure_specs(era_id: String) -> Array:
 	return out
 
 
+const FIG_SPAWN_R := 110.0     # プレイヤーからこの距離に入った人物だけを実体化する
+const FIG_DESPAWN_R := 230.0
+const MAX_FIGS := 16           # 同時に実体化する人物の上限
+const MAX_GUARDS := 30         # 護衛の総数の上限
+const GUARDS_PER_FIG := 3
+
+
 func _spawn_figures() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(era.get("eraId", "")) + 31
-	var i := 0
+	_fig_pending.clear()
 	for spec in figure_specs(era["eraId"]):
 		var key: String = spec.get("at", "capital")
 		if not (key in HistoryDB.LANDMARK_KEYS):
 			key = "capital"
-		var center: Vector3 = world.landmark_pos(key)
-		var pos: Vector3 = world.random_ground_point_near(center, 9.0, rng)
+		var pos: Vector3 = world.random_ground_point_near(world.landmark_pos(key), 9.0, rng)
 		var nm: String = str(spec.get("name", "人物"))
-		var ad: Dictionary = Game.db.actor(nm)
-		var f := HistFigure.spawn(self, pos + Vector3.UP * 0.5, nm, era["eraId"], spec.get("lines", []), ad)
-		var an := Game.db.actor_name(nm)
-		for qid in Game.db.q_actors:
-			for c in Game.db.q_actors[qid]:
-				if c["name"] == an and not (qid in f.questions):
-					f.questions.append(qid)
-		f.refresh_hint()
-		figures.append(f)
-		var label: String = spec.get("guard", Wanted.GUARDS.get(era["eraId"], "護衛"))
-		var ng := int(spec.get("guards", 0)) if f.killable else 0
-		for gi in ng:
-			var ang := TAU * gi / maxf(1.0, float(ng))
-			var gp: Vector3 = world.random_ground_point_near(pos + Vector3(cos(ang), 0, sin(ang)) * 4.0, 1.5, rng)
-			var e := Enemy.spawn(self, gp + Vector3.UP * 0.5, label, era["eraId"], gi == 0 and ng >= 4)
-			e.aggro_range = 16.0
-			f.guards.append(e)
-		# 予定（遅らせると歴史が揺らぐ）
-		for sc in ad.get("schedule", []):
-			if str(sc.get("at", "")) in HistoryDB.LANDMARK_KEYS:
-				var start := 70.0 + i * 25.0
-				f.set_appointment(sc, world.landmark_pos(str(sc["at"])), start, start + 120.0)
-				break
-		hud.compass_points["◆" + f.figure_name] = pos
-		i += 1
-	hud.extra_markers = figures.duplicate()
-	_spawn_battles(rng)
+		_fig_pending.append({"spec": spec, "pos": pos, "name": nm})
+		hud.compass_points["◆" + nm] = pos
 	interact = ActorInteract.new()
 	interact.setup(self, hud, figures)
 	add_child(interact)
+	_spawn_battles(rng)
 	_appt_announced.clear()
+	_stream_figures()
+
+
+## テスト用：すべての人物をすぐに実体化する
+func spawn_all_figures() -> void:
+	for e in _fig_pending.duplicate():
+		_materialize(e)
+	_fig_pending.clear()
+	_sync_figures()
+
+
+func _stream_figures() -> void:
+	var p: Node3D = player.vehicle if player and player.in_vehicle() else player
+	if p == null:
+		return
+	var pp := p.global_position
+	# 遠く離れた人物は片づける（連れ回し中・予定の途中・倒れた人は除く）
+	for f in figures.duplicate():
+		if not is_instance_valid(f):
+			figures.erase(f)
+			continue
+		if f.dead or f.follow_target != null or (not f.appointment.is_empty() and not f._appt_done):
+			continue
+		if interact and (interact._protect_fig == f or interact._menu_fig == f):
+			continue
+		if f.global_position.distance_to(pp) > FIG_DESPAWN_R:
+			_fig_pending.append({"spec": f.get_meta("spec"), "pos": f.home, "name": f.figure_name})
+			for g in f.guards:
+				if is_instance_valid(g):
+					g.queue_free()
+			figures.erase(f)
+			f.queue_free()
+	# 近い順に実体化
+	var near: Array = _fig_pending.filter(func(e): return (e["pos"] as Vector3).distance_to(pp) < FIG_SPAWN_R)
+	near.sort_custom(func(a, b): return (a["pos"] as Vector3).distance_to(pp) < (b["pos"] as Vector3).distance_to(pp))
+	for e in near:
+		if figures.size() >= MAX_FIGS:
+			break
+		_materialize(e)
+		_fig_pending.erase(e)
+	_sync_figures()
+
+
+func _materialize(e: Dictionary) -> void:
+	var nm: String = e["name"]
+	if _fig_dead.has(nm):
+		return
+	var spec: Dictionary = e["spec"]
+	var ad: Dictionary = Game.db.actor(nm)
+	var f := HistFigure.spawn(self, (e["pos"] as Vector3) + Vector3.UP * 0.5, nm, era["eraId"], spec.get("lines", []), ad)
+	f.set_meta("spec", spec)
+	f.killed.connect(func(_x): _fig_dead[nm] = true)
+	var an := Game.db.actor_name(nm)
+	for qid in Game.db.q_actors:
+		for c in Game.db.q_actors[qid]:
+			if c["name"] == an and not (qid in f.questions):
+				f.questions.append(qid)
+	f.hint_on = interact.hints_on if interact else true
+	f.refresh_hint()
+	figures.append(f)
+	var label: String = spec.get("guard", Wanted.GUARDS.get(era["eraId"], "護衛"))
+	var ng := mini(int(spec.get("guards", 0)), GUARDS_PER_FIG) if f.killable else 0
+	ng = mini(ng, MAX_GUARDS - _guard_count())
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(nm)
+	for gi in ng:
+		var ang := TAU * gi / maxf(1.0, float(ng))
+		var gp: Vector3 = world.random_ground_point_near(f.global_position + Vector3(cos(ang), 0, sin(ang)) * 4.0, 1.5, rng)
+		var g := Enemy.spawn(self, gp + Vector3.UP * 0.5, label, era["eraId"], gi == 0 and ng >= 3)
+		g.aggro_range = 16.0
+		f.guards.append(g)
+	# 予定（遅らせると歴史が揺らぐ）：すべての予定を順に
+	var appts: Array = ad.get("schedule", []).filter(func(sc): return str(sc.get("at", "")) in HistoryDB.LANDMARK_KEYS and str(sc.get("era", ad.get("era", ""))) == era["eraId"])
+	if not appts.is_empty():
+		f.appointments = appts
+		f.next_appointment(world, 50.0 + (absi(hash(nm)) % 60))
+
+
+func _guard_count() -> int:
+	var n := 0
+	for f in figures:
+		if is_instance_valid(f):
+			n += f.guards.filter(func(g): return is_instance_valid(g) and not g.dead).size()
+	return n
+
+
+func _sync_figures() -> void:
+	hud.extra_markers = figures.filter(func(f): return is_instance_valid(f))
+	if interact:
+		interact.figures = figures
 
 
 ## 合戦：両軍の兵を名所に置く。片方を倒すと、もう片方に加勢したことになる
@@ -236,14 +311,18 @@ func _spawn_battles(rng: RandomNumberGenerator) -> void:
 		hud.compass_points["⚔" + str(b.get("name", ""))] = center
 
 
-func _process(_dt: float) -> void:
+func _process(dt: float) -> void:
 	if mode != "free" or hud == null:
 		return
+	_stream_t -= dt
+	if _stream_t <= 0.0 and player:
+		_stream_t = 0.5
+		_stream_figures()
 	for f in figures:
-		if not is_instance_valid(f) or f.dead or f.appointment.is_empty() or _appt_announced.has(f):
+		if not is_instance_valid(f) or f.dead or f.appointment.is_empty() or f._appt_done:
 			continue
-		if f._t >= f.appt_start:
-			_appt_announced[f] = true
+		if f._t >= f.appt_start and _appt_announced.get(f, "") != str(f.appointment.get("event", "")):
+			_appt_announced[f] = str(f.appointment.get("event", ""))
 			hud.toast("%sが「%s」のため%sへ向かい始めた" % [f.figure_name, f.appointment.get("event", ""), HistoryDB.landmark_name(era, str(f.appointment.get("at", "")))], 4.0)
 
 

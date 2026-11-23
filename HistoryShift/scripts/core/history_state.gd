@@ -9,6 +9,7 @@ extends RefCounted
 ## 状態空間は「4択×手段」の組み合わせ×パラメータの連続値で、事実上無限。
 
 const SAVE_PATH := "user://save_v2.json"
+static var save_path := SAVE_PATH   # テストは別のファイルに差し替える（並行して走る他のテストとぶつからないように）
 const NUM := ["centralization", "warrior", "court", "religion", "commerce", "open_asia", "open_west", "tech",
 	"education", "commoners", "militarism", "democracy", "economy", "unity"]
 const CAT := ["capital", "ruler", "edu_center"]
@@ -499,7 +500,7 @@ func compose_ending() -> Array:
 
 # ---------- セーブ ----------
 func save() -> void:
-	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	var f := FileAccess.open(save_path, FileAccess.WRITE)
 	if f == null:
 		return
 	f.store_string(JSON.stringify({"interventions": interventions, "answers": answers, "exam_submitted": exam_submitted,
@@ -508,9 +509,9 @@ func save() -> void:
 
 
 func load_save() -> bool:
-	if not FileAccess.file_exists(SAVE_PATH):
+	if not FileAccess.file_exists(save_path):
 		return false
-	var d = JSON.parse_string(FileAccess.get_file_as_string(SAVE_PATH))
+	var d = JSON.parse_string(FileAccess.get_file_as_string(save_path))
 	if typeof(d) != TYPE_DICTIONARY:
 		return false
 	reset_all()
@@ -545,7 +546,7 @@ func load_save() -> bool:
 	return true
 
 
-static func has_save() -> bool: return FileAccess.file_exists(SAVE_PATH)
+static func has_save() -> bool: return FileAccess.file_exists(save_path)
 static func delete_save() -> void:
-	if FileAccess.file_exists(SAVE_PATH):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE_PATH))
+	if FileAccess.file_exists(save_path):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))

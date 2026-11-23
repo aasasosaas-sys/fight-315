@@ -118,8 +118,12 @@ static func extend_actor(base: Dictionary, ext: Dictionary, fera: String) -> voi
 		if ext.has(k):
 			var lst: Array = base.get(k, []).duplicate()
 			for x in ext[k]:
-				if not (x in lst):
-					lst.append(x)
+				var y: Variant = x
+				if x is Dictionary and not (x as Dictionary).has("era"):
+					y = (x as Dictionary).duplicate()
+					y["era"] = fera     # その時代での貢献（それより前の時代の行動では使わない）
+				if not (y in lst):
+					lst.append(y)
 			base[k] = lst
 	for k in ["persuade", "give"]:
 		if ext.has(k):

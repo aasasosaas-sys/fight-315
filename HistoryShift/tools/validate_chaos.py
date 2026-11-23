@@ -138,7 +138,9 @@ def main():
             if n in actors:   # 別の時代のファイル＝その時代での追加分（HistoryDB.extend_actor と同じ合成）
                 b = actors[n]
                 for k in ("contrib", "schedule", "q", "aka"):
-                    if k in a: b[k] = b.get(k, []) + [x for x in a[k] if x not in b.get(k, [])]
+                    if k in a:
+                        ext = [dict(x, era=x.get("era", era)) if isinstance(x, dict) else x for x in a[k]]
+                        b[k] = b.get(k, []) + [x for x in ext if x not in b.get(k, [])]
                 for k in ("persuade", "give"):
                     if k in a: b.setdefault(k, {}).update(a[k])
                 for k in ("saved", "doc"):
@@ -391,7 +393,7 @@ def main():
                  schedule=[sc for sc in a.get("schedule", []) if not shadowed("delay", n, event=sc["event"])])
         for c in a.get("contrib", []):
             fo = {"q": c["q"], "choice": c["choice"]} if "choice" in c else None
-            count(f"actor:{n}:kill/escort", *effects_of(fo, c.get("vars"), c.get("year", a["active"]), e))
+            count(f"actor:{n}:kill/escort", *effects_of(fo, c.get("vars"), c.get("year", a["active"]), c.get("era", e)))
         sv = a.get("saved")
         if sv: count(f"actor:{n}:protect", *effects_of(sv.get("force"), sv.get("vars"), sv["year"], era_of_year(eras, sv["year"])))
         if a.get("doc"): count(f"actor:{n}:steal", *effects_of({"q": a["doc"]["q"], "choice": a["doc"]["choice"]}, None, 0, e))
@@ -401,7 +403,7 @@ def main():
             count(f"actor:{n}:give:{it}", *effects_of(sp.get("force"), sp.get("vars"), sp.get("year", a["active"]), e))
         for sc in a.get("schedule", []):
             ms = sc["missed"]
-            count(f"actor:{n}:delay:{sc['event']}", *effects_of(ms.get("force"), ms.get("vars"), sc["year"], e))
+            count(f"actor:{n}:delay:{sc['event']}", *effects_of(ms.get("force"), ms.get("vars"), sc["year"], sc.get("era", e)))
     for b in battles:
         for s in b["sides"]:
             if "wins" in s:

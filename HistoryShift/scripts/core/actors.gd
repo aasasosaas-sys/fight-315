@@ -220,6 +220,11 @@ static func resolve(db: HistoryDB, actions: Array) -> Dictionary:
 		var ad: Dictionary = db.actors.get(nm, {})
 		var yr := int(ad.get("active", 0)) if not ad.is_empty() else _era_mid(db, era)
 		var aera := str(ad.get("era", era)) if not ad.is_empty() else era
+		# 人物の時代より後の時代で行動した（後の時代のファイルで追加された人物）なら、その時代の初めから効く
+		var ei := HistoryDB.ERA_ORDER.find(era)
+		if era != "" and ei > HistoryDB.ERA_ORDER.find(aera):
+			aera = era
+			yr = maxi(yr, _era_first(db, era))
 		var out: Array = []   # [{force?, vars?, year, note}]
 		match verb:
 			"kill", "escort":
@@ -228,6 +233,9 @@ static func resolve(db: HistoryDB, actions: Array) -> Dictionary:
 				else:
 					var any := false
 					for c in ad.get("contrib", []):
+						# 行動した時代より前の時代の貢献は、もう済んでいる
+						if era != "" and HistoryDB.ERA_ORDER.find(str(c.get("era", ad.get("era", "")))) < ei:
+							continue
 						var sc := str(c.get("successor", ad.get("successor", "")))
 						if sc != "" and db.actors.has(sc) and not (st.has(sc) and st[sc]["gone"] >= 0):
 							out.append({"note": "%sに代わって%sがその役目を引き継いだ" % [nm, sc]})
@@ -342,7 +350,7 @@ static func _contrib_effect(db: HistoryDB, c: Dictionary, ad: Dictionary) -> Dic
 	if c.has("vars"):
 		e["vars"] = c["vars"]
 		e["year"] = int(c.get("year", ad.get("active", 0)))
-		e["era"] = str(ad.get("era", ""))
+		e["era"] = str(c.get("era", ad.get("era", "")))
 	return e
 
 
@@ -355,6 +363,12 @@ static func _special(db: HistoryDB, sp: Dictionary, yr: int, era: String) -> Dic
 		e["year"] = int(sp.get("year", yr))
 		e["era"] = db.era_of_year(e["year"]) if HistoryDB.ERA_ORDER.find(db.era_of_year(e["year"])) > HistoryDB.ERA_ORDER.find(era) else era
 	return e
+
+
+static func _era_first(db: HistoryDB, era: String) -> int:
+	var e := db.get_era(era)
+	var ys: Array = e.get("questions", []).map(func(q): return int(q["year"]))
+	return 0 if ys.is_empty() else int(ys.min())
 
 
 static func _era_mid(db: HistoryDB, era: String) -> int:

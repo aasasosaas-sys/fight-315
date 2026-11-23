@@ -32,7 +32,9 @@ var _last_cause := "player"
 var _last_hit_t := -99.0
 var _fire_t := 0.0
 # 予定
-var appointment: Dictionary = {}      # {event, at, year, ...}
+var appointments: Array = []          # この時代の予定すべて（順にこなす）
+var _appt_i := -1
+var appointment: Dictionary = {}      # いまの予定 {event, at, year, ...}
 var appt_start := 0.0                 # セッション開始からの秒で、向かい始める時刻
 var appt_deadline := 0.0
 var appt_goal := Vector3.ZERO
@@ -124,7 +126,19 @@ func refresh_hint() -> void:
 	_hint.visible = hint_on and not nums.is_empty() and not dead
 
 
-## 予定を設定する（セッション開始から start 秒で出発、deadline 秒までに着けば史実どおり）
+## 次の予定へ（delay 秒後に出発、そこから 120 秒以内に着けば史実どおり）
+func next_appointment(w, delay: float) -> void:
+	_appt_i += 1
+	if _appt_i >= appointments.size():
+		appointment = {}
+		return
+	var sc: Dictionary = appointments[_appt_i]
+	set_appointment(sc, w.landmark_pos(str(sc["at"])), _t + delay, _t + delay + 120.0)
+	_appt_done = false
+	delay_secs = 0.0
+
+
+## 予定を設定する（出現から start 秒で出発、deadline 秒までに着けば史実どおり）
 func set_appointment(sc: Dictionary, goal: Vector3, start: float, deadline: float) -> void:
 	appointment = sc
 	appt_goal = goal
@@ -312,3 +326,5 @@ func _check_appointment() -> void:
 	elif not dead:
 		global_position = appt_goal + Vector3(2, 0.5, 0)   # 史実どおり間に合った（回り道をしてでも）
 		home = global_position
+	if not dead and Game.world:
+		next_appointment(Game.world, 40.0)
