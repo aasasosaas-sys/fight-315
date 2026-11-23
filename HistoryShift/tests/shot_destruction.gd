@@ -147,7 +147,7 @@ func _era(era_id: String) -> void:
 	if row and _on("fire"):
 		var c := row.center()
 		var fz := row.frame.basis.z
-		await _frame(c, 24.0, 8.0, atan2(fz.x, fz.z) + 0.35, row)
+		await _frame(c, 20.0, 6.0, atan2(fz.x, fz.z) + 0.3, row)
 		row.last_cause = "player"
 		row.ignite()
 		Shell.fire(get_tree(), "hiya", c + fz * 10.0 + Vector3(0, 5, 0), -fz * 40.0 + Vector3(0, -8, 0), 0)

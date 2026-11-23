@@ -746,6 +746,41 @@ func _fire_step(dt: float) -> void:
 		k += 1
 
 
+static var _flame_material: StandardMaterial3D
+
+
+## アニメ調の炎（しずく形・くっきりした縁・白い芯）
+static func _flame_mat() -> StandardMaterial3D:
+	if _flame_material:
+		return _flame_material
+	var w := 64
+	var h := 112
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	for y in h:
+		var v := float(y) / (h - 1)          # 0 = 先端（上）, 1 = 根元
+		var wid := 0.92 * sqrt(clampf((v - 0.02) / 0.98, 0.0, 1.0))
+		if v > 0.72:
+			wid *= sqrt(clampf((1.0 - v) / 0.28, 0.0, 1.0))
+		for x in w:
+			var u := absf((x - (w - 1) * 0.5) / ((w - 1) * 0.5))
+			var d := u - wid
+			var a := clampf(-d / 0.07, 0.0, 1.0)
+			var core := clampf((wid * 0.55 - u) / 0.08, 0.0, 1.0) * clampf((v - 0.35) / 0.15, 0.0, 1.0)
+			var c := 0.78 + 0.22 * core
+			img.set_pixel(x, y, Color(c, c, c * (0.85 + 0.15 * core), a))
+	img.generate_mipmaps()
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.vertex_color_use_as_albedo = true
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	m.albedo_texture = ImageTexture.create_from_image(img)
+	m.disable_receive_shadows = true
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_flame_material = m
+	return m
+
+
 func _make_fire_fx(u: Destructible, with_light: bool) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Fire"
@@ -773,19 +808,21 @@ func _make_fire_fx(u: Destructible, with_light: bool) -> Node3D:
 	c1.add_point(Vector2(0, 0.4)); c1.add_point(Vector2(0.3, 1.0)); c1.add_point(Vector2(1, 0.1))
 	fl.scale_amount_curve = c1
 	var g := Gradient.new()
-	g.set_color(0, Color(1.0, 0.95, 0.55, 1.0))
-	g.set_color(1, Color(0.9, 0.12, 0.02, 0.0))
-	g.add_point(0.35, Color(1.0, 0.55, 0.12, 0.95))
+	g.set_color(0, Color(1.0, 0.92, 0.45, 1.0))
+	g.set_color(1, Color(0.85, 0.12, 0.04, 0.0))
+	g.add_point(0.45, Color(1.0, 0.5, 0.1, 1.0))
+	g.add_point(0.8, Color(0.95, 0.25, 0.05, 0.8))
 	fl.color_ramp = g
 	var q := QuadMesh.new()
-	q.material = Effects.particle_mat(Color.WHITE, true)
+	q.size = Vector2(0.7, 1.2)
+	q.material = _flame_mat()
 	fl.mesh = q
 	fl.local_coords = false
 	root.add_child(fl)
 	var sm := CPUParticles3D.new()
 	sm.name = "Smoke"
-	sm.amount = 14
-	sm.lifetime = 4.5
+	sm.amount = 18
+	sm.lifetime = 5.0
 	sm.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
 	sm.emission_box_extents = fl.emission_box_extents * 0.6
 	sm.direction = Vector3(0.2, 1, 0.1)
@@ -799,7 +836,7 @@ func _make_fire_fx(u: Destructible, with_light: bool) -> Node3D:
 	c2.add_point(Vector2(0, 0.3)); c2.add_point(Vector2(1, 1.0))
 	sm.scale_amount_curve = c2
 	var g2 := Gradient.new()
-	g2.set_color(0, Color(0.25, 0.22, 0.22, 0.75))
+	g2.set_color(0, Color(0.2, 0.18, 0.18, 0.9))
 	g2.set_color(1, Color(0.5, 0.48, 0.48, 0.0))
 	sm.color_ramp = g2
 	var q2 := QuadMesh.new()
