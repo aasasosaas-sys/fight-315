@@ -48,6 +48,9 @@ def gd_cause_keys():
 
 
 ARGS, ITEMS, CAUSES = gd_keys("ARGS"), gd_keys("ITEMS"), gd_cause_keys()
+# 名所ごとに、歴史へ通知される破壊ユニット（tools/dump_landmark_units.gd が書き出す）
+UNITS_PATH = os.path.join(ROOT, "tools", "landmark_units.json")
+UNITS = json.load(open(UNITS_PATH, encoding="utf-8")) if os.path.exists(UNITS_PATH) else None
 
 
 def load_eras():
@@ -289,6 +292,27 @@ def main():
                     if key in x:
                         for v in (x[key] if isinstance(x[key], list) else [x[key]]):
                             if v not in allowed: err(f"{tw}: bad {key} {v}")
+                if UNITS is not None and era in UNITS and k in ("destroy", "fire", "sink", "bridge"):
+                    eu = UNITS[era]
+                    lms = idl if k in ("destroy", "bridge", "sink") and idl else ([x["at"]] if "at" in x else list(eu.keys()))
+                    lms = [l for l in lms if l not in ("town", "river")] or lms
+                    avail = [eu[l] for l in lms if l in eu]
+                    kinds = {}
+                    for a_ in avail:
+                        for kk, nn in a_["kinds"].items(): kinds[kk] = kinds.get(kk, 0) + nn
+                    if k == "destroy":
+                        if not avail and not set(lms) & {"town", "river"}: err(f"{tw}: no history-reporting buildings at {lms} in {era} (tools/landmark_units.json)")
+                        types = x.get("type") if isinstance(x.get("type"), list) else ([x["type"]] if "type" in x else [])
+                        if types and not any(t in kinds for t in types): err(f"{tw}: no {types} at {lms} in {era} (has {sorted(kinds)})")
+                        if "value" in x and sum(a_["value"] for a_ in avail) < x["value"]: err(f"{tw}: value {x['value']} exceeds what {lms} holds in {era} ({sum(a_['value'] for a_ in avail)})")
+                    elif k == "fire":
+                        fl = sum(a_["flammable"] for a_ in avail)
+                        if fl < min(int(x.get("min", 1)), 5): err(f"{tw}: only {fl} flammable buildings at {lms} in {era}")
+                        if int(x.get("min", 1)) > 24: err(f"{tw}: fire counts are reported at 5/12/24 per landmark; min > 24 unreachable at one landmark")
+                    elif k == "sink":
+                        if kinds.get("boat", 0) < int(x.get("min", 1)): err(f"{tw}: only {kinds.get('boat', 0)} boats in {era}")
+                    elif k == "bridge":
+                        if idl and idl[0] not in ("river", "town") and kinds.get("bridge", 0) == 0: err(f"{tw}: no bridge at {idl} in {era}")
                 if k == "persuade" and "arg" not in x: err(f"{tw}: persuade needs arg")
                 if k == "give" and "item" not in x: err(f"{tw}: give needs item")
                 if k == "escort" and "to" not in x: err(f"{tw}: escort needs to")
@@ -338,8 +362,33 @@ def main():
         ch = count("rule:" + r["id"], *effects_of(r.get("force"), r.get("vars"), r.get("year", 0), r["_era"]))
         if verbose and (not only or r["_era"] == only):
             print(f"  {r['id']:30s} {r['title']}: " + (", ".join(f"{a}→{b}" for a, b in ch) or "（設問は不変・その後の歴史のみ）"))
+    # 手作りルールが同じ行動に当たると、その人物のデータ（contrib・saved・persuade…）の効果は出ない（ルールが受け持つ）
+    def shadowed(verb, n, **kw):
+        for r in all_rules:
+            ts = r["trigger"] if isinstance(r["trigger"], list) else [r["trigger"]]
+            for x in ts:
+                if x.get("kind") != verb: continue
+                idl = x.get("id") if isinstance(x.get("id"), list) else [x.get("id")]
+                if n not in [aname(str(i)) or i for i in idl]: continue
+                ok = True
+                for k2, v2 in kw.items():
+                    if k2 in x:
+                        vals = x[k2] if isinstance(x[k2], list) else [x[k2]]
+                        if v2 not in vals: ok = False
+                if verb == "kill" and "cause" in x: ok = False   # 原因つきのルールは、その原因の時だけ
+                if ok: return True
+        return False
+
     for n, a in actors.items():
         e = a["era"]
+        kill_open = not shadowed("kill", n)
+        escort_open = any(not shadowed("escort", n, to=l) for l in LANDMARKS)
+        if not (kill_open or escort_open): a = dict(a, contrib=[])
+        if a.get("saved") and shadowed("protect", n) and (a.get("death") != "illness" or shadowed("give", n, item="特効薬")): a = dict(a, saved=None)
+        if a.get("doc") and shadowed("steal", n): a = dict(a, doc=None)
+        a = dict(a, persuade={k: v for k, v in a.get("persuade", {}).items() if not shadowed("persuade", n, arg=k)},
+                 give={k: v for k, v in a.get("give", {}).items() if not shadowed("give", n, item=k)},
+                 schedule=[sc for sc in a.get("schedule", []) if not shadowed("delay", n, event=sc["event"])])
         for c in a.get("contrib", []):
             fo = {"q": c["q"], "choice": c["choice"]} if "choice" in c else None
             count(f"actor:{n}:kill/escort", *effects_of(fo, c.get("vars"), c.get("year", a["active"]), e))
