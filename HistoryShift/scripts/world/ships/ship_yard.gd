@@ -412,7 +412,10 @@ func _build_hud() -> void:
 	_tint.visible = false
 	_hud.add_child(_tint)
 	_status = Label.new()
-	_status.position = Vector2(24, 150)
+	_status.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_status.position = Vector2(-1100, 130)
+	_status.custom_minimum_size = Vector2(1076, 60)
+	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_status.add_theme_font_size_override("font_size", 22)
 	_status.add_theme_constant_override("outline_size", 7)
 	_status.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))

@@ -159,8 +159,9 @@ func _interiors(sh: Ship) -> void:
 		await _wait_interior(sh)
 		# 部屋の角から反対の角へ
 		var h := minf(float(rd.get("h", 2.5)), 3.0)
-		var from := Vector3(float(rd["x0"]) + 0.4, y + minf(1.7, h - 0.3), float(rd["z1"]) - 0.4)
-		var to := Vector3(float(rd["x1"]) - 0.4, y + 0.8, float(rd["z0"]) + 0.4)
+		var along_z := float(rd["z1"]) - float(rd["z0"]) >= float(rd["x1"]) - float(rd["x0"])
+		var from := Vector3(cx, y + minf(1.9, h - 0.35), float(rd["z1"]) - 0.35) if along_z else Vector3(float(rd["x1"]) - 0.35, y + minf(1.9, h - 0.35), cz)
+		var to := Vector3(cx, y + 0.9, float(rd["z0"])) if along_z else Vector3(float(rd["x0"]), y + 0.9, cz)
 		p.teleport(xf * Vector3(cx, y + 0.3, float(rd["z0"]) + 0.6))
 		_cam(sh.xf_cur * from, sh.xf_cur * to, 75.0)
 		await _frames(6)

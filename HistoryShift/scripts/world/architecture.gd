@@ -397,7 +397,7 @@ func foundation(xf: Transform3D, wd: float, dp: float, h: float, mat := "stonewa
 		_ustack.back()["base_top"] = maxf(float(_ustack.back()["base_top"]), xf.origin.y + h)
 
 
-func roof(xf: Transform3D, y: float, hw: float, hd: float, rise: float, style: String, mat := "rooftile", colr := TILE, lift := 0.5, under_col := Color(0.55, 0.42, 0.34), curve := 1.35) -> void:
+func roof(xf: Transform3D, y: float, hw: float, hd: float, rise: float, style: String, mat := "rooftile", colr := TILE, lift := 0.5, under_col := Color(0.55, 0.42, 0.34), curve := 1.35, clamp := []) -> void:
 	var gs := 0.0
 	match style:
 		"irimoya": gs = 0.42
@@ -406,7 +406,10 @@ func roof(xf: Transform3D, y: float, hw: float, hd: float, rise: float, style: S
 	var thick := 0.32 if mat == "rooftile" else 0.7
 	var gmat := "darkwood" if style != "gable" else "darkwood"
 	var rx := xf * Transform3D(Basis(), Vector3(0, y, 0))
-	kit.roof(rx, hw, hd, rise, gs, mat, "darkwood", colr, curve, lift, thick, under_col, gmat, Color(0.8, 0.75, 0.7))
+	if clamp.is_empty():
+		kit.roof(rx, hw, hd, rise, gs, mat, "darkwood", colr, curve, lift, thick, under_col, gmat, Color(0.8, 0.75, 0.7))
+	else:
+		kit.roof(rx, hw, hd, rise, gs, mat, "darkwood", colr, curve, lift, thick, under_col, gmat, Color(0.8, 0.75, 0.7), 12, 16, clamp[0], clamp[1])
 	if style != "pyramid":
 		var cap_mat := mat if mat != "thatch" else "thatch"
 		kit.ridge_cap(rx, hw, hd, rise, gs, cap_mat, colr * Color(0.7, 0.7, 0.7) if mat == "rooftile" else colr * Color(0.8, 0.8, 0.8), 0.55 if mat == "rooftile" else 0.9)
@@ -896,12 +899,14 @@ func shinden(lm_xf: Transform3D, lx: float, lz: float, size := 46.0) -> void:
 	var hs := size * 0.5
 	var pillar := Color(0.88, 0.8, 0.7)
 	var o := {"base_h": 0.3, "wall_h": 3.2, "pillar": pillar, "pillar_mat": "wood", "roof_mat": "thatch", "roof_col": BARK, "roof": "irimoya", "over": 1.8, "raised": true, "lift": 0.0, "rise": 0.38, "door_mat": "wood", "base_mat": "earth", "base_col": Color(0.8, 0.75, 0.68)}
-	jp_hall(c * Transform3D(Basis(), Vector3(0, 0, -hs * 0.35)), 16.0, 9.0, o)
+	# 寝殿の幅は対屋と重ならないように（中に入れるので）
+	var sw := clampf(hs * 1.24 - 7.6, 10.0, 16.0)
+	jp_hall(c * Transform3D(Basis(), Vector3(0, 0, -hs * 0.35)), sw, 9.0, o)
 	jp_hall(c * Transform3D(Basis(Vector3.UP, PI * 0.5), Vector3(-hs * 0.62, 0, -hs * 0.2)), 11.0, 7.0, o)
 	jp_hall(c * Transform3D(Basis(Vector3.UP, -PI * 0.5), Vector3(hs * 0.62, 0, -hs * 0.2)), 11.0, 7.0, o)
 	# 渡殿
 	for sgn in [-1.0, 1.0]:
-		var p0 := Vector3(sgn * 8.5, 0, -hs * 0.35)
+		var p0 := Vector3(sgn * (sw * 0.5 + 0.5), 0, -hs * 0.35)
 		var p1 := Vector3(sgn * (hs * 0.62 - 3.6), 0, -hs * 0.35)
 		var mid := (p0 + p1) * 0.5
 		var cx := c * Transform3D(Basis(), mid)
@@ -1160,7 +1165,12 @@ func castle(xf: Transform3D, base_w := 40.0, base_h := 11.0, tiers := 5, wall_co
 		var hw := ww * 0.5 + 1.6
 		var hd := dd * 0.5 + 1.6
 		var rise: float = t_["rise"]
-		roof(xf, ty + hh, hw, hd, rise, "irimoya" if (last or i % 2 == 0) else "hip", "rooftile", TILE_DARK, 0.55, PLASTER)
+		# 下の層の屋根は上の層の床の下で平らに抑える（上の層の部屋に屋根が突き出さない）
+		var clamp: Array = []
+		if not last:
+			var nx2: Dictionary = ti[i + 1]
+			clamp = [Rect2(-float(nx2["ww"]) * 0.5 + 0.12, -float(nx2["dd"]) * 0.5 + 0.12, float(nx2["ww"]) - 0.24, float(nx2["dd"]) - 0.24), float(nx2["y"]) - (ty + hh) - 0.08]
+		roof(xf, ty + hh, hw, hd, rise, "irimoya" if (last or i % 2 == 0) else "hip", "rooftile", TILE_DARK, 0.55, PLASTER, 1.35, clamp)
 		# 屋根の当たり判定（壁の外側の軒の輪。上の層の中には入れない）
 		if last:
 			col(xf, Vector3(0, ty + hh + rise * 0.45, 0), Vector3(ww + 3.2, rise * 0.9, dd + 3.2))
@@ -1197,8 +1207,12 @@ func castle(xf: Transform3D, base_w := 40.0, base_h := 11.0, tiers := 5, wall_co
 	reg_interior("castle", xf, floors, [dd0], {"accent": accent, "tiers": tiers})
 	end_unit()
 	# 隅櫓と塀
+	var ylo := top_w * 0.5 - 6.5
+	var yagura_ok := ylo > tw * 0.5 + 0.3 or ylo > td * 0.5 + 0.3   # 小さな本丸では天守と重なるので置かない
 	for cx in [-1.0, 1.0]:
 		for cz in [-1.0, 1.0]:
+			if not yagura_ok:
+				continue
 			var p := Vector3(cx * (top_w * 0.5 - 3.5), base_h, cz * (top_w * 0.5 - 3.5))
 			var yx := xf * Transform3D(Basis(), p)
 			begin_unit("yagura", yx, {"kind_detail": "sumi_yagura"})

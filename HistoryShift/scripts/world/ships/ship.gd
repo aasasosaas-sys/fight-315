@@ -939,9 +939,7 @@ func _update_fire_fx() -> void:
 			node.position = Vector3(0, maxf(flood.fire_y, sd.top_at(flood.zone_z[k])) + 0.3, flood.zone_z[k])
 			fire_fx[k] = node
 		node.visible = true
-		var fl := node.get_node_or_null("Flames") as CPUParticles3D
-		if fl:
-			fl.amount_ratio = clampf(f, 0.2, 1.0)
+		node.scale = Vector3.ONE * clampf(0.5 + f * 0.6, 0.5, 1.1)
 
 
 func _make_flames() -> Node3D:

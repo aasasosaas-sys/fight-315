@@ -672,7 +672,7 @@ func _capital_edo(lm: Dictionary) -> void:
 	street(lm, 0, 22, 0, 66, 4.0)
 	var b := _house_builder()
 	for sgn in [-1.0, 1.0]:
-		lots(lm, sgn * 4.5, 36, sgn * 4.5, 64, sgn, 0.0, 8.5, 5.5, 7.5, b)
+		lots(lm, sgn * 4.5, 36, sgn * 4.5, 64, -sgn, 0.0, 8.5, 5.5, 7.5, b)   # 通りの外側へ（両側が通りの上で重なっていた）
 		street(lm, sgn * 58, -50, sgn * 58, 50, 2.8)
 		lots(lm, sgn * 61, -46, sgn * 61, 46, sgn, 0.0, 8.0, 5.5, 7.5, b)
 	for k in 5:
@@ -946,7 +946,7 @@ func _temple_meiji_taisho(lm: Dictionary) -> void:
 	plaza(lm, 0, -18, 30, 12, 0.9)
 	var b := func(xf: Transform3D, fw: float, dp: float) -> void: a.machiya(xf, fw, dp, 1, {"wall": Color(0.95, 0.85, 0.75)})
 	for sgn in [-1.0, 1.0]:
-		lots(lm, sgn * 4.2, -4, sgn * 4.2, 26, sgn, 0.0, 5.5, 4.0, 5.0, b)
+		lots(lm, sgn * 4.2, -4, sgn * 4.2, 26, -sgn, 0.0, 5.5, 4.0, 5.0, b)   # 仲見世は参道の両側（重なっていた）
 	for k in 6:
 		a.lamp(wp(lm, -3.6 if k % 2 == 0 else 3.6, -4 + (k / 2) * 10), "lantern")
 

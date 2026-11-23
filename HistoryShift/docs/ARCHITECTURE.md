@@ -79,3 +79,18 @@ main.gd が `Flow` ノードとして生成する。タイトル・試験・採�
 - `Game.chaos_event(kind, id, info)`: kind = destroy / sink / fire / bridge / block。id はランドマークのキー（道沿いは "town"、川の橋は "river"、block の橋は橋グループ ID）。
   info = {era, pos, type, cause("player"|"player_indirect"|"enemy"|"world"), ...}
 - ツール（`scripts/player/destruction_tools.gd`）: 1 銃 / 2 焙烙玉 / 3 火薬樽・ダイナマイト / 4 大筒・野砲（設置→砲撃）/ 5 棒火矢、G で焙烙玉、ホイールで切替。
+
+## 実寸の船（担当: world）— `scripts/world/ships/`
+- データ: `data/ships/<id>.json`（調査）＋ `"layout"`（ゲーム用: 船型・部品・部屋の位置ヒント・浸水の設定）。`sosen.json` は ming_junk の変種（平安の宋船・仮）。
+  座標は船ローカル（水線中央が原点、船首 -Z、右舷 +X）、部品の位置 `s` は水線の船首からの距離 m。
+- `ShipData`（読込＋配置計画: 甲板の分類 weather/internal/super、天井高 2.15m 未満は広げる、部屋の配置、階段、区画・水密扉・注水弁）
+  → `ShipExterior`（船体・上甲板・部品、常に表示）／`ShipInterior`（船内、近づくと数フレームに分けて生成・離れると解放）／`ShipProps`（key_props の語から小道具）。
+- `Ship`（AnimatableBody3D の `ShipBody` を持つ）: 被害 `on_hit / on_blast / on_direct_blast / on_ram / on_ignite`、E で水密扉・注水弁・ポンプ・舷梯、
+  小さめの船は舵（`ShipHelm`、F）で操船。沈没で `Game.chaos_event("sink", "port", {type:"ship", ship, name, pos, value, cause, era, landmark})`。
+- `ShipFlood`: 区画ごとの水量、破孔流入 q=Cd·A·√(2gΔh)、扉・隔壁上端の流れ、ポンプ（缶室浸水で停止）、沈下・トリム・GZ 曲線による傾斜/転覆、
+  木造の延焼と焼け抜け、空母格納庫の誘爆、火が弾火薬庫へ（注水で防げる）。
+- `ShipYard`（EraWorld の子、`layouts.gd` の `_port_layout` 末尾の 1 行で配置）: 爆発の通知（`Destruction.blast_at` 内の 1 行 → `blast_all`）、
+  泳ぎ・息・沈む船からの脱出、海面マスク（`water.gdshader` の dry_* uniform）、状態表示、`ShipLaunch`（小舟・内火艇）。
+- 箱庭との縮尺: 地形は ±220m、岸から境界まで 30〜40m しかないので、喫水の深い船（大和・赤城・加賀・氷川丸・三笠・サスケハナ等）は実寸のまま
+  境界の外の沖に錨泊させ、その船の周り 60m にいる間だけ `EraWorld.half_size` を広げる（小舟で渡る）。浅い船は岸近くに桟橋つきで置く。
+- テスト: `tests/test_ships.tscn`（ヘッドレス: 全船の組立・自沈/爆薬/弾火薬庫/放火の早回し）、`tests/shot_ships.tscn`（外観・船内・沈没の連続写真）。

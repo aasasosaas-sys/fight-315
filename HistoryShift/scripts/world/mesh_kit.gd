@@ -7,6 +7,7 @@ var surf := {}   # mat_key -> [verts, norms, uvs, cols, idx, uv2(unit id, part)]
 ## 破壊ユニット ID（UV2.x に焼き込む。0 = 破壊対象外）。part は UV2.y（0=躯体, 1=屋根）
 var cur_unit := 0
 var has_units := false
+var _cut: Array = []       # [Transform3D 逆変換, Rect2]: grid の格子のうち 4 隅がすべて内側のものを作らない（屋根）
 const ROOF_MATS := ["rooftile", "thatch"]
 
 
@@ -259,6 +260,17 @@ func grid(mat: String, rows: Array, uvs: Array, col: Color, out_ref: Vector3, us
 			var pb: Vector3 = s[0][b]
 			var pc: Vector3 = s[0][c]
 			var pd: Vector3 = s[0][d]
+			if not _cut.is_empty():
+				var inv: Transform3D = _cut[0]
+				var cr: Rect2 = _cut[1]
+				var all_in := true
+				for q in [pa, pb, pc, pd]:
+					var lq: Vector3 = inv * q
+					if not cr.has_point(Vector2(lq.x, lq.z)):
+						all_in = false
+						break
+				if all_in:
+					continue
 			var nn: Vector3 = s[1][a] + s[1][c]
 			var fn := (pb - pa).cross(pc - pa)
 			if fn.length_squared() < 1e-12:
@@ -276,10 +288,15 @@ func grid(mat: String, rows: Array, uvs: Array, col: Color, out_ref: Vector3, us
 ## gable_s: 0=寄棟(宝形) / 0.3-0.5=入母屋 / 1=切妻。curve: 反り(>1で凹)。lift: 隅の反り上がり(m)
 func roof(xf: Transform3D, hw: float, hd: float, rise: float, gable_s: float, mat: String, under_mat: String,
 		col := Color.WHITE, curve := 1.35, lift := 0.0, thick := 0.3, under_col := Color(0.55, 0.45, 0.38),
-		gable_mat := "", gable_col := Color.WHITE, segs := 6, side_segs := 8) -> void:
+		gable_mat := "", gable_col := Color.WHITE, segs := 6, side_segs := 8, clamp_r := Rect2(), clamp_y := INF) -> void:
+	# clamp_r（局所 xz）の内側の頂点は高さを clamp_y までに抑える（上に載る層の床下に屋根を収める）
 	if hd > hw and gable_s < 1.0:
 		xf = xf * Transform3D(Basis(Vector3.UP, PI * 0.5), Vector3.ZERO)
 		var t := hw; hw = hd; hd = t
+		if clamp_r.size.x > 0.0:
+			clamp_r = Rect2(-clamp_r.end.y, clamp_r.position.x, clamp_r.size.y, clamp_r.size.x)
+	if clamp_r.size.x > 0.0:
+		_cut = [xf.affine_inverse(), clamp_r]
 	var ridge := hw - hd
 	var levels: Array = []  # s 値
 	for k in segs + 1:
@@ -324,6 +341,8 @@ func roof(xf: Transform3D, hw: float, hd: float, rise: float, gable_s: float, ma
 					lp.y += lift * k
 					lp.x += signf(lp.x) * lift * 0.5 * k
 					lp.z += signf(lp.z) * lift * 0.5 * k
+				if clamp_r.size.x > 0.0 and clamp_r.has_point(Vector2(lp.x, lp.z)):
+					lp.y = minf(lp.y, clamp_y)
 				var wp := xf * lp
 				row.append(wp)
 				var along := t * (2.0 * (hx if side % 2 == 0 else hz))
@@ -387,6 +406,7 @@ func roof(xf: Transform3D, hw: float, hd: float, rise: float, gable_s: float, ma
 				ur.append(Vector2(p.x, p.z))
 			inner_uv.append(ur)
 		grid(under_mat, inner_rows, inner_uv, under_col, xf * Vector3(0, rise * 4.0, 0))
+	_cut = []
 
 
 ## 棟（むね）: 屋根の頂部の箱

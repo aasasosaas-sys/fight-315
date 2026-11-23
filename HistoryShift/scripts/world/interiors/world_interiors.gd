@@ -75,7 +75,43 @@ func setup(list: Array) -> void:
 		defs[id] = d
 		ids.append(id)
 	_assign_tags()
-	print("[Interiors] %d enterable buildings" % ids.size())
+	_check_overlaps()
+	print("[Interiors] %d enterable buildings (%d closed: overlapped by another building)" % [ids.size(), blocked.size()])
+
+
+## レイアウトで別の建物と重なっている部屋は開けない（入口を塞ぐ）。中に他の建物の壁や屋根が突き出すため
+func _check_overlaps() -> void:
+	var dst := Destruction.current
+	if dst == null or not is_instance_valid(dst):
+		return
+	for id in ids:
+		var d: Dictionary = defs[id]
+		var inv: Transform3D = d["_inv"]
+		var f: Dictionary = d["floors"][0]
+		var r: Rect2 = (f["rect"] as Rect2).grow(-0.3)
+		var y0: float = f["y"]
+		for u in dst.units_near(d["_c"], float(d["_r"]) + 15.0):
+			var du := u as Destructible
+			if du.id == id or du.kind in ["lamp", "lantern", "prop", "fence", "wall", "stonewall", "brickwall", "stall", "bridge", "boat", "torii"]:
+				continue
+			var hit := false
+			for sh in du.def["shapes"]:
+				var t: Transform3D = sh[0]
+				if t.basis.y.normalized().dot(Vector3.UP) < 0.95:
+					continue   # 坂（階段）は除く
+				var c: Vector3 = inv * t.origin
+				if r.has_point(Vector2(c.x, c.z)) and c.y > y0 - 0.5 and c.y < y0 + 8.0:
+					hit = true
+					break
+			if hit:
+				# 小さい方を閉じる
+				var other: int = du.id
+				var close := id
+				if defs.has(other) and float(defs[other]["_r"]) < float(d["_r"]):
+					close = other
+				blocked[close] = "overlap"
+				_add_barrier(close)
+				break
 
 
 func _load_info() -> void:
