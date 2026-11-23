@@ -209,8 +209,10 @@ static func resolve(db: HistoryDB, actions: Array) -> Dictionary:
 			"persuade":
 				if a.get("ok", false):
 					s["trust"] += 1
-	# 2. 効果
+	# 2. 効果（ruled = 手作りルールが効果を受け持った行動は、状態にだけ数えて効果は出さない）
 	for a in actions:
+		if a.get("ruled", false):
+			continue
 		var seq := int(a.get("seq", 0))
 		var verb := str(a.get("verb", ""))
 		var era := str(a.get("era", ""))

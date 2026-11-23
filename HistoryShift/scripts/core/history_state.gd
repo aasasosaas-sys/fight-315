@@ -355,6 +355,15 @@ func chaos_in_effect(rule: Dictionary) -> bool:
 	return any
 
 
+## 効果を出さない行動の記録（手作りルールが効果を受け持った行動。人物の状態の判定にだけ使う）
+func record_action(action: Dictionary) -> void:
+	var a := action.duplicate(true)
+	a["seq"] = next_seq()
+	actions.append(a)
+	recompute()
+	save()
+
+
 ## 自由な行動（HistoryActors の動詞）を記録して歴史全体を再計算する。戻り値は apply_chaos と同じ形の変化一覧
 func apply_action(action: Dictionary) -> Array:
 	var old := world.duplicate()

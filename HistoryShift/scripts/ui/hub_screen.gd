@@ -494,7 +494,7 @@ func _show_actions() -> void:
 	var number := {}
 	for i in Game.db.questions.size():
 		number[Game.db.questions[i]["id"]] = i + 1
-	var acts: Array = Game.state.actions.duplicate()
+	var acts: Array = Game.state.actions.filter(func(a): return not a.get("ruled", false))
 	acts.sort_custom(func(a, b): return int(a.get("seq", 0)) < int(b.get("seq", 0)))
 	if acts.is_empty():
 		lv.add_child(JSUI.label("自由探索での行動はまだない（揺らぎのルールによる変化は改変ログを参照）。", 22, JSUI.MUTED, null, true))

@@ -162,6 +162,8 @@ func record(kind: String, id: String, info: Dictionary = {}) -> Array:
 			hits.append(hit)
 	if hits.is_empty() and not matched:
 		hits.append_array(_generic(kind, id, info, ev))
+	elif matched:
+		_record_ruled(kind, id, info)
 	if kind == "kill" and str(info.get("type", "")) == "soldier":
 		hits.append_array(_battle_kill(id))
 	return hits
@@ -214,6 +216,23 @@ func _generic(kind: String, id: String, info: Dictionary, ev: Dictionary) -> Arr
 		"battle":
 			pass
 	return out.filter(func(h): return not h.is_empty())
+
+
+## 手作りルールに当たった人物への行動も記録だけはする（ruled: true）。効果はルールに任せ、一般則の効果は出さないが、
+## 人物の状態（倒れた・救われた・信頼・後継者の判定）には数える
+func _record_ruled(kind: String, id: String, info: Dictionary) -> void:
+	var nm := db.actor_name(id)
+	if nm == "":
+		return
+	if kind == "kill" and (str(info.get("type", "")) != "figure" or _actor_gone(nm)):
+		return
+	if not (kind in ["kill", "protect", "escort", "give", "persuade", "steal", "forge", "delay"]):
+		return
+	var a := {"verb": kind, "target": nm, "ruled": true, "era": active_era, "ok": true}
+	for k in EXTRA_KEYS:
+		if info.has(k):
+			a[k] = info[k]
+	state.record_action(a)
 
 
 ## UI（会話メニュー）からの行動。手作りルール → 一般則の順に解決し、hit（断られたら refused: true）を返す
