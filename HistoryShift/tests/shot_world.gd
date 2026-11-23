@@ -32,6 +32,9 @@ func _initialize() -> void:
 		quit(1)
 		return
 	world = EraWorld.build(era)
+	if world == null:
+		quit(1)
+		return
 	root.add_child(world)
 	cam = Camera3D.new()
 	cam.fov = 70.0
@@ -111,7 +114,7 @@ func _apply_shot() -> void:
 	var to: Vector3 = s["to"]
 	from.y = maxf(from.y, world.height_at(from.x, from.z) + 1.5)
 	cam.transform = Transform3D(Basis.looking_at(to - from, Vector3.UP), from)
-	wait = 34 if shot_i == 0 else 16
+	wait = 26 if shot_i == 0 else 10
 
 
 func _process(_delta: float) -> bool:

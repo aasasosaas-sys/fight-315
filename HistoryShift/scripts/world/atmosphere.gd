@@ -64,14 +64,14 @@ static func build_environment(world: Node3D, style: Dictionary) -> Dictionary:
 	env.fog_light_color = style["fog_color"]
 	env.fog_light_energy = 1.0
 	env.fog_sun_scatter = 0.25
-	env.fog_density = style["fog_density"]
-	env.fog_aerial_perspective = 0.55
+	env.fog_density = float(style["fog_density"]) * 0.3
+	env.fog_aerial_perspective = 0.35
 	env.fog_sky_affect = 0.25
 	env.fog_height = 40.0
-	env.fog_height_density = 0.004
+	env.fog_height_density = 0.0
 
 	env.volumetric_fog_enabled = EraWorld.volumetric_enabled and q >= 2
-	env.volumetric_fog_density = style["vol_fog"]
+	env.volumetric_fog_density = float(style["vol_fog"]) * 0.28
 	env.volumetric_fog_albedo = style["vol_albedo"]
 	env.volumetric_fog_emission = Color(0, 0, 0)
 	env.volumetric_fog_anisotropy = 0.6

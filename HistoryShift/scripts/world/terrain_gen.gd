@@ -616,7 +616,7 @@ func _chunk_mesh(i0: int, j0: int, per: int, step: int) -> ArrayMesh:
 
 ## 遠景リング（コリジョンなし）: プレイ範囲の外側の山並み・海底
 func build_outer(parent: Node3D, mat: Material) -> void:
-	var step := 25.0
+	var step := 12.5
 	var n := int(OUTER * 2.0 / step) + 1
 	var verts := PackedVector3Array()
 	var norms := PackedVector3Array()

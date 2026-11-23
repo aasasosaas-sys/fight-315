@@ -28,6 +28,7 @@ uniform vec3 rock_tint : source_color = vec3(0.62, 0.6, 0.56);
 uniform vec3 road_tint : source_color = vec3(1.0);
 uniform vec3 plaza_tint : source_color = vec3(1.0);
 uniform vec3 field_color : source_color = vec3(0.24, 0.27, 0.15);
+uniform float snow_height = 9999.0;
 uniform float road_scale = 0.22;
 uniform float plaza_scale = 0.25;
 
@@ -172,6 +173,13 @@ void fragment() {
 		alb = mix(alb, a2, w); nrm = mix(nrm, n2, w); rgh = mix(rgh, r2, w);
 	}
 
+	// 山頂の雪
+	float snow_w = smoothstep(snow_height, snow_height + 18.0, v_wpos.y + (m2 - 0.5) * 30.0) * smoothstep(0.35, 0.75, v_wnrm.y + 0.2);
+	if (snow_w > 0.01) {
+		alb = mix(alb, vec3(0.92, 0.94, 0.98), snow_w);
+		rgh = mix(rgh, 0.55, snow_w);
+		nrm = mix(nrm, vec3(0.5, 0.5, 1.0), snow_w * 0.7);
+	}
 	// マクロな明暗・色ムラ
 	alb *= mix(0.82, 1.12, m1) * mix(0.92, 1.06, m3);
 	ALBEDO = clamp(alb, 0.0, 1.0);

@@ -4,7 +4,7 @@ extends RefCounted
 ## 草は EraWorld 側の GPU グラス（grass_clump_mesh を使う）。
 
 const CELL := 120.0
-const NEAR_END := 250.0
+const NEAR_END := 190.0
 const FAR_BEGIN := 225.0
 
 var w: EraWorld
@@ -186,7 +186,7 @@ func _emit_species(sp: String, xfs: Array) -> void:
 				mmi.visibility_range_begin = near_end - 25.0
 				mmi.visibility_range_begin_margin = 20.0
 				mmi.visibility_range_end = 1400.0
-				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if q >= 2 else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			root.add_child(mmi)
 
 
@@ -343,6 +343,8 @@ static func species_meshes(sp: String) -> Array:
 ## 葉カード群（楕円体の表面付近に配置）。col.r=明るさ(AO), g=揺れやすさ, a=0(カード)
 static func cards(kit: MeshKit, center: Vector3, radii: Vector3, count: int, size: float, rng: RandomNumberGenerator, up_bias := 0.0, flex := 1.0, core := true) -> void:
 	var s := kit._s("leaf")
+	count = int(count * 1.35)
+	size *= 1.3
 	for i in count:
 		var d := Vector3(rng.randf_range(-1, 1), rng.randf_range(-1, 1) + up_bias, rng.randf_range(-1, 1))
 		if d.length_squared() < 0.01:
@@ -368,7 +370,7 @@ static func cards(kit: MeshKit, center: Vector3, radii: Vector3, count: int, siz
 		s[4].append_array([base, base + 1, base + 2, base, base + 2, base + 3])
 	if core:
 		var cb: int = s[0].size()
-		kit.sphere("leaf", Transform3D(Basis.from_scale(radii * 0.62), center), 1.0, 8, 5, Color(0.42, flex, 0, 1))
+		kit.sphere("leaf", Transform3D(Basis.from_scale(radii * 0.5), center), 1.0, 6, 4, Color(0.28, flex, 0, 1))
 		# sphere は法線を正規化済み。色だけ上書き不要
 
 
@@ -542,7 +544,7 @@ static func grass_clump_mesh(spacing: float) -> ArrayMesh:
 	var norms := PackedVector3Array()
 	var uvs := PackedVector2Array()
 	var idx := PackedInt32Array()
-	var blades := 5
+	var blades := 7
 	for b in blades:
 		var off := Vector3(rng.randf_range(-0.5, 0.5), 0, rng.randf_range(-0.5, 0.5)) * spacing * 0.9
 		var a := rng.randf() * TAU
@@ -550,7 +552,7 @@ static func grass_clump_mesh(spacing: float) -> ArrayMesh:
 		var fwd := Vector3(-sin(a), 0, cos(a))
 		var lean := rng.randf_range(0.1, 0.35)
 		var hgt := rng.randf_range(0.65, 1.0)
-		var wid := rng.randf_range(0.022, 0.038)
+		var wid := rng.randf_range(0.03, 0.05)
 		var base := verts.size()
 		var segs := 3
 		for s in segs + 1:

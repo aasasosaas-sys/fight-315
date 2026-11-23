@@ -48,6 +48,7 @@ var height_tex: ImageTexture
 var control_tex: ImageTexture
 var static_body: StaticBody3D   # 建物などのコリジョン
 var deco_trees: Array = []      # [species, Vector3, scale]（建築側が植える木）
+var pond_requests: Array = []   # 池（建築側が要求）
 
 
 static func build(p_era: Dictionary) -> EraWorld:
@@ -117,10 +118,9 @@ func _build() -> void:
 
 
 func _ready() -> void:
-	if Engine.has_singleton("Game") or get_node_or_null("/root/Game"):
-		var g = get_node_or_null("/root/Game")
-		if g and g.has_method("set_world"):
-			g.set_world(self)
+	var g = get_node_or_null("/root/Game")
+	if g and g.get("world") == null and g.has_method("set_world"):
+		g.set_world(self)
 
 
 func _process(_delta: float) -> void:
@@ -193,6 +193,10 @@ func set_time_of_day(hours: float) -> void:
 	if pano:
 		pano.energy_multiplier = lerpf(0.05, 1.0, day)
 	env.ambient_light_energy = lerpf(0.25, 1.0, day)
+	if is_inside_tree():
+		for l in get_tree().get_nodes_in_group("world_night_light"):
+			if is_ancestor_of(l):
+				l.visible = day < 0.35
 
 
 func add_street_point(p: Vector3) -> void:
@@ -317,8 +321,14 @@ func _terrain_material() -> ShaderMaterial:
 	var road_scale := {"dirt": 0.2, "cobble": 0.4, "asphalt": 0.2, "sand": 0.25, "concrete": 0.25, "stonewall": 0.3}
 	m.set_shader_parameter("road_scale", road_scale.get(road_key, 0.25))
 	m.set_shader_parameter("plaza_scale", road_scale.get(plaza_key, 0.25))
+	if road_key == "dirt":
+		m.set_shader_parameter("road_tint", Color(1.3, 1.18, 1.05))
+	if plaza_key == "dirt":
+		m.set_shader_parameter("plaza_tint", Color(1.25, 1.15, 1.02))
 	if plaza_key == "sand":
 		m.set_shader_parameter("plaza_tint", Color(1.25, 1.2, 1.1))
+	if era_id == "showa":
+		m.set_shader_parameter("snow_height", 128.0)
 	var gt: Color = style["grass_tint"]
 	m.set_shader_parameter("grass_tint", gt)
 	return m

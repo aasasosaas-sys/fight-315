@@ -54,7 +54,7 @@ void vertex() {
 	float dens = density * (1.0 - smoothstep(0.1, 0.5, ctrl.r)) * (1.0 - smoothstep(0.15, 0.55, ctrl.g)) * mix(1.0, 0.35, ctrl.a);
 	dens *= smoothstep(0.74, 0.86, n.y);
 	dens *= smoothstep(water_level + 1.2, water_level + 2.2, hgt);
-	dens *= mix(smoothstep(0.18, 0.42, patch + patch2 * 0.3), 1.0, field);
+	dens *= mix(smoothstep(0.1, 0.32, patch + patch2 * 0.3), 1.0, field);
 	dens *= inside;
 	float camd = length(pos - CAMERA_POSITION_WORLD.xz);
 	float fade = 1.0 - smoothstep(radius * 0.55, radius, camd);
