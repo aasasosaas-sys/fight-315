@@ -41,6 +41,13 @@ func _build(seed: int) -> void:
 	var m := Humanoid.mat(coat, 0.55)
 	var dark := Humanoid.mat(coat.darkened(0.6), 0.6)
 	var tack := Humanoid.mat(Color(0.45, 0.12, 0.1), 0.5)
+	seat = Node3D.new()
+	seat.name = "Seat"
+	add_child(seat)
+	_sound = Sfx.loop_player(self, Sfx.hooves(), -8.0)
+	if ResourceLoader.exists(MODEL):
+		_build_model(rng, coat)
+		return
 	var body := Node3D.new()
 	add_child(body)
 	# 前方は -Z
@@ -67,11 +74,66 @@ func _build(seed: int) -> void:
 	body.add_child(_tail)
 	Humanoid.part(_tail, "capsule", dark, Vector3(0, -0.35, 0.1), Vector3(0.08, 0.35, 0.08), Vector3(20, 0, 0))
 	Humanoid.part(body, "box", tack, Vector3(0, 1.7, 0.05), Vector3(0.7, 0.08, 0.75))  # 鞍
-	seat = Node3D.new()
-	seat.name = "Seat"
 	seat.position = Vector3(0, 0.62, 0.1)
-	add_child(seat)
-	_sound = Sfx.loop_player(self, Sfx.hooves(), -8.0)
+
+
+const MODEL := "res://assets/vehicles/horse.glb"
+var _anim: AnimationPlayer
+var _anim_name := ""
+
+
+## Blender で生成したリアル寄りの馬（tools/make_horse.py）
+func _build_model(rng: RandomNumberGenerator, coat: Color) -> void:
+	var inst: Node3D = (load(MODEL) as PackedScene).instantiate()
+	inst.rotation.y = PI    # glTF の前方(+Z) → Godot の前方(-Z)
+	add_child(inst)
+	var coat_m := StandardMaterial3D.new()
+	coat_m.albedo_color = coat
+	coat_m.roughness = 0.42
+	coat_m.rim_enabled = true
+	coat_m.rim = 0.25
+	coat_m.normal_enabled = true
+	var nt := NoiseTexture2D.new()
+	nt.width = 512; nt.height = 512
+	nt.as_normal_map = true
+	nt.bump_strength = 2.0
+	var fn := FastNoiseLite.new()
+	fn.frequency = 0.08
+	nt.noise = fn
+	coat_m.normal_texture = nt
+	coat_m.normal_scale = 0.35
+	coat_m.uv1_triplanar = true
+	coat_m.uv1_scale = Vector3(3, 3, 3)
+	var hair_m := StandardMaterial3D.new()
+	hair_m.albedo_color = coat.darkened(0.75) if coat.v > 0.4 else Color(0.05, 0.04, 0.035)
+	hair_m.roughness = 0.75
+	for mi in inst.find_children("*", "MeshInstance3D", true, false):
+		(mi as MeshInstance3D).material_override = hair_m if String(mi.name).contains("Hair") else coat_m
+	# 鞍・鐙・手綱
+	var tack := Humanoid.mat(Color(0.32, 0.12, 0.08), 0.55)
+	var cloth := Humanoid.mat([Color(0.55, 0.1, 0.1), Color(0.12, 0.2, 0.45), Color(0.15, 0.15, 0.15)][rng.randi() % 3], 0.8)
+	var saddle := Node3D.new()
+	add_child(saddle)
+	Humanoid.part(saddle, "box", cloth, Vector3(0, 1.66, -0.05), Vector3(0.82, 0.03, 0.85))
+	Humanoid.part(saddle, "box", tack, Vector3(0, 1.72, -0.05), Vector3(0.42, 0.1, 0.62))
+	Humanoid.part(saddle, "box", tack, Vector3(0, 1.8, -0.32), Vector3(0.3, 0.12, 0.06))
+	Humanoid.part(saddle, "box", tack, Vector3(0, 1.79, 0.22), Vector3(0.34, 0.1, 0.06))
+	for x in [-0.32, 0.32]:
+		Humanoid.part(saddle, "box", tack, Vector3(x, 1.35, -0.05), Vector3(0.02, 0.7, 0.04))
+		Humanoid.part(saddle, "box", Humanoid.mat(Color(0.3, 0.3, 0.32), 0.3, 0.9), Vector3(x, 0.98, -0.05), Vector3(0.1, 0.03, 0.12))
+	seat.position = Vector3(0, 0.82, -0.02)
+	var aps := inst.find_children("*", "AnimationPlayer", true, false)
+	if aps.size() > 0:
+		_anim = aps[0]
+		for n in _anim.get_animation_list():
+			_anim.get_animation(n).loop_mode = Animation.LOOP_LINEAR
+		_play("Idle")
+
+
+func _play(n: String) -> void:
+	if _anim and _anim_name != n and _anim.has_animation(n):
+		_anim_name = n
+		_anim.play(n, 0.25)
 
 
 func get_speed() -> float: return absf(speed)
@@ -136,14 +198,22 @@ func _physics_process(dt: float) -> void:
 				o.panic(global_position)
 		speed *= 0.6
 	# アニメーション
+	if _anim:
+		var sp := absf(speed)
+		if sp < 0.5:
+			_play("Idle"); _anim.speed_scale = 1.0
+		elif sp < 10.0:
+			_play("Walk"); _anim.speed_scale = clampf(sp / 4.0, 0.6, 2.2)
+		else:
+			_play("Gallop"); _anim.speed_scale = clampf(sp / 16.0, 0.8, 1.4)
 	_gait += dt * lerpf(3.0, 13.0, clampf(absf(speed) / 18.0, 0, 1)) * (1.0 if absf(speed) > 0.3 else 0.0)
 	var amp := clampf(absf(speed) / 6.0, 0.0, 1.0) * 35.0
-	for i in _legs.size():
+	for i in _legs.size() if not _anim else 0:
 		var off: float = [0.0, PI, PI * 0.5, PI * 1.5][i] if absf(speed) > 10.0 else [0.0, PI, PI, 0.0][i]
 		_legs[i].rotation_degrees.x = sin(_gait + off) * amp
 	_rear = move_toward(_rear, 0.0, dt * 1.2)
-	_neck.rotation_degrees.x = sin(_gait * 2.0) * 4.0 * clampf(absf(speed) / 10.0, 0, 1) - _rear * 40.0
-	_tail.rotation_degrees.x = 20.0 + sin(Time.get_ticks_msec() * 0.003) * 8.0 + absf(speed) * 2.0
+	if _neck: _neck.rotation_degrees.x = sin(_gait * 2.0) * 4.0 * clampf(absf(speed) / 10.0, 0, 1) - _rear * 40.0
+	if _tail: _tail.rotation_degrees.x = 20.0 + sin(Time.get_ticks_msec() * 0.003) * 8.0 + absf(speed) * 2.0
 	if driver != null and absf(speed) > 1.0:
 		if not _sound.playing:
 			_sound.play()

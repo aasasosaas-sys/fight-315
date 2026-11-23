@@ -16,6 +16,8 @@ uniform float metallic = 0.0;
 uniform float grime = 1.0;
 uniform float normal_depth = 1.0;
 uniform float variation = 1.0;
+uniform float albedo_mul = 1.0;
+uniform float desat = 0.0;
 
 varying vec3 v_wpos;
 varying vec3 v_wnrm;
@@ -27,7 +29,9 @@ void vertex() {
 }
 
 void fragment() {
-	vec3 a = texture(albedo_tex, UV).rgb * COLOR.rgb;
+	vec3 ta = texture(albedo_tex, UV).rgb;
+	ta = mix(ta, vec3(dot(ta, vec3(0.3, 0.59, 0.11))), desat) * albedo_mul;
+	vec3 a = ta * COLOR.rgb;
 	float m1 = texture(macro_tex, v_wpos.xz * 0.031 + v_wpos.y * 0.017).r;
 	float m2 = texture(macro_tex, (v_wpos.xy + v_wpos.zy) * 0.09).r;
 	a *= mix(1.0, mix(0.84, 1.1, m1), variation);

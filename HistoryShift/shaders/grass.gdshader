@@ -92,7 +92,7 @@ void vertex() {
 	v_base = base_color;
 	if (use_ground > 0.5) {
 		vec3 g = textureLod(alb_arr, vec3(pos * 0.24, L_GRASS), 3.0).rgb;
-		g = mix(g, g * vec3(0.78, 1.0, 0.55) * 1.12, 0.65) * ground_tint;
+		g = mix(g, g * vec3(0.72, 1.0, 0.5) * 1.15, 0.8) * ground_tint;
 		v_base = g * 0.55;
 		v_col = mix(v_col, g * vec3(1.15, 1.35, 0.9), 0.45) * mix(0.85, 1.12, r2);
 		v_col = mix(v_col, tipc, field);

@@ -29,6 +29,8 @@ uniform vec3 road_tint : source_color = vec3(1.0);
 uniform vec3 plaza_tint : source_color = vec3(1.0);
 uniform vec3 field_color : source_color = vec3(0.24, 0.27, 0.15);
 uniform float snow_height = 9999.0;
+uniform vec2 snow_center = vec2(0.0);
+uniform float snow_radius = 99999.0;
 uniform float road_scale = 0.22;
 uniform float plaza_scale = 0.25;
 
@@ -99,12 +101,12 @@ void fragment() {
 	sample_layer(L_GRASS, wp, gdx, gdy, 0.24, mix(mixv, 0.8, far_k * 0.6), alb, nrm, rgh);
 	vec3 lush = alb * lush_color * 2.6;
 	alb = mix(alb, lush, smoothstep(0.3, 0.75, m1) * 0.75);
-	alb = mix(alb, alb * vec3(0.78, 1.0, 0.55) * 1.12, 0.65);
+	alb = mix(alb, alb * vec3(0.72, 1.0, 0.5) * 1.15, 0.8);
 	alb *= grass_tint;
 
 	vec3 a2; vec3 n2; float r2;
 	// 土のパッチ
-	float dirt_w = smoothstep(0.62, 0.8, m2 * 0.7 + m3 * 0.5) * 0.7;
+	float dirt_w = smoothstep(0.66, 0.84, m2 * 0.7 + m3 * 0.5) * 0.45;
 	// 森の地面
 	float forest_w = ctrl.a;
 	if (forest_w > 0.01) {
@@ -115,7 +117,7 @@ void fragment() {
 	}
 	if (dirt_w > 0.01) {
 		sample_layer(L_DIRT, wp, gdx, gdy, 0.2, mixv, a2, n2, r2);
-		a2 *= vec3(0.9, 0.85, 0.8);
+		a2 *= vec3(1.05, 1.0, 0.92);
 		float w = hblend(dirt_w, dot(a2, vec3(0.33)), 2.5);
 		alb = mix(alb, a2, w); nrm = mix(nrm, n2, w); rgh = mix(rgh, r2, w);
 	}
@@ -123,10 +125,10 @@ void fragment() {
 	float field_w = ctrl.b;
 	if (field_w > 0.01) {
 		sample_single(L_DIRT, wp * 0.3, gdx * 0.3, gdy * 0.3, a2, n2, r2);
-		a2 = mix(a2 * 0.55, field_color, 0.55);
+		a2 = mix(a2 * 0.6, field_color * 1.15, 0.6);
 		float rows = smoothstep(0.35, 0.5, abs(fract(dot(wp, vec2(0.7071)) * 1.4) - 0.5));
 		a2 *= mix(1.0, 0.82, rows);
-		alb = mix(alb, a2, field_w); nrm = mix(nrm, n2, field_w); rgh = mix(rgh, r2 * 0.35, field_w);
+		alb = mix(alb, a2, field_w); nrm = mix(nrm, n2, field_w); rgh = mix(rgh, 0.55, field_w);
 	}
 	// 砂浜
 	float sand_w = 1.0 - smoothstep(water_level + 1.2, water_level + 3.4, v_wpos.y + (m3 - 0.5) * 1.5);
@@ -175,7 +177,7 @@ void fragment() {
 	}
 
 	// 山頂の雪
-	float snow_w = smoothstep(snow_height, snow_height + 18.0, v_wpos.y + (m2 - 0.5) * 30.0) * smoothstep(0.35, 0.75, v_wnrm.y + 0.2);
+	float snow_w = smoothstep(snow_height, snow_height + 18.0, v_wpos.y + (m2 - 0.5) * 30.0) * smoothstep(0.35, 0.75, v_wnrm.y + 0.2) * (1.0 - smoothstep(snow_radius * 0.7, snow_radius, length(v_wpos.xz - snow_center)));
 	if (snow_w > 0.01) {
 		alb = mix(alb, vec3(0.92, 0.94, 0.98), snow_w);
 		rgh = mix(rgh, 0.55, snow_w);

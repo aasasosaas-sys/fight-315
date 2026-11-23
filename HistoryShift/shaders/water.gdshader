@@ -6,7 +6,7 @@ uniform sampler2D depth_tex : hint_depth_texture, filter_linear_mipmap;
 uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
 uniform sampler2D noise_tex : filter_linear_mipmap, repeat_enable;
 uniform vec3 shallow_color : source_color = vec3(0.12, 0.42, 0.42);
-uniform vec3 deep_color : source_color = vec3(0.02, 0.10, 0.16);
+uniform vec3 deep_color : source_color = vec3(0.03, 0.15, 0.2);
 uniform vec3 foam_color : source_color = vec3(0.92, 0.95, 0.95);
 uniform float wave_amp = 0.35;
 uniform float wave_len = 28.0;

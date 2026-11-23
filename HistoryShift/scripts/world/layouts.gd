@@ -50,6 +50,17 @@ func terrain_features() -> void:
 			# 瀬田の唐橋: 戦場を横切る川
 			lm = w.landmarks["battlefield"]
 			_channel(lm, Vector2(0, -60), Vector2(0, 60), 9.0)
+			# 水城: 大宰府の前の長い土塁（地形として盛る）
+			var cl: Dictionary = w.landmarks["castle"]
+			var p0: Vector3 = cl["xf"] * Vector3(-72, 0, 52)
+			var p1: Vector3 = cl["xf"] * Vector3(-6, 0, 52)
+			var p2: Vector3 = cl["xf"] * Vector3(6, 0, 52)
+			var p3: Vector3 = cl["xf"] * Vector3(72, 0, 52)
+			for seg in [[p0, p1], [p2, p3]]:
+				var A := Vector2(seg[0].x, seg[0].z)
+				var B := Vector2(seg[1].x, seg[1].z)
+				var sdf := func(p: Vector2) -> float: return TerrainGen._seg_dist(p, A, B) - 9.0
+				t.mound_sdf(sdf, Rect2(Vector2(minf(A.x, B.x), minf(A.y, B.y)) - Vector2(20, 20), (B - A).abs() + Vector2(40, 40)), cl["h"], 7.0, 9.0)
 		"sengoku", "edo":
 			# 城の堀
 			lm = w.landmarks["castle" if era == "sengoku" else "capital"]
@@ -1072,16 +1083,6 @@ func _castle_asuka_nara(lm: Dictionary) -> void:
 	_kairo(corners(lm, 0, -12, 40, 30), [2])
 	a.gate(pl(lm, 0, 22, 0, Vector2(12, 6)), 10.0, "romon")
 	plaza(lm, 0, -12, 38, 28, 0.9)
-	# 水城: 長い土塁
-	var p0 := wp(lm, -70, 50)
-	var p1 := wp(lm, 70, 50)
-	var mid := (p0 + p1) * 0.5
-	var xf := Transform3D(Basis(Vector3.UP, float(lm["angle"])), mid)
-	a.kit.box("grassmat", xf * Transform3D(Basis(), Vector3(0, 2.0, 0)), Vector3(140, 6.0, 8.0), Color(0.75, 0.85, 0.6))
-	a.kit.box("grassmat", xf * Transform3D(Basis(Vector3.RIGHT, 0.6), Vector3(0, 1.6, 5.0)), Vector3(140, 0.5, 6.0), Color(0.75, 0.85, 0.6))
-	a.kit.box("grassmat", xf * Transform3D(Basis(Vector3.RIGHT, -0.6), Vector3(0, 1.6, -5.0)), Vector3(140, 0.5, 6.0), Color(0.75, 0.85, 0.6))
-	a.cols.append([xf * Transform3D(Basis(), Vector3(0, 2.0, 0)), Vector3(140, 6.0, 9.0)])
-	t.occupy_rect(Vector2(mid.x, mid.z), -float(lm["angle"]), 70, 7)
 	# 門の切れ目
 	a.gate(pl(lm, 0, 60, 0, Vector2(8, 4)), 7.0, "yakui")
 

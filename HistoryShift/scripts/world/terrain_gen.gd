@@ -174,6 +174,10 @@ func carve_river(canon_pts: Array) -> void:
 	# 単調性を再保証
 	for k in range(1, pts.size()):
 		surf[k] = minf(surf[k], surf[k - 1])
+	# 河口から上流へ勾配を制限（急流の「壁」を作らない。地形の方を掘り下げる）
+	for k in range(pts.size() - 2, -1, -1):
+		var ds := pts[k].distance_to(pts[k + 1])
+		surf[k] = minf(surf[k], surf[k + 1] + ds * 0.012)
 	river_surface = surf
 	var w := river_half_w
 	var band := 70.0
