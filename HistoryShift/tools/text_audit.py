@@ -73,13 +73,14 @@ def era_of(path):
 
 
 def collect():
-    """[{file, era, kind, path(list), text, group}] を返す。group は並んで表示されうる文章のまとまり。"""
+    """[{file, era, kind, path(list), text, group, alt}] を返す。group は並んで表示されうる文章のまとまり、
+    alt が同じものどうしは同時には出ない（modern.json の同じトピックの分岐・言い換え）。"""
     out = []
 
-    def add(fp, kind, path, text, group=""):
+    def add(fp, kind, path, text, group="", alt=""):
         if isinstance(text, str) and text.strip():
             out.append({"file": os.path.relpath(fp, ROOT), "era": era_of(fp), "kind": kind, "path": path,
-                        "text": text, "group": group})
+                        "text": text, "group": group, "alt": alt})
 
     for fp in sorted(glob.glob(os.path.join(DATA, "*.json"))):
         d = json.load(open(fp, encoding="utf-8"))
@@ -89,15 +90,15 @@ def collect():
                 t = r.get("text")
                 if isinstance(t, list):
                     for j, v in enumerate(t):
-                        add(fp, "modern", ["ending_rules", i, "text", j], v, "modern:" + r.get("topic", ""))
+                        add(fp, "modern", ["ending_rules", i, "text", j], v, "modern", r.get("topic", ""))
                 else:
-                    add(fp, "modern", ["ending_rules", i, "text"], t, "modern:" + r.get("topic", ""))
+                    add(fp, "modern", ["ending_rules", i, "text"], t, "modern", r.get("topic", ""))
             for k, t in d.get("baseline", {}).items():
                 if isinstance(t, list):
                     for j, v in enumerate(t):
-                        add(fp, "modern", ["baseline", k, j], v, "modern:" + k)
+                        add(fp, "modern", ["baseline", k, j], v, "modern", k)
                 else:
-                    add(fp, "modern", ["baseline", k], t, "modern:" + k)
+                    add(fp, "modern", ["baseline", k], t, "modern", k)
             continue
         if "questions" not in d:
             continue
@@ -234,6 +235,8 @@ def audit(items):
                 for y in range(x + 1, len(lst)):
                     shared[(lst[x], lst[y])] += 1
         for (a, b), c in shared.items():
+            if items[a]["alt"] and items[a]["alt"] == items[b]["alt"]:
+                continue   # 同じトピックの言い換えどうしは同時に出ない
             ga, gb = items[a]["gram"], items[b]["gram"]
             j = c / max(1, len(ga | gb))
             if j >= 0.45:
@@ -252,6 +255,8 @@ def audit(items):
         for x in range(len(idxs)):
             for y in range(x + 1, len(idxs)):
                 a, b = items[idxs[x]], items[idxs[y]]
+                if a["alt"] and a["alt"] == b["alt"]:
+                    continue
                 cs = common_sub(a["text"], b["text"], 16)
                 if cs:
                     adj_pairs += 1
@@ -288,8 +293,8 @@ def summary(items, st):
         t = it["text"]
         if CHRONICLE.search(t): styles["年代記"] += 1
         if t.startswith("【") or "号外" in t or "見出し" in t: styles["見出し/号外"] += 1
-        if "瓦版" in t or "読売" in t: styles["瓦版"] += 1
-        if re.search(r"「[^」]{4,}」と(言|語|詠|記|書|笑|嘆|叫|つぶや)", t): styles["人物の言葉"] += 1
+        if "瓦版" in t or "読売" in t or t.startswith("さても"): styles["瓦版"] += 1
+        if t.startswith("「") or re.search(r"「[^」]{4,}」(と(言|語|詠|記|書|笑|嘆|叫|つぶや)|――)", t): styles["人物の言葉"] += 1
         if re.search(r"(詠|狂歌|和歌|落首)", t): styles["和歌/狂歌"] += 1
     lines.append("文体の幅（結果文）: " + "、".join("%s %d" % kv for kv in styles.items()))
     flagged = sum(1 for it in items if it["score"] > 0)
