@@ -176,6 +176,7 @@ static func anim_library() -> AnimationLibrary:
 				var a: Animation = ap.get_animation(n).duplicate()
 				var looped: bool = n in LOOPS or (n.begins_with("Mocap_") and not n in ["Mocap_Fall", "Mocap_Shoot"])
 				a.loop_mode = Animation.LOOP_LINEAR if looped else Animation.LOOP_NONE
+				a.set_meta("src", path)
 				_lib.add_animation(n, a)
 		inst.free()
 	return _lib

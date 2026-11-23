@@ -50,3 +50,7 @@ textures/vram_compression/import_etc2_astc=true
 [editor]
 
 export/convert_text_resources_to_binary=true
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/vrm/plugin.cfg")
