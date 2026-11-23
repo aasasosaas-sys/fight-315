@@ -73,7 +73,7 @@ func _fire_rule(tr: ChaosTracker, era: String, r: Dictionary) -> Array:
 
 
 func _run() -> void:
-	HistoryState.save_path = "user://test_chaos_save.json"   # 本物のセーブや並行テストに触れない
+	HistoryState.save_path = "user://test_chaos_%d.json" % OS.get_process_id()   # 本物のセーブや並行テストに触れない
 	var db := HistoryDB.load_all()
 	var tr := ChaosTracker.new(db, null)
 	_check(tr.errors.is_empty(), "chaos json errors: %s" % [tr.errors])
