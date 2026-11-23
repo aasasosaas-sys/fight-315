@@ -556,8 +556,8 @@ func _build_grass() -> void:
 		mat.set_shader_parameter("water_level", water_level)
 		mat.set_shader_parameter("base_color", style["grass_base"])
 		mat.set_shader_parameter("tip_color", style["grass_tip"])
-		for k in ["grass_a", "grass_b", "grass_c", "tip_light"]:
-			mat.set_shader_parameter(k, style[k])
+		for pk in ["grass_a", "grass_b", "grass_c", "tip_light"]:
+			mat.set_shader_parameter(pk, style[pk])
 		mat.set_shader_parameter("rice_color", (style["field_col"] as Color) * 1.15)
 		mmi.material_override = mat
 		add_child(mmi)

@@ -93,4 +93,5 @@ void fragment() {
 	float a = clamp(edge + vig * (1.0 - edge), 0.0, 1.0);
 	ALBEDO = lc * edge + vec3(0.06, 0.05, 0.1) * vig * (1.0 - edge) + rays;
 	ALPHA = a;
+	ALBEDO = vec3(1.0, 0.0, 0.0); ALPHA = 0.5; //DEBUG
 }
