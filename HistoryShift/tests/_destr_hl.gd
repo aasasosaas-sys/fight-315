@@ -1,13 +1,13 @@
-extends SceneTree
-func _initialize() -> void:
+extends Node
+## 破壊システムのヘッドレス簡易テスト: godot --headless --path . res://tests/_destr_hl.tscn
+func _ready() -> void:
 	_go.call_deferred()
 func _go() -> void:
-	await process_frame
-	var g = root.get_node("/root/Game")
+	Game.chaos_event.connect(func(k, id, info): print("chaos ", k, " ", id, " ", info.get("type", ""), " cause=", info.get("cause", "")))
 	var sess := Session.start_free_roam("edo")
-	root.add_child(sess)
-	await process_frame
-	await process_frame
+	get_tree().root.add_child(sess)
+	await get_tree().process_frame
+	await get_tree().process_frame
 	var d := Destruction.current
 	var kinds := {}
 	for u in d.units.values():
@@ -16,9 +16,9 @@ func _go() -> void:
 	var cap: Vector3 = sess.world.landmark_pos("capital")
 	var t0 := Time.get_ticks_usec()
 	for i in 6:
-		Effects.explosion(self, cap + Vector3(i * 8 - 20, 1, 15), 11.0, 900.0, 0, 0.5)
+		Effects.explosion(get_tree(), cap + Vector3(i * 8 - 20, 1, 15), 11.0, 900.0, 0, 0.5)
 	print("blasts ms ", (Time.get_ticks_usec() - t0) / 1000.0, " debris ", d.live_debris(), " ", d.summary_text())
-	for i in 120:
-		await physics_frame
+	for i in 240:
+		await get_tree().physics_frame
 	print("after ", d.live_debris(), " fires ", d.burning_count(), " ", d.summary_text())
-	quit()
+	get_tree().quit()

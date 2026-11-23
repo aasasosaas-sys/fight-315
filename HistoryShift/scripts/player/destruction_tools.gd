@@ -83,6 +83,10 @@ func select(i: int) -> void:
 
 func _physics_process(dt: float) -> void:
 	_cool -= dt
+	# 運転中（と降りて 10 秒）の墜落・炎上は player_indirect として歴史に数える
+	var veh = _player.get("vehicle") if _player else null
+	if veh != null and is_instance_valid(veh):
+		Destruction.note_player()
 	if Game.input_blocked:
 		return
 	for k in SLOTS:

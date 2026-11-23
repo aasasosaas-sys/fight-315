@@ -44,6 +44,8 @@ var _banner: Label
 var _hit_t := 0.0
 var _vig := 0.0
 var _bold: Font
+var _tool: Label                  # 破壊ツール表示（左下）
+var _destr: Label                 # 自由探索の破壊カウンタ（右上）
 var _shift: PanelContainer        # 「歴史が揺らいだ！」通知
 var _shift_head: Label
 var _shift_text: Label
@@ -89,7 +91,7 @@ func _ready() -> void:
 	_hit.position = Vector2(-14, -30)
 
 	# 左下：体力・弾・乗り物
-	var bl := _panel(Vector2(28, -150), Vector2(420, 122), Control.PRESET_BOTTOM_LEFT)
+	var bl := _panel(Vector2(28, -184), Vector2(560, 156), Control.PRESET_BOTTOM_LEFT)
 	var v := VBoxContainer.new()
 	bl.add_child(v)
 	_hp_bar = ProgressBar.new()
@@ -103,6 +105,7 @@ func _ready() -> void:
 	_ammo = _label("30 / ∞", 34, Color.WHITE, v)
 	_ammo.add_theme_font_override("font", _bold)
 	_veh = _label("", 22, Color(1, 1, 1, 0.8), v)
+	_tool = _label("", 21, CYAN, v)
 
 	# 右上：手配度
 	_stars = _label("", 40, GOLD)
@@ -112,6 +115,13 @@ func _ready() -> void:
 	_stars.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_stars.add_theme_constant_override("outline_size", 8)
 	_stars.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+	_destr = _label("", 22, Color(1, 0.82, 0.6))
+	_destr.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_destr.position = Vector2(-630, 80)
+	_destr.custom_minimum_size = Vector2(600, 30)
+	_destr.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_destr.add_theme_constant_override("outline_size", 6)
+	_destr.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 
 	# 左上：目標
 	var tl := _panel(Vector2(28, 28), Vector2(560, 0), Control.PRESET_TOP_LEFT)
@@ -503,6 +513,10 @@ func _process(dt: float) -> void:
 					_veh.text += "  （速度を上げてマウスを上へ → 離陸）"
 		else:
 			_veh.text = "F：乗り物に乗る" if _near_vehicle(p) else ""
+	if p and is_instance_valid(p) and p.get("tools") != null:
+		_tool.text = "" if p.in_vehicle() else p.tools.hud_text()
+	var dm = Destruction.current
+	_destr.text = dm.summary_text() if dm != null and is_instance_valid(dm) and (is_free_roam or int(dm.stats["units"]) > 0) else ""
 	var s := Wanted.stars()
 	_stars.text = "★".repeat(s) + "☆".repeat(5 - s) if s > 0 else ""
 	_hit_t = maxf(0.0, _hit_t - dt)

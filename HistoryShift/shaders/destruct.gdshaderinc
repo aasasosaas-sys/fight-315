@@ -5,9 +5,9 @@ global uniform sampler2D destruct_tex;
 varying flat vec4 v_dstate;
 varying flat vec2 v_dcut;
 
-void destruct_vertex(inout vec3 vtx, vec2 uv2) {
-	v_dstate = vec4(0.0);
-	v_dcut = vec2(1e6, 0.0);
+void destruct_vertex(inout vec3 vtx, vec2 uv2, out vec4 dstate, out vec2 dcut) {
+	dstate = vec4(0.0);
+	dcut = vec2(1e6, 0.0);
 	int id = int(uv2.x + 0.5);
 	if (id > 0) {
 		ivec2 tc = ivec2(id % 256, (id / 256) * 2);
@@ -17,26 +17,26 @@ void destruct_vertex(inout vec3 vtx, vec2 uv2) {
 		if ((hide & (1 << part)) != 0) {
 			vtx = vec3(0.0);
 		}
-		v_dstate = st;
+		dstate = st;
 		vec4 cut = texelFetch(destruct_tex, tc + ivec2(0, 1), 0);
 		if (cut.b > 0.5) {
-			v_dcut = cut.rg;
+			dcut = cut.rg;
 		}
 	}
 }
 
 // 切断線（崩れた壁のギザギザの上端）
-float destruct_jag(float n2, float n3) {
-	return v_dcut.x + (n2 - 0.5) * 2.0 * v_dcut.y + (n3 - 0.5) * 0.6;
+float destruct_jag(vec2 dcut, float n2, float n3) {
+	return dcut.x + (n2 - 0.5) * 2.0 * dcut.y + (n3 - 0.5) * 0.6;
 }
 
 // 焦げ・ひび・燃えさし。base はアルベド、n1/n2 はノイズ（0-1）。返り値 xyz=アルベド, emission は out 引数
-vec3 destruct_albedo(vec3 base, vec3 wpos, float n1, float n2, float n3, out vec3 emis) {
+vec3 destruct_albedo(vec4 dstate, vec2 dcut, vec3 base, vec3 wpos, float n1, float n2, float n3, out vec3 emis) {
 	emis = vec3(0.0);
 	vec3 a = base;
-	float ch = v_dstate.g;
-	float cr = v_dstate.b;
-	float burn = v_dstate.a;
+	float ch = dstate.g;
+	float cr = dstate.b;
+	float burn = dstate.a;
 	if (ch > 0.001) {
 		// 斑の焦げ（ベタの黒茶）
 		float blot = n1 * 0.65 + n2 * 0.35;
@@ -58,8 +58,8 @@ vec3 destruct_albedo(vec3 base, vec3 wpos, float n1, float n2, float n3, out vec
 		a *= 1.0 - mask * cr * 0.12;
 	}
 	// 崩れた断面の縁（切断線のすぐ下を暗く）
-	if (v_dcut.x < 1e5) {
-		float jag = destruct_jag(n2, n3);
+	if (dcut.x < 1e5) {
+		float jag = destruct_jag(dcut, n2, n3);
 		float edge = 1.0 - smoothstep(0.0, 0.35, jag - wpos.y);
 		a = mix(a, vec3(0.1, 0.08, 0.07), edge * 0.85);
 	}

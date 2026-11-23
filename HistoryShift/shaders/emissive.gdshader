@@ -5,7 +5,11 @@ render_mode diffuse_burley;
 uniform float energy = 2.5;
 varying vec3 v_wpos;
 void vertex() {
-	destruct_vertex(VERTEX, UV2);
+	vec4 d_st;
+	vec2 d_cut;
+	destruct_vertex(VERTEX, UV2, d_st, d_cut);
+	v_dstate = d_st;
+	v_dcut = d_cut;
 	v_wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 }
 void fragment() {

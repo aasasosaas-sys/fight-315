@@ -64,6 +64,8 @@ var top_y := 1.0
 var cut_y := 1e6
 var hide_bits := 0             # 1 躯体 / 2 屋根 を隠す
 var palette: Array = []        # [mat, 平均色, 頂点数]（瓦礫・小破片用、遅延計算）
+var last_cause := "world"      # 最後に被害を与えた原因: player / player_indirect / enemy / world
+var fire_cause := "world"
 var _shape_nodes: Array = []
 var _fx_t := 0.0
 var _hit_flash_t := 0.0
@@ -174,7 +176,7 @@ func size_class() -> float:
 
 
 # ================================================================ 被害
-func take_hit(amount: float, _from_team: int, point := Vector3.ZERO, dir := Vector3.ZERO) -> void:
+func take_hit(amount: float, from_team: int, point := Vector3.ZERO, dir := Vector3.ZERO) -> void:
 	if destroyed:
 		return
 	var a := amount
@@ -182,7 +184,7 @@ func take_hit(amount: float, _from_team: int, point := Vector3.ZERO, dir := Vect
 		a *= 0.2
 	if point == Vector3.ZERO:
 		point = center()
-	damage(a, point, dir, 0.0)
+	damage(a, point, dir, 0.0, mgr.cause_for(from_team))
 
 
 ## 乗り物の体当たり。mass_k: 馬 0.6 / 車 1 / 飛行機 4
@@ -192,21 +194,29 @@ func ram(speed: float, vel: Vector3, mass_k: float) -> void:
 	var dmg := (speed - 4.0) * 7.0 * mass_k
 	if bool(cfg.get("small", false)):
 		dmg *= 3.0
-	damage(dmg, center() - vel.normalized() * aabb.size.length() * 0.3, vel.normalized(), 0.0)
+	var cause := mgr.cause_for(-1)
+	var pl = Game.player
+	if pl != null and is_instance_valid(pl) and pl.has_method("in_vehicle") and pl.in_vehicle() \
+			and (pl.vehicle as Node3D).global_position.distance_to(center()) < aabb.size.length() + 25.0:
+		cause = "player"
+		Destruction.note_player()
+	damage(dmg, center() - vel.normalized() * aabb.size.length() * 0.3, vel.normalized(), 0.0, cause)
 
 
 ## 爆発（Destruction.blast から）
-func blast(dmg: float, origin: Vector3, fire_chance: float) -> void:
+func blast(dmg: float, origin: Vector3, fire_chance: float, cause := "") -> void:
 	if destroyed:
 		return
 	var dir := (center() - origin)
 	dir.y = maxf(dir.y, 0.0)
-	damage(dmg, origin.lerp(center(), 0.5), dir.normalized(), fire_chance)
+	damage(dmg, origin.lerp(center(), 0.5), dir.normalized(), fire_chance, cause)
 
 
-func damage(amount: float, point: Vector3, dir: Vector3, fire_chance: float) -> void:
+func damage(amount: float, point: Vector3, dir: Vector3, fire_chance: float, cause := "") -> void:
 	if destroyed or amount <= 0.0:
 		return
+	if cause != "":
+		last_cause = cause
 	hp -= amount
 	var frac := clampf(hp / max_hp, 0.0, 1.0)
 	crack = clampf((1.0 - frac) * 1.25, 0.0, 1.0)
@@ -233,6 +243,7 @@ func ignite() -> void:
 		return
 	if not flammable or burning:
 		return
+	fire_cause = "player_indirect" if last_cause in ["player", "player_indirect"] else last_cause
 	mgr.start_fire(self)
 
 
@@ -248,6 +259,7 @@ func burn_step(dt: float) -> void:
 			stage = 2
 			collapse_roof(Vector3.ZERO)
 		if hp <= 0.0:
+			last_cause = fire_cause
 			destroy(Vector3.ZERO, 0.4)
 	mgr.push_state(self)
 

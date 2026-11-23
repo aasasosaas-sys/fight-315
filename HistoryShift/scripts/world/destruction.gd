@@ -8,6 +8,9 @@ extends Node3D
 ## - 手配度・被害カウンタ・Game.chaos_event（歴史シミュレーションへの通知）
 
 static var current: Destruction
+## 最後にプレイヤーが何かを引き起こした時刻（10 秒以内の世界側の被害は player_indirect）
+static var last_player_t := -99.0
+const INDIRECT_WINDOW := 10.0
 
 const TEX_W := 256
 const CELL := 16.0
@@ -68,6 +71,22 @@ static func attach(w: Node3D) -> Destruction:
 static func blast_at(_tree: SceneTree, pos: Vector3, radius: float, damage: float, team := -1, fire_chance := 0.2) -> void:
 	if current != null and is_instance_valid(current) and current.is_inside_tree():
 		current.blast(pos, radius, damage, team, fire_chance)
+
+
+static func note_player() -> void:
+	last_player_t = Time.get_ticks_msec() / 1000.0
+
+
+## 被害の原因。team 0 = プレイヤー、1 以上 = 敵、-1 = 世界（樽・墜落・炎上車など）
+func cause_for(team: int) -> String:
+	if team == 0:
+		note_player()
+		return "player"
+	if team >= 1:
+		return "enemy"
+	if Time.get_ticks_msec() / 1000.0 - last_player_t < INDIRECT_WINDOW:
+		return "player_indirect"
+	return "world"
 
 
 func _exit_tree() -> void:
@@ -159,7 +178,8 @@ func _process(_dt: float) -> void:
 
 
 # ================================================================ 爆発
-func blast(pos: Vector3, radius: float, damage: float, _team := -1, fire_chance := 0.2) -> void:
+func blast(pos: Vector3, radius: float, damage: float, team := -1, fire_chance := 0.2) -> void:
+	var cause := cause_for(team)
 	for u in units_near(pos, radius + 4.0):
 		var du := u as Destructible
 		if du.destroyed:
@@ -168,7 +188,7 @@ func blast(pos: Vector3, radius: float, damage: float, _team := -1, fire_chance 
 		if d > radius:
 			continue
 		var k := 1.0 - d / radius
-		du.blast(damage * (0.3 + 0.7 * k), pos, fire_chance * (0.4 + 0.6 * k))
+		du.blast(damage * (0.3 + 0.7 * k), pos, fire_chance * (0.4 + 0.6 * k), cause)
 	# 倒木
 	var rt := radius * 0.8
 	var trees: Array = world.get("tree_defs")
@@ -331,9 +351,26 @@ func destroy_unit(u: Destructible, dir: Vector3, power: float) -> void:
 		var g: String = u.def.get("opts", {}).get("group", str(u.id))
 		if not _bridge_done.has(g):
 			_bridge_done[g] = true
-			_chaos("bridge", u.landmark if u.landmark != "" else "river", {"type": u.def.get("opts", {}).get("kind_detail", "bridge"), "pos": ctr})
+			var bid: String = u.landmark if u.landmark != "" else "river"
+			_chaos("bridge", bid, {"type": u.def.get("opts", {}).get("kind_detail", "bridge"), "pos": ctr, "cause": u.last_cause, "bridge": g})
+			_chaos("block", g, {"type": "bridge", "landmark": bid, "pos": ctr, "cause": u.last_cause})
 	elif bool(u.cfg["chaos"]):
-		_chaos("destroy", _lm_id(u), {"type": u.kind, "detail": u.def.get("opts", {}).get("kind_detail", u.kind), "pos": ctr, "value": u.cfg["value"]})
+		_chaos("destroy", _lm_id(u), {"type": u.kind, "detail": u.def.get("opts", {}).get("kind_detail", u.kind), "pos": ctr, "value": u.cfg["value"], "cause": u.last_cause, "burned": u.char_amt > 0.5})
+	if not small and u.kind != "bridge" and _blocks_road(u):
+		_chaos("block", _lm_id(u), {"type": u.kind, "pos": ctr, "cause": u.last_cause})
+
+
+## 瓦礫が道をふさぐか（足元の周囲に道のマスクがあるか）
+func _blocks_road(u: Destructible) -> bool:
+	var t = world.get("terrain")
+	if t == null:
+		return false
+	var c := u.center()
+	var r := maxf(u.aabb.size.x, u.aabb.size.z) * 0.5 + 1.0
+	for o in [Vector2.ZERO, Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r)]:
+		if float(t.mask_at(t.road, c.x + o.x, c.z + o.y)) > 0.4:
+			return true
+	return false
 
 
 func _lm_id(u: Destructible) -> String:
@@ -410,7 +447,7 @@ func _sink(u: Destructible) -> void:
 	if u.flammable:
 		u.burning = false
 		start_fire(u)
-	_chaos("sink", _lm_id(u), {"type": "boat", "ship": u.def.get("opts", {}).get("ship", "boat"), "pos": ctr, "value": u.cfg["value"]})
+	_chaos("sink", _lm_id(u), {"type": "boat", "ship": u.def.get("opts", {}).get("ship", "boat"), "pos": ctr, "value": u.cfg["value"], "cause": u.last_cause})
 
 
 # ================================================================ 破片
@@ -652,7 +689,7 @@ func start_fire(u: Destructible) -> void:
 	var step: int = int(_fire_chaos.get(lm, 0))
 	if step < FIRE_CHAOS_STEPS.size() and cnt >= int(FIRE_CHAOS_STEPS[step]):
 		_fire_chaos[lm] = step + 1
-		_chaos("fire", lm, {"count": cnt, "pos": u.center(), "type": u.kind})
+		_chaos("fire", lm, {"count": cnt, "pos": u.center(), "type": u.kind, "cause": u.fire_cause})
 
 
 func burning_count() -> int:
@@ -702,6 +739,8 @@ func _fire_step(dt: float) -> void:
 						continue
 					var d := _aabb_dist(nu.aabb, u.center()) - u.aabb.size.length() * 0.35
 					if d < 5.0 and randf() < 0.16 * (1.0 - clampf(d / 5.0, 0.0, 1.0)) + 0.04:
+						nu.fire_cause = "player_indirect" if u.fire_cause in ["player", "player_indirect"] else u.fire_cause
+						nu.last_cause = nu.fire_cause
 						start_fire(nu)
 						break
 		k += 1

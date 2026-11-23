@@ -66,3 +66,16 @@ func end()                                                         # 片付け�
 
 ## Flow（担当: ui）— `scripts/ui/flow.gd`
 main.gd が `Flow` ノードとして生成する。タイトル・試験・採点ハブ・ブリーフィング・ワープ演出・改変結果（連鎖表示）・エンディング・改変ログ・設定・クレジットを担当。Session を生成/破棄して画面を切り替える。
+
+## 破壊システム（担当: world/gameplay）— `scripts/world/destruction.gd` ほか
+- 生成時: `Architecture.begin_unit(kind, xf)/end_unit()` で建物・塀区画・灯籠・船・橋区画などを「破壊ユニット」として記録（`EraWorld.unit_defs`）。
+  ジオメトリは従来どおり結合メッシュに残り、UV2 にユニット ID を焼く（描画コールは増えない）。土台（foundation）は壊れない。
+- `Destruction.attach(world)` が各ユニットを `Destructible`（StaticBody3D, layer WORLD, group "destructible"）に変換し、
+  状態テクスチャ（global uniform `destruct_tex`）でシェーダが 隠す/焦げ/ひび/燃えさし/切断（廃墟の高さ）を描く（`shaders/destruct.gdshaderinc`）。
+- 被害: `take_hit(amount, team, point, dir)`（弾）/ `ram(speed, vel, mass_k)`（乗り物）/ `Destruction.blast_at(tree, pos, r, dmg, team, fire)`（爆発。`Effects.explosion` が自動で呼ぶ）。
+  段階: ひび → 屋根崩落（瓦が滑り落ちる）→ 倒壊（`Fracture.slice` で元メッシュを格子に切った破片 RigidBody＋瓦礫の山＋低いコリジョン）。
+- 木は `EraWorld.tree_defs`（MultiMesh のインスタンス）を倒す。火災は木造に延焼（同時 14 棟・ランドマークごと 36 回まで）。
+- 破片 layer は `Game.COLLISION_DEBRIS`(64)。プレイヤー・町人とは当たらない（町人は爆風でも倒れず逃げる）。
+- `Game.chaos_event(kind, id, info)`: kind = destroy / sink / fire / bridge / block。id はランドマークのキー（道沿いは "town"、川の橋は "river"、block の橋は橋グループ ID）。
+  info = {era, pos, type, cause("player"|"player_indirect"|"enemy"|"world"), ...}
+- ツール（`scripts/player/destruction_tools.gd`）: 1 銃 / 2 焙烙玉 / 3 火薬樽・ダイナマイト / 4 大筒・野砲（設置→砲撃）/ 5 棒火矢、G で焙烙玉、ホイールで切替。

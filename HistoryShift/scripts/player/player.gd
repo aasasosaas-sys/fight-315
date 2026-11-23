@@ -216,6 +216,8 @@ func _gun(_dt: float) -> void:
 
 ## 弾の命中処理（プレイヤー・敵・機銃で共用）
 static func apply_hit(tree: SceneTree, hit: Dictionary, dir: Vector3, dmg: float, team: int) -> void:
+	if team == 0:
+		Destruction.note_player()   # 撃った樽の誘爆などを player_indirect として数える
 	var col: Object = hit["collider"]
 	var pos: Vector3 = hit["position"]
 	var nrm: Vector3 = hit["normal"]

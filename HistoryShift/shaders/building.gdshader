@@ -37,7 +37,11 @@ varying vec3 v_wpos;
 varying vec3 v_wnrm;
 
 void vertex() {
-	destruct_vertex(VERTEX, UV2);
+	vec4 d_st;
+	vec2 d_cut;
+	destruct_vertex(VERTEX, UV2, d_st, d_cut);
+	v_dstate = d_st;
+	v_dcut = d_cut;
 	v_wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	v_wnrm = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	UV *= uv_scale;
@@ -83,10 +87,10 @@ void fragment() {
 		vec2 dp = vec2(dot(v_wpos.xz, vec2(0.71, 0.71)) + v_wpos.y * 0.3, v_wpos.y + dot(v_wpos.xz, vec2(0.6, -0.8)) * 0.5);
 		float n2 = texture(macro_tex, dp * 0.11).r;
 		float n3 = texture(macro_tex, dp * 0.45 + vec2(0.37, 0.11)).r;
-		if (v_dcut.x < 1e5 && v_wpos.y > destruct_jag(n2, n3)) {
+		if (v_dcut.x < 1e5 && v_wpos.y > destruct_jag(v_dcut, n2, n3)) {
 			discard;
 		}
-		a = destruct_albedo(a, v_wpos, texture(macro_tex, v_wpos.xz * 0.05 + v_wpos.y * 0.07).r, n2, n3, d_emis);
+		a = destruct_albedo(v_dstate, v_dcut, a, v_wpos, texture(macro_tex, v_wpos.xz * 0.05 + v_wpos.y * 0.07).r, n2, n3, d_emis);
 	}
 	ALBEDO = clamp(a, 0.0, 1.0);
 	NORMAL_MAP = mix(texture(normal_tex, UV).rgb, vec3(0.5, 0.5, 1.0), flat_normal);
