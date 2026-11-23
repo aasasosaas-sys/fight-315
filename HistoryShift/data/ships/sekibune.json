@@ -1,0 +1,34 @@
+{
+  "id": "sekibune",
+  "name": {"ja": "関船", "en": "Sekibune"},
+  "era": "sengoku_edo",
+  "year": 1600,
+  "type": "medium fast war galley",
+  "schema_notes": "level_m = deck height above the waterline. confidence: sourced / typical / reconstruction.",
+  "basis": [
+    {"fact": "After 1609 the sekibune became the navy's main force; slender, pointed hull for speed", "source_url": "https://kanagawa-u.repo.nii.ac.jp/record/9799/files/12_04.pdf", "year": 1609},
+    {"fact": "Drawing of a 70-oar sekibune (関船図 七十挺立)", "source_url": "https://da.dl.itc.u-tokyo.ac.jp/portal/en/assets/4b940e97-0cda-7371-7274-1497828787de", "year": 1700}
+  ],
+  "dimensions": {
+    "length_overall_m": 25.0,
+    "beam_m": 5.0,
+    "draft_m": 1.2,
+    "displacement_t": 80,
+    "confidence": "reconstruction",
+    "freeboard_m": {"mid": 1.0}
+  },
+  "decks": [
+    {"name": "矢倉 deck", "level_m": 2.5, "rooms": [
+      {"name": "Fighting deck", "purpose": "archers and gunners", "approx_size_m": [18, 5], "position": "full length", "key_props": ["shield boards", "bows", "matchlocks"], "notes": "", "confidence": "reconstruction"}
+    ]},
+    {"name": "Oar deck", "level_m": 1.0, "rooms": [
+      {"name": "Oar deck", "purpose": "40-80 oars", "approx_size_m": [20, 5], "position": "port and starboard", "key_props": ["艪"], "notes": "", "confidence": "sourced (70-oar type)"}
+    ]}
+  ],
+  "exterior": {"materials": ["wood"], "colors": {"hull": "natural/black"}, "features": ["slender hull", "banners"]},
+  "crew": {"total": 100},
+  "lighting": {"type": "lanterns"},
+  "props_period": ["banners"],
+  "flooding": {"watertight_subdivision": "None", "pumps": "Buckets", "sea_cocks": "None", "magazines": [], "freeboard_m": 1.0, "historical_damage": [], "game_sinking_hooks": ["Low freeboard: swamped easily"]},
+  "uncertain": ["Most details"]
+}

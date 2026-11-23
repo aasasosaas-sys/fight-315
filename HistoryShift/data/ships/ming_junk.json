@@ -1,0 +1,55 @@
+{
+  "id": "ming_junk",
+  "name": {"ja": "明のジャンク船（種子島来航船）", "en": "Ming ocean junk (Tanegashima 1543)"},
+  "era": "sengoku",
+  "year": 1543,
+  "type": "Fujian-type ocean-going junk (福船)",
+  "schema_notes": "level_m = deck height above the waterline. confidence: sourced / typical / reconstruction. Dimensions are scaled from the Quanzhou ship (Song, excavated 1974) as the best archaeological analogue.",
+  "basis": [
+    {"fact": "Watertight-bulkhead technology: separate compartments so one damaged hold does not sink the ship (UNESCO ICH 2010)", "source_url": "https://ich.unesco.org/en/RL/watertight-bulkhead-technology-of-chinese-junks-00321", "year": 2010},
+    {"fact": "Fu ship: bottom with watertight compartments, iron nails, tung oil; rabbeted planks; seams caulked with ramie, lime and tung oil; camphor, pine and fir timbers", "source_url": "https://www.fujian.gov.cn/english/cultureandtravel/cultureandarts/202504/t20250427_6905493.htm", "year": 1550},
+    {"fact": "Junks have a central stern rudder, overhanging flat transom, flat bottom", "source_url": "https://www.Wikipedia.org/wiki/Junks", "year": 1550},
+    {"fact": "Quanzhou ship: 12 bulkheads, 13 compartments; ~9.15-9.82 m wide; 24 m preserved / 34.6 m reconstructed", "source_url": "https://en.wikipedia.org/wiki/Quanzhou_ship", "year": 1274},
+    {"fact": "鉄炮記 (1606): 1543 a large ship with Portuguese aboard took refuge at Tanegashima; Wang Zhi (王直) is thought to have been aboard", "source_url": "https://gendai.media/articles/-/56879", "year": 1543}
+  ],
+  "dimensions": {
+    "length_overall_m": 32.0,
+    "beam_m": 9.5,
+    "draft_m": 3.0,
+    "displacement_t": 350,
+    "freeboard_m": {"mid": 2.0, "stern": 5.0},
+    "confidence": "reconstruction (from the Quanzhou ship)",
+    "masts": 3,
+    "compartments": 13
+  },
+  "decks": [
+    {"name": "Stern castle (舵楼)", "level_m": 5.0, "rooms": [
+      {"name": "Captain's cabin and Mazu shrine (媽祖)", "purpose": "command and prayer", "approx_size_m": [6, 6], "position": "stern", "key_props": ["Mazu altar", "incense", "compass (針房)", "lanterns"], "notes": "", "confidence": "typical"},
+      {"name": "Tiller room", "purpose": "rudder control", "approx_size_m": [4, 4], "position": "stern", "key_props": ["tiller", "rudder hoist windlass"], "notes": "", "confidence": "typical"}
+    ]},
+    {"name": "Main deck", "level_m": 2.0, "rooms": [
+      {"name": "Deck", "purpose": "sailing", "approx_size_m": [25, 9], "position": "full length", "key_props": ["battened lug sails", "windlass", "galley stove (brick)", "water casks", "eyes painted on the bow"], "notes": "", "confidence": "typical"}
+    ]},
+    {"name": "Hold (13 compartments)", "level_m": -1.0, "rooms": [
+      {"name": "Compartments", "purpose": "cargo (silk, porcelain, saltpetre)", "approx_size_m": [2.5, 9], "position": "full length, divided by 12 bulkheads", "key_props": ["porcelain crates", "silk", "hatches"], "notes": "Each compartment about 2-3 m long", "confidence": "sourced (bulkheads)"}
+    ]}
+  ],
+  "exterior": {
+    "materials": ["fir/pine/camphor", "tung oil"],
+    "colors": {"hull": "dark oiled wood", "stern": "painted decoration (red/green)"},
+    "features": ["square transom", "battened sails", "bow eyes"]
+  },
+  "crew": {"total": 100},
+  "lighting": {"type": "oil lamps, paper lanterns"},
+  "props_period": ["matchlocks (Portuguese)", "porcelain", "compass"],
+  "flooding": {
+    "watertight_subdivision": "12 watertight bulkheads (13 compartments)",
+    "pumps": "Buckets; bilge pump (typical)",
+    "sea_cocks": "Limber holes (typical)",
+    "magazines": [],
+    "freeboard_m": 2.0,
+    "historical_damage": [],
+    "game_sinking_hooks": ["Breaching a single compartment does not sink the ship; breaching 4+ does"]
+  },
+  "uncertain": ["Exact 1543 ship dimensions", "Wang Zhi's presence"]
+}

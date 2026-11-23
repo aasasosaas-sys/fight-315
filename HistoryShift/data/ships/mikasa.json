@@ -1,0 +1,141 @@
+{
+  "id": "mikasa",
+  "name": {"ja": "戦艦三笠", "en": "IJN Battleship Mikasa"},
+  "era": "meiji",
+  "year": 1905,
+  "type": "pre-dreadnought battleship (Vickers, Barrow; commissioned 1 Mar 1902)",
+  "schema_notes": "level_m = deck surface height above design waterline (negative = below). Positions: bow/mid/stern + port/starboard/centre. confidence: sourced = stated by a cited source; typical = standard for this ship type/period, not verified this session; reconstruction = game simplification.",
+  "basis": [
+    {"fact": "Standard displacement 15,140 t; length 122 m (museum figure, between perpendiculars); width 23.2 m; speed 18 kt; main armament 12-inch x4 (2 twin mounts), secondary 6-inch x14", "source_url": "https://www.kinenkan-mikasa.or.jp/en/mikasa/index.html", "year": 1902},
+    {"fact": "Overall length 131.7 m (432 ft), beam 23.2 m, normal draught ~8.3 m, 15,140 long tons normal load, crew about 830", "source_url": "https://en.wikipedia.org/wiki/Japanese_battleship_Mikasa", "year": 1902},
+    {"fact": "Crew figure 860 appears in the museum leaflet (snippet truncated)", "source_url": "https://www.kinenkan-mikasa.or.jp/en/documents/leaf_e.pdf", "year": 1905},
+    {"fact": "25 Belleville boilers, 2 vertical triple-expansion engines, 2 shafts, 15,000 ihp", "source_url": "https://navypedia.org/ships/japan/jap_bb_mikasa.htm", "year": 1902},
+    {"fact": "Coal 700 t standard / 1,521 t maximum", "source_url": "https://www.kinenkan-mikasa.or.jp/en/mikasa/index.html", "year": 1902},
+    {"fact": "Armour: belt 229-102 mm, casemates 152-51 mm, deck 76-51 mm (Harvey nickel per Navypedia; other sources say Krupp cemented)", "source_url": "https://navypedia.org/ships/japan/jap_bb_mikasa.htm", "year": 1902},
+    {"fact": "Main guns 40-cal 30.5 cm twin mounts, one fore and one aft; 8 cm guns on the upper deck, 10 per side", "source_url": "https://trafficnews.jp/post/132819", "year": 1905},
+    {"fact": "Upper deck is wooden planking; it sounds underfoot", "source_url": "https://trafficnews.jp/post/132819", "year": 2020},
+    {"fact": "On the open top bridge (最上艦橋) the floor marks where Togo stood (front row, right of centre) with Chief of Staff Kato Tomosaburo and staff officer Akiyama Saneyuki behind him; chart room and conning tower adjoin", "source_url": "https://trafficnews.jp/post/132819/2", "year": 1905},
+    {"fact": "Togo stood on the compass deck above the bridge; Z flag hoisted at about 13:55 on 27 May 1905", "source_url": "https://wikipedia.com/wiki/Battle_of_Tsushima", "year": 1905},
+    {"fact": "Hit 32 times at Tsushima, 8 dead (one account; others say 40+ hits)", "source_url": "https://military-historian.squarespace.com/archive-1/2017/11/12/tools-of-war-the-battleship-mikasa", "year": 1905},
+    {"fact": "On 11 Sep 1905 the aft magazine exploded while she was moored in Sasebo harbour and she sank in shallow water", "source_url": "https://trafficnews.jp/post/133670/2", "year": 1905},
+    {"fact": "Death toll from the Sasebo explosion: 339 or 251 depending on source; contemporary press said ~600", "source_url": "https://warshipsresearch.blogspot.com/2024/09/japanese-battleship-mikasa-lost-due-to.html", "year": 1905},
+    {"fact": "Refloated 8 Aug 1906; repairs took over two years", "source_url": "https://www.tokyoweekender.com/?p=57291", "year": 1906},
+    {"fact": "Primary record: 明治三十八年 軍艦三笠罹災関係 held by the NIDS library", "source_url": "https://www.nids.mod.go.jp/publication/senshi/pdf/200603/1.pdf", "year": 1905},
+    {"fact": "As a memorial ship, everything below the lower deck is filled with concrete and earth (Washington Treaty); the main guns are replicas", "source_url": "https://trafficnews.jp/post/132819", "year": 1926},
+    {"fact": "The museum restored the captain's cabin and the guns; exhibits about the Battle of the Japan Sea are inside", "source_url": "https://www.jalan.net/kankou/spt_guide000000189647/", "year": 1961},
+    {"fact": "The museum tour map lists the conning tower, main armament, 6-inch auxiliary guns, bower anchor and bow crest", "source_url": "https://www.kinenkan-mikasa.or.jp/en/tourmap/bridge_upp_deck_data/cunning_tower.html", "year": 2024}
+  ],
+  "dimensions": {
+    "length_overall_m": 131.7,
+    "length_pp_m": 122.0,
+    "beam_m": 23.2,
+    "draft_m": 8.3,
+    "displacement_t": 15140,
+    "freeboard_m": {"bow": 7.0, "mid": 5.5, "stern": 5.0, "confidence": "typical (estimated from period photos; not sourced)"},
+    "upper_deck_above_waterline_m": 5.5,
+    "mast_height_above_wl_m": {"value": 45, "confidence": "reconstruction"},
+    "funnels": 2,
+    "masts": 2
+  },
+  "decks": [
+    {
+      "name": "最上艦橋 / Compass deck (open top bridge)",
+      "level_m": 16.0,
+      "rooms": [
+        {"name": "Open compass platform", "purpose": "Togo's command post at Tsushima", "approx_size_m": [8, 4], "position": "bow-mid, centre (forward superstructure top)", "key_props": ["binnacle compass", "voice tubes", "canvas splinter screens at chest height", "floor plates marking Togo, Kato and Akiyama's positions", "brass telescope", "hand rail"], "notes": "Open to sky. Reached by steep ladders (ラッタル).", "confidence": "sourced"}
+      ]
+    },
+    {
+      "name": "前部艦橋 / Fore bridge, chart room, conning tower",
+      "level_m": 11.0,
+      "rooms": [
+        {"name": "海図室 Chart room", "purpose": "navigation plotting", "approx_size_m": [4, 3], "position": "bow-mid, centre", "key_props": ["chart table", "chronometer box", "dividers", "oil/electric lamp"], "notes": "Adjoins bridge per museum tour.", "confidence": "sourced"},
+        {"name": "司令塔 Conning tower", "purpose": "armoured steering and command position", "approx_size_m": [4, 3.5], "position": "bow-mid, centre, below the bridge", "key_props": ["steering wheel", "engine-order telegraphs", "voice tubes", "narrow viewing slits"], "notes": "Oval armoured tower. Armour is 356 mm per typical British practice (unverified).", "confidence": "sourced (existence); typical (armour)"}
+      ]
+    },
+    {
+      "name": "上甲板 Upper deck",
+      "level_m": 5.5,
+      "rooms": [
+        {"name": "前部主砲塔 Fore 12-inch twin turret", "purpose": "main battery", "approx_size_m": [11, 11], "position": "bow, centre", "key_props": ["twin 30.5 cm/40 barrels", "barbette ring"], "notes": "The memorial ship's guns are replicas.", "confidence": "sourced"},
+        {"name": "8 cm gun battery", "purpose": "anti-torpedo-boat guns", "approx_size_m": [60, 3], "position": "mid, port and starboard", "key_props": ["10 x 8 cm (12-pdr) guns per side", "ready-use ammunition racks"], "notes": "", "confidence": "sourced"},
+        {"name": "Upper-deck 6-inch casemates", "purpose": "secondary battery", "approx_size_m": [4, 4], "position": "4 corners of the battery (fore/aft, port/starboard)", "key_props": ["6-inch QF gun", "armoured casemate"], "notes": "4 of the 14 six-inch guns are typically on the upper deck, 10 on the main deck.", "confidence": "typical"},
+        {"name": "Funnels and boat stowage", "purpose": "2 funnels with ship's boats on booms between them", "approx_size_m": [30, 15], "position": "mid", "key_props": ["boat derricks", "cowl ventilators", "steam launches", "cutters"], "notes": "", "confidence": "typical"},
+        {"name": "後部艦橋 Aft bridge", "purpose": "secondary conning position", "approx_size_m": [8, 3], "position": "stern-mid, centre", "key_props": ["searchlight", "compass"], "notes": "", "confidence": "typical"},
+        {"name": "後部主砲塔 Aft 12-inch twin turret", "purpose": "main battery", "approx_size_m": [11, 11], "position": "stern, centre", "key_props": ["twin barrels"], "notes": "Directly above the aft magazine that exploded in 1905.", "confidence": "sourced"},
+        {"name": "錨甲板 Forecastle / anchor gear", "purpose": "anchoring", "approx_size_m": [15, 12], "position": "bow", "key_props": ["bower anchors (stockless) in hawse pipes", "steam capstans", "chain cables", "bow crest (菊花紋章)"], "notes": "", "confidence": "sourced"}
+      ]
+    },
+    {
+      "name": "中甲板 Main (battery) deck",
+      "level_m": 3.0,
+      "rooms": [
+        {"name": "6-inch casemate battery", "purpose": "10 secondary guns with the mess spaces between them", "approx_size_m": [55, 20], "position": "mid, port and starboard", "key_props": ["6-inch guns in casemates", "folding mess tables", "hammock hooks on the deckhead", "ditty-box racks", "shell hoists"], "notes": "The crew ate and slung hammocks between the guns. The museum displays exhibits here.", "confidence": "typical"},
+        {"name": "長官公室 Admiral's day cabin", "purpose": "conference and dining room of the C-in-C", "approx_size_m": [10, 14], "position": "stern, centre", "key_props": ["long conference table", "chairs", "stern windows/gallery", "wood panelling", "Imperial portrait (御真影) space"], "notes": "Fleet commander's quarters are aft, following RN practice.", "confidence": "typical"},
+        {"name": "長官室 Admiral's sleeping cabin", "purpose": "Togo's cabin", "approx_size_m": [4, 4], "position": "stern, starboard", "key_props": ["bunk", "desk", "wash stand"], "notes": "", "confidence": "typical"},
+        {"name": "艦長室 Captain's cabin", "purpose": "Captain Ijichi Hikojiro's quarters", "approx_size_m": [5, 4], "position": "stern, port", "key_props": ["desk", "bunk", "sofa"], "notes": "Restored by the museum.", "confidence": "sourced (exists); typical (position)"},
+        {"name": "参謀長室 Chief of Staff's cabin", "purpose": "Kato Tomosaburo's quarters", "approx_size_m": [3.5, 3.5], "position": "stern", "key_props": ["bunk", "desk"], "notes": "", "confidence": "typical"},
+        {"name": "士官室 Wardroom", "purpose": "officers' mess", "approx_size_m": [10, 8], "position": "stern-mid", "key_props": ["mess table", "sideboard", "piano (possible)"], "notes": "", "confidence": "typical"},
+        {"name": "烹炊所 Galley", "purpose": "cooking for ~860 men", "approx_size_m": [8, 6], "position": "mid, near the funnel casings", "key_props": ["coal-fired ranges", "rice boilers (釜)", "steam kettles"], "notes": "", "confidence": "typical"},
+        {"name": "厠 Heads", "purpose": "latrines", "approx_size_m": [4, 3], "position": "bow (crew), stern (officers)", "key_props": ["trough latrines"], "notes": "", "confidence": "typical"}
+      ]
+    },
+    {
+      "name": "下甲板 Lower deck",
+      "level_m": 0.5,
+      "rooms": [
+        {"name": "兵員居住区 Crew berthing (fore)", "purpose": "hammock berthing and mess for ratings", "approx_size_m": [25, 20], "position": "bow", "key_props": ["hammocks", "lockers", "mess kits"], "notes": "The memorial ship is filled with concrete below this deck, so spaces below are reconstruction only.", "confidence": "typical"},
+        {"name": "Torpedo flat", "purpose": "4 submerged 45 cm torpedo tubes", "approx_size_m": [8, 20], "position": "bow and stern, port and starboard", "key_props": ["torpedo tubes", "torpedoes on chocks"], "notes": "", "confidence": "typical"},
+        {"name": "無線電信室 Wireless room", "purpose": "Type 36 radio (信濃丸's 'enemy sighted' message was received by this ship)", "approx_size_m": [3, 3], "position": "mid", "key_props": ["spark-gap transmitter", "Morse key", "headphones"], "notes": "Wireless room position not verified.", "confidence": "reconstruction"}
+      ]
+    },
+    {
+      "name": "船倉甲板 Platform / hold (machinery, magazines)",
+      "level_m": -4.0,
+      "rooms": [
+        {"name": "前部弾火薬庫 Fore magazine and shell room", "purpose": "12-inch charges and shells", "approx_size_m": [12, 14], "position": "bow, centre under the fore turret", "key_props": ["silk-bag charges in cases", "shells", "hydraulic hoists", "flooding valves"], "notes": "", "confidence": "typical"},
+        {"name": "汽罐室 Boiler rooms (3)", "purpose": "25 Belleville water-tube boilers", "approx_size_m": [36, 14], "position": "mid", "key_props": ["boiler fronts", "stokers' shovels", "coal chutes from side bunkers", "ash hoists", "pressure gauges"], "notes": "Coal bunkers line the sides and add splinter protection.", "confidence": "sourced (boilers); typical (layout)"},
+        {"name": "機械室 Engine rooms (2, port/starboard)", "purpose": "2 vertical triple-expansion engines", "approx_size_m": [18, 9], "position": "stern-mid, port and starboard, separated by a centreline bulkhead", "key_props": ["3-cylinder engine", "crossheads", "engine-order telegraph repeater", "oil cans"], "notes": "", "confidence": "typical"},
+        {"name": "後部弾火薬庫 Aft magazine", "purpose": "12-inch charges (this magazine exploded in 1905)", "approx_size_m": [12, 14], "position": "stern, centre", "key_props": ["powder cases", "shells", "flood cocks"], "notes": "", "confidence": "sourced (explosion site)"},
+        {"name": "Shaft alleys and steering gear", "purpose": "propeller shafts and steering engine", "approx_size_m": [20, 3], "position": "stern", "key_props": ["shaft bearings", "steam steering engine", "hand steering wheels (emergency)"], "notes": "", "confidence": "typical"}
+      ]
+    }
+  ],
+  "exterior": {
+    "materials": ["steel hull and superstructure", "teak/wood upper-deck planking", "armour belt along the waterline"],
+    "colors": {"hull_1905": "dark grey (wartime 鼠色)", "boot_topping": "dark red/black (uncertain)", "deck": "natural wood", "funnels": "grey with black tops (uncertain)", "memorial_today": "grey"},
+    "features": ["two upright funnels", "two military masts with fighting tops", "Z flag (Z旗) at the masthead during the battle scene", "rising-sun naval ensign at the stern", "chrysanthemum crest on the bow", "ram bow", "twin 12-inch turrets fore and aft"]
+  },
+  "crew": {"total": 860, "alt_figures": [830], "notes": "Plus Togo's fleet staff in 1905."},
+  "lighting": {"type": "electric incandescent lamps with steam dynamos, oil lamps as backup, searchlights on bridges and masts", "mood": "dim yellow interior; bright overcast daylight on the deck (the Tsushima battle day was foggy with high waves)", "confidence": "typical"},
+  "props_period": ["白い第二種軍装 vs 紺の第一種軍装 (May = dark winter uniforms)", "brass voice tubes", "signal flags and halyards", "semaphore", "hammocks lashed in nettings", "coal sacks", "shell trolleys", "Morse lamp"],
+  "flooding": {
+    "watertight_subdivision": "Steel hull with transverse watertight bulkheads, a double bottom under the machinery, and side coal bunkers acting as protective compartments. The compartment count is unverified.",
+    "bulkheads": [
+      {"position_from_bow_m": 18, "note": "collision bulkhead (typical)"},
+      {"position_from_bow_m": 35, "note": "forward magazine bulkhead"},
+      {"position_from_bow_m": 50, "note": "fore boiler room"},
+      {"position_from_bow_m": 86, "note": "boiler/engine room boundary"},
+      {"position_from_bow_m": 104, "note": "aft magazine bulkhead"}
+    ],
+    "bulkhead_confidence": "reconstruction (positions inferred from the turret and funnel layout)",
+    "pumps": "Steam-driven main circulating and bilge pumps in the machinery spaces, plus hand pumps (typical)",
+    "sea_cocks": "Magazine flooding cocks (弾火薬庫注水弁) next to each magazine (standard practice; the 1905 accident shows the risk). Kingston valves for the condensers.",
+    "magazines": [{"name": "fore 12-inch", "position": "bow, under fore turret"}, {"name": "aft 12-inch", "position": "stern, under aft turret"}, {"name": "6-inch and 8 cm", "position": "distributed along the battery, below the waterline"}],
+    "freeboard_m": 5.5,
+    "historical_damage": [
+      {"event": "Battle of Tsushima", "date": "1905-05-27", "sequence": ["Hit ~32-40 times, mostly in the upper works", "No serious flooding"], "source_url": "https://military-historian.squarespace.com/archive-1/2017/11/12/tools-of-war-the-battleship-mikasa"},
+      {"event": "Magazine explosion at Sasebo", "date": "1905-09-11/12", "sequence": ["Fire started near the aft magazine at night (cause disputed; one theory is sailors drinking alcohol lit by flame)", "Aft magazine detonated, blowing out the hull aft", "Sank by the stern in shallow harbour water; settled on the bottom with superstructure and masts above water (period photos)", "251-339 dead", "Refloated 8 Aug 1906 and repaired for 2+ years"], "source_url": "https://trafficnews.jp/post/133670/2"}
+    ],
+    "game_sinking_hooks": ["Fire in the aft handling room: a timer to the magazine explosion unless the flood cocks are opened", "Opening the magazine flood cocks floods the aft compartments, giving a stern trim", "The Sasebo harbour scenario: the ship settles upright on the bottom rather than capsizing (shallow water)"]
+  },
+  "uncertain": [
+    "Exact deck heights and room dimensions are estimates; the museum ship below the lower deck is filled with concrete, so no physical evidence of the lower spaces exists today.",
+    "Belt armour type (Harvey vs Krupp) is disputed between sources.",
+    "Crew 830 vs 860.",
+    "Sasebo death toll: 251 vs 339 vs ~600 (press).",
+    "Exact positions of the cabins (長官公室 etc.) follow RN practice and need checking against the museum floor plan (official site unreachable this session).",
+    "1905 paint colours.",
+    "Official museum pages (kinenkan-mikasa.or.jp) could not be fetched; facts come from search-result snippets."
+  ]
+}

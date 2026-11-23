@@ -1,0 +1,38 @@
+{
+  "id": "shuinsen",
+  "name": {"ja": "朱印船（末吉船／末次船／荒木船）", "en": "Red Seal Ship"},
+  "era": "edo_early",
+  "year": 1633,
+  "type": "armed merchant ship, junk hull with Western-style elements (民の船)",
+  "schema_notes": "level_m = deck height above the waterline. confidence: sourced / typical / reconstruction.",
+  "basis": [
+    {"fact": "Over 350 Japanese ships went abroad under the system between 1600 and 1635", "source_url": "https://EN.wikipedia.com/wiki/Red_Seal_Ship", "year": 1635},
+    {"fact": "Sueyoshi family ema (votive tablet) at Kiyomizu-dera, Nov 1633, for a voyage to Tonkin; original at Kyoto National Museum", "source_url": "https://EN.wikipedia.com/wiki/Red_Seal_Ship", "year": 1633}
+  ],
+  "dimensions": {
+    "length_overall_m": 40.0,
+    "beam_m": 9.0,
+    "draft_m": 3.5,
+    "displacement_t": 500,
+    "freeboard_m": {"mid": 2.5},
+    "confidence": "reconstruction",
+    "masts": 3
+  },
+  "decks": [
+    {"name": "Sterncastle", "level_m": 5.0, "rooms": [
+      {"name": "Owner/merchant cabin", "purpose": "merchant", "approx_size_m": [6, 6], "position": "stern", "key_props": ["red seal document (朱印状)", "abacus", "shrine"], "notes": "", "confidence": "reconstruction"}
+    ]},
+    {"name": "Main deck", "level_m": 2.5, "rooms": [
+      {"name": "Deck", "purpose": "sailing", "approx_size_m": [30, 9], "position": "full length", "key_props": ["mat/cloth sails", "Western spritsail", "guns"], "notes": "", "confidence": "reconstruction"}
+    ]},
+    {"name": "Hold", "level_m": -1.0, "rooms": [
+      {"name": "Compartmented hold", "purpose": "silver out, silk/sugar/deerskins back", "approx_size_m": [3, 9], "position": "full length", "key_props": ["silver", "deerskins"], "notes": "", "confidence": "reconstruction"}
+    ]}
+  ],
+  "exterior": {"materials": ["wood"], "colors": {"hull": "black/dark", "flags": "family banners"}, "features": ["junk hull", "Western-style stern gallery"]},
+  "crew": {"total": 200, "notes": "Typical 200-300 incl. merchants (unverified)"},
+  "lighting": {"type": "lanterns"},
+  "props_period": ["朱印状", "silver ingots"],
+  "flooding": {"watertight_subdivision": "Junk-type bulkheads (assumed)", "pumps": "Buckets", "sea_cocks": "None", "magazines": [{"name": "powder", "position": "hold"}], "freeboard_m": 2.5, "historical_damage": [], "game_sinking_hooks": ["Same as the junk"]},
+  "uncertain": ["Nearly everything except existence and the ema"]
+}

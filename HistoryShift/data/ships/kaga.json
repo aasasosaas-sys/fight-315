@@ -1,0 +1,68 @@
+{
+  "id": "kaga",
+  "name": {"ja": "航空母艦加賀", "en": "IJN Aircraft Carrier Kaga"},
+  "era": "showa_war",
+  "year": 1941,
+  "type": "fleet carrier (converted Tosa-class battleship hull; rebuilt 1933-35)",
+  "schema_notes": "level_m = deck height above the waterline. confidence: sourced / typical / reconstruction.",
+  "basis": [
+    {"fact": "After the rebuild: length ~247.65 m, beam 32.5 m, 38,200 long tons standard", "source_url": "https://en.wikipedia.org/wiki/Japanese_aircraft_carrier_Kaga", "year": 1935},
+    {"fact": "As completed: 238.5 m overall, beam 31.67 m, full-load draft 7.92 m; 28 kt; range 12,000 nmi at 15 kt", "source_url": "https://www.historyofwar.org/articles/weapons_kaga.html", "year": 1928},
+    {"fact": "Crew 1,708; 3 hangar decks; 3 elevators", "source_url": "https://m.ww2db.com/ship_spec.php?ship_id=c9", "year": 1941},
+    {"fact": "~1,700 personnel and 90 aircraft", "source_url": "https://oceanexplorer.noaa.gov/?p=17055", "year": 1941},
+    {"fact": "Small island on the starboard side added in the 1933-35 rebuild; funnels on the starboard side, angled downward", "source_url": "https://www.historyofwar.org/articles/weapons_kaga.html", "year": 1935},
+    {"fact": "Midway: 4 bombs from Enterprise dive-bombers; fires spread; scuttled by Hagikaze with 2 torpedoes", "source_url": "https://www.historyofwar.org/articles/weapons_kaga.html", "year": 1942},
+    {"fact": "Wreck found 16 Oct 2019; both Akagi and Kaga lie at more than 5,400 m", "source_url": "https://www.papahanaumokuakea.gov/new-news/2019/10/21/kaga/", "year": 2019}
+  ],
+  "dimensions": {
+    "length_overall_m": 247.65,
+    "beam_m": 32.5,
+    "draft_m": 9.5,
+    "draft_confidence": "typical (post-rebuild figure unverified; as-completed 7.92 m)",
+    "displacement_t": {"standard": 38200},
+    "flight_deck_m": {"length": 248.6, "width": 30.5, "height_above_wl": 15.5, "confidence": "typical"},
+    "freeboard_m": {"flight_deck": 15.5}
+  },
+  "decks": [
+    {"name": "艦橋 Island (starboard)", "level_m": 21.0, "rooms": [
+      {"name": "Compass bridge", "purpose": "conning (Captain Okada Jisaku killed here at Midway when a bomb hit a fuel bowser beside the island)", "approx_size_m": [5, 4], "position": "forward of amidships, STARBOARD edge", "key_props": ["binnacle", "telegraphs", "windows"], "notes": "Small island, smaller than modern carriers'.", "confidence": "sourced (starboard); typical (Okada detail)"}
+    ]},
+    {"name": "飛行甲板 Flight deck", "level_m": 15.5, "rooms": [
+      {"name": "Flight deck", "purpose": "flight operations", "approx_size_m": [248, 30.5], "position": "full length", "key_props": ["wood planking", "arresting wires", "3 elevators", "white markings", "katakana 'カ' at the aft end (typical)"], "notes": "", "confidence": "typical"}
+    ]},
+    {"name": "Hangars (3 levels)", "level_m": 10.0, "rooms": [
+      {"name": "Upper hangar", "purpose": "aircraft", "approx_size_m": [170, 22], "position": "full length", "key_props": ["aircraft", "ordnance trolleys", "fuel lines"], "notes": "", "confidence": "sourced (3 hangar decks)"},
+      {"name": "Middle hangar", "purpose": "aircraft", "approx_size_m": [160, 20], "position": "full length", "key_props": ["aircraft"], "notes": "", "confidence": "sourced"},
+      {"name": "Lower hangar", "purpose": "spare aircraft", "approx_size_m": [80, 18], "position": "partial", "key_props": ["crated spares"], "notes": "", "confidence": "sourced (exists); typical (size)"}
+    ]},
+    {"name": "Main deck", "level_m": 0.5, "rooms": [
+      {"name": "20 cm casemates", "purpose": "10 x 20 cm guns (5 per side)", "approx_size_m": [40, 4], "position": "stern, port and starboard", "key_props": ["casemate guns"], "notes": "", "confidence": "typical"},
+      {"name": "Long funnel trunk", "purpose": "exhaust led aft along the starboard side", "approx_size_m": [60, 5], "position": "starboard", "key_props": ["hot trunking (crew quarters near it were notoriously hot)"], "notes": "", "confidence": "typical"},
+      {"name": "Crew berthing", "purpose": "~1,700 crew", "approx_size_m": [40, 25], "position": "bow and stern", "key_props": ["hammocks"], "notes": "", "confidence": "typical"}
+    ]},
+    {"name": "Machinery", "level_m": -5.0, "rooms": [
+      {"name": "Boiler and turbine rooms", "purpose": "propulsion", "approx_size_m": [80, 26], "position": "mid", "key_props": ["boilers", "turbines"], "notes": "", "confidence": "typical"},
+      {"name": "Magazines and aviation fuel", "purpose": "ordnance", "approx_size_m": [15, 15], "position": "fore and aft", "key_props": ["bombs", "torpedoes", "gasoline tanks"], "notes": "", "confidence": "typical"}
+    ]}
+  ],
+  "exterior": {
+    "materials": ["steel", "wooden flight deck"],
+    "colors": {"hull": "IJN grey", "flight_deck": "natural wood", "markings": "white"},
+    "features": ["STARBOARD small island", "broad battleship hull", "starboard downward funnel", "AA sponsons"]
+  },
+  "crew": {"total": 1708},
+  "lighting": {"type": "electric", "confidence": "typical"},
+  "props_period": ["A6M2", "D3A1", "B5N2", "fuel bowser cart", "ordnance trolleys"],
+  "flooding": {
+    "watertight_subdivision": "Battleship hull (Tosa class) with good underwater protection; like Akagi, the enclosed hangars were the weak point.",
+    "pumps": "Fire mains / electric pumps (typical)",
+    "sea_cocks": "Kingston valves (typical)",
+    "magazines": [{"name": "ordnance and fuel", "position": "fore and aft below the waterline"}],
+    "freeboard_m": 7.5,
+    "historical_damage": [
+      {"event": "Midway", "date": "1942-06-04", "sequence": ["4 bomb hits, including near the island", "Captain and bridge staff killed", "Hangar fires and secondary explosions", "Abandoned; scuttled by Hagikaze's 2 torpedoes in the evening"], "source_url": "https://www.historyofwar.org/articles/weapons_kaga.html"}
+    ],
+    "game_sinking_hooks": ["Same as Akagi; the bridge hit scenario (fuel bowser next to the island)"]
+  },
+  "uncertain": ["Post-rebuild draft", "Elevator sizes and positions", "Deck markings", "Crew 1,340 vs 1,708"]
+}
