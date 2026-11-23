@@ -454,17 +454,17 @@
   },
   {
    "id": "sg_alt_fire_nanbanji",
-   "title": "南蛮寺、炎上",
+   "title": "南蛮寺の門、崩れる",
    "trigger": {
-    "kind": "fire",
-    "at": "temple",
-    "min": 5
+    "kind": "destroy",
+    "id": "temple",
+    "type": "gate"
    },
    "force": {
     "q": "sengoku_03",
     "choice": 0
    },
-   "text": "京の南蛮寺が燃え、宣教師たちは九州へ逃れた。目の前の脅威が消えた秀吉は、まず刀狩に取りかかった。バテレン追放令はその後になった。"
+   "text": "京の南蛮寺の門が崩れ、宣教師たちは九州へ逃れた。目の前の脅威が消えた秀吉は、まず刀狩に取りかかった。バテレン追放令はその後になった。"
   },
   {
    "id": "sg_alt_persuade_coelho_loyal",
