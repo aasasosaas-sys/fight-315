@@ -25,6 +25,7 @@ func _ready() -> void:
 		names = LINEUP.duplicate()
 	var font: Font = load("res://assets/fonts/NotoSerifJP-Bold.ttf")
 	var xs: Array[float] = []
+	var labels: Array = []
 	var i := 0
 	for nm: String in names:
 		var x := (i % per - (mini(per, names.size()) - 1) * 0.5) * SPACING + (i / per) * 40.0
@@ -52,12 +53,24 @@ func _ready() -> void:
 		lab.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		lab.position = Vector3(x, 1.95, 0)
 		add_child(lab)
+		labels.append([lab, n])
 		i += 1
 	var cam := Camera3D.new()
 	add_child(cam)
 	cam.fov = 30
 	for _f in 30:
 		await get_tree().process_frame
+	# ラベルと寄りの位置を、立ち姿の頭の位置へ合わせる
+	for pair: Array in labels:
+		var lab: Label3D = pair[0]
+		var model: Node3D = pair[1]
+		var sk := model.get_node_or_null("%GeneralSkeleton") as Skeleton3D
+		if sk:
+			var hp := sk.global_transform * sk.get_bone_global_pose(sk.find_bone("Head")).origin
+			lab.position = Vector3(hp.x, hp.y + 0.42, hp.z)
+			var idx := names.find(String(model.get_meta("figure", "")))
+			if idx >= 0:
+				xs[idx] = hp.x
 	var groups := int(ceil(float(names.size()) / per))
 	for g in groups:
 		var cx := g * 40.0

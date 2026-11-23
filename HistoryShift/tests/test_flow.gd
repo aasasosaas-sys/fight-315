@@ -73,6 +73,19 @@ func _run() -> void:
 		flow.session.aborted.emit()
 		await _secs(3.0)
 		_check(flow.current == "hub", "hub after abort (current=%s)" % flow.current)
+	# 自由探索で人物を倒す → 歴史が揺らぐ → 中断 → 混乱版のアフター画面 → ハブ
+	flow.start_free_roam("sengoku", "hub")
+	await _secs(3.5)
+	if flow.session != null:
+		G.chaos_event.emit("kill", "羽柴秀吉", {"era": "sengoku", "type": "figure"})
+		await _secs(0.3)
+		_check(st.is_chaos(G.db.by_id["sengoku_05"]), "free-roam kill rewrote history")
+		flow.session.aborted.emit()
+		await _secs(3.0)
+		_check(flow.current == "aftermath", "chaos aftermath after free roam (current=%s)" % flow.current)
+		flow.screen.to_hub.emit()
+		await _secs(0.4)
+		_check(flow.current == "hub", "hub after chaos aftermath (current=%s)" % flow.current)
 	# 失敗
 	var q2: Dictionary = {}
 	for x in G.db.questions:

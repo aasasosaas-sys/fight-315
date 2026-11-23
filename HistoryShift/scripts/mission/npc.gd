@@ -25,7 +25,7 @@ func _ready() -> void:
 	var outfit := Humanoid.outfit_for(era_id, "npc")
 	if npc_name.contains("記録者"):
 		outfit = Humanoid.Outfit.MONK
-	_rig = Humanoid.build(outfit, hash(npc_name), false, 1 if Humanoid.is_female_name(npc_name) else 0)
+	_rig = Humanoid.build(outfit, hash(npc_name), false, 1 if Humanoid.is_female_name(npc_name) else 0, npc_name)
 	_rig.rotation.y = PI
 	add_child(_rig)
 	var body := StaticBody3D.new()
@@ -39,7 +39,8 @@ func _ready() -> void:
 	body.add_child(cs)
 	add_child(body)
 	_tag = Label3D.new()
-	_tag.text = npc_name
+	var title := String(Figures.spec_for(npc_name).get("title", ""))
+	_tag.text = npc_name if title == "" else npc_name + "\n" + title
 	_tag.font = load("res://assets/fonts/NotoSerifJP-Bold.ttf")
 	_tag.font_size = 56
 	_tag.pixel_size = 0.006

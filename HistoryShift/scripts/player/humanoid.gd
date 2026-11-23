@@ -143,10 +143,11 @@ static func is_female_name(n: String) -> bool:
 	return false
 
 
-static func build(outfit: int, seed: int, armed: bool, female := -1) -> Humanoid:
+static func build(outfit: int, seed: int, armed: bool, female := -1, figure := "") -> Humanoid:
 	var h := Humanoid.new()
 	h.name = "Humanoid"
 	h._female_req = female
+	h._figure = figure
 	if _skinned_ok == -1:
 		_skinned_ok = 1 if ResourceLoader.exists(MANNEQUIN) else 0
 	if _skinned_ok == 1:
@@ -193,6 +194,7 @@ static var anime := true
 const ANIME_MALE := ["HairSample_Male", "Sakurada_Fumiriya", "Sendagaya_Shibu"]
 const ANIME_FEMALE := ["Sendagaya_Shino", "HairSample_Female"]
 var _anim_lib_override: AnimationLibrary
+var _figure := ""   # 歴史上の人物名（専用の見た目：scripts/player/figures.gd）
 
 
 ## 服装（Outfit）→ アニメ素体の衣装・髪型・配色。未実装の衣装は近い時代の装いで代用
@@ -288,16 +290,24 @@ func _construct_anime(outfit: int, rng: RandomNumberGenerator, armed: bool) -> b
 	if not ResourceLoader.exists(AnimeChar.VRM_DIR + base + ".vrm"):
 		return false
 	var spec := _anime_spec(outfit, female, rng)
+	var fs: Dictionary = Figures.spec_for(_figure) if _figure != "" else {}
+	if not fs.is_empty():
+		female = fs["female"]
+		base = fs["base"]
+		spec = {"outfit": fs["outfit"], "hair": "", "pal": fs["palette"]}
 	var pal: Dictionary = spec.get("pal", {})
 	if pal.get("robe", null) == "":
 		pal["robe"] = pal.get("kosode", "ai")
 	var model: Node3D = AnimeChar.build(base, spec.outfit, pal, spec.hair)
+	if not fs.is_empty():
+		Figures.decorate(model, fs, rng.randi())
 	# 顔・年齢・体格の個人差（武装した者・兵には子どもを出さない）
 	var combat := armed or outfit in [Outfit.SAMURAI, Outfit.ASHIGARU, Outfit.SOLDIER, Outfit.POLICE, Outfit.GUARDIAN, Outfit.AGENT]
 	var fopts := {"female": female, "modern": outfit in MODERN}
 	if combat:
 		fopts["age"] = "young" if rng.randf() < 0.5 else "adult"
-	set_meta("face", AnimeFace.apply(model, rng.randi(), fopts))
+	if fs.is_empty():
+		set_meta("face", AnimeFace.apply(model, rng.randi(), fopts))
 	if outfit == Outfit.GUARDIAN:
 		_shadowify(model)
 	# アニメ素体は自前のアニメーションプレイヤーを持つので、木（AnimationTree）だけで動かす
@@ -314,7 +324,7 @@ func _construct_anime(outfit: int, rng: RandomNumberGenerator, armed: bool) -> b
 	var h := _rest_height(model)
 	var target := 1.72 if outfit == Outfit.AGENT else ((1.55 if female else 1.68) if outfit in MODERN else (1.5 if female else 1.62))
 	target *= rng.randf_range(0.97, 1.03)
-	model.scale = Vector3.ONE * (target / maxf(h, 0.5))
+	model.scale = Figures.integration_scale(model, fs) if not fs.is_empty() else Vector3.ONE * (target / maxf(h, 0.5))
 	if armed:
 		var hand := _holder("RightHand")
 		weapon = Node3D.new()

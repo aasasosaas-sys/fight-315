@@ -38,6 +38,8 @@ func _ready() -> void:
 	chaos_event.connect(chaos.on_event)
 	for e in db.errors:
 		push_warning(e)
+	for e in chaos.errors:
+		push_warning(e)
 
 
 func _setup_input() -> void:

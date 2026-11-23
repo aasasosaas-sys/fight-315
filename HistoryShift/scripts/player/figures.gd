@@ -16,7 +16,7 @@ const NODE_PREFIX := "Fig_"
 const HAIR_TINT := {
 	"black": Color(1, 1, 1), "gray": Color(2.6, 2.6, 2.6), "white": Color(3.9, 3.9, 3.7),
 	"brown": Color(2.3, 1.55, 0.95), "blond": Color(3.9, 3.1, 1.6), "auburn": Color(2.6, 1.3, 0.8),
-	"shaved": Color(2.75, 2.35, 1.75),
+	"shaved": Color(3.9, 3.2, 2.3),
 }
 ## 髭（簡易メッシュ）の色
 const BEARD_COL := {"black": Color(0.1, 0.09, 0.1), "gray": Color(0.52, 0.5, 0.5), "white": Color(0.88, 0.87, 0.85),
@@ -56,7 +56,7 @@ const ARCH := {
 		"acc": ["magatama", "kanto_tachi"], "face": {"age": 45}},
 	# 古墳の武人（短甲＋衝角付冑：当世具足を流用し兜を差し替え）
 	"kofun_warrior": {"outfit": "busho", "hair": "court_bun", "hide": ["kabuto", "maedate", "shikoro", "haidate"],
-		"palette": {"kosode_t": "shiro:plain", "do": "tetsu:ita:kin", "kusazuri": "tetsu:ita:kin", "sode": "tetsu:ita:kin", "kote": "kuro", "kobakama": "shiro:plain", "suneate": "kuro:shino:kin"},
+		"palette": {"kosode_t": "shiro:plain", "do": "sumi:ita:kin", "kusazuri": "sumi:ita:kin", "sode": "sumi:ita:kin", "kote": "kuro", "kobakama": "shiro:plain", "suneate": "kuro:shino:kin"},
 		"acc": ["shokaku_kabuto", "kanto_tachi", "magatama"], "face": {"age": 40}},
 	# 卑弥呼・壱与：白の巫女装束、勾玉と鏡
 	"priestess": {"outfit": "kimono", "hair": "suberakashi", "female": true, "hide": FEMALE_OBI,
@@ -106,7 +106,7 @@ const ARCH := {
 		"acc": ["katana", "wakizashi", "sensu"], "kamon_at": ["back", "sleeve", "chest"], "face": {"age": 40}},
 	# 江戸の裃（肩衣＋袴）、大小、丁髷
 	"kamishimo": {"outfit": "hakama", "hair": "chonmage",
-		"palette": {"kosode": "kon:plain", "eri": "kuro", "haneri": "shiro", "hakama": "nezumi:plain", "obi": "kuro", "tabi": "shiro", "zori": "wara:weave:kuchiba"},
+		"palette": {"kosode": "kinari:plain", "eri": "kuro", "haneri": "shiro", "hakama": "nezumi:plain", "obi": "kuro", "tabi": "shiro", "zori": "wara:weave:kuchiba"},
 		"acc": ["kataginu:nezumi", "katana", "wakizashi", "sensu"], "kamon_at": ["kataginu", "sleeve"], "face": {"age": 45}},
 	# 江戸の学者（総髪・書物）
 	"scholar": {"outfit": "hakama", "hair": "court_bun",
@@ -170,7 +170,7 @@ const FIGURES := {
 	"難升米": {"arch": "kofun_chief", "title": "魏へ渡った卑弥呼の使者", "acc": ["magatama", "scroll"], "face": {"mustache": "thin"}},
 	"卑弥弓呼": {"arch": "kofun_warrior", "title": "邪馬台国と争った狗奴国の王", "face": {"age": 45, "beard": "short"}},
 	"倭王武": {"arch": "kofun_warrior", "title": "倭の五王・ワカタケル大王", "aka": ["ワカタケル大王", "雄略天皇"], "acc": ["shokaku_kabuto", "kanto_tachi", "magatama", "kofun_crown_band"],
-		"palette": {"do": "tetsu:ita:kin", "kusazuri": "tetsu:ita:kin"}, "face": {"age": 40, "mustache": "thin", "beard": "goatee"}},
+		"palette": {"do": "sumi:ita:kin", "kusazuri": "sumi:ita:kin"}, "face": {"age": 40, "mustache": "thin", "beard": "goatee"}},
 	"筑紫君磐井": {"arch": "kofun_warrior", "title": "ヤマト政権に抗った筑紫の国造", "aka": ["磐井"], "face": {"age": 50, "beard": "short"}},
 	"欽明天皇": {"arch": "kofun_king", "title": "仏教公伝の大王", "face": {"age": 45, "mustache": "thin", "beard": "goatee"}},
 	"物部尾輿": {"arch": "kofun_chief", "title": "排仏を唱えた大連", "palette": {"kosode": "kon:plain", "hakama": "shiro:plain"}, "face": {"age": 50, "beard": "short", "brows": "thick"}},
@@ -306,7 +306,7 @@ const FIGURES := {
 	"松平信綱": {"arch": "kamishimo", "title": "「知恵伊豆」と呼ばれた老中", "palette": {"hakama": "kon:plain"}, "acc": ["kataginu:kon", "katana", "wakizashi", "sensu"], "face": {"age": 42}},
 	"天草四郎": {"arch": "sengoku_lord", "title": "島原・天草一揆の総大将", "aka": ["益田時貞"], "hair": "court_bun",
 		"palette": {"kosode": "shiro:plain", "hakama": "kuchiba:plain", "eri": "shiro"}, "acc": ["ruff", "crucifix", "katana"], "kamon_at": [], "face": {"age": 16, "eyes": "large"}},
-	"徳川吉宗": {"arch": "kamishimo", "title": "享保の改革を行った八代将軍", "kamon": "aoi", "palette": {"kosode": "ai:plain", "hakama": "kon:plain"},
+	"徳川吉宗": {"arch": "kamishimo", "title": "享保の改革を行った八代将軍", "kamon": "aoi", "palette": {"kosode": "kinari:plain", "hakama": "kon:plain"},
 		"acc": ["kataginu:kon", "katana", "wakizashi", "sensu"], "face": {"age": 45}, "height": 1.8},
 	"大黒屋光太夫": {"arch": "meiji_suit", "title": "ロシアから帰国した漂流民", "hair": "court_bun",
 		"palette": {"jacket": "kon", "vest": "ebicha", "trousers": "kon", "tie": "shiro"}, "acc": ["fur_hat"], "face": {"age": 42}},
@@ -447,7 +447,7 @@ static func resolve(name: String) -> String:
 		for c: String in cands:
 			if c.length() < 2 or c.length() <= best_len:
 				continue
-			var ok := n.ends_with(" " + c) or n.ends_with("　" + c) or n.begins_with(c + "（") or inner == c
+			var ok := n.ends_with(" " + c) or n.ends_with("　" + c) or n.ends_with("・" + c) or n.begins_with(c + "（") or inner == c
 			if ok:
 				best = cands[c]
 				best_len = c.length()
@@ -567,7 +567,9 @@ static func face_opts(s: Dictionary) -> Dictionary:
 	var hc: String = s.get("hair_color", f.get("hair_color", "black"))
 	fx["hair_gray"] = 2 if hc == "white" else (1 if hc == "gray" else 0)
 	if hc in ["brown", "blond", "auburn", "shaved"]:
-		fx["hair_tint"] = HAIR_TINT[hc]
+		# AnimeFace は丸刈り（buzz）の髪色を 1.5 倍にするので割り戻す
+		var ht: Color = HAIR_TINT[hc]
+		fx["hair_tint"] = ht / 1.5 if String(s.get("hair", "")) == "buzz" else ht
 	elif hc == "black":
 		fx["hair_tint"] = Color(1, 1, 1)
 	match String(f.get("eyes", "")):
@@ -1714,7 +1716,7 @@ static func _accessory(ctx: Dictionary, spec: String) -> void:
 			gripm.position = Vector3(0, 0.075, -0.035)
 			gripm.rotation = Vector3(-0.45, 0, 0)
 			n.add_child(gripm)
-			_put(ctx, "Hips", n, Transform3D(Basis().scaled(Vector3.ONE * k), Vector3(-0.07 * k, L["waist_y"] + 0.0 * k, L["waist_hd"] + 0.012 * k)))
+			_put(ctx, "Hips", n, Transform3D(Basis().scaled(Vector3.ONE * k), Vector3(-0.08 * k, L["waist_y"] + 0.03 * k, L["waist_hd"] + 0.022 * k)))
 		"hyotan":
 			var n := Node3D.new()
 			n.name = NODE_PREFIX + "Hyotan"
@@ -1782,10 +1784,10 @@ static func _accessory(ctx: Dictionary, spec: String) -> void:
 			var neck: Vector3 = L["neck"]
 			var fn := func(u: float, v: float) -> Vector3:
 				var a := u * TAU
-				var r := lerpf(0.06, 0.13, v)
-				return Vector3(sin(a) * r, 0.022 * sin(a * 22.0) * v, cos(a) * r * 1.05)
+				var r := lerpf(0.07, 0.16, v)
+				return Vector3(sin(a) * r, 0.028 * sin(a * 22.0) * v + 0.02 * v, cos(a) * r * 1.08)
 			var m := _mi(_surf(fn, 88, 3, true, 0.008), _mat(ctx, "shiro"), "Ruff")
-			_put(ctx, "Neck", m, Transform3D(Basis().scaled(Vector3.ONE * k), neck + Vector3(0, -0.005 * k, 0.005 * k)))
+			_put(ctx, "Neck", m, Transform3D(Basis().scaled(Vector3.ONE * k), neck + Vector3(0, -0.035 * k, 0.012 * k)))
 		"medals":
 			var chest: Vector3 = L["chest"]
 			var n := Node3D.new()
@@ -1983,14 +1985,14 @@ static func _kataginu(ctx: Dictionary, col: String) -> void:
 	for sx: float in [1.0, -1.0]:
 		# 羽（肩から外へ張り出す板）
 		var wing := func(u: float, v: float) -> Vector3:
-			var x := lerpf(0.06, 0.3, u) * k
+			var x := lerpf(0.06, 0.36, u) * k
 			var z := lerpf(-0.12, 0.12, v) * k * (1.0 - 0.15 * u)
-			return Vector3(sx * x, sy + 0.012 * k * u - 0.02 * k * (1.0 - u) * (1.0 - u) + 0.01 * k * absf(v - 0.5), z)
+			return Vector3(sx * x, sy + 0.03 * k * u - 0.02 * k * (1.0 - u) * (1.0 - u) + 0.01 * k * absf(v - 0.5), z)
 		_put(ctx, "UpperChest", _mi(_surf(wing, 6, 4, false, 0.008 * k), mat, "Wing"), Transform3D.IDENTITY)
 		# 前身頃：肩の前縁から帯の中央へ細くなる
 		var front := func(u: float, v: float) -> Vector3:
 			var top_in := Vector3(sx * 0.065 * k, sy - 0.01 * k, 0.1 * k)
-			var top_out := Vector3(sx * 0.22 * k, sy - 0.005 * k, 0.11 * k)
+			var top_out := Vector3(sx * 0.26 * k, sy + 0.01 * k, 0.11 * k)
 			var bot_in := Vector3(sx * 0.012 * k, wy, wd + 0.012 * k)
 			var bot_out := Vector3(sx * 0.07 * k, wy, wd + 0.012 * k)
 			var top := top_in.lerp(top_out, u)
@@ -2184,7 +2186,7 @@ static func _headwear(ctx: Dictionary, id: String, col: String) -> void:
 			n.add_child(pin)
 			var ei: PackedVector3Array
 			if id == "kanmuri_ryuei":
-				ei = PackedVector3Array([Vector3(0, 0.1, -0.085), Vector3(0, 0.17, -0.1), Vector3(0, 0.25, -0.13), Vector3(0, 0.3, -0.18)])
+				ei = PackedVector3Array([Vector3(0, 0.1, -0.085), Vector3(0, 0.15, -0.1), Vector3(0, 0.2, -0.13), Vector3(0, 0.23, -0.17)])
 			else:
 				ei = PackedVector3Array([Vector3(0, 0.08, -0.09), Vector3(0, 0.02, -0.14), Vector3(0, -0.1, -0.16), Vector3(0, -0.24, -0.17)])
 			var enrm := PackedVector3Array([Vector3(0, 0, -1), Vector3(0, 0.2, -1), Vector3(0, 0.3, -1), Vector3(0, 0.4, -1)])
@@ -2471,14 +2473,14 @@ static func _fallback_facial_hair(ctx: Dictionary, face: Dictionary) -> void:
 			_put(ctx, "Head", _mi(_surf(fn2, 2, 5, false, 0.006 * k), mat, "Sideburn"), Transform3D.IDENTITY)
 	if must != "none":
 		var my := mouth.y + 0.014 * k
-		var w := {"thin": 0.32, "toothbrush": 0.16, "full": 0.42, "kaiser": 0.5, "walrus": 0.5, "handlebar": 0.62}.get(must, 0.35) as float
+		var w := {"thin": 0.32, "toothbrush": 0.12, "full": 0.42, "kaiser": 0.5, "walrus": 0.5, "handlebar": 0.62}.get(must, 0.35) as float
 		var th := {"thin": 0.0035, "toothbrush": 0.007, "full": 0.0065, "kaiser": 0.005, "walrus": 0.008, "handlebar": 0.005}.get(must, 0.005) as float
 		if must == "toothbrush":
 			var fn3 := func(u: float, v: float) -> Vector3:
 				var a := lerpf(-w, w, u)
-				var y := lerpf(my + 0.006 * k, my - 0.006 * k, v)
-				return surf_pt.call(a, y, 0.005 * k)
-			_put(ctx, "Head", _mi(_surf(fn3, 4, 2, false, 0.007 * k), mat, "Mustache"), Transform3D.IDENTITY)
+				var y := lerpf(my + 0.011 * k, my + 0.003 * k, v)
+				return surf_pt.call(a, y, 0.003 * k)
+			_put(ctx, "Head", _mi(_surf(fn3, 4, 2, false, 0.004 * k), mat, "Mustache"), Transform3D.IDENTITY)
 		else:
 			for sx: float in [1.0, -1.0]:
 				var pts := PackedVector3Array()

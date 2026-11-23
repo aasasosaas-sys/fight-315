@@ -81,3 +81,23 @@ v1（tools/SCHEMA.md）の項目はすべてそのまま有効。v2 では以下
 ```
 - topic ごと（首相・政治体制・首都・経済・教育・文化・外交・技術・暮らし など）に複数の分岐。最終状態で一致したものを topic ごとに最初の1つ採用。
 - 首相は「どんな経歴・出自の人物か」（例：織田家の末裔、元陸軍将校、女性初の…）。実在の存命人物は使わない。
+
+## data/chaos/<eraId>.json（自由探索の「歴史の揺らぎ」）
+自由探索（ミッションなし）で人物を倒したり名所を壊したりすると、計画外に歴史が変わる。`scripts/core/chaos.gd`（ChaosTracker）が
+`Game.chaos_event(kind, id, info)` を数え、条件を満たしたルールを `HistoryState.apply_chaos` で適用する。HistoryDB は data/ 直下しか読まないので、問題データには影響しない。
+検証：`python3 tools/validate_chaos.py [-v]`、テスト：`godot --headless --path . -s tests/test_chaos.gd`。
+```json
+{"eraId": "sengoku",
+ "figures": [{"name": "織田信長", "at": "village", "guards": 5, "guard": "織田家の馬廻", "lines": ["是非に及ばず。"]}],
+ "rules": [
+  {"id": "sg_kill_nobunaga", "title": "信長、本能寺の前に死す", "trigger": {"kind": "kill", "id": "織田信長"},
+   "force": {"q": "sengoku_05", "choice": 3}, "text": "あなたのせいで織田信長が……"},
+  {"id": "sg_massacre", "title": "一向一揆、燃え広がる", "trigger": {"kind": "kill", "type": "soldier", "min": 30},
+   "vars": {"commoners": 30, "religion": 30}, "year": 1570, "text": "……"}]}
+```
+- `figures`：自由探索でその名所に立つ歴史上の人物（**その時代のミッションの npc 名**。故人のみ。天皇・宗教の開祖は対象にしない）。護衛は `guard` の名前の Enemy。
+- `trigger`：辞書、または「どれか1つ」の配列。`kind`（destroy / sink / fire / bridge / kill）、`id`（名所キー・人物名、文字列か配列）、`type`（info.type。kill は figure / soldier、destroy は建物の種類 castle_keep・pagoda・hall・hangar など）、`at`（名所キー）、`min`（件数。fire は名所ごとの延焼数の最大値の合計）、`value`（destroy の info.value＝建物の格の合計）。
+  破壊は建物1棟ごとに destroy が来るので、名所の破壊には `value` か `type` を必ず付ける。修正力（type guardian）は兵の数に入らない。
+- `force`：問題の史実を強制する（介入 `cause: "chaos"`, `method: -1`）。本来の史実と違う選択肢にする。のちにその問題のミッション（修復ミッションは自動生成）を成功させれば上書きされる。
+- `vars` + `year`：その年の時点で歴史パラメータを変える（`chaos_mods` に保存、同じルールは1回だけ）。前の時代の分は時代の区切りより前、同じ時代は year <= 問題の年 の問題より前に効く。
+- `text`：HUD の「歴史が揺らいだ！」とアフター画面に出る、その時代の史実にもとづく一文（〇〇のせいで……）。民間人を標的にした描写はしない。
