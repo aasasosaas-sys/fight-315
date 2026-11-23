@@ -151,6 +151,11 @@ def main():
     L = kimono.landmarks(body_p)
     garments = anime_garment.make(body_p, L, female, body)
     kimono.USE_POSE = False
+    if os.environ.get("WASOU_PREVIEW"):
+        # 確認用：A ポーズのまま Blender（Cycles）で撮る
+        import anime_costume
+        anime_costume.preview(garments, body_p, L, os.environ["WASOU_PREVIEW"], os.environ.get("WASOU_PARTS", ""),
+                              os.environ.get("WASOU_CAMS", "front,back,feet"))
     if os.environ.get("KEEP_POSE"):
         # 確認用：A ポーズのまま書き出す
         deltas = None
@@ -162,8 +167,9 @@ def main():
     bpy.context.view_layer.update()
     bpy.data.objects.remove(body_p, do_unlink=True)
     bodyw = bpy.data.objects["w_bodyw"]
+    bodywf = bpy.data.objects["w_bodywf"]
     # 書き出し用：服と和装用の体をアーマチュアの子にして、向きを元に戻す
-    objs = list(garments.values()) + [bodyw]
+    objs = list(garments.values()) + [bodyw, bodywf]
     for o in objs:
         mw = o.matrix_world.copy()
         o.parent = arm
@@ -184,6 +190,7 @@ def main():
                 if vg:
                     vg.name = b.name
     bodyw.name = "BodyW"
+    bodywf.name = "BodyWF"
     for o in bpy.data.objects:
         o.select_set(o in objs or o == arm)
     bpy.context.view_layer.objects.active = arm

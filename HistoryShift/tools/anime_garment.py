@@ -477,8 +477,9 @@ def bone_weights(o, L, arms=True, legs=0.0):
     am.object = L["arm"]
 
 
-def body_hidden(rest_body, L, wrist_t=0.93):
+def body_hidden(rest_body, L, wrist_t=0.93, feet=True, name="w_bodyw"):
     """和装用の体：服に隠れる範囲（足首より上〜首元）を位置で消す。手首から先と足首から下は残す。
+    feet=False：足も消す（足袋・靴などの履物が足を丸ごと覆う服装用）。
     rest_body は T ポーズ（休止姿勢）なので腕は休止姿勢の骨の位置で判定する。"""
     arm = L["arm"]
     mw_a = arm.matrix_world
@@ -491,7 +492,7 @@ def body_hidden(rest_body, L, wrist_t=0.93):
     neck_z = (mw_a @ b[K.bn("neck_01")].head_local).z
     g = rest_body.copy()
     g.data = rest_body.data.copy()
-    g.name = "w_bodyw"
+    g.name = name
     bpy.context.collection.objects.link(g)
     mw = g.matrix_world
     zs = [(mw @ v.co).z for v in g.data.vertices]
@@ -508,7 +509,7 @@ def body_hidden(rest_body, L, wrist_t=0.93):
                 hand = True
         if hand:
             continue
-        if floor + 0.1 < q.z < neck_z - 0.025:
+        if (floor + 0.1 < q.z or not feet) and q.z < neck_z - 0.025:
             kill.append(v)
     bmesh.ops.delete(bm, geom=kill, context="VERTS")
     bm.to_mesh(g.data)
@@ -517,12 +518,13 @@ def body_hidden(rest_body, L, wrist_t=0.93):
 
 
 def make(body_p, L, female, rest_body):
+    import anime_costume as C
     K.SECTION_HOOK = tsection_dims(L)
     K.KEEP_V = False
     hip_z = L["pelvis"].z
-    waist_z = L["spine_01"].z
     neck_z = L["neck_01"].z
     body_hidden(rest_body, L)
+    body_hidden(rest_body, L, feet=False, name="w_bodywf")
     # 小袖：男は腰下まで（袴の中へ）、女は膝上まで（下は裾の筒が受け持つ）
     ks = shell(body_p, L, "kosode", neck_z + 0.03, hip_z - (0.06 if not female else 0.1), 0.012)
     tl = tamoto(body_p, L, "l", 0.22 if female else 0.08, 0.24 if female else 0.2)
@@ -534,35 +536,36 @@ def make(body_p, L, female, rest_body):
     K.drape([hk_main, rb], cb, frames=40, stiff=14.0, bend=0.8)
     K.drape([tl, tr], body_p, frames=40, stiff=14.0, bend=0.8)
     bpy.data.objects.remove(cb, do_unlink=True)
-    import os
-    if os.environ.get("DBG_TAMOTO"):
-        for t in (tl, tr):
-            ps = [t.matrix_world @ v.co for v in t.data.vertices]
-            print("TAMOTO", t.name, "x", round(min(p.x for p in ps), 3), round(max(p.x for p in ps), 3), "y", round(min(p.y for p in ps), 3), round(max(p.y for p in ps), 3), "z", round(min(p.z for p in ps), 3), round(max(p.z for p in ps), 3), "nf", len(t.data.polygons))
     bone_weights(ks, L)
     for t, s in ((tl, "l"), (tr, "r")):
         K.arm_weights(t, L, s)
     bone_weights(rb, L, arms=False, legs=0.3)
     for h in hk + himo:
-        K.wrap_onto(h, body_p, 0.0) if False else None
         bone_weights(h, L, arms=False, legs=0.6)
     hk = hk + himo
     er, han = collar(ks, L)
     for e in er + han:
         bone_weights(e, L)
-    ob = K.obi(body_p, L, 0.2 if female else 0.06, female)
-    K.wrap_onto(ob[0], ks, 0.012)
-    for x in ob:
-        bone_weights(x, L, arms=False)
-    # 甲冑は別途作り直す（ここでは作らない）
-    groups = {"kosode": [ks, tl, tr], "eri": er, "haneri": han, "hakama": hk, "robe": [rb], "obi": ob}
+    groups = {"kosode": [ks], "tamoto": [tl, tr], "eri": er, "haneri": han, "hakama": hk, "robe": [rb]}
+    # 帯・履物・甲冑・近代の服（anime_costume.py）。custom_uv：模様の UV を自前で付けたパーツ
+    extra, custom_uv = C.make_extra(body_p, L, female, ks)
+    groups.update(extra)
     out = {}
     for key, objs in groups.items():
+        objs = [o for o in objs if o.data.vertices]
+        if not objs:
+            continue
         j = K.join(objs, "w_garment_%s" % key)
         K.material(j, key)
         mods = [m for m in j.modifiers if m.type == "ARMATURE"]
         for m in mods[1:]:
             j.modifiers.remove(m)
+        for vg in list(j.vertex_groups):
+            if vg.name == "pin":
+                j.vertex_groups.remove(vg)
+        if key in custom_uv:
+            out[key] = j
+            continue
         # 模様を貼る UV（実寸に近いスケールで展開）
         bpy.context.view_layer.objects.active = j
         for o2 in bpy.context.selected_objects:

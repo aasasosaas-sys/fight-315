@@ -6,18 +6,43 @@ extends RefCounted
 const VRM_DIR := "res://assets/characters/vrm/cc0/"
 const WASOU_DIR := "res://assets/characters/vrm/wasou/"
 
-## 服装ごとに見せる布（vrm_wasou.py が書き出すパーツ名）
+## 服装ごとに見せる布（vrm_wasou.py / anime_costume.py が書き出すパーツ名）
 const SETS := {
 	"modern": [],
-	"samurai": ["kosode", "eri", "haneri", "hakama", "obi", "armor"],
-	"hakama": ["kosode", "eri", "haneri", "hakama", "obi"],
-	"kimono": ["kosode", "eri", "haneri", "robe", "obi"],
+	# 江戸の武士・町人・女性
+	"samurai": ["kosode", "tamoto", "eri", "haneri", "hakama", "obi", "tabi", "zori", "zori_hanao"],
+	"hakama": ["kosode", "tamoto", "eri", "haneri", "hakama", "obi", "tabi", "zori", "zori_hanao"],
+	"kimono": ["kosode", "tamoto", "eri", "haneri", "robe", "obi", "taiko", "obijime", "obiage", "tabi", "zori", "zori_hanao"],
+	"kimono_geta": ["kosode", "tamoto", "eri", "haneri", "robe", "obi", "taiko", "obijime", "obiage", "tabi_g", "geta", "geta_hanao"],
+	# 戦国の当世具足
+	"busho": ["kosode_t", "eri_t", "haneri_t", "do", "kusazuri", "sode", "kote", "haidate", "kobakama", "suneate", "tabi", "waraji",
+		"kabuto", "shikoro", "maedate"],
+	"ashigaru": ["kosode_t", "eri_t", "haneri_t", "do", "kusazuri", "kote", "kobakama", "suneate", "tabi", "waraji", "jingasa", "jingasa_mon"],
+	# 明治・大正
+	"shosei": ["kosode", "tamoto", "eri", "shirt_cuff", "collar_st", "hakama", "obi", "tabi_g", "geta", "geta_hanao", "pcap_top", "pcap_band", "pcap_badge"],
+	"suit_meiji": ["jacket", "vest", "shirt_v", "tie", "lapel", "btn_suit", "collar_st", "trousers", "shoes", "bowler"],
+	"haikara": ["kosode", "tamoto", "eri", "haneri", "hakama_f", "obi", "boots_h"],
+	# 昭和（戦前・戦中）
+	"army": ["jacket", "collar_st", "collar_tab", "btn_tunic", "pockets", "belt", "buckle", "trousers", "puttee", "boots", "fcap", "fcap_star"],
+	"navy": ["jacket", "collar_st", "btn_tunic", "epaulet", "trousers", "shoes", "pcap_top", "pcap_band", "pcap_badge"],
+	"showa_m": ["shirt", "shirt_collar", "btn_shirt", "trousers", "belt_t", "shoes"],
+	"showa_suit": ["jacket", "shirt_v", "tie", "lapel", "btn_suit", "trousers", "shoes"],
+	"showa_f": ["shirt", "shirt_collar", "btn_shirt", "monpe", "shoes"],
 	"_dbg_noeri": ["kosode", "hakama", "obi"],
-	"_dbg_eri": ["eri", "haneri"],
 	"_dbg_k": ["kosode"],
-	"_dbg_ke": ["kosode", "eri"],
-	"_dbg_o": ["obi"],
 }
+
+## 足を丸ごと覆う履物（これを履く服装では足のない体 BodyWF を使う）
+const FOOTWEAR := ["tabi", "tabi_g", "shoes", "boots", "boots_h"]
+
+## 薄い布・小物：輪郭線を付けず両面を描く
+const NO_OUTLINE := ["eri", "haneri", "eri_t", "haneri_t", "obiage", "vest", "shirt_v", "tie", "lapel", "pockets", "collar_tab",
+	"btn_suit", "btn_tunic", "btn_shirt", "buckle", "fcap_star", "pcap_badge", "jingasa_mon", "zori_hanao", "geta_hanao", "obijime"]
+
+## 配色にないパーツは、この親パーツの色を使う（呼び出し側が小袖の色だけ渡したときなど）
+const ALIAS := {"tamoto": "kosode", "kosode_t": "kosode", "eri_t": "eri", "haneri_t": "haneri", "taiko": "obi",
+	"kusazuri": "do", "sode": "do", "shikoro": "do", "lapel": "jacket", "collar_st": "jacket", "pockets": "jacket",
+	"shirt_collar": "shirt", "hakama_f": "hakama", "kobakama": "hakama", "tabi_g": "tabi"}
 
 ## 自然染料ふうの色（明るめのアニメ配色）。[地の色, 影の色]
 const DYES := {
@@ -32,13 +57,52 @@ const DYES := {
 	"kuro": [Color(0.14, 0.13, 0.14), Color(0.06, 0.06, 0.08)],      # 黒
 	"kin": [Color(0.86, 0.68, 0.3), Color(0.58, 0.4, 0.16)],         # 金茶
 	"nezumi": [Color(0.55, 0.55, 0.56), Color(0.36, 0.36, 0.42)],    # 鼠
+	"sumi": [Color(0.22, 0.22, 0.25), Color(0.11, 0.11, 0.15)],      # 墨（背広）
+	"haiiro": [Color(0.62, 0.62, 0.6), Color(0.42, 0.42, 0.46)],     # 灰色
+	"kinari": [Color(0.93, 0.9, 0.82), Color(0.72, 0.68, 0.66)],     # 生成り
+	"mizu": [Color(0.66, 0.8, 0.9), Color(0.45, 0.56, 0.7)],         # 水色
+	"kaki_g": [Color(0.56, 0.5, 0.32), Color(0.36, 0.32, 0.2)],      # カーキ（国防色）
+	"ebicha": [Color(0.48, 0.14, 0.16), Color(0.28, 0.06, 0.1)],     # 海老茶
+	"murasaki": [Color(0.5, 0.33, 0.62), Color(0.3, 0.18, 0.42)],    # 紫
+	"shu": [Color(0.86, 0.26, 0.16), Color(0.58, 0.12, 0.1)],        # 朱
+	"cha": [Color(0.42, 0.25, 0.13), Color(0.24, 0.12, 0.07)],       # 茶（革）
+	"kogecha": [Color(0.24, 0.15, 0.1), Color(0.12, 0.07, 0.05)],    # 焦茶
+	"wara": [Color(0.86, 0.76, 0.5), Color(0.62, 0.5, 0.3)],         # 藁
+	"shiraki": [Color(0.86, 0.72, 0.52), Color(0.62, 0.46, 0.3)],    # 白木
 }
 
 ## 服装 → パーツごとの「色:柄:差し色」（柄・差し色は省略可）
 const PALETTES := {
-	"samurai": {"kosode": "kon:kasuri:ai", "eri": "kuro", "haneri": "shiro", "hakama": "nezumi:shima:kuro", "obi": "kuro", "armor": "enji"},
-	"hakama": {"kosode": "ai:plain", "eri": "kon", "haneri": "shiro", "hakama": "kuchiba:shima:kaki", "obi": "kuro"},
-	"kimono": {"kosode": "sakura:sakura_komon:shiro", "eri": "enji", "haneri": "shiro", "robe": "sakura:sakura_komon:shiro", "obi": "kin:asanoha:enji"},
+	"samurai": {"kosode": "kon:kasuri:ai", "eri": "kuro", "haneri": "shiro", "hakama": "nezumi:shima:kuro", "obi": "kuro",
+		"tabi": "shiro", "zori": "wara:weave:kuchiba", "zori_hanao": "kuro"},
+	"hakama": {"kosode": "ai:plain", "eri": "kon", "haneri": "shiro", "hakama": "kuchiba:shima:kaki", "obi": "kuro",
+		"tabi": "shiro", "zori": "wara:weave:kuchiba", "zori_hanao": "kon"},
+	"kimono": {"kosode": "sakura:sakura_komon:shiro", "eri": "enji", "haneri": "shiro", "robe": "sakura:sakura_komon:shiro",
+		"obi": "kin:asanoha:enji", "taiko": "kin:asanoha:enji", "obijime": "enji", "obiage": "shu", "tabi": "shiro",
+		"zori": "kinari", "zori_hanao": "enji"},
+	"kimono_geta": {"kosode": "ai:kasuri:shiro", "eri": "kuro", "haneri": "shiro", "robe": "ai:kasuri:shiro", "obi": "enji:ichimatsu:kuro",
+		"taiko": "enji:ichimatsu:kuro", "obijime": "kin", "obiage": "sakura", "tabi_g": "shiro", "geta": "shiraki:wood:kuchiba", "geta_hanao": "enji"},
+	"busho": {"kosode_t": "kon:kasuri:ai", "eri_t": "kuro", "haneri_t": "shiro", "do": "kuro:odoshi:enji", "kusazuri": "kuro:odoshi:enji",
+		"sode": "kuro:odoshi:enji", "kote": "kuro", "haidate": "kuro:odoshi:enji", "kobakama": "nezumi:shima:kuro",
+		"suneate": "kuro:shino:kin", "tabi": "kon", "waraji": "wara:weave:kuchiba", "kabuto": "kuro:suji:kin",
+		"shikoro": "kuro:odoshi:enji", "maedate": "kin"},
+	"ashigaru": {"kosode_t": "ai:plain", "eri_t": "kon", "haneri_t": "shiro", "do": "kuro:ita:nezumi", "kusazuri": "kuro:ita:nezumi",
+		"kote": "kuro", "kobakama": "kon:plain", "suneate": "kuro:shino:nezumi", "tabi": "kon", "waraji": "wara:weave:kuchiba",
+		"jingasa": "kuro", "jingasa_mon": "shu"},
+	"shosei": {"kosode": "kon:kasuri:shiro", "eri": "kuro", "shirt_cuff": "shiro", "collar_st": "shiro", "hakama": "kogecha:shima:kuro",
+		"obi": "kuro", "tabi_g": "kon", "geta": "shiraki:wood:kuchiba", "geta_hanao": "kuro",
+		"pcap_top": "kuro", "pcap_band": "kuro", "pcap_badge": "kin"},
+	"suit_meiji": {"jacket": "sumi", "vest": "sumi", "shirt_v": "shiro", "tie": "kuro", "lapel": "kuro", "btn_suit": "kuro",
+		"collar_st": "shiro", "trousers": "nezumi:shima:sumi", "shoes": "kuro", "bowler": "kuro"},
+	"haikara": {"kosode": "murasaki:yagasuri:shiro", "eri": "enji", "haneri": "shiro", "hakama_f": "ebicha", "obi": "kuchiba",
+		"boots_h": "kogecha"},
+	"army": {"jacket": "kaki_g", "collar_st": "kaki_g", "collar_tab": "shu", "btn_tunic": "kin", "pockets": "kaki_g", "belt": "cha",
+		"buckle": "kin", "trousers": "kaki_g", "puttee": "kaki_g:puttee:kogecha", "boots": "cha", "fcap": "kaki_g", "fcap_star": "kin"},
+	"navy": {"jacket": "shiro", "collar_st": "shiro", "btn_tunic": "kin", "epaulet": "kuro", "trousers": "shiro", "shoes": "shiro",
+		"pcap_top": "shiro", "pcap_band": "kuro", "pcap_badge": "kin"},
+	"showa_m": {"shirt": "kinari", "shirt_collar": "kinari", "btn_shirt": "shiro", "trousers": "haiiro", "belt_t": "kuro", "shoes": "cha"},
+	"showa_suit": {"jacket": "nezumi", "shirt_v": "shiro", "tie": "enji", "lapel": "sumi", "btn_suit": "kuro", "trousers": "nezumi", "shoes": "cha"},
+	"showa_f": {"shirt": "mizu", "shirt_collar": "shiro", "btn_shirt": "shiro", "monpe": "kon:kasuri:shiro", "shoes": "kuro"},
 }
 
 static var _pat_cache := {}
@@ -89,9 +153,52 @@ static func pattern_tex(pattern: String, base: Color, accent: Color) -> Texture2
 						var petal: float = 0.075 * (0.65 + 0.35 * absf(cos(an * 2.5)))
 						if rr < petal:
 							a = 1.0 if rr > 0.018 else 0.6
+				"odoshi":     # 威（毛引）：上は漆の小札頭（ぎざぎざの縁）、下は差し色の糸の縦目、裾に菱縫
+					var tooth := absf(fmod(u * 16.0, 1.0) - 0.5) * 2.0
+					if v < 0.2 + 0.07 * tooth:
+						a = -0.35 if v < 0.05 else 0.0
+					else:
+						a = 1.0
+						if fmod(u * 12.0, 1.0) < 0.1:
+							a = 0.55
+						if v > 0.78 and v < 0.92:
+							var cu2 := fmod(u * 6.0, 1.0) - 0.5
+							var cv2 := (v - 0.85) / 0.07
+							if absf(absf(cu2) * 2.0 - absf(cv2) * 0.5) < 0.12:
+								a = 0.3
+					if v > 0.95:
+						a = 0.15
+				"ita":        # 桶側胴：漆の板、上縁の照り、鋲の列
+					a = -0.35 if v < 0.06 else 0.0
+					if v > 0.93:
+						a = 0.25
+					var ru := fmod(u * 8.0, 1.0) - 0.5
+					if Vector2(ru, (v - 0.22) * 3.0).length() < 0.11:
+						a = 0.9
+				"suji":       # 筋兜：縦の筋
+					var su := fmod(u * 4.0, 1.0)
+					a = 0.7 if su < 0.06 else (-0.25 if su < 0.14 else 0.0)
+				"shino":      # 篠の脛当：縦の板と隙間
+					var sh := fmod(u * 3.0, 1.0)
+					a = 0.8 if sh < 0.07 else (-0.3 if sh < 0.16 else 0.0)
+				"weave":      # 藁の編み目
+					var row := int(v * 8.0)
+					var wu := fmod(u * 8.0 + (0.5 if row % 2 == 1 else 0.0), 1.0)
+					a = 0.55 * absf(wu - 0.5) * 2.0 + (0.4 if fmod(v * 8.0, 1.0) < 0.12 else 0.0)
+				"wood":       # 木目
+					a = 0.35 * (0.5 + 0.5 * sin(u * 60.0 + sin(v * 9.0) * 2.5))
+					a = a * a * 2.0
+				"yagasuri":   # 矢絣：縦の列ごとに矢羽根の山形を色替え
+					var col := int(u * 4.0)
+					var fu := absf(fmod(u * 4.0, 1.0) - 0.5)
+					var band := int(floor(v * 3.0 + fu * 1.2))
+					a = 1.0 if (col + band) % 2 == 0 else 0.0
+				"puttee":     # 巻脚絆：斜めの巻き目
+					var d := fmod(u * 1.0 + v * 1.0, 1.0)
+					a = 0.8 if d < 0.08 else 0.0
 				_:
 					a = 0.0
-			var c := base.lerp(accent, a)
+			var c := base.lerp(accent, a) if a >= 0.0 else base.lerp(Color.WHITE, -a)
 			# 織り目：縦横の細かいむら（ごく弱く）
 			var weave := 1.0 + 0.035 * (sin(x * 1.7) * sin(y * 1.9)) + rng.randf_range(-0.015, 0.015)
 			img.set_pixel(x, y, Color(c.r * weave, c.g * weave, c.b * weave, 1.0))
@@ -144,10 +251,15 @@ static func _dress(n: Node3D, sk: Skeleton3D, base: String, outfit: String, pal:
 	if body:
 		template = body.mesh.surface_get_material(0)
 	var show: Array = SETS.get(outfit, [])
+	var feet_covered := false
+	for f in FOOTWEAR:
+		if f in show:
+			feet_covered = true
+	var defaults: Dictionary = PALETTES.get(outfit, {})
 	for mi: MeshInstance3D in src.find_children("*", "MeshInstance3D", true, false):
 		var part := _part_name(mi.name)
-		if part == "bodyw":
-			if body:
+		if part == "bodyw" or part == "bodywf":
+			if body and (part == "bodywf") == feet_covered:
 				_swap_body(body, mi, sk)
 			continue
 		if not part in show:
@@ -159,7 +271,7 @@ static func _dress(n: Node3D, sk: Skeleton3D, base: String, outfit: String, pal:
 		g.skeleton = g.get_path_to(sk)
 		g.skin = _rebind(mi, sk)
 		g.extra_cull_margin = 2.0
-		var spec: PackedStringArray = String(pal.get(part, "ai")).split(":")
+		var spec: PackedStringArray = _resolve(part, pal, defaults).split(":")
 		var dye: Array = DYES.get(spec[0], DYES["ai"])
 		var tex: Texture2D = null
 		if spec.size() > 1 and spec[1] != "plain":
@@ -167,7 +279,7 @@ static func _dress(n: Node3D, sk: Skeleton3D, base: String, outfit: String, pal:
 			tex = pattern_tex(spec[1], dye[0], acc[0])
 		elif spec.size() > 1:
 			tex = pattern_tex("plain", dye[0], dye[0])
-		g.material_override = _cloth_mat(template, dye[0], dye[1], not part in ["eri", "haneri"] and OS.get_environment("NO_OUTLINE") == "", tex)
+		g.material_override = _cloth_mat(template, dye[0], dye[1], not part in NO_OUTLINE and OS.get_environment("NO_OUTLINE") == "", tex)
 		if OS.get_environment("DBG_PART") == part:
 			var dm := StandardMaterial3D.new()
 			dm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -177,13 +289,28 @@ static func _dress(n: Node3D, sk: Skeleton3D, base: String, outfit: String, pal:
 	src.free()
 
 
+## パーツの配色：呼び出し側の指定 → その親パーツ（ALIAS）の指定 → 服装の既定 → 親パーツの既定
+static func _resolve(part: String, pal: Dictionary, defaults: Dictionary) -> String:
+	var parent: String = ALIAS.get(part, "")
+	for d: Dictionary in [pal, defaults]:
+		if String(d.get(part, "")) != "":
+			return d[part]
+		if d == pal and parent != "" and String(pal.get(parent, "")) != "" and not defaults.has(part):
+			return pal[parent]
+	if parent != "" and String(defaults.get(parent, "")) != "":
+		return defaults[parent]
+	return "ai"
+
+
 static func _part_name(node_name: String) -> String:
 	var s := node_name.to_lower()
+	if s.begins_with("bodywf"):
+		return "bodywf"
 	if s.begins_with("bodyw"):
 		return "bodyw"
-	for k in ["kosode", "haneri", "eri", "hakama", "robe", "obi", "armor"]:
-		if ("garment_" + k) in s:
-			return k
+	var i := s.find("garment_")
+	if i >= 0:
+		return s.substr(i + 8)
 	return s
 
 
