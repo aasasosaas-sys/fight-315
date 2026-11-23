@@ -105,3 +105,40 @@ static func sell_mult(level: float) -> float: return 0.3 + 0.3 * _s(level)
 static func lesson_zone(level: float) -> float: return lerpf(0.24, 0.09, _s(level))
 ## 稽古 1 回で上がる量（score 0〜1）
 static func lesson_gain(level: float, score: float) -> float: return gain(level, 9.0 * (0.35 + 0.65 * clampf(score, 0.0, 1.0)))
+
+
+## 技能の効き目の一行（持ち物画面・ハブ用）
+static func effect_line(id: String, lv: float) -> String:
+	match id:
+		"kenjutsu", "sojutsu":
+			return "威力 ×%.2f　振りの時間 ×%.2f　受け %d%%　受け流し %.2f秒　刃の傷み ×%.2f" % [melee_damage_mult(lv), melee_time_mult(lv), roundi(block_reduction(lv) * 100), parry_window(lv), wear_mult(lv)]
+		"kyujutsu":
+			return "引きの時間 ×%.2f　矢の勢い ×%.2f　狙いの揺れ %.3f" % [bow_draw_mult(lv), bow_power_mult(lv), aim_sway(lv)]
+		"shageki":
+			return "散らばり ×%.2f　反動 ×%.2f　装填 ×%.2f　不発 ×%.2f" % [spread_mult(lv), recoil_mult(lv), reload_mult(lv), misfire_mult(lv)]
+		"katana_smith", "gun_smith", "powder", "machining", "shipbuilding":
+			var extra := ""
+			if id == "katana_smith":
+				extra = "　砥石 +%d" % int(whetstone_restore(lv))
+			elif id == "machining":
+				extra = "　修理 +%d" % int(repair_amount(lv))
+			return "作る品の品質 +%.2f（主技能のとき）%s" % [0.6 * lv / 100.0, extra]
+		"chemistry":
+			return "火薬・弾薬・薬の品質を補助（時代をまたいで効く）"
+		"riding":
+			return "速さ ×%.2f　小回り ×%.2f　落馬 %d%%" % [horse_speed_mult(lv), horse_turn_mult(lv), roundi(horse_throw_chance(lv) * 100)]
+		"driving":
+			return "ハンドル反応 %.1f　グリップ %.2f　ふらつき %.2f　加速 ×%.2f" % [car_steer_rate(lv), car_grip(lv), car_wobble(lv), car_power_mult(lv)]
+		"piloting":
+			return "旋回 ×%.2f　揺れ %.2f　失速 %d km/h　着陸 %d km/h まで" % [plane_turn_mult(lv), plane_wobble(lv), roundi(plane_stall_speed(lv) * 3.6), roundi(plane_land_speed(lv) * 3.6)]
+		"sailing":
+			return "舟の舵 ×%.2f　速さ ×%.2f" % [boat_turn_mult(lv), boat_speed_mult(lv)]
+		"medicine":
+			return "回復の速さ ×%.2f　薬の効き ×%.2f" % [regen_mult(lv), heal_mult(lv)]
+		"architecture":
+			return "火薬樽・ダイナマイトの威力 ×%.2f" % demolition_mult(lv)
+		"rhetoric":
+			return "説得の後押し +%d　買値 ×%.2f　売値 ×%.2f" % [persuade_bonus(lv), buy_mult(lv), sell_mult(lv)]
+		"komonjo":
+			return "書状を盗む・偽る成功率 %d%%" % roundi(forge_success(lv) * 100)
+	return ""

@@ -21,6 +21,7 @@ var wanted: Wanted
 var _ended := false
 var figures: Array = []    # 自由探索に現れる歴史上の人物（HistFigure）
 var interact: ActorInteract
+var craft: CraftWorld      # 工房・店・蔵・時空鞄（scripts/mission/craft_world.gd）
 var _appt_announced: Dictionary = {}
 var _fig_pending: Array = []      # まだ実体化していない人物 [{spec, pos, name}]
 var _fig_dead: Dictionary = {}
@@ -116,6 +117,7 @@ func _ready() -> void:
 	Game.input_blocked = false
 	Game.lock_mouse(true)
 
+	_arm_player()
 	if mode == "mission":
 		runner = MissionRunner.new()
 		add_child(runner)
@@ -128,8 +130,11 @@ func _ready() -> void:
 	else:
 		hud.banner(era["eraName"] + "　自由探索", Color(0.37, 0.91, 1.0), 2.5)
 		hud.set_objective("自由探索", "好きに暴れろ。乗り物は F で奪える。人物に近づいて E で話せる（T でヒント切替）。\n※ 何をしても歴史は変わりうる。わざとでも、うっかりでも。", "")
-		hud.toast("馬・車・飛行機を探して乗り回せ！", 4.0)
+		hud.toast("馬・車・飛行機を探して乗り回せ！ 工房（⚒）に弟子入りして技を磨ける。Tab で時空鞄", 5.0)
 		_begin_chaos()
+	craft = CraftWorld.new()
+	craft.setup(self, hud)
+	add_child(craft)
 
 
 # ------------------------------------------------------------------ 自由探索の「歴史の揺らぎ」
@@ -429,7 +434,60 @@ func _on_failed(reason: String) -> void:
 	failed.emit(reason)
 
 
+## 武器の貸与（返すのはセッションの終わり）。
+##  - 設定「最初から武装」：時空銃（弾は尽きない）と爆弾・大筒を貸す
+##  - ミッション：使える武器を持っていなければ、その時代の武器を貸す（戦うミッションを必ず遂行できるように）
+const MISSION_KITS := {
+	"jomon_kofun": [["tankyu", 1], ["ya", 40], ["tekken", 1]],
+	"asuka_nara": [["tankyu", 1], ["ya", 40], ["chokuto", 1]],
+	"heian": [["wakyu", 1], ["ya", 40], ["tachi", 1]],
+	"kamakura_muromachi": [["wakyu", 1], ["ya", 40], ["tachi", 1]],
+	"sengoku": [["hinawaju", 1], ["hayago", 30], ["uchigatana", 1]],
+	"edo": [["hinawaju", 1], ["hayago", 30], ["uchigatana", 1]],
+	"meiji_taisho": [["arisaka38", 1], ["dan38", 60]],
+	"showa": [["arisaka38", 1], ["dan38", 90], ["grenade", 3]],
+}
+
+
+func _arm_player() -> void:
+	var prof := Game.profile
+	if prof == null or player == null:
+		return
+	if PlayerProfile.start_armed():
+		var g := prof.lend("jikuju", 1, 0.8)
+		g["mag"] = 30
+		for pair in [["horoku", 10], ["keg", 3], ["dynamite", 3], ["hiya", 5], ["taihou", 1], ["hodan", 10]]:
+			prof.lend(pair[0], pair[1], 0.7)
+		prof.equip(int(g["uid"]))
+		hud.toast("時空管理局から「時空銃」と爆薬を貸与された（設定：最初から武装）", 3.5)
+	elif mode == "mission" and not prof.has_ranged_weapon():
+		var first := {}
+		var names: PackedStringArray = []
+		for pair in MISSION_KITS.get(era.get("eraId", ""), [["arisaka38", 1], ["dan38", 60]]):
+			var it := prof.lend(pair[0], pair[1], 0.55)
+			names.append(CraftDB.item_name(pair[0]))
+			if first.is_empty() and not it.is_empty():
+				first = it
+		if not first.is_empty():
+			if int(first["stats"].get("mag", 0)) > 0:
+				first["mag"] = int(first["stats"]["mag"])
+			prof.equip(int(first["uid"]))
+		hud.toast("任務のため、時空管理局が%sを貸し与えた（任務が終われば返す）" % "・".join(names), 4.0)
+	if player.arms:
+		player.arms.refresh_model()
+
+
 func _on_player_died() -> void:
+	# 手にしていた武器は死んだ場所に落ちる（拾い直せる）。この時代にまだない品なら、それだけで歴史が揺らぐ
+	if mode == "free" and Game.profile and not Game.profile.weapon().is_empty() and not Game.profile.weapon().get("loan", false):
+		var w: Dictionary = Game.profile.remove_instance(int(Game.profile.weapon()["uid"]))
+		var dpos := player.global_position
+		var d := LootDrop.spawn(self, dpos + Vector3.UP * 0.3, [{"id": str(w["id"]), "n": 1, "q": float(w.get("q", 0.5)), "dur": float(w.get("dur", 0)) / maxf(1.0, float(w["stats"].get("max_dur", 1.0)))}], 0, "落とした武器")
+		d._arm = 4.0
+		var gap := CraftDB.anachronism_gap(str(w["id"]), era["eraId"])
+		if gap > 0:
+			Game.chaos_event.emit("anachronism", str(w["id"]), {"era": era["eraId"], "item": str(w["id"]), "gap": gap, "cause": "lost", "type": CraftDB.item_type(str(w["id"])), "pos": dpos})
+		hud.toast("%sを落とした……（倒れた場所に落ちている）" % CraftDB.item_name(str(w["id"])), 3.0)
 	if mode == "free":
 		hud.show_death("力尽きた……")
 		await get_tree().create_timer(2.5).timeout
@@ -455,6 +513,8 @@ func _on_abort() -> void:
 
 
 func _exit_tree() -> void:
+	if Game.profile and mode != "backdrop":
+		Game.profile.return_loans()
 	# end() を経ずに破棄された場合も、混乱の記録を止める
 	if mode == "free" and Game.chaos and Game.chaos.world == world:
 		Game.chaos.end_session()
@@ -462,6 +522,11 @@ func _exit_tree() -> void:
 
 func end() -> void:
 	_ended = true
+	Engine.time_scale = 1.0
+	if craft and is_instance_valid(craft):
+		craft.end_session()
+	if Game.profile:
+		Game.profile.return_loans()
 	if mode == "free" and Game.chaos:
 		Game.chaos.end_session()
 		if Game.chaos.shifted.is_connected(_on_history_shift):
