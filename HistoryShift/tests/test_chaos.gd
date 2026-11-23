@@ -107,7 +107,7 @@ func _run() -> void:
 			var hit: Dictionary = mine[0]
 			var solo := hits.size() == 1
 			# 再計算結果が simulate と一致
-			var sim := st.simulate(st.interventions)
+			var sim := st._simulate_war(st.interventions, null, st.actions)
 			for q in db.questions:
 				_check(sim["world"][q["id"]] == st.world_choice(q), "%s: recompute consistent %s" % [r["id"], q["id"]])
 			# force
@@ -253,7 +253,7 @@ func _generic_tests(db: HistoryDB) -> void:
 		for q in db.questions:
 			var c := st.world_choice(q)
 			_check(c >= 0 and c <= 3, "fuzz: valid choice %s" % q["id"])
-		var sim := st.simulate(st.interventions)
+		var sim := st._simulate_war(st.interventions, null, st.actions)
 		for q in db.questions:
 			_check(sim["world"][q["id"]] == st.world_choice(q), "fuzz: recompute consistent")
 		st.save()
