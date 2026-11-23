@@ -4,25 +4,33 @@ extends Node
 ## 説得する（論点を選ぶ）／未来を語る（関わる問題の選択肢へ導く）／渡す（未来の品）／守る（刺客を退ける）／
 ## 連れて行く（別の名所まで同行させる）／書状を盗む・偽の書状を渡す。結果は Game.chaos.act() で歴史に反映される。
 ## T キーで「この人物は第N問に関わる」ヒントの表示を切り替える。
+## ミッション中（runner あり）は MissionRunner が data/actors に載っている人物（Npc）を add_figure で渡す。メニューの先頭は
+## そのミッションの会話（「ミッションの会話」）で、選ぶと今までどおり talk ステップが進む。ほかの行動は自由探索と同じく
+## Game.chaos で歴史に反映される（ミッション中は揺らぎの記録が止まっているので、行動の間だけ有効にする）。
+## 人物は HistFigure（自由探索）か Npc（ミッション）で、どちらも figure_name / actor / questions / lines / dead /
+## talking / follow_target / home / era_id / refresh_hint() を持つ。
 
 var session: Node
 var hud
 var figures: Array = []
 var sites: Array = []                 # 国家事業の現場（ProjectSite）
-var _near: HistFigure = null
+var runner: MissionRunner = null      # ミッション中の会話メニューなら、そのミッション
+var _near: Variant = null             # HistFigure / Npc
 var _near_site: ProjectSite = null
 var _task: Dictionary = {}            # 進行中の事業 {site, type, enemies, pickups, got}
-var _menu_fig: HistFigure = null
+var _menu_fig: Variant = null         # HistFigure / Npc
 var _layer: CanvasLayer
 var _panel: PanelContainer
 var _title: Label
 var _line: Label
 var _box: VBoxContainer
-var _escort: HistFigure = null
+var _escort: Variant = null
 var _escort_t := 0.0
 var _assassins: Array = []
-var _protect_fig: HistFigure = null
+var _protect_fig: Variant = null
 var hints_on := true
+var _input_frame := -1                # E を受け取ったフレーム（MissionRunner が同じ E で直接会話を始めないように）
+var _prompted := false                # ミッション中：自分が出した案内を消すため
 
 const TALK_RANGE := 3.8
 const ESCORT_RADIUS := 30.0
@@ -34,8 +42,35 @@ func setup(p_session: Node, p_hud, p_figures: Array) -> void:
 	figures = p_figures
 
 
+## ミッション中：会話メニューを開ける人物を加える
+func add_figure(f: Node3D) -> void:
+	if not (f in figures):
+		figures.append(f)
+
+
+## この人物の E を会話メニューが受け取るか
+func offers(f: Node) -> bool:
+	return f != null and is_instance_valid(f) and f in figures
+
+
+## このフレームの E を会話メニューが使った（開いた・閉じた）か、メニューが開いているか
+func took_input() -> bool:
+	return is_open() or _input_frame == Engine.get_process_frames()
+
+
+func is_mission() -> bool:
+	return runner != null and is_instance_valid(runner)
+
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	if is_mission() and Game.chaos:
+		# ミッション中の行動の記録は、このミッションの分だけ（直前の自由探索の出来事と混ぜない）
+		if not Game.chaos.is_active():
+			Game.chaos.begin_session(str(session.era.get("eraId", "")) if session else "", Game.world)
+			Game.chaos.end_session()
+		if session and session.has_method("_on_history_shift") and not Game.chaos.shifted.is_connected(session._on_history_shift):
+			Game.chaos.shifted.connect(session._on_history_shift)
 	_layer = CanvasLayer.new()
 	_layer.layer = 12
 	add_child(_layer)
@@ -63,6 +98,11 @@ func _ready() -> void:
 	v.add_child(_box)
 	_panel.visible = false
 	_layer.add_child(_panel)
+
+
+func _exit_tree() -> void:
+	if is_mission() and Game.chaos and session and is_instance_valid(session) and Game.chaos.shifted.is_connected(session._on_history_shift):
+		Game.chaos.shifted.disconnect(session._on_history_shift)
 
 
 func _mk_label(parent: Node, size: int, c: Color) -> Label:
@@ -98,21 +138,26 @@ func _process(dt: float) -> void:
 		_near_site = null if _near else _nearest_site()
 		if hud and not hud.is_dialog_open():
 			if _near:
-				hud.set_prompt("E：%sと話す" % _near.figure_name)
+				var pending: bool = is_mission() and runner.is_pending_talk(_near)
+				hud.set_prompt(("E：%sと話す（ミッションの会話・ほかの行動）" if pending else "E：%sと話す") % _near.figure_name)
+				_prompted = true
 			elif _near_site:
 				hud.set_prompt("E：国家事業「%s」" % _near_site.project.get("name", ""))
-			else:
+				_prompted = true
+			elif not is_mission() or _prompted:
+				# ミッション中は MissionRunner も案内を出すので、自分の出した案内だけ消す
 				hud.set_prompt("")
+				_prompted = false
 	_tick_escort(dt)
 	_tick_protect()
 	_tick_task()
 
 
-func _nearest() -> HistFigure:
+func _nearest() -> Node3D:
 	var p: Node3D = Game.player
 	if p.in_vehicle():
 		return null
-	var best: HistFigure = null
+	var best: Node3D = null
 	var bd := TALK_RANGE
 	for f in figures:
 		if f.dead:
@@ -154,21 +199,23 @@ func _unhandled_input(event: InputEvent) -> void:
 		if is_open():
 			close()
 			get_viewport().set_input_as_handled()
-		elif _near and not Game.input_blocked:
+		elif _near and not Game.input_blocked and not (hud and hud.is_dialog_open()):
 			open(_near)
 			get_viewport().set_input_as_handled()
 		elif _near_site and not Game.input_blocked:
 			open_site(_near_site)
 			get_viewport().set_input_as_handled()
+		if is_open() or get_viewport().is_input_handled():
+			_input_frame = Engine.get_process_frames()
 	elif event.is_action_pressed("pause") and is_open():
 		close()
 		get_viewport().set_input_as_handled()
 
 
 # ------------------------------------------------------------------ メニュー
-func open(f: HistFigure) -> void:
+func open(f: Node3D) -> void:
 	_menu_fig = f
-	f.talking = true
+	_menu_fig.talking = true
 	_panel.visible = true
 	Game.input_blocked = true
 	Game.lock_mouse(false)
@@ -285,7 +332,7 @@ func _finish_project(st: ProjectSite) -> void:
 	_task = {}
 	if hud:
 		hud.set_objective("自由探索", "好きに暴れろ。人物に近づいて E で話せる。看板で国家事業に着手できる。", "")
-	Game.chaos.act("project", str(st.project.get("id", "")), {})
+	_chaos_act("project", str(st.project.get("id", "")), {})
 	for s2 in sites:
 		if is_instance_valid(s2):
 			s2.refresh()
@@ -312,12 +359,18 @@ func _actor() -> Dictionary:
 
 func _main_page(msg := "") -> void:
 	_clear()
-	var f := _menu_fig
+	var f: Variant = _menu_fig
 	var a := _actor()
 	var title := String(Figures.spec_for(f.figure_name).get("title", "")) if not a.is_empty() else ""
 	_title.text = f.figure_name + (("　―　" + title) if title != "" else "")
 	_line.text = msg if msg != "" else ("%s「%s」" % [f.figure_name, str(f.lines[0]) if not f.lines.is_empty() else "……何用か。"])
 	var verbs: Array = HistoryActors.verbs_for(a) if not a.is_empty() else ["persuade", "give", "escort"]
+	if is_mission():
+		# ミッションの会話を先頭に（選ぶと今までどおり talk ステップが進む）
+		if runner.is_pending_talk(f):
+			_button("ミッションの会話", _mission_talk)
+		elif f is Npc and not (f.lines as Array).is_empty():
+			_button("話を聞く（ミッションの会話をもう一度）", _replay_talk)
 	_button("説得する", _persuade_page)
 	if not f.questions.is_empty():
 		_button("未来を語る", _steer_page)
@@ -376,10 +429,52 @@ func _steer_choices(q: Dictionary) -> void:
 	_button("戻る", _steer_page)
 
 
+## ミッションの会話（MissionRunner.talk_npc：会話が終わると次のステップへ）
+func _mission_talk() -> void:
+	close()
+	if is_mission():
+		runner.talk_npc()
+
+
+## 済んだミッションの会話をもう一度見る（ステップは進めない）
+func _replay_talk() -> void:
+	var f: Variant = _menu_fig
+	close()
+	if hud and f != null and is_instance_valid(f):
+		hud.dialog(f.figure_name, f.lines)
+
+
+## 行動を歴史に反映する。自由探索中はそのまま、ミッション中は揺らぎの記録をこの行動の間だけ有効にする
+func _chaos_act(verb: String, target: String, info: Dictionary) -> Dictionary:
+	if Game.chaos == null:
+		return {}
+	if Game.chaos.is_active():
+		return Game.chaos.act(verb, target, info)
+	var era_id := str(session.era.get("eraId", "")) if session and "era" in session else ""
+	if era_id == "":
+		return {}
+	Game.chaos.active_era = era_id
+	Game.chaos.world = Game.world
+	var hit: Dictionary = Game.chaos.act(verb, target, info)
+	Game.chaos.active_era = ""
+	Game.chaos.world = null
+	return hit
+
+
+## 「守る」などで書き換えた目標表示を戻す
+func _restore_objective(text := "好きに暴れろ。人物に近づいて E で話せる。") -> void:
+	if hud == null:
+		return
+	if is_mission():
+		runner.refresh_objective()
+	else:
+		hud.set_objective("自由探索", text, "")
+
+
 func _do(verb: String, info: Dictionary) -> void:
 	if _menu_fig == null:
 		return
-	var hit: Dictionary = Game.chaos.act(verb, _menu_fig.figure_name, info) if Game.chaos else {}
+	var hit: Dictionary = _chaos_act(verb, _menu_fig.figure_name, info)
 	for f in figures:
 		if is_instance_valid(f):
 			f.refresh_hint()
@@ -394,7 +489,7 @@ func _do(verb: String, info: Dictionary) -> void:
 
 # ------------------------------------------------------------------ 連れて行く
 func _start_escort() -> void:
-	var f := _menu_fig
+	var f: Variant = _menu_fig
 	if _escort and is_instance_valid(_escort):
 		_escort.follow_target = null
 	_escort = f
@@ -420,18 +515,18 @@ func _tick_escort(dt: float) -> void:
 	if here != "" and (_escort.home.distance_to(w.landmark_pos(here)) > ESCORT_RADIUS * 1.5) and here != home_key:
 		_escort_t += dt
 		if _escort_t > 2.0:
-			var f := _escort
+			var f: Variant = _escort
 			_escort = null
 			f.follow_target = null
 			f.home = f.global_position
-			Game.chaos.act("escort", f.figure_name, {"to": here})
+			_chaos_act("escort", f.figure_name, {"to": here})
 	else:
 		_escort_t = 0.0
 
 
 # ------------------------------------------------------------------ 守る
 func _start_protect() -> void:
-	var f := _menu_fig
+	var f: Variant = _menu_fig
 	close()
 	_protect_fig = f
 	_assassins.clear()
@@ -457,14 +552,13 @@ func _tick_protect() -> void:
 		_protect_fig = null
 		if hud:
 			hud.toast("守りきれなかった……", 3.0)
-			hud.set_objective("自由探索", "好きに暴れろ。人物に近づいて E で話せる。", "")
+			_restore_objective()
 		return
 	var left := _assassins.filter(func(e): return is_instance_valid(e) and not e.dead).size()
 	if hud:
 		hud.set_counter("刺客 %d / %d" % [_assassins.size() - left, _assassins.size()])
 	if left == 0:
-		var f := _protect_fig
+		var f: Variant = _protect_fig
 		_protect_fig = null
-		if hud:
-			hud.set_objective("自由探索", "好きに暴れろ。人物に近づいて E で話せる。", "")
-		Game.chaos.act("protect", f.figure_name, {})
+		_restore_objective()
+		_chaos_act("protect", f.figure_name, {})

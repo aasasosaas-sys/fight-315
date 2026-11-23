@@ -34,7 +34,7 @@ func _ready() -> void:
 	cs.shape = cap
 	cs.position = Vector3(0, 0.88, 0)
 	add_child(cs)
-	_rig = Humanoid.build(Humanoid.outfit_for(era_id, "civilian"), randi(), false)
+	_rig = Humanoid.build_streamed(Humanoid.outfit_for(era_id, "civilian"), randi(), false, -1, "", Humanoid.PRIORITY_CROWD)
 	_rig.rotation.y = PI
 	add_child(_rig)
 	_pick_goal()

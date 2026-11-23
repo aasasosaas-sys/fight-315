@@ -106,6 +106,53 @@ const PALETTES := {
 }
 
 static var _pat_cache := {}
+## 共有する資源（人数が増えても素体・和装ごとに 1 つ）。PackedScene は持っておかないと毎回ディスクから読み直しになる
+static var _scene_cache := {}     # パス → PackedScene
+static var _wasou_cache := {}     # 素体 → {list: [{part, mesh, skin}], bodyw / bodywf: {mesh, skin}}
+static var _mat_cache := {}       # 布の素材のキー → Material
+static var stat_shared_hits := 0  # ベンチマーク用：共有で作らずに済んだ素材・スキンの数
+
+
+## PackedScene を読み込んで保持する（instantiate のたびに読み直さない）
+static func scene(path: String) -> PackedScene:
+	var ps: PackedScene = _scene_cache.get(path, null)
+	if ps == null:
+		if _loading.has(path):
+			_loading.erase(path)
+			ps = ResourceLoader.load_threaded_get(path) as PackedScene   # 読み込み中なら待つ
+		if ps == null:
+			ps = load(path) as PackedScene
+		_scene_cache[path] = ps
+	return ps
+
+
+static var _loading := {}
+
+
+## 裏のスレッドで読み込みを始める（済んでいれば true）。人物を組み立てる前に呼ぶと、初めての素体でフレームが止まらない
+static func prefetch(path: String) -> bool:
+	if _scene_cache.has(path):
+		return true
+	if not ResourceLoader.exists(path):
+		return true
+	if not _loading.has(path):
+		if ResourceLoader.load_threaded_request(path, "PackedScene") != OK:
+			return true   # 頼めなければ scene() がその場で読む
+		_loading[path] = true
+		return false
+	match ResourceLoader.load_threaded_get_status(path):
+		ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			return false
+		ResourceLoader.THREAD_LOAD_LOADED:
+			scene(path)
+	return true
+
+
+## 素体と和装の読み込みが済んだか（済んでいなければ裏で読み込みを始める）
+static func prefetch_base(base: String) -> bool:
+	var a := prefetch(VRM_DIR + base + ".vrm")
+	var b := prefetch(WASOU_DIR + base + ".glb")
+	return a and b
 
 
 ## 布の柄（繰り返しの 1 枚）。地の色に差し色で柄を描き、織り目のかすかなむらを足す
@@ -209,7 +256,7 @@ static func pattern_tex(pattern: String, base: Color, accent: Color) -> Texture2
 
 
 static func build(base: String, outfit := "modern", palette: Dictionary = {}, hair := "") -> Node3D:
-	var n: Node3D = (load(VRM_DIR + base + ".vrm") as PackedScene).instantiate()
+	var n: Node3D = scene(VRM_DIR + base + ".vrm").instantiate()
 	_prepare(n)
 	var sk: Skeleton3D = n.find_children("*", "Skeleton3D", true, false)[0]
 	if outfit != "modern":
@@ -241,13 +288,35 @@ static func _prepare(n: Node3D) -> void:
 		sec.spring_bones.assign(keep)
 
 
-static func _dress(n: Node3D, sk: Skeleton3D, base: String, outfit: String, pal: Dictionary) -> void:
+## 素体ごとの和装（glb）の中身：部位ごとのメッシュと、VRM 骨格へ結び直したスキン。体の差し替え用メッシュも
+## 素体の休止姿勢は同じ素体なら同じなので、スキン・差し替えた体のメッシュは全員で共有できる
+static func _wasou(base: String, sk: Skeleton3D, body: MeshInstance3D) -> Dictionary:
+	if _wasou_cache.has(base):
+		return _wasou_cache[base]
 	var path := WASOU_DIR + base + ".glb"
+	var out := {"list": []}
 	if not ResourceLoader.exists(path):
 		push_warning("和装がまだ生成されていません: " + path)
-		return
-	var src: Node = (load(path) as PackedScene).instantiate()
+		_wasou_cache[base] = out
+		return out
+	var src: Node = scene(path).instantiate()
+	for mi: MeshInstance3D in src.find_children("*", "MeshInstance3D", true, false):
+		var part := _part_name(mi.name)
+		if part == "bodyw" or part == "bodywf":
+			if body:
+				out[part] = {"mesh": _body_mesh(body, mi), "skin": _rebind(mi, sk)}
+			continue
+		(out["list"] as Array).append({"part": part, "mesh": mi.mesh, "skin": _rebind(mi, sk)})
+	src.free()
+	_wasou_cache[base] = out
+	return out
+
+
+static func _dress(n: Node3D, sk: Skeleton3D, base: String, outfit: String, pal: Dictionary) -> void:
 	var body: MeshInstance3D = sk.get_node_or_null("Body")
+	var W := _wasou(base, sk, body)
+	if (W["list"] as Array).is_empty():
+		return
 	var template: Material = null
 	if body:
 		template = body.mesh.surface_get_material(0)
@@ -257,20 +326,22 @@ static func _dress(n: Node3D, sk: Skeleton3D, base: String, outfit: String, pal:
 		if f in show:
 			feet_covered = true
 	var defaults: Dictionary = PALETTES.get(outfit, {})
-	for mi: MeshInstance3D in src.find_children("*", "MeshInstance3D", true, false):
-		var part := _part_name(mi.name)
-		if part == "bodyw" or part == "bodywf":
-			if body and (part == "bodywf") == feet_covered:
-				_swap_body(body, mi, sk)
-			continue
+	var bkey := "bodywf" if feet_covered else "bodyw"
+	if body and W.has(bkey):
+		body.mesh = W[bkey]["mesh"]
+		body.skin = W[bkey]["skin"]
+		body.extra_cull_margin = 2.0
+		stat_shared_hits += 1
+	for e: Dictionary in W["list"]:
+		var part: String = e["part"]
 		if not part in show:
 			continue
 		var g := MeshInstance3D.new()
 		g.name = "Garment_" + part
-		g.mesh = mi.mesh
+		g.mesh = e["mesh"]
 		sk.add_child(g)
 		g.skeleton = g.get_path_to(sk)
-		g.skin = _rebind(mi, sk)
+		g.skin = e["skin"]
 		g.extra_cull_margin = 2.0
 		var spec: PackedStringArray = _resolve(part, pal, defaults).split(":")
 		var dye: Array = DYES.get(spec[0], DYES["ai"])
@@ -280,14 +351,13 @@ static func _dress(n: Node3D, sk: Skeleton3D, base: String, outfit: String, pal:
 			tex = pattern_tex(spec[1], dye[0], acc[0])
 		elif spec.size() > 1:
 			tex = pattern_tex("plain", dye[0], dye[0])
-		g.material_override = _cloth_mat(template, dye[0], dye[1], not part in NO_OUTLINE and OS.get_environment("NO_OUTLINE") == "", tex)
+		g.material_override = _cloth_mat_shared(template, dye[0], dye[1], not part in NO_OUTLINE and OS.get_environment("NO_OUTLINE") == "", tex)
 		if OS.get_environment("DBG_PART") == part:
 			var dm := StandardMaterial3D.new()
 			dm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 			dm.albedo_color = Color(1, 0, 1)
 			dm.cull_mode = BaseMaterial3D.CULL_DISABLED
 			g.material_override = dm
-	src.free()
 
 
 ## パーツの配色：呼び出し側の指定 → その親パーツ（ALIAS）の指定 → 服装の既定 → 親パーツの既定
@@ -342,6 +412,13 @@ static func _rebind(mi: MeshInstance3D, sk: Skeleton3D) -> Skin:
 
 ## 体を「和装用の体」（服に隠れる部分を除いたもの）に差し替え、元の素材を名前で引き継ぐ
 static func _swap_body(body: MeshInstance3D, src: MeshInstance3D, sk: Skeleton3D) -> void:
+	body.mesh = _body_mesh(body, src)
+	body.skin = _rebind(src, sk)
+	body.extra_cull_margin = 2.0
+
+
+## 和装用の体のメッシュ（素体の体の素材を名前で引き継いだ複製）
+static func _body_mesh(body: MeshInstance3D, src: MeshInstance3D) -> ArrayMesh:
 	var mats := {}
 	for i in body.mesh.get_surface_count():
 		var m := body.mesh.surface_get_material(i)
@@ -352,9 +429,19 @@ static func _swap_body(body: MeshInstance3D, src: MeshInstance3D, sk: Skeleton3D
 		var m2 := mesh.surface_get_material(i)
 		if m2 and mats.has(m2.resource_name):
 			mesh.surface_set_material(i, mats[m2.resource_name])
-	body.mesh = mesh
-	body.skin = _rebind(src, sk)
-	body.extra_cull_margin = 2.0
+	return mesh
+
+
+## 布の素材（同じ雛形・色・柄・輪郭線なら全員で共有する。あとから書き換える処理はない）
+static func _cloth_mat_shared(template: Material, lit: Color, shade: Color, outline := true, tex: Texture2D = null) -> Material:
+	var key := "%d|%s|%s|%s|%d" % [template.get_instance_id() if template else 0, lit.to_html(), shade.to_html(), outline, tex.get_instance_id() if tex else 0]
+	var m: Material = _mat_cache.get(key, null)
+	if m == null:
+		m = _cloth_mat(template, lit, shade, outline, tex)
+		_mat_cache[key] = m
+	else:
+		stat_shared_hits += 1
+	return m
 
 
 ## 布の MToon（素体の素材を雛形に、地の色・影の色を差し替え）

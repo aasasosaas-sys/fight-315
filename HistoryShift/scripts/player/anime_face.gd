@@ -49,6 +49,13 @@ static var _info_cache := {}
 static var _mesh_cache := {}
 static var _tex_cache := {}
 static var _overlay_shader: Shader
+static var _mat_share := {}       # 色を変えた素材（元の素材・色が同じなら全員で共有する。あとから書き換える処理はない）
+## 顔の形のパラメータ（opts.pool のときは、素体・性別・年齢ごとに pool 種類のどれかにそろえて顔メッシュを共有する）
+const SHAPE_KEYS := ["jaw", "face_len", "chin", "cheek", "eye_gap", "eye_h", "eye_tilt", "eye_y", "nose", "mouth_w", "brow_y", "brow_thick", "brow_angle"]
+
+
+static func _shared(key: String) -> ShaderMaterial:
+	return _mat_share.get(key, null) as ShaderMaterial
 
 
 ## 種から個性を選び、model（AnimeChar.build の戻り値）へ適用する
@@ -59,6 +66,13 @@ static func apply(root: Node3D, seed: int, opts := {}) -> Dictionary:
 	var base := root.scene_file_path.get_file().get_basename()
 	var female: bool = bool(opts["female"]) if opts.has("female") else base in FEMALE_BASES
 	var p := roll(seed, String(opts.get("age", "")), female, bool(opts.get("modern", false)))
+	var pool := int(opts.get("pool", 0))
+	if pool > 0:
+		# 顔の形だけは少数の型から（色・髭・表情・小物は一人ずつ）。形が同じなら _sculpt のメッシュを共有できる
+		var shape := roll(absi(seed) % pool * 104729 + 13, String(p["age"]), female, bool(opts.get("modern", false)))
+		for k: String in SHAPE_KEYS:
+			p[k] = shape[k]
+		p["highlight"] = snappedf(float(p["highlight"]), 0.05)
 	var fixed: Dictionary = opts.get("fixed", {})
 	for k in fixed:
 		p[k] = fixed[k]
@@ -480,7 +494,20 @@ static func _apply_face(face: MeshInstance3D, sk: Skeleton3D, p: Dictionary) -> 
 		if not (m is ShaderMaterial):
 			continue
 		var k := _kind(m.resource_name)
+		# 同じ元の素材・同じ色なら共有（肌の上に描く顔の模様 _overlay は一人ずつなので共有しない）
+		var key := "face|%d|%d|" % [m.get_instance_id(), k]
+		match k:
+			K_SKIN: key = "" if (sculpted and bool(I.ok)) else key + skin_c.to_html()
+			K_BROW: key += brow_c.to_html()
+			K_IRIS: key += ("%.3f" % float(p.highlight)) if "Highlight" in m.resource_name else (p.iris as Color).to_html()
+			K_EYE: key += "%s|%s" % [lash_c.to_html(), elder]
+			K_MOUTH: key += skin_c.to_html()
+		if key != "" and _mat_share.has(key):
+			face.set_surface_override_material(si, _shared(key))
+			continue
 		var mm := (m as ShaderMaterial).duplicate() as ShaderMaterial
+		if key != "":
+			_mat_share[key] = mm
 		match k:
 			K_SKIN:
 				_tint(mm, skin_c)
@@ -610,8 +637,12 @@ static func _apply_body_skin(sk: Skeleton3D, p: Dictionary) -> void:
 			if mi.get_surface_override_material(si) != null:
 				continue
 			if m is ShaderMaterial and "SKIN" in m.resource_name:
-				var mm := (m as ShaderMaterial).duplicate() as ShaderMaterial
-				_tint(mm, c)
+				var key := "body|%d|%s" % [m.get_instance_id(), c.to_html()]
+				var mm := _shared(key)
+				if mm == null:
+					mm = (m as ShaderMaterial).duplicate() as ShaderMaterial
+					_tint(mm, c)
+					_mat_share[key] = mm
 				mi.set_surface_override_material(si, mm)
 
 
@@ -679,7 +710,12 @@ static func _apply_hair(sk: Skeleton3D, p: Dictionary) -> void:
 			if m == null:
 				continue
 			var n := String(names[si]) if si < names.size() else "hair"
+			var hkey := "hair|%d|%s|%d|%s|%s" % [m.get_instance_id(), n, g, tint.to_html(), skin_c.to_html()]
+			if _mat_share.has(hkey):
+				ah.set_surface_override_material(si, _shared(hkey))
+				continue
 			var mm := m.duplicate() as ShaderMaterial
+			_mat_share[hkey] = mm
 			var ol: ShaderMaterial = (m.next_pass as ShaderMaterial).duplicate() as ShaderMaterial if m.next_pass is ShaderMaterial else null
 			if n.begins_with("hair"):
 				var c := Color(1, 1, 1) if g > 0 else tint
@@ -708,7 +744,12 @@ static func _apply_hair(sk: Skeleton3D, p: Dictionary) -> void:
 			var m2 := vh.get_active_material(si) as ShaderMaterial
 			if m2 == null:
 				continue
+			var vkey := "vhair|%d|%d" % [m2.get_instance_id(), g]
+			if _mat_share.has(vkey):
+				vh.set_surface_override_material(si, _shared(vkey))
+				continue
 			var mm2 := m2.duplicate() as ShaderMaterial
+			_mat_share[vkey] = mm2
 			mm2.set_shader_parameter("_MainTex", _gray_tex(m2.get_shader_parameter("_MainTex"), g))
 			mm2.set_shader_parameter("_ShadeTexture", _gray_tex(m2.get_shader_parameter("_ShadeTexture"), g))
 			mm2.set_shader_parameter("_Color", Color.WHITE)

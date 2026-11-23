@@ -35,21 +35,48 @@ static func _src_info(path: String) -> Dictionary:
 	return info
 
 
-## 先の骨格向けに焼き直したライブラリ（骨格の形ごとにキャッシュ）
+static var _warm_state := {}   # 先骨格のキー → 焼き直しの途中 {out, names, i, ti}
+
+
+## 先の骨格向けに焼き直したライブラリ（骨格の形ごとにキャッシュ。全員で共有する）
 static func library_for(tgt: Skeleton3D, key: String) -> AnimationLibrary:
+	if not _lib_cache.has(key):
+		warm(tgt, key, -1)
+	return _lib_cache[key]
+
+
+## もう焼き直しが済んでいるか
+static func is_ready(key: String) -> bool:
+	return _lib_cache.has(key)
+
+
+## 少しずつ焼き直す（budget_usec を使い切ったら途中で戻る。-1 なら最後まで）。済んだら true
+## 人物を組み立てる前に何フレームかに分けて呼ぶと、初めての素体でフレームが止まらない
+static func warm(tgt: Skeleton3D, key: String, budget_usec: int) -> bool:
 	if _lib_cache.has(key):
-		return _lib_cache[key]
+		return true
+	var t0 := Time.get_ticks_usec()
 	var src_lib := Humanoid.anim_library()
-	var ti := _skel_info(tgt)
-	var out := AnimationLibrary.new()
-	for an in src_lib.get_animation_list():
+	var w: Dictionary = _warm_state.get(key, {})
+	if w.is_empty():
+		w = {"out": AnimationLibrary.new(), "names": Array(src_lib.get_animation_list()), "i": 0, "ti": _skel_info(tgt)}
+		_warm_state[key] = w
+	var names: Array = w["names"]
+	var out: AnimationLibrary = w["out"]
+	while int(w["i"]) < names.size():
+		var an: StringName = names[int(w["i"])]
+		w["i"] = int(w["i"]) + 1
 		var a := src_lib.get_animation(an)
 		var sp: String = a.get_meta("src", "")
-		if sp == "":
-			continue
-		out.add_animation(an, _convert(a, _src_info(sp), ti))
-	_lib_cache[key] = out
-	return out
+		if sp != "":
+			out.add_animation(an, _convert(a, _src_info(sp), w["ti"]))
+		if budget_usec >= 0 and Time.get_ticks_usec() - t0 > budget_usec:
+			break
+	if int(w["i"]) >= names.size():
+		_lib_cache[key] = out
+		_warm_state.erase(key)
+		return true
+	return false
 
 
 static func _convert(a: Animation, si: Dictionary, ti: Dictionary) -> Animation:
@@ -95,6 +122,21 @@ static func _convert(a: Animation, si: Dictionary, ti: Dictionary) -> Animation:
 			var tr := b.add_track(Animation.TYPE_ROTATION_3D)
 			b.track_set_path(tr, SKEL + n)
 			out_tracks[n] = tr
+	# 計算の要る骨だけ：先は「動きを写す骨とその祖先」、元は「写される骨とその祖先」（髪・服の揺れ骨などは飛ばす。結果は同じ）
+	var t_need := {}
+	for n in mapped:
+		var c: String = n
+		while c != "" and not t_need.has(c):
+			t_need[c] = true
+			c = tparent.get(c, "")
+	var t_order: Array = ti.order.filter(func(n: String) -> bool: return t_need.has(n))
+	var s_need := {}
+	for n in mapped:
+		var c2: String = mapped[n]
+		while c2 != "" and not s_need.has(c2):
+			s_need[c2] = true
+			c2 = sparent.get(c2, "")
+	var s_order: Array = si.order.filter(func(n: String) -> bool: return s_need.has(n))
 	var out_pos := -1
 	if pos_track >= 0:
 		out_pos = b.add_track(Animation.TYPE_POSITION_3D)
@@ -103,7 +145,7 @@ static func _convert(a: Animation, si: Dictionary, ti: Dictionary) -> Animation:
 		# 元：ワールド回転と休止姿勢からの差
 		var sg := {}
 		var delta := {}
-		for n in si.order:
+		for n in s_order:
 			var lq: Quaternion = slocal[n]
 			if rot_tracks.has(n):
 				lq = a.rotation_track_interpolate(rot_tracks[n], time)
@@ -113,7 +155,7 @@ static func _convert(a: Animation, si: Dictionary, ti: Dictionary) -> Animation:
 			delta[n] = g * (srest[n] as Quaternion).inverse()
 		# 先：差を当ててから自分の階層でローカルへ
 		var tg := {}
-		for n in ti.order:
+		for n in t_order:
 			var pn2: String = tparent[n]
 			var pg: Quaternion = tg[pn2] if pn2 != "" and tg.has(pn2) else Quaternion.IDENTITY
 			var g2: Quaternion

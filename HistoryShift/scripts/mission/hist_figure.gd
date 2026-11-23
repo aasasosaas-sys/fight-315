@@ -78,7 +78,7 @@ func _ready() -> void:
 	cs.position = Vector3(0, 0.9, 0)
 	add_child(cs)
 	var outfit := Humanoid.outfit_for(era_id, "npc")
-	_rig = Humanoid.build(outfit, hash(figure_name), false, 1 if (Humanoid.is_female_name(figure_name) or "woman" in actor.get("tags", [])) else 0, figure_name)
+	_rig = Humanoid.build_streamed(outfit, hash(figure_name), false, 1 if (Humanoid.is_female_name(figure_name) or "woman" in actor.get("tags", [])) else 0, figure_name, Humanoid.PRIORITY_TARGET)
 	_rig.rotation.y = PI
 	add_child(_rig)
 	_tag = Label3D.new()

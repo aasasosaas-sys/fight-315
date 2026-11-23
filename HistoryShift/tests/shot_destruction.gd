@@ -48,11 +48,12 @@ func _frame(target: Vector3, dist: float, height := 6.0, side := 0.0, ignore: Ob
 	var space := get_viewport().world_3d.direct_space_state
 	var pos := Vector3.ZERO
 	var dir := Vector3.ZERO
-	for k in 12:
-		var a := side + (k / 2) * 0.55 * (1.0 if k % 2 == 0 else -1.0)
+	for k in 24:
+		# 12 方位を試し、だめなら高い位置から見下ろす
+		var a := side + ((k % 12) / 2) * 0.55 * (1.0 if k % 2 == 0 else -1.0)
 		dir = Vector3(sin(a), 0, cos(a))
 		pos = target + dir * dist
-		pos.y = maxf(float(w.height_at(pos.x, pos.z)), float(w.water_level)) + height
+		pos.y = maxf(float(w.height_at(pos.x, pos.z)), float(w.water_level)) + height + (0.0 if k < 12 else dist * 0.8)
 		var q := PhysicsRayQueryParameters3D.create(pos, target, Game.COLLISION_WORLD)
 		var hit := space.intersect_ray(q)
 		if hit.is_empty() or hit["collider"] == ignore or (hit["position"] as Vector3).distance_to(target) < 4.0:

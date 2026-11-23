@@ -63,7 +63,7 @@ func _ready() -> void:
 			"showa": weapon = "mg"
 		hp = 60.0
 	var outfit := Humanoid.outfit_for(era_id, "guardian" if is_guardian else "enemy")
-	_rig = Humanoid.build(outfit, randi(), true)
+	_rig = Humanoid.build_streamed(outfit, randi(), true, -1, "", Humanoid.PRIORITY_GUARD)   # 近づくまで見た目は組み立てない（mission_target は自動で優先）
 	_rig.rotation.y = PI
 	add_child(_rig)
 	if is_leader:

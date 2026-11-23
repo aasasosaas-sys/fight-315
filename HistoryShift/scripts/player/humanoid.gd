@@ -144,17 +144,314 @@ static func is_female_name(n: String) -> bool:
 
 
 static func build(outfit: int, seed: int, armed: bool, female := -1, figure := "") -> Humanoid:
+	var h := _make(outfit, seed, armed, female, figure)
+	h._build_now()
+	return h
+
+
+## 遠くにいる間は組み立てない人物（町人・兵・歴史上の人物）。近づくと組み立て、遠ざかると見た目だけ捨てる
+## （速さ・伏せ・倒れたなどの状態は Humanoid に残るので、組み立て直しても同じ姿・同じ状態に戻る）。
+## prio：PRIORITY_TARGET（人物・ミッションの相手）＞ PRIORITY_GUARD（兵）＞ PRIORITY_CROWD（町人）。同時に組み立てる数の上限で優先する
+static func build_streamed(outfit: int, seed: int, armed: bool, female := -1, figure := "", prio := PRIORITY_CROWD) -> Humanoid:
+	var h := _make(outfit, seed, armed, female, figure)
+	h.priority = prio
+	if streaming_enabled:
+		h.streamed = true
+	else:
+		h._build_now()
+	return h
+
+
+static func _make(outfit: int, seed: int, armed: bool, female: int, figure: String) -> Humanoid:
 	var h := Humanoid.new()
 	h.name = "Humanoid"
 	h._female_req = female
 	h._figure = figure
+	h._args = [outfit, seed, armed]
+	return h
+
+
+## 見た目を組み立てる（build はすぐ、build_streamed は近づいたときに _build_some から）
+func _build_now() -> void:
+	if _built:
+		return
+	var t0 := Time.get_ticks_usec()
 	if _skinned_ok == -1:
 		_skinned_ok = 1 if ResourceLoader.exists(MANNEQUIN) else 0
+	var outfit: int = _args[0]
+	var seed: int = _args[1]
+	var armed: bool = _args[2]
 	if _skinned_ok == 1:
-		h._construct_skinned(outfit, seed, armed)
+		_construct_skinned(outfit, seed, armed)
 	else:
-		h._construct(outfit, seed, armed)
-	return h
+		_construct(outfit, seed, armed)
+	_built = true
+	_lod = -1
+	_state = ""
+	var us := Time.get_ticks_usec() - t0
+	stat_builds += 1
+	stat_build_usec += us
+	stat_build_max_usec = maxi(stat_build_max_usec, us)
+	if us > 60000 and OS.get_environment("HUMANOID_PROFILE") != "":
+		print("  [Humanoid] slow build %.0fms outfit=%d figure=%s base=%s" % [us / 1000.0, outfit, _figure, get_meta("anime_base", "")])
+
+
+## 見た目を捨てる（ノード・骨格・アニメーションの木）。状態の変数は残す
+func _unbuild() -> void:
+	if not _built:
+		return
+	# 木から外さずに消す（外した骨格に揺れ骨の更新が届くとエラーになる）。消えるのはこのフレームの終わり
+	if _secondary and is_instance_valid(_secondary):
+		var mod: Variant = _secondary.get("internal_modifier_node")
+		if mod is SkeletonModifier3D:
+			(mod as SkeletonModifier3D).active = false
+	for c in get_children():
+		c.queue_free()
+	_skel = null
+	_tree = null
+	weapon = null
+	muzzle = null
+	hips = null; torso = null; head = null; arm_l = null; arm_r = null; leg_l = null; leg_r = null
+	_anim_lib_override = null
+	_mesh_list.clear()
+	_secondary = null
+	_built = false
+	_lod = -1
+	_state = ""
+	stat_unbuilds += 1
+
+
+func is_built() -> bool:
+	return _built
+
+
+func _enter_tree() -> void:
+	if streamed and not (self in _streamed):
+		_streamed.append(self)
+
+
+func _exit_tree() -> void:
+	if streamed:
+		_streamed.erase(self)
+		_queue.erase(self)
+
+
+# ------------------------------------------------------------------ 人数・距離の管理（build_streamed の人物）
+## 近づいたら組み立てる距離／遠ざかったら捨てる距離（m）・同時に組み立てておく上限
+const STREAM_IN := 60.0
+const STREAM_OUT := 120.0
+const MAX_ACTIVE := 40
+const PRIORITY_CROWD := 0
+const PRIORITY_GUARD := 1
+const PRIORITY_TARGET := 2
+const PRIORITY_BONUS := 30.0          # 優先度 1 段で、これだけ近くにいるのと同じ扱い
+## 遠い人物の手抜き（LOD）：揺れ骨を止める・影を落とさない・アニメーションを間引く距離（m）
+const LOD_SPRING := 22.0
+const LOD_SHADOW := 40.0
+const LOD_ANIM := 45.0
+const LOD_ANIM_FAR := 80.0
+const BUILD_BUDGET_USEC := 8000       # 1 フレームに組み立てに使う時間（最低 1 人は組み立てる）
+static var streaming_enabled := true  # false にすると build_streamed もすぐ組み立てる
+static var _streamed: Array = []      # 登録中の Humanoid（build_streamed で作られ、木に入っているもの）
+static var _queue: Array = []         # 組み立て待ち（近い・優先度の高い順）
+static var _tick_frame := -1
+static var _scan_t := 0.0
+static var _warm_inst := {}           # 素体 → リターゲット用に読み込んだ素体（焼き直しが終わったら捨てる）
+# ベンチマーク用の数
+static var stat_builds := 0
+static var stat_unbuilds := 0
+static var stat_build_usec := 0
+static var stat_build_max_usec := 0
+static var stat_warm_usec := 0        # アニメーションの焼き直しに使った時間
+
+var streamed := false
+var priority := PRIORITY_CROWD
+var _args: Array = []
+var _built := false
+var _lod := -1
+var _dist := 0.0
+var _anim_skip := 1
+var _anim_n := 0
+var _anim_acc := 0.0
+var _mesh_list: Array = []
+var _secondary: Node = null
+
+
+## いまの優先度（持ち主がミッションの撃破対象になったら上げる）
+func _prio() -> int:
+	var p := get_parent()
+	if p and p.get("mission_target") == true:
+		return PRIORITY_TARGET
+	return priority
+
+
+func _score() -> float:
+	return _dist - float(_prio()) * PRIORITY_BONUS
+
+
+## 距離の基準：プレイヤー（乗り物に乗っていれば乗り物）。いなければ null（全員を組み立てる）
+static func _focus() -> Variant:
+	var p: Node3D = Game.player
+	if p == null or not is_instance_valid(p) or not p.is_inside_tree():
+		return null
+	var v: Variant = p.get("vehicle")
+	if p.has_method("in_vehicle") and bool(p.call("in_vehicle")) and v is Node3D and is_instance_valid(v):
+		return (v as Node3D).global_position
+	return p.global_position
+
+
+## 毎フレーム 1 回（最初に _process に来た登録済みの Humanoid が呼ぶ）
+static func _stream_tick(dt: float) -> void:
+	var f := Engine.get_process_frames()
+	if f == _tick_frame:
+		return
+	_tick_frame = f
+	var focus: Variant = _focus()
+	_scan_t -= dt
+	if _scan_t <= 0.0:
+		_scan_t = 0.25
+		_scan(focus)
+	_build_some()
+
+
+## 距離を測り、組み立てる人・捨てる人・LOD を決める
+static func _scan(focus: Variant) -> void:
+	_streamed = _streamed.filter(func(h: Variant) -> bool: return is_instance_valid(h) and (h as Humanoid).is_inside_tree())
+	var cands: Array = []
+	for h: Humanoid in _streamed:
+		h._dist = 0.0 if focus == null else h.global_position.distance_to(focus as Vector3)
+		if focus == null or h._dist < (STREAM_OUT if h._built else STREAM_IN):
+			cands.append(h)
+	cands.sort_custom(func(a: Humanoid, b: Humanoid) -> bool: return a._score() < b._score())
+	var want := {}
+	for i in cands.size():
+		if focus != null and i >= MAX_ACTIVE:
+			break
+		want[cands[i]] = true
+	_queue.clear()
+	for h: Humanoid in cands:
+		if want.has(h) and not h._built:
+			_queue.append(h)
+	for h: Humanoid in _streamed:
+		if h._built and not want.has(h):
+			h._unbuild()
+		elif h._built:
+			h._apply_lod()
+
+
+## 待っている人を、フレームの予算の範囲で組み立てる（素体のアニメーションの焼き直しも少しずつ）
+static func _build_some() -> void:
+	var t0 := Time.get_ticks_usec()
+	var built := 0
+	var i := 0
+	var warmed := false
+	while i < _queue.size():
+		var h: Humanoid = _queue[i]
+		if not is_instance_valid(h) or not h.is_inside_tree() or h._built:
+			_queue.remove_at(i)
+			continue
+		var used := Time.get_ticks_usec() - t0
+		if (built > 0 or warmed) and used > BUILD_BUDGET_USEC:
+			return
+		var base := h.anime_base()
+		if base != "" and not AnimeChar.prefetch_base(base):
+			i += 1          # 素体を裏で読み込み中：ほかの人を先に
+			continue
+		if base != "" and not Retarget.is_ready(base):
+			warmed = true
+			if not _warm(base, maxi(BUILD_BUDGET_USEC - used, 2000)):
+				return   # 続きは次のフレーム
+			continue
+		_queue.remove_at(i)
+		h._build_now()
+		h._apply_lod()
+		built += 1
+
+
+## 素体のアニメーションを少しずつ焼き直す。終わったら true
+static func _warm(base: String, budget_usec: int) -> bool:
+	var t0 := Time.get_ticks_usec()
+	var inst: Node3D = _warm_inst.get(base, null)
+	if inst == null:
+		inst = AnimeChar.scene(AnimeChar.VRM_DIR + base + ".vrm").instantiate()
+		_warm_inst[base] = inst
+	var sks := inst.find_children("*", "Skeleton3D", true, false)
+	var done := sks.is_empty() or Retarget.warm(sks[0] as Skeleton3D, base, budget_usec)
+	if done:
+		_warm_inst.erase(base)
+		inst.free()
+	stat_warm_usec += Time.get_ticks_usec() - t0
+	return done
+
+
+## この人物のアニメ素体の名前（組み立てる前に分かる。アニメ素体を使わない環境では ""）
+func anime_base() -> String:
+	if not anime or force_variant != "" or _args.is_empty():
+		return ""
+	if _skinned_ok == -1:
+		_skinned_ok = 1 if ResourceLoader.exists(MANNEQUIN) else 0
+	if _skinned_ok != 1:
+		return ""
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(_args[1])
+	var pick := _pick_anime(int(_args[0]), rng)
+	var base := String(pick["base"])
+	return base if ResourceLoader.exists(AnimeChar.VRM_DIR + base + ".vrm") else ""
+
+
+## 遠い人物の手抜き：揺れ骨・影・アニメーションの更新頻度
+func _apply_lod() -> void:
+	if not _built or not streamed:
+		return
+	var lod := 0 if _dist < LOD_SPRING else (1 if _dist < LOD_SHADOW else (2 if _dist < LOD_ANIM else 3))
+	if lod == _lod:
+		return
+	_lod = lod
+	if _mesh_list.is_empty():
+		_mesh_list = find_children("*", "MeshInstance3D", true, false)
+		var sec := find_child("secondary", true, false)
+		_secondary = sec
+	# 揺れ骨（VRM の髪・袖の spring bone）
+	if _secondary and is_instance_valid(_secondary):
+		var mod: Variant = _secondary.get("internal_modifier_node")
+		if mod is SkeletonModifier3D:
+			(mod as SkeletonModifier3D).active = lod == 0
+	# 影
+	for mi: MeshInstance3D in _mesh_list:
+		if not is_instance_valid(mi):
+			continue
+		if not mi.has_meta("lod_shadow0"):
+			mi.set_meta("lod_shadow0", mi.cast_shadow)
+		if lod >= 2:
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		else:
+			mi.cast_shadow = mi.get_meta("lod_shadow0")
+	# アニメーション：遠いほど間引いてまとめて進める
+	_anim_skip = 1 if lod < 3 else (2 if _dist < LOD_ANIM_FAR else 4)
+	if _tree:
+		_tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_IDLE if _anim_skip == 1 else AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+		_anim_n = get_instance_id() % _anim_skip
+		_anim_acc = 0.0
+
+
+## アニメ素体の性別と素体の選び方（_construct_anime と anime_base で同じ乱数の使い方をする）
+func _pick_anime(outfit: int, rng: RandomNumberGenerator) -> Dictionary:
+	var female := false
+	if _female_req >= 0:
+		female = _female_req == 1
+	elif outfit == Outfit.KIMONO:
+		female = rng.randf() < 0.8
+	elif outfit in [Outfit.COMMONER, Outfit.NOBLE, Outfit.ANCIENT, Outfit.WESTERN]:
+		female = rng.randf() < 0.35
+	var bases: Array = ANIME_FEMALE if female else ANIME_MALE
+	var base: String = bases[rng.randi() % bases.size()]
+	if outfit == Outfit.AGENT:
+		base = "HairSample_Male"
+	if _figure != "":
+		var fs: Dictionary = Figures.spec_for(_figure)
+		if not fs.is_empty():
+			base = fs["base"]
+	return {"female": female, "base": base}
 
 
 static func anim_library() -> AnimationLibrary:
@@ -249,6 +546,12 @@ func _anime_spec(outfit: int, female: bool, rng: RandomNumberGenerator) -> Dicti
 		"pal": {"kosode": dye.call(["ai:kasuri:shiro", "kaki:plain", "kuchiba:shima:kaki", "nezumi:plain"]), "eri": "kuro", "haneri": "shiro", "hakama": dye.call(["nezumi:shima:kuro", "kon:plain", "kuchiba:plain"]), "obi": "kuro"}}
 
 
+## 町人・兵の顔の形の種類（素体・性別・年齢ごと）
+const FACE_POOL := 4
+static var _shadow_cache := {}        # 元の素材 → 修正力の素材（全員で共有）
+static var _bt_cache := {}            # アニメーションの木の形 → AnimationNodeBlendTree（全員で共有）
+
+
 ## 「歴史の修正力」：墨のように黒い体に、紫に光る輪郭と目（主人公の現代服と見分けがつくように）
 func _shadowify(model: Node3D) -> void:
 	for mi: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
@@ -257,6 +560,9 @@ func _shadowify(model: Node3D) -> void:
 			if m == null:
 				m = mi.mesh.surface_get_material(si)
 			if not (m is ShaderMaterial):
+				continue
+			if _shadow_cache.has(m):
+				mi.set_surface_override_material(si, _shadow_cache[m])
 				continue
 			var mm := (m as ShaderMaterial).duplicate() as ShaderMaterial
 			var eye := "eye" in m.resource_name.to_lower()
@@ -272,6 +578,7 @@ func _shadowify(model: Node3D) -> void:
 				ol.set_shader_parameter("_OutlineColor", Color(0.8, 0.25, 1.0))
 				ol.set_shader_parameter("_OutlineLightingMix", 0.0)
 				mm.next_pass = ol
+			_shadow_cache[m] = mm
 			mi.set_surface_override_material(si, mm)
 
 
@@ -286,7 +593,7 @@ func _construct_anime(outfit: int, rng: RandomNumberGenerator, armed: bool) -> b
 	var bases: Array = ANIME_FEMALE if female else ANIME_MALE
 	var base: String = bases[rng.randi() % bases.size()]
 	if outfit == Outfit.AGENT:
-		base = "HairSample_Male"
+		base = "HairSample_Male"   # （_pick_anime と同じ選び方。変えるときは両方）
 	if not ResourceLoader.exists(AnimeChar.VRM_DIR + base + ".vrm"):
 		return false
 	var spec := _anime_spec(outfit, female, rng)
@@ -307,6 +614,7 @@ func _construct_anime(outfit: int, rng: RandomNumberGenerator, armed: bool) -> b
 	if combat:
 		fopts["age"] = "young" if rng.randf() < 0.5 else "adult"
 	if fs.is_empty():
+		fopts["pool"] = FACE_POOL   # 町人・兵の顔の形は素体・年齢ごとに数種類から（顔メッシュを共有する）。色・髭・表情は一人ずつ
 		set_meta("face", AnimeFace.apply(model, rng.randi(), fopts))
 	if outfit == Outfit.GUARDIAN:
 		_shadowify(model)
@@ -449,6 +757,14 @@ func _setup_tree(model: Node3D, outfit: int, armed: bool) -> void:
 	_tree.root_node = NodePath("..")
 	var lib: AnimationLibrary = _anim_lib_override if _anim_lib_override else anim_library()
 	_tree.add_animation_library("", lib)
+	# 木の形（ノードの組み合わせ）は同じ形の人物で共有する（値は AnimationTree ごとに持つ）
+	var bt_key := "%d|%s|%s|%s" % [lib.get_instance_id(), outfit == Outfit.GUARDIAN, outfit in [Outfit.SOLDIER, Outfit.ASHIGARU, Outfit.SAMURAI], armed]
+	if _bt_cache.has(bt_key):
+		_tree.tree_root = _bt_cache[bt_key]
+		_tree.active = true
+		hips = Node3D.new(); torso = hips; head = hips; arm_l = hips; arm_r = hips; leg_l = hips; leg_r = hips
+		add_child(hips)
+		return
 	var bt := AnimationNodeBlendTree.new()
 	var bs := AnimationNodeBlendSpace1D.new()
 	var mocap := lib.has_animation("Mocap_Walk")
@@ -500,6 +816,7 @@ func _setup_tree(model: Node3D, outfit: int, armed: bool) -> void:
 	bt.connect_node("hit", 0, "state")
 	bt.connect_node("hit", 1, "hitanim")
 	bt.connect_node("output", 0, "hit")
+	_bt_cache[bt_key] = bt
 	_tree.tree_root = bt
 	_tree.active = true
 	# 互換用のダミー関節（手続きアニメ用変数を参照するコードのため）
@@ -1040,8 +1357,21 @@ func hurt() -> void:
 
 
 func _process(dt: float) -> void:
+	if streamed:
+		_stream_tick(dt)
+	if not _built:
+		return
 	if skinned:
+		if _tree == null:
+			return
 		_process_skinned(dt)
+		if _anim_skip > 1:
+			_anim_acc += dt
+			_anim_n += 1
+			if _anim_n >= _anim_skip:
+				_anim_n = 0
+				_tree.advance(_anim_acc)
+				_anim_acc = 0.0
 		return
 	if _dying:
 		_fall = move_toward(_fall, 1.0, dt * 2.5)

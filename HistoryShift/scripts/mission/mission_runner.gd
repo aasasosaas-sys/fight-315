@@ -21,6 +21,7 @@ var _timer := -1.0
 var _ride_started := false
 var _active_key := ""
 var _rng := RandomNumberGenerator.new()
+var interact: ActorInteract = null    # ミッション中の会話メニュー（data/actors の人物と話すとき）
 
 
 func setup(p_mission: Dictionary, p_era: Dictionary, p_hud, p_root: Node3D) -> void:
@@ -91,6 +92,7 @@ func _begin(i: int) -> void:
 		"talk":
 			var pos: Vector3 = _world().random_ground_point_near(lp, 6.0, _rng) if _world() else lp
 			_npc = Npc.spawn(spawn_root, pos, s.get("npc", "人物"), s.get("lines", ["……"]), era["eraId"])
+			_offer_menu(_npc)
 			hud.target_world = pos + Vector3.UP * 2.4
 			hud.target_label = s.get("npc", "人物")
 			hud.set_objective(title, s.get("text", ""), _counter_text() + "　（近づいて E で話す）")
@@ -226,18 +228,14 @@ func _process(dt: float) -> void:
 			if _npc == null or not is_instance_valid(_npc) or _talking:
 				return
 			var d := pp.distance_to(_npc.global_position)
+			# 会話メニューを開ける人物：E はメニューが受け取る（先頭の「ミッションの会話」で下の会話になる）
+			var menu := interact != null and interact.offers(_npc)
 			if d < 4.0 and not in_plane:
-				hud.set_prompt("E：%sと話す" % _npc.npc_name)
-				if Input.is_action_just_pressed("interact") and not hud.is_dialog_open():
-					_talking = true
-					hud.set_prompt("")
-					hud.dialog(_npc.npc_name, _npc.lines)
-					await hud.dialog_finished
-					_talking = false
-					if is_instance_valid(_npc):
-						_npc.talked = true
-					_begin(idx + 1)
-			else:
+				if not menu:
+					hud.set_prompt("E：%sと話す" % _npc.npc_name)
+				if Input.is_action_just_pressed("interact") and not hud.is_dialog_open() and not (menu and interact.took_input()):
+					talk_npc()
+			elif not menu:
 				hud.set_prompt("")
 		"ride":
 			var kind: String = s.get("vehicle", "horse")
@@ -257,3 +255,60 @@ func _process(dt: float) -> void:
 				if riding and flat_d < (80.0 if kind == "plane" else 25.0):
 					hud.toast("時間内に到着！")
 					_begin(idx + 1)
+
+
+## talk ステップの会話（E で直接、または会話メニューの「ミッションの会話」から）。終わると次のステップへ
+func talk_npc() -> void:
+	if _talking or _npc == null or not is_instance_valid(_npc) or idx < 0 or idx >= steps.size():
+		return
+	if str(steps[idx].get("type", "")) != "talk":
+		return
+	var step := idx
+	_talking = true
+	hud.set_prompt("")
+	hud.dialog(_npc.npc_name, _npc.lines)
+	await hud.dialog_finished
+	_talking = false
+	if is_instance_valid(_npc):
+		_npc.talked = true
+	if idx == step:
+		_begin(idx + 1)
+
+
+## いまの talk ステップの相手で、まだ話していないか（会話メニューの「ミッションの会話」）
+func is_pending_talk(n: Node) -> bool:
+	return n != null and n == _npc and not _talking and idx >= 0 and idx < steps.size() \
+		and str(steps[idx].get("type", "")) == "talk" and is_instance_valid(_npc) and not _npc.talked
+
+
+## ミッションの人物が data/actors の人物なら、自由探索と同じ会話メニューを出す
+func _offer_menu(n: Npc) -> void:
+	if n == null or not n.is_actor():
+		return
+	if interact == null or not is_instance_valid(interact):
+		interact = ActorInteract.new()
+		interact.setup(get_parent(), hud, [])
+		interact.runner = self
+		add_child(interact)
+	interact.add_figure(n)
+
+
+## 目標表示をいまのステップのものに戻す（会話メニューの「守る」などで一時的に書き換えたあと）
+func refresh_objective() -> void:
+	if idx < 0 or idx >= steps.size():
+		return
+	var s: Dictionary = steps[idx]
+	var title: String = mission.get("title", "")
+	var counter := _counter_text()
+	match str(s.get("type", "goto")):
+		"talk":
+			counter += "　（近づいて E で話す）"
+		"defeat":
+			counter = "撃破 %d / %d" % [_kills, _need]
+		"collect":
+			counter = "%s %d / %d" % [s.get("item", "アイテム"), _kills, _need]
+		"ride":
+			var kind: String = s.get("vehicle", "horse")
+			var vname: String = {"horse": "馬", "car": "自動車", "plane": "飛行機"}.get(kind, kind)
+			counter = "%sに乗って制限時間内に到着せよ" % vname
+	hud.set_objective(title, s.get("text", ""), counter)

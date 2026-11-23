@@ -377,6 +377,7 @@ const FIGURES := {
 static var _alias_cache := {}
 static var _kamon_cache := {}
 static var _mesh_cache := {}
+static var _acc_mat_cache := {}   # 小物の素材（_mat）
 
 
 # ===========================================================================
@@ -712,27 +713,26 @@ static func _add_parts(model: Node3D, sk: Skeleton3D, base: String, parts: Array
 	var path := AnimeChar.WASOU_DIR + base + ".glb"
 	if not ResourceLoader.exists(path):
 		return
-	var src: Node = (load(path) as PackedScene).instantiate()
 	var body: MeshInstance3D = sk.get_node_or_null("Body")
 	var template: Material = body.mesh.surface_get_material(0) if body and body.mesh else null
-	for mi: MeshInstance3D in src.find_children("*", "MeshInstance3D", true, false):
-		var part := AnimeChar._part_name(mi.name)
+	# 部位のメッシュと結び直したスキンは素体ごとに共有（AnimeChar._wasou。glb を毎回読み直さない）
+	for e: Dictionary in AnimeChar._wasou(base, sk, body)["list"]:
+		var part: String = e["part"]
 		if not part in parts:
 			continue
 		var g := MeshInstance3D.new()
 		g.name = "Garment_" + part
-		g.mesh = mi.mesh
+		g.mesh = e["mesh"]
 		sk.add_child(g)
 		g.skeleton = g.get_path_to(sk)
-		g.skin = AnimeChar._rebind(mi, sk)
+		g.skin = e["skin"]
 		g.extra_cull_margin = 2.0
 		var spec: PackedStringArray = String(pal.get(part, "kuro")).split(":")
 		var dye: Array = _dye(spec[0])
 		var tex: Texture2D = null
 		if spec.size() > 1 and spec[1] != "plain":
 			tex = AnimeChar.pattern_tex(spec[1], dye[0], _dye(spec[2] if spec.size() > 2 else "shiro")[0])
-		g.material_override = AnimeChar._cloth_mat(template, dye[0], dye[1], true, tex)
-	src.free()
+		g.material_override = AnimeChar._cloth_mat_shared(template, dye[0], dye[1], true, tex)
 
 
 # ===========================================================================
@@ -747,8 +747,9 @@ static func _dye(n: String) -> Array:
 
 ## MToon（素体の材質を複製）。pattern を渡すと AnimeChar の布柄を貼る
 static func _mat(ctx: Dictionary, col: String, outline := true, pattern := "", accent := "shiro", tile := Vector2(6, 6)) -> Material:
-	var key := "%s|%s|%s|%s|%s" % [col, outline, pattern, accent, tile]
-	var cache: Dictionary = ctx["bas"].get("_mats", {})
+	# 同じ雛形・色・柄の小物の素材は全員で共有（あとから書き換える処理はない）
+	var key := "%d|%s|%s|%s|%s|%s" % [(ctx["tmpl"] as Material).get_instance_id() if ctx["tmpl"] else 0, col, outline, pattern, accent, tile]
+	var cache: Dictionary = _acc_mat_cache
 	if cache.has(key):
 		return cache[key]
 	var d := _dye(col)
@@ -762,7 +763,6 @@ static func _mat(ctx: Dictionary, col: String, outline := true, pattern := "", a
 		# 小物は細いので輪郭線を少し細く
 		(m.next_pass as ShaderMaterial).set_shader_parameter("_OutlineWidth", 0.14)
 	cache[key] = m
-	ctx["bas"]["_mats"] = cache
 	return m
 
 
