@@ -8,6 +8,11 @@ var sess: Session
 var cam: CameraRig
 var p: Player
 var chaos_log: Array = []
+var only := ""        # "-- edo only=fire" で一部だけ撮る
+
+
+func _on(sec: String) -> bool:
+	return only == "" or only == sec
 
 
 func _ready() -> void:
@@ -86,7 +91,10 @@ func _run() -> void:
 	var args := OS.get_cmdline_user_args()
 	var eras: Array = []
 	for a in args:
-		eras.append(a)
+		if String(a).begins_with("only="):
+			only = String(a).substr(5)
+		else:
+			eras.append(a)
 	if eras.is_empty():
 		eras = ["edo", "sengoku"]
 	Game.chaos_event.connect(func(k: String, id: String, info: Dictionary) -> void:
@@ -114,7 +122,7 @@ func _era(era_id: String) -> void:
 
 	# ---- 1) 家を焙烙玉 → ダイナマイト級で倒壊
 	var house := _find("house", cap + Vector3(0, 0, 20))
-	if house:
+	if house and _on("house"):
 		var c := house.center()
 		var hz := house.frame.basis.z
 		await _frame(c, 20.0, 5.0, atan2(hz.x, hz.z) + 0.5, house)
@@ -136,7 +144,7 @@ func _era(era_id: String) -> void:
 
 	# ---- 2) 町並みに棒火矢 → 延焼
 	var row := _find("house", cap + Vector3(-25, 0, -10), 400.0, func(u: Destructible) -> bool: return u.flammable)
-	if row:
+	if row and _on("fire"):
 		var c := row.center()
 		var fz := row.frame.basis.z
 		await _frame(c, 24.0, 8.0, atan2(fz.x, fz.z) + 0.35, row)
@@ -155,7 +163,7 @@ func _era(era_id: String) -> void:
 	var wall := _find("wall", cap, 500.0)
 	if wall == null:
 		wall = _find("fence", cap, 500.0)
-	if wall:
+	if wall and _on("wall"):
 		var c := wall.center()
 		await _frame(c, 16.0, 4.0, 1.0, wall)
 		await _shot("%s_wall_before" % era_id)
@@ -177,7 +185,7 @@ func _era(era_id: String) -> void:
 		if dd < best and dd > 60.0:
 			best = dd
 			tpos = o
-	if tpos != Vector3.INF:
+	if tpos != Vector3.INF and _on("tree"):
 		await _frame(tpos + Vector3(0, 4, 0), 26.0, 7.0, 0.3)
 		await _shot("%s_tree_before" % era_id)
 		Effects.explosion(get_tree(), tpos + Vector3(1.5, 0.5, 0), 9.0, 500.0, 0, 0.0)
@@ -191,7 +199,7 @@ func _era(era_id: String) -> void:
 	var boat := _find("boat", port, 300.0, func(u: Destructible) -> bool: return u.max_hp > 400.0)
 	if boat == null:
 		boat = _find("boat", port, 300.0)
-	if boat:
+	if boat and _on("boat"):
 		var c := boat.center()
 		var side := atan2(port.x - c.x, port.z - c.z)
 		await _frame(c, 30.0, 6.0, side, boat)
@@ -206,7 +214,7 @@ func _era(era_id: String) -> void:
 	var keep := _find("castle_keep", w.landmark_pos("castle"), 600.0)
 	if keep == null:
 		keep = _find("castle_keep", cap, 600.0)
-	if keep:
+	if keep and _on("keep"):
 		var c := keep.center()
 		await _frame(c, 75.0, 14.0, 0.5, keep)
 		await _shot("%s_keep_before" % era_id)
@@ -226,6 +234,11 @@ func _era(era_id: String) -> void:
 		print("  keep destroyed=%s" % keep.destroyed)
 
 	# ---- 7) 町の中心で大暴れ（性能計測）
+	if not _on("rampage"):
+		tcam = null
+		sess.end()
+		await _frames(5)
+		return
 	await _frame(cap + Vector3(0, 2, 0), 40.0, 14.0, 0.0)
 	var t1 := Time.get_ticks_usec()
 	for i in 8:

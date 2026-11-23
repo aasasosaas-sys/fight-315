@@ -249,7 +249,7 @@ func ignite() -> void:
 
 ## Destruction の火災ティックから
 func burn_step(dt: float) -> void:
-	char_amt = minf(1.0, char_amt + dt * 0.05)
+	char_amt = minf(1.0, char_amt + dt * 0.09)
 	if not destroyed:
 		var rate := 0.028 if kind != "castle_keep" and kind != "pagoda" else 0.012
 		hp -= max_hp * rate * dt

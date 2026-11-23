@@ -16,7 +16,7 @@ const TEX_W := 256
 const CELL := 16.0
 const MAX_DEBRIS := 110
 const MAX_FIRES := 14
-const MAX_FIRE_LIGHTS := 6
+const MAX_FIRE_LIGHTS := 4
 const MAX_FALLING_TREES := 24
 const MAX_DECALS := 28
 const FIRE_SPREAD_CAP := 36      # ランドマークごとの延焼回数の上限
@@ -812,9 +812,10 @@ func _make_fire_fx(u: Destructible, with_light: bool) -> Node3D:
 		var l := OmniLight3D.new()
 		l.name = "L"
 		l.light_color = Color(1.0, 0.55, 0.2)
-		l.light_energy = 2.2
-		l.omni_range = clampf(ext.length() * 2.5, 8.0, 22.0)
-		l.position = Vector3(0, 1.0, 0)
+		l.light_energy = 0.8
+		l.omni_range = clampf(ext.length() * 1.6, 7.0, 14.0)
+		l.omni_attenuation = 1.6
+		l.position = Vector3(0, 2.0, 0)
 		root.add_child(l)
 	var snd := Sfx.loop_player(root, Sfx.fire_loop(), -8.0)
 	if snd:
