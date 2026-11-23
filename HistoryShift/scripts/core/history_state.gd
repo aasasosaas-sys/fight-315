@@ -12,12 +12,12 @@ const SAVE_PATH := "user://save_v2.json"
 static var save_path := SAVE_PATH   # テストは別のファイルに差し替える（並行して走る他のテストとぶつからないように）
 const NUM := ["centralization", "warrior", "court", "religion", "commerce", "open_asia", "open_west", "tech",
 	"education", "commoners", "militarism", "democracy", "economy", "unity"]
-const CAT := ["capital", "ruler", "edu_center", "war"]
+const CAT := ["capital", "ruler", "edu_center", "war", "standing"]
 const LABELS := {
 	"centralization": "中央集権", "warrior": "武士の力", "court": "朝廷・貴族", "religion": "宗教勢力", "commerce": "商業・都市",
 	"open_asia": "大陸との交流", "open_west": "西洋との交流", "tech": "技術力", "education": "教育・学問", "commoners": "民衆の力",
 	"militarism": "軍事優先", "democracy": "民主化", "economy": "経済力", "unity": "国内の安定",
-	"capital": "首都", "ruler": "実権", "edu_center": "学問の中心", "war": "太平洋戦争",
+	"capital": "首都", "ruler": "実権", "edu_center": "学問の中心", "war": "太平洋戦争", "standing": "国際的地位",
 }
 
 var db: HistoryDB
@@ -41,6 +41,7 @@ var era_states: Dictionary = {}      # eraId -> その時代の終わりの状�
 var final_state: Dictionary = {}
 var chaos_touched: Dictionary = {}   # qid -> true（混乱がなければ史実が違っていた問題）
 var war: Dictionary = {}             # 太平洋戦争の帰趨（WarModel.evaluate の結果：tier・pillars・score…）
+var standing: Dictionary = {}        # 国際的地位の推移（WarModel.standing の結果：points[{year, score, tier, base…}]）
 
 
 func _init(p_db: HistoryDB) -> void:
@@ -182,16 +183,21 @@ func _merge_layer(ivs: Dictionary) -> Dictionary:
 ## 二段階の計算：まず戦前までの歴史を出して1941年の国力（WarModel）を評価し、その帰趨を1941年の変化として重ねて計算し直す
 func _simulate_war(ivs: Dictionary, mods: Variant, acts: Array) -> Dictionary:
 	var r1 := simulate(ivs, mods)
-	var w := WarModel.evaluate(db, r1["eras"], r1["world"], acts)
+	var sd := WarModel.standing(db, r1["eras"], r1["world"], acts)
+	var w := WarModel.evaluate(db, r1["eras"], r1["world"], acts, sd)
 	var wm: Dictionary = w.get("mods", {})
-	if wm.is_empty():
+	var extra: Array = (sd.get("mods", []) as Array).duplicate()
+	if not wm.is_empty():
+		extra.append({"rule": "war", "era": "showa", "year": int(db.war_model.get("war_year", 1941)), "effects": wm, "title": "太平洋戦争：" + str(w["tier"])})
+	if extra.is_empty():
 		r1["war"] = w
+		r1["standing"] = sd
 		return r1
-	var extra: Array = [{"rule": "war", "era": "showa", "year": int(db.war_model.get("war_year", 1941)), "effects": wm, "title": "太平洋戦争：" + str(w["tier"])}]
 	var base: Array = (chaos_mods + _layer["mods"]) if mods == null else (mods as Array)
 	var ivs2 := ivs if mods != null else _merge_layer(ivs)
 	var r2 := simulate(ivs2, base + extra)
 	r2["war"] = w
+	r2["standing"] = sd
 	return r2
 
 
@@ -209,6 +215,7 @@ func recompute() -> void:
 	effective = _merge_layer(interventions)
 	var r := _simulate_war(interventions, null, actions)
 	war = r["war"]
+	standing = r.get("standing", {})
 	world = r["world"]
 	reasons = r["reasons"]
 	era_states = r["eras"]
@@ -558,6 +565,12 @@ func compose_ending() -> Array:
 		lines.append("")
 		lines.append("―― 太平洋戦争：%s ――" % wt.get("name", wt.get("id", "")))
 		lines.append(str(wt.get("summary", "")))
+	var spts: Array = standing.get("points", [])
+	if not spts.is_empty():
+		var seq_t: PackedStringArray = []
+		for sp in spts:
+			seq_t.append("%d年 %s" % [sp["year"], sp["tier"]])
+		lines.append("（日本の国際的地位：" + " → ".join(seq_t) + "）")
 	var mj := modern_japan()
 	if not mj.is_empty():
 		lines.append("")

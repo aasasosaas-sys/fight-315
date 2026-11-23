@@ -530,7 +530,7 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			advance_dialog()
 		return
-	if event.is_action_pressed("pause") and not _death.visible:
+	if event.is_action_pressed("pause") and not _death.visible and get_tree().get_nodes_in_group("game_modal").is_empty():
 		get_viewport().set_input_as_handled()
 		set_paused(not _pause.visible)
 

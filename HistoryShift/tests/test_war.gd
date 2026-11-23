@@ -162,10 +162,96 @@ func _run() -> void:
 		st3.load_save()
 		_check(st3.war_tier() == st2.war_tier(), "fuzz: save/load keeps war tier")
 	print("fuzz tiers: ", tiers)
+	_standing_tests(db)
 	HistoryState.delete_save()
 	await _integration()
 	print("RESULT: %s (%d failures)" % ["PASS" if fails == 0 else "FAIL", fails])
 	quit(1 if fails else 0)
+
+
+## 国際的地位の推移
+func _standing_tests(db: HistoryDB) -> void:
+	var sm: Dictionary = db.standing_model
+	_check(not sm.is_empty(), "standing model loaded")
+	var st := HistoryState.new(db)
+	for p in st.standing["points"]:
+		_check(absf(float(p["score"]) - float(p["base"])) < 0.01 and p["tier"] == p["base_tier"], "untouched history reproduces the real standing at %d" % p["year"])
+	_check(not WarModel.power_by(st.standing, sm, 1853), "historically not a power before 1853")
+	_check(WarModel.power_by(st.standing, sm, 1919), "historically a power by 1919")
+	# 1つの行動では1853年より前に列強にならない（事業・鎖国をしない）
+	for pid in db.projects:
+		_apply_set(st, db, [pid])
+		_check(not WarModel.power_by(st.standing, sm, 1800), "single project %s does not make Japan a power before 1853" % pid)
+	st.actions = []
+	st.interventions = {"edo_05": {"choice": 0, "method": 0, "seq": 1}}
+	st.recompute()
+	_check(not WarModel.power_by(st.standing, sm, 1800), "not adopting sakoku alone is not enough")
+	# 深い戦略（貪欲）：1700年までに列強の一角
+	var cands: Array = db.projects.keys().filter(func(p): return int(db.projects[p]["year"]) < 1700)
+	var goal := func(s2: HistoryState) -> float:
+		for p in s2.standing["points"]:
+			if int(p["year"]) == 1700:
+				return float(p["score"])
+		return 0.0
+	var chosen: Array = []
+	var found := false
+	for step in 40:
+		_apply_set(st, db, chosen)
+		if WarModel.power_by(st.standing, sm, 1700):
+			found = true
+			break
+		var best := ""
+		var bv := -1e9
+		for pid in cands:
+			if pid in chosen or not WarModel.available(db, st.actions, st.war["pillars"], pid)[0]:
+				continue
+			_apply_set(st, db, chosen + [pid])
+			var v: float = goal.call(st)
+			if v > bv:
+				bv = v
+				best = pid
+		if best == "":
+			break
+		chosen.append(best)
+	_check(found, "a multi-era strategy makes Japan a great power by 1700")
+	if found:
+		var eras := {}
+		var lines: PackedStringArray = []
+		chosen.sort_custom(func(a, b): return int(db.projects[a]["year"]) < int(db.projects[b]["year"]))
+		for pid in chosen:
+			eras[db.projects[pid]["era"]] = true
+			lines.append("%d年 %s" % [db.projects[pid]["year"], db.projects[pid]["name"]])
+		print("great power by 1700 (%d projects, %d eras, + no sakoku):\n  %s" % [chosen.size(), eras.size(), "\n  ".join(lines)])
+		_check(eras.size() >= 4, "power by 1700 needs foundations from several eras (%d)" % eras.size())
+		var curve: PackedStringArray = []
+		for p in st.standing["points"]:
+			curve.append("%d:%s" % [p["year"], p["tier"]])
+		print("  curve: ", " → ".join(curve))
+		# 1853年に列強なら、ペリー来航と条約が変わる
+		var s1853: Dictionary = {}
+		for p in st.standing["points"]:
+			if int(p["year"]) == 1853:
+				s1853 = p
+		if float(s1853.get("score", 0.0)) >= 65.0:
+			_check(st.world_choice(db.by_id["edo_04"]) == 1, "a great power in 1853 gets an equal treaty (edo_04 → ①)")
+		else:
+			print("  (1853 score %d: below 65, Perry consequence not tested in this strategy)" % int(s1853.get("score", 0.0)))
+		var ending := st.compose_ending()
+		_check(String(ending[1]).contains("日本の国際的地位"), "ending mentions the standing")
+	# 江戸までの事業をすべて＋鎖国なし → 1853年に列強の一角なら、ペリーは対等の交渉を求め、条約は関税自主権つきに
+	var pre1853: Array = db.projects.keys().filter(func(p): return int(db.projects[p]["year"]) < 1853)
+	pre1853.sort_custom(func(a, b): return int(db.projects[a]["year"]) < int(db.projects[b]["year"]))
+	_apply_set(st, db, pre1853)
+	var sc53 := 0.0
+	for p in st.standing["points"]:
+		if int(p["year"]) == 1853:
+			sc53 = float(p["score"])
+	print("all projects before 1853 + no sakoku: 1853 standing %d, edo_04 = %d" % [int(sc53), st.world_choice(db.by_id["edo_04"])])
+	_check(sc53 >= 65.0, "deep strategy makes Japan a power in 1853")
+	_check(st.world_choice(db.by_id["edo_04"]) == 1, "a great power in 1853 gets an equal treaty (edo_04 → ①)")
+	st.interventions = {}
+	st.actions = []
+	st.recompute()
 
 
 func _integration() -> void:

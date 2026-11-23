@@ -19,6 +19,8 @@ func _run() -> void:
 	var game := get_tree().root.get_node_or_null("Game")
 	if game == null:
 		print("Game autoload missing"); get_tree().quit(2); return
+	if game.profile:
+		game.profile.autosave = false   # 拾った物・貸与で本物の持ち物ファイルを書き換えない
 	var use_real := "real" in OS.get_cmdline_user_args()
 	if not use_real:
 		game.set_meta("force_fallback_world", true)

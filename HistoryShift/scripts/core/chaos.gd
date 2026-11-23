@@ -225,8 +225,9 @@ func _generic(kind: String, id: String, info: Dictionary, ev: Dictionary) -> Arr
 		"teach":
 			# 技術を教える（actor_interact の「技術を教える」）：人物がいればその人に、いなければその土地の職人に伝わる
 			var sk := str(info.get("skill", ""))
-			if sk != "" and not _taught.has(nm + "/" + sk):
-				_taught[nm + "/" + sk] = true
+			var tkey := (nm if nm != "" else id) + "/" + sk
+			if sk != "" and not _taught.has(tkey):
+				_taught[tkey] = true
 				out.append(_act({"verb": "teach", "target": nm if nm != "" else id, "skill": sk, "level": int(info.get("level", 0))}))
 		"anachronism":
 			# 時代錯誤の品が過去に残った（渡した・落とした・職人の前で作った）。同じ品は一度の自由探索で一度だけ

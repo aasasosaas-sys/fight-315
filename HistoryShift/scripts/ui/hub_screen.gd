@@ -95,6 +95,13 @@ func _header() -> Control:
 		wb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		wb.pressed.connect(_show_war)
 		h.add_child(wb)
+	if not Game.state.standing.get("points", []).is_empty():
+		var sp: Array = Game.state.standing["points"]
+		var early := WarModel.power_by(Game.state.standing, Game.db.standing_model, 1853)
+		var sb := JSUI.button("国際的地位：" + str(sp[-1]["tier"]) + ("（1853年以前から列強）" if early else ""), "gold" if early else "normal", 20, 260)
+		sb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		sb.pressed.connect(_show_standing)
+		h.add_child(sb)
 	if Game.profile:
 		var top: Array = Game.profile.skills_summary(1.0)
 		h.add_child(_stat("技能", ("%s %d" % [top[0]["name"], int(top[0]["level"])]) if not top.is_empty() else "素人", JSUI.GOLD if not top.is_empty() else JSUI.MUTED))
@@ -489,6 +496,63 @@ func _footer() -> Control:
 		JSUI.confirm(self, "すべてリセット", "答案・歴史改変・ログ・技能・持ち物をすべて消去し、世界を本来の史実に戻します。この操作は取り消せません。", "リセットする", "やめる", func(): reset_all.emit(), true))
 	h.add_child(reset_b)
 	return h
+
+
+## 国際的地位の推移：各時点の「この世界」と「史実」。史実の根拠を先に、そのあと何がこの世界を変えたか
+func _show_standing() -> void:
+	var sd: Dictionary = Game.state.standing
+	var sm: Dictionary = Game.db.standing_model
+	var r := JSUI.modal(self, 1400, "国際的地位の推移 ― 日本はいつ列強になったか")
+	var overlay: Control = r[0]
+	var v: VBoxContainer = r[1]
+	v.add_child(JSUI.label(str(sm.get("note", "")), 18, JSUI.MUTED, null, true))
+	var sc := ScrollContainer.new()
+	sc.custom_minimum_size = Vector2(0, 560)
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	v.add_child(sc)
+	var lv := JSUI.vbox(10)
+	lv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sc.add_child(lv)
+	for p in sd.get("points", []):
+		var pn := JSUI.panel(JSUI.sb(Color(1, 1, 1, 0.03), 8, 0, Color.TRANSPARENT, 0, 12))
+		var pv := JSUI.vbox(4)
+		pn.add_child(pv)
+		var hh := JSUI.hbox(12)
+		var nm := JSUI.label("%d年　この世界：%s（%d）　史実：%s（%d）" % [p["year"], p["tier"], int(p["score"]), p["base_tier"], int(p["base"])], 21, Color.WHITE, JSUI.sans_bold())
+		nm.custom_minimum_size = Vector2(700, 0)
+		hh.add_child(nm)
+		var bars := JSUI.vbox(2)
+		bars.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		for val in [float(p["score"]), float(p["base"])]:
+			var bar := ProgressBar.new()
+			bar.max_value = 100
+			bar.value = val
+			bar.show_percentage = false
+			bar.custom_minimum_size = Vector2(0, 10)
+			bars.add_child(bar)
+		hh.add_child(bars)
+		pv.add_child(hh)
+		pv.add_child(JSUI.label("【史実】" + str(p.get("basis", "")), 18, JSUI.TEXT, null, true))
+		var got: PackedStringArray = []
+		for it in p.get("projects", []):
+			got.append("%s %+d" % [it[0], int(it[1])])
+		for it2 in p.get("facts", []):
+			got.append("%s %+d" % [it2[0], int(it2[1])])
+		if absf(float(p.get("vars", 0.0))) >= 1.0:
+			got.append("歴史の流れ %+d" % int(p["vars"]))
+		if not got.is_empty():
+			pv.add_child(JSUI.label("【この世界】" + "、".join(got), 18, JSUI.CYAN, null, true))
+		lv.add_child(pn)
+	for n in sd.get("notes", []):
+		lv.add_child(JSUI.label("▲ " + str(n), 19, JSUI.GOLD, null, true))
+	lv.add_child(JSUI.label("【地位を上げるには】戦国・江戸初めの海と産業の事業（国友の工房・南蛮式帆船・朱印船と日本町）を積み重ね、1639年の鎖国（ポルトガル船の来航禁止）を起こさないこと。古い時代の積み重ねほど複利で大きく効く。1853年に列強の一角なら、ペリー来航と条約の中身が変わる。", 19, JSUI.GOLD, null, true))
+	var row := JSUI.hbox()
+	row.alignment = BoxContainer.ALIGNMENT_END
+	var close := JSUI.button("閉じる", "ghost", 24, 200)
+	close.pressed.connect(func(): UISfx.play("back"); JSUI.close_modal(overlay))
+	row.add_child(close)
+	v.add_child(row)
+	close.call_deferred("grab_focus")
 
 
 ## 戦局予測：1941年の国力の柱と、太平洋戦争の帰趨。史実の数字を先に、そのあと「どの時代で何をすれば変わるか」

@@ -527,6 +527,7 @@ func end() -> void:
 		craft.end_session()
 	if Game.profile:
 		Game.profile.return_loans()
+		Game.profile.flush()
 	if mode == "free" and Game.chaos:
 		Game.chaos.end_session()
 		if Game.chaos.shifted.is_connected(_on_history_shift):

@@ -273,6 +273,14 @@ func _build_chaos() -> void:
 				wb0 = str(h0["war_before"])
 				break
 		left_col.add_child(JSUI.label(("戦局予測：%s → %s" % [wb0, wt]) if wb0 != "" and wb0 != wt else ("戦局予測：" + wt), 24, JSUI.GOLD, JSUI.sans_bold(), true))
+	var spts: Array = Game.state.standing.get("points", [])
+	if not spts.is_empty():
+		var chg: PackedStringArray = []
+		for sp in spts:
+			if sp["tier"] != sp["base_tier"]:
+				chg.append("%d年 %s" % [sp["year"], sp["tier"]])
+		if not chg.is_empty():
+			left_col.add_child(JSUI.label("国際的地位：" + "、".join(chg) + "（史実と違う）", 21, JSUI.CYAN, null, true))
 	if not broken.is_empty():
 		left_col.add_child(JSUI.label("混乱のせいで %d 問の確定解答が崩れた。ハブから時空跳躍して史実を修復しよう（古い時代から直すのが近道）。" % broken.size(), 22, JSUI.SHU, null, true))
 	elif Game.state.exam_submitted:

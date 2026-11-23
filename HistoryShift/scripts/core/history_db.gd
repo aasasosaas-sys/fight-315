@@ -17,6 +17,7 @@ var battles: Array = []         # 合戦（data/actors/<era>.json の battles）
 var q_actors: Dictionary = {}   # qid -> [{name, at}]（その問題に関わる人物と、会える名所）
 var war_model: Dictionary = {}  # data/war/model.json（太平洋戦争の帰趨モデル、WarModel）
 var projects: Dictionary = {}   # 事業 id -> 国家事業（data/projects/<era>.json）
+var standing_model: Dictionary = {}  # data/war/standing.json（国際的地位の推移）
 
 
 static func load_all(dir := "res://data") -> HistoryDB:
@@ -78,6 +79,11 @@ func _load_war(dir: String) -> void:
 			war_model = d
 		else:
 			errors.append("war/model.json: JSON を読めません")
+	var sp := dir.path_join("war/standing.json")
+	if FileAccess.file_exists(sp):
+		var ds: Variant = JSON.parse_string(FileAccess.get_file_as_string(sp))
+		if typeof(ds) == TYPE_DICTIONARY:
+			standing_model = ds
 	var pdir := dir.path_join("projects")
 	if not DirAccess.dir_exists_absolute(pdir):
 		return

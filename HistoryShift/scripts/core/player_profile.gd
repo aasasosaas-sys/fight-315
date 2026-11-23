@@ -24,6 +24,9 @@ var lessons: Dictionary = {}          # 工房 id -> 稽古の回数
 var loan_stacks: Dictionary = {}      # 貸与した束の数（返すとき差し引く）
 var next_uid := 1
 var autosave := true
+var _dirty := false
+var _last_save := -100000
+const SAVE_INTERVAL_MS := 3000      # 技能の細かな上昇はまとめて保存する（持ち物・お金の変化はすぐ保存）
 
 
 func _init() -> void:
@@ -74,7 +77,7 @@ func set_level(id: String, v: float) -> void:
 	skills[id] = clampf(v, 0.0, 100.0)
 	if floorf(skills[id] / 5.0) != floorf(old / 5.0) or Skills.rank(skills[id]) != Skills.rank(old):
 		skill_up.emit(id, old, skills[id])
-	_changed()
+	_changed(false)
 
 
 ## 稽古（弟子入り）で上げる。cap = その工房で教われる上限。上がった量を返す
@@ -236,9 +239,19 @@ func spend(mon: int) -> bool:
 
 
 # ------------------------------------------------------------------ 保存
-func _changed() -> void:
+func _changed(important := true) -> void:
 	changed.emit()
-	if autosave:
+	if not autosave:
+		return
+	if important or Time.get_ticks_msec() - _last_save > SAVE_INTERVAL_MS:
+		save()
+	else:
+		_dirty = true
+
+
+## まとめて保存（セッションの終わり・ゲームの終了時）
+func flush() -> void:
+	if _dirty and autosave:
 		save()
 
 
@@ -284,6 +297,8 @@ func from_dict(d: Dictionary) -> void:
 
 
 func save() -> void:
+	_dirty = false
+	_last_save = Time.get_ticks_msec()
 	var f := FileAccess.open(save_path, FileAccess.WRITE)
 	if f == null:
 		return

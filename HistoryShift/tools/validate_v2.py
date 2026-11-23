@@ -10,7 +10,7 @@ import glob, json, os, random, re, sys
 
 NUM = ["centralization", "warrior", "court", "religion", "commerce", "open_asia", "open_west", "tech",
        "education", "commoners", "militarism", "democracy", "economy", "unity"]
-CAT = ["capital", "ruler", "edu_center", "war"]
+CAT = ["capital", "ruler", "edu_center", "war", "standing"]
 BASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
 errors, warns = [], []
 

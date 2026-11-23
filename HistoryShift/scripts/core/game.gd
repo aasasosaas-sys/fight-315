@@ -103,3 +103,8 @@ func set_world(w: Node3D) -> void:
 
 func lock_mouse(locked: bool) -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if locked else Input.MOUSE_MODE_VISIBLE
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST and profile:
+		profile.flush()

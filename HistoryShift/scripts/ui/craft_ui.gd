@@ -70,6 +70,7 @@ func prof() -> PlayerProfile:
 
 func _show() -> void:
 	_root.visible = true
+	add_to_group("game_modal")   # 開いている間は Esc でポーズしない（HUD）
 	Game.input_blocked = true
 	Game.lock_mouse(false)
 
@@ -80,6 +81,7 @@ func close() -> void:
 	_game = null
 	_root.visible = false
 	_station = null
+	remove_from_group("game_modal")
 	Game.input_blocked = false
 	Game.lock_mouse(true)
 	closed.emit()

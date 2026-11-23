@@ -24,7 +24,7 @@ static func _era_end_year(db: HistoryDB, era_id: String) -> int:
 
 
 ## 1941年の国力。eras = その世界の各時代の終わりの状態、world = 設問の史実、acts = 行動の記録
-static func evaluate(db: HistoryDB, eras: Dictionary, world: Dictionary, acts: Array) -> Dictionary:
+static func evaluate(db: HistoryDB, eras: Dictionary, world: Dictionary, acts: Array, stand: Dictionary = {}) -> Dictionary:
 	var m: Dictionary = db.war_model
 	if m.is_empty():
 		return {"tier": "", "pillars": {}, "mods": {}}
@@ -72,6 +72,14 @@ static func evaluate(db: HistoryDB, eras: Dictionary, world: Dictionary, acts: A
 				var pts := float(pr["pillars"][pid]) * k2
 				parts[pid]["projects"] += pts
 				parts[pid]["list"].append([pr["name"], pts])
+	# 1900年の国際的地位が史実より高ければ（低ければ）外交・工業・資源に響く
+	for sp in stand.get("points", []):
+		if int(sp["year"]) == 1900:
+			var dd := (float(sp["score"]) - float(sp["base"])) * 0.2
+			for pid in ["diplomacy", "industry", "resources"]:
+				if parts.has(pid) and absf(dd) >= 0.5:
+					parts[pid]["projects"] += dd
+					parts[pid]["list"].append(["1900年の国際的地位", dd])
 	for pid in parts:
 		var p: Dictionary = parts[pid]
 		pillars[pid] = clampf(p["base"] + p["vars"] + p["projects"] + p["facts"], 0.0, 100.0)
@@ -184,3 +192,105 @@ static func projects_for(db: HistoryDB, era_id: String) -> Array:
 			out.append(db.projects[pid])
 	out.sort_custom(func(a, b): return int(a["year"]) < int(b["year"]))
 	return out
+
+
+# ================================================================== 国際的地位の推移（data/war/standing.json）
+## 各時点（1600・1700・1800・1853・1900・1919・1941年）の日本の国際的地位。
+## 史実の値（base）＋ 事業（柱の点 × 重み × k × その時点までの複利）＋ 歴史パラメータの変化（時代の終わりまでの変化 × 重み × 複利）＋ 設問の史実（facts）
+static func standing(db: HistoryDB, eras: Dictionary, world: Dictionary, acts: Array) -> Dictionary:
+	var s: Dictionary = db.standing_model
+	if s.is_empty():
+		return {"points": [], "mods": []}
+	var g: Dictionary = s.get("growth", {})
+	var gb := float(g.get("base", 1.6))
+	var gc := float(g.get("cap", 3.0))
+	var k := float(s.get("k", 1.0))
+	var w: Dictionary = s.get("weights", {})
+	var vw: Dictionary = s.get("vars", {})
+	var vcap := float(s.get("vars_cap", 12))
+	var pts: Array = []
+	for cp in s.get("checkpoints", []):
+		var y := int(cp["year"])
+		var proj := 0.0
+		var plist: Array = []
+		for a in acts:
+			if str(a.get("verb", "")) != "project" or a.get("ruled", false):
+				continue
+			var pr: Dictionary = db.projects.get(str(a.get("target", "")), {})
+			if pr.is_empty() or int(pr["year"]) >= y:
+				continue
+			var gr := minf(gc, pow(gb, float(y - int(pr["year"])) / 100.0))
+			var add := 0.0
+			for pid in pr.get("pillars", {}):
+				add += float(w.get(pid, 0.0)) * float(pr["pillars"][pid])
+			add *= k * gr
+			proj += add
+			if absf(add) >= 0.5:
+				plist.append([pr["name"], add])
+		var vars_part := 0.0
+		var prev := HistoryState.base_state()
+		for eid in HistoryDB.ERA_ORDER:
+			if not eras.has(eid):
+				continue
+			var ey := _era_end_year(db, eid)
+			if ey >= y:
+				break
+			var st: Dictionary = eras[eid]
+			var gr2 := minf(gc, pow(gb, float(y - ey) / 100.0))
+			for v in vw:
+				vars_part += float(vw[v]) * (float(st.get(v, 0.0)) - float(prev.get(v, 0.0))) * gr2
+			prev = st
+		vars_part = clampf(vars_part, -vcap, vcap)
+		var facts := 0.0
+		var flist: Array = []
+		for f in s.get("facts", []):
+			if int(f.get("from", 0)) <= y and int(world.get(str(f["q"]), -1)) == int(f["choice"]):
+				facts += float(f["points"])
+				flist.append([f.get("note", ""), float(f["points"])])
+		var score := clampf(float(cp["base"]) + proj + vars_part + facts, 0.0, 100.0)
+		pts.append({"year": y, "score": score, "tier": standing_tier(s, score), "base": float(cp["base"]),
+			"base_tier": standing_tier(s, float(cp["base"])), "basis": cp.get("basis", ""), "projects": plist, "vars": vars_part, "facts": flist})
+	# その時点の地位がもたらす変化
+	var mods: Array = []
+	var notes: Array = []
+	for c in s.get("consequences", []):
+		for p in pts:
+			if int(p["year"]) != int(c["year"]):
+				continue
+			var hit: bool = (c.has("if_min") and float(p["score"]) >= float(c["if_min"])) or (c.has("if_max") and float(p["score"]) <= float(c["if_max"]) and float(p["base"]) > float(c["if_max"]))
+			if hit:
+				mods.append({"rule": "standing%d" % int(c["year"]), "era": db.era_of_year(int(c["year"])), "year": int(c["year"]), "effects": c["mods"], "title": str(c.get("text", ""))})
+				notes.append(str(c.get("text", "")))
+	# 令和のエンディング用：1941年の地位（史実と違うとき、または1700年までに列強になっていたとき）
+	if not pts.is_empty():
+		var last: Dictionary = pts[-1]
+		var early_power := false
+		for p in pts:
+			if int(p["year"]) <= 1800 and float(p["score"]) >= _tier_min(s, str(s.get("power_tier", "列強の一角"))):
+				early_power = true
+		if last["tier"] != last["base_tier"] or early_power:
+			mods.append({"rule": "standing_end", "era": "showa", "year": 1941, "effects": {"set": {"standing": last["tier"]}}, "title": "国際的地位"})
+	return {"points": pts, "mods": mods, "notes": notes}
+
+
+static func standing_tier(s: Dictionary, score: float) -> String:
+	var best := ""
+	for t in s.get("tiers", []):
+		if score >= float(t["min"]):
+			best = t["id"]
+	return best
+
+
+static func _tier_min(s: Dictionary, tier: String) -> float:
+	for t in s.get("tiers", []):
+		if t["id"] == tier:
+			return float(t["min"])
+	return 999.0
+
+
+## ある年までに列強（power_tier 以上）になっているか
+static func power_by(st_res: Dictionary, s: Dictionary, year: int) -> bool:
+	for p in st_res.get("points", []):
+		if int(p["year"]) <= year and float(p["score"]) >= _tier_min(s, str(s.get("power_tier", "列強の一角"))):
+			return true
+	return false
