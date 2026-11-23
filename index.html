@@ -912,47 +912,247 @@
             .sp-band-lines { animation: none; }
             .uport-ready { animation: none; }
         }
+        /* =====================================================================
+           ★UI改訂（和風ソシャゲ風）: ヘッダー / 下部タブバー / メニュー / ホーム
+           ===================================================================== */
+        :root {
+            --wa-gold: #D4AF37; --wa-gold-l: #F6E2A0; --wa-gold-d: #8A6A12;
+            --wa-shu: #C8392B; --wa-shu-d: #7E1F16;
+            --wa-ink: #120D1A; --wa-lacquer: #1B0F26; --wa-murasaki: #4A2E69;
+            --wa-tab-h: 64px;
+        }
+        body { padding-bottom: calc(var(--wa-tab-h) + env(safe-area-inset-bottom) + 8px);
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -10%, rgba(74,46,105,.55), transparent 70%),
+                #0E0A14; }
+        /* 青海波の地紋 */
+        .wa-seigaiha, .wa-header, .wa-tabbar, .wa-sheet-panel {
+            --wa-pattern: radial-gradient(circle at 50% 100%, transparent 38%, rgba(212,175,55,.07) 39% 42%, transparent 43% 55%, rgba(212,175,55,.07) 56% 59%, transparent 60%);
+        }
+
+        /* ---------- ヘッダー ---------- */
+        .wa-header { background: var(--wa-pattern), linear-gradient(180deg, #2a1640 0%, #190d27 100%); background-size: 28px 14px, auto;
+            border-bottom: 2px solid var(--wa-gold); box-shadow: 0 2px 0 var(--wa-shu-d), 0 6px 18px rgba(0,0,0,.55); padding: 6px 10px; }
+        .wa-header > nav { display: none !important; } /* 旧タブ（内部状態のみ保持） */
+        .wa-header-inner { max-width: 80rem; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
+        .wa-player { display: flex; align-items: center; gap: 8px; min-width: 0; text-align: left; }
+        .wa-player-medal { width: 44px; height: 44px; border-radius: 9999px; flex-shrink: 0; box-shadow: 0 0 0 2px var(--wa-gold), 0 0 0 4px var(--wa-shu-d), 0 2px 8px rgba(0,0,0,.6); overflow: visible; }
+        .wa-player-info { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+        .wa-rank { font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 11px; color: #fff4e0; padding: 1px 10px 1px 7px; white-space: nowrap;
+            background: linear-gradient(90deg, var(--wa-shu), #9f2a1f); clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 50%, 100% 100%, 0 100%); }
+        .wa-level { font-size: 11px; color: var(--wa-gold-l); font-weight: 700; margin-top: 2px; }
+        .wa-logo { margin: 0 auto; font-weight: 800; font-size: 17px; letter-spacing: .08em; white-space: nowrap;
+            background: linear-gradient(180deg, #fff6d5, #e7c25c 55%, #b8860b); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 1px 0 #3b1d0a); }
+        .wa-logo b { font-size: 1.15em; margin-left: .1em; }
+        .wa-res { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+        .wa-pill { display: flex; align-items: center; gap: 5px; height: 28px; padding: 0 10px 0 4px; border-radius: 9999px; font-weight: 800; font-size: 13px; font-family: ui-monospace, monospace;
+            background: linear-gradient(180deg, #0d0814, #24142f); border: 1px solid rgba(212,175,55,.6); box-shadow: inset 0 1px 0 rgba(255,255,255,.08); }
+        .wa-pill i { width: 22px; height: 22px; border-radius: 9999px; display: grid; place-items: center; font-size: 11px; }
+        .wa-pill-coin { color: #fde68a; } .wa-pill-coin i { background: radial-gradient(circle at 35% 30%, #fff1b8, #d4a017); color: #5a3d00; }
+        .wa-pill-gem { color: #e9d5ff; } .wa-pill-gem i { background: radial-gradient(circle at 35% 30%, #f5d0fe, #9333ea); color: #fff; }
+        .wa-pill small { font-size: 10px; color: rgba(253,230,138,.65); font-family: 'Zen Kaku Gothic New', sans-serif; }
+        .wa-icon-btn { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; color: var(--wa-gold-l);
+            background: linear-gradient(180deg, #3a2352, #1d1029); border: 1px solid rgba(212,175,55,.55); box-shadow: 0 2px 0 #0a0510; transition: transform .1s; }
+        .wa-icon-btn:active { transform: translateY(2px); box-shadow: none; }
+        .wa-icon-danger { color: #fca5a5; border-color: rgba(239,68,68,.55); }
+        @media (max-width: 720px) { .wa-logo { display: none; } }
+        @media (max-width: 520px) { .wa-hide-sm { display: none; } .wa-pill { font-size: 12px; padding-right: 8px; } .wa-res { gap: 4px; } }
+
+        /* ---------- 下部タブバー ---------- */
+        .wa-tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 45; height: calc(var(--wa-tab-h) + env(safe-area-inset-bottom));
+            padding-bottom: env(safe-area-inset-bottom); display: grid; grid-template-columns: repeat(5, 1fr); align-items: end;
+            background: var(--wa-pattern), linear-gradient(180deg, #23132f, #120a1a); background-size: 28px 14px, auto;
+            border-top: 2px solid var(--wa-gold); box-shadow: 0 -2px 0 var(--wa-shu-d) inset, 0 -6px 18px rgba(0,0,0,.6); }
+        #appMainHeader.hidden ~ .wa-tabbar, #appMainHeader.hidden ~ .wa-sheet { display: none !important; }
+        .wa-tabbar > button { height: var(--wa-tab-h); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+            color: rgba(246,226,160,.55); font-size: 11px; font-weight: 700; position: relative; transition: color .15s; }
+        .wa-tabbar > button i { font-size: 20px; }
+        .wa-tabbar > button.wa-active { color: #fff3c4; }
+        .wa-tabbar > button.wa-active::before { content: ''; position: absolute; top: 4px; width: 7px; height: 7px; background: var(--wa-shu); transform: rotate(45deg); box-shadow: 0 0 8px var(--wa-shu); }
+        .wa-tabbar > button.wa-active i { filter: drop-shadow(0 0 6px rgba(253,224,71,.7)); }
+        .wa-tab-main { justify-content: flex-end !important; padding-bottom: 6px; }
+        .wa-tab-main-disc { width: 62px; height: 62px; margin-top: -26px; border-radius: 9999px; display: grid; place-items: center; color: #fff4e0;
+            background: radial-gradient(circle at 40% 30%, #ef5a45, var(--wa-shu) 55%, var(--wa-shu-d)); border: 3px solid var(--wa-gold);
+            box-shadow: 0 0 0 3px #1b0f26, 0 4px 12px rgba(200,57,43,.6), inset 0 2px 0 rgba(255,255,255,.25); }
+        .wa-tab-main-disc i { font-size: 26px !important; }
+        .wa-tabbar > button.wa-tab-main.wa-active::before { display: none; }
+        .wa-tabbar > button.wa-tab-main.wa-active .wa-tab-main-disc { box-shadow: 0 0 0 3px #1b0f26, 0 0 18px rgba(253,224,71,.65), inset 0 2px 0 rgba(255,255,255,.25); }
+
+        /* ---------- メニューシート ---------- */
+        .wa-sheet { position: fixed; inset: 0; z-index: 70; background: rgba(5,2,10,.6); display: flex; align-items: flex-end; justify-content: center; }
+        .wa-sheet.hidden { display: none; }
+        .wa-sheet-panel { width: min(100%, 640px); margin-bottom: calc(var(--wa-tab-h) + env(safe-area-inset-bottom)); border-radius: 18px 18px 0 0; padding: 14px 14px 18px;
+            background: var(--wa-pattern), linear-gradient(180deg, #2a1640, #160b20); background-size: 28px 14px, auto;
+            border: 2px solid var(--wa-gold); border-bottom: none; box-shadow: 0 -10px 30px rgba(0,0,0,.6); animation: wa-sheet-up .2s ease-out; }
+        @keyframes wa-sheet-up { from { transform: translateY(30px); opacity: 0; } }
+        .wa-sheet-title { display: flex; justify-content: space-between; align-items: center; color: var(--wa-gold-l); font-weight: 800; font-size: 18px; letter-spacing: .3em; margin-bottom: 12px; }
+        .wa-sheet-title button { width: 32px; height: 32px; border-radius: 9999px; color: var(--wa-gold-l); border: 1px solid rgba(212,175,55,.5); }
+        .wa-sheet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+        .wa-sheet-grid button, .wa-home-grid button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 14px 6px; border-radius: 12px;
+            color: #fbefd0; font-weight: 700; font-size: 13px; background: linear-gradient(180deg, #3b2353, #1f1130); border: 1px solid rgba(212,175,55,.5);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 3px 0 #0b0612; transition: transform .1s; }
+        .wa-sheet-grid button:active, .wa-home-grid button:active { transform: translateY(2px); box-shadow: inset 0 1px 0 rgba(255,255,255,.1); }
+        .wa-sheet-grid button i, .wa-home-grid button i { font-size: 22px; color: var(--wa-gold); }
+        .wa-sheet-grid .wa-danger { color: #fecaca; border-color: rgba(239,68,68,.45); } .wa-sheet-grid .wa-danger i { color: #f87171; }
+
+        /* ---------- ホーム ---------- */
+        .wa-home { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 14px; align-items: stretch; }
+        .wa-home.hidden { display: none; }
+        @media (max-width: 860px) { .wa-home { grid-template-columns: 1fr; } }
+        .wa-home-scene { position: relative; min-height: 420px; border-radius: 18px; overflow: hidden; border: 2px solid var(--wa-gold);
+            box-shadow: 0 0 0 3px var(--wa-shu-d), 0 10px 30px rgba(0,0,0,.6); isolation: isolate; }
+        @media (max-width: 860px) { .wa-home-scene { min-height: 360px; } }
+        .wa-sky { position: absolute; inset: 0; background: linear-gradient(180deg, #120a2e 0%, #2b1850 38%, #6b2d4d 68%, #c8573b 88%, #e9a14e 100%); }
+        .wa-moon { position: absolute; right: 12%; top: 9%; width: 86px; height: 86px; border-radius: 9999px;
+            background: radial-gradient(circle at 38% 35%, #fffbea, #f3e3b0 60%, #d8c084); box-shadow: 0 0 40px 14px rgba(255,240,200,.35); }
+        .wa-hills { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 38%; }
+        .wa-kasumi { position: absolute; height: 18px; border-radius: 9999px; background: linear-gradient(90deg, transparent, rgba(246,226,160,.38), transparent); }
+        .wa-kasumi-1 { left: -10%; width: 70%; top: 40%; animation: wa-drift 18s ease-in-out infinite alternate; }
+        .wa-kasumi-2 { right: -12%; width: 60%; top: 58%; height: 14px; animation: wa-drift 23s ease-in-out infinite alternate-reverse; }
+        @keyframes wa-drift { to { transform: translateX(12%); } }
+        .wa-home-leader { position: absolute; left: 50%; bottom: 8%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; cursor: pointer; z-index: 2; }
+        .wa-leader-frame { width: clamp(180px, 34vw, 250px); aspect-ratio: 1; border-radius: 9999px; padding: 6px;
+            background: conic-gradient(from 0deg, #fff3c4, #b8860b, #fff3c4, #b8860b, #fff3c4); box-shadow: 0 0 0 4px var(--wa-shu-d), 0 12px 30px rgba(0,0,0,.65), 0 0 50px rgba(253,224,71,.25);
+            animation: wa-float 4s ease-in-out infinite; }
+        .wa-leader-frame img { width: 100%; height: 100%; border-radius: 9999px; display: block; background: #1b0f26; }
+        @keyframes wa-float { 50% { transform: translateY(-8px); } }
+        .wa-nameplate { margin-top: 10px; display: flex; align-items: center; gap: 8px; padding: 6px 18px; color: #fff6dc; font-weight: 800; font-size: 18px; letter-spacing: .1em;
+            background: linear-gradient(180deg, #2c1a3e, #140a1c); border: 2px solid var(--wa-gold); clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%); }
+        .wa-rar { font-size: 11px; font-weight: 900; letter-spacing: 0; padding: 1px 7px; border-radius: 4px; color: #1b0f26; background: linear-gradient(180deg, #fff1b8, #d4a017); }
+        .wa-home-quote { position: absolute; left: 4%; top: 6%; max-width: 46%; writing-mode: vertical-rl; height: 58%; font-size: 17px; font-weight: 700; line-height: 1.8;
+            color: #fff6dc; text-shadow: 0 2px 6px rgba(0,0,0,.8); letter-spacing: .12em; z-index: 2; }
+        .wa-home-side { display: flex; flex-direction: column; gap: 12px; }
+        .wa-sortie { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 18px 10px; border-radius: 16px; color: #fff6e0;
+            background: radial-gradient(ellipse at 50% 0%, #ef6a52, var(--wa-shu) 55%, var(--wa-shu-d)); border: 3px solid var(--wa-gold);
+            box-shadow: 0 0 0 3px #1b0f26, 0 6px 0 #4a120c, 0 10px 24px rgba(200,57,43,.45), inset 0 2px 0 rgba(255,255,255,.25); transition: transform .1s; overflow: hidden; }
+        .wa-sortie::after { content: ''; position: absolute; top: 0; bottom: 0; width: 40%; left: -60%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.28), transparent); animation: wa-shine 3.2s ease-in-out infinite; }
+        @keyframes wa-shine { 0%, 60% { transform: translateX(0); } 100% { transform: translateX(450%); } }
+        .wa-sortie:active { transform: translateY(4px); box-shadow: 0 0 0 3px #1b0f26, 0 2px 0 #4a120c; }
+        .wa-sortie-label { font-size: 34px; font-weight: 800; letter-spacing: .4em; padding-left: .4em; text-shadow: 0 3px 0 #5a160e; }
+        .wa-sortie-sub { font-size: 12px; font-weight: 700; color: #ffe8c2; margin-top: 2px; }
+        .wa-home-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        @media (max-width: 420px) { .wa-home-grid { grid-template-columns: repeat(2, 1fr); } }
+        .wa-banner { position: relative; text-align: left; border-radius: 14px; padding: 14px 16px; min-height: 96px; overflow: hidden; color: #fff6dc;
+            background: linear-gradient(110deg, #3b1f5c 0%, #6b2d6b 50%, #b8860b 120%); border: 2px solid var(--wa-gold); box-shadow: 0 0 0 2px #1b0f26, 0 6px 16px rgba(0,0,0,.5); }
+        .wa-banner-kicker { display: inline-block; font-size: 11px; font-weight: 900; padding: 1px 8px; border-radius: 4px; background: var(--wa-shu); letter-spacing: .2em; }
+        .wa-banner-title { display: block; font-size: 19px; font-weight: 800; margin-top: 6px; text-shadow: 0 2px 4px rgba(0,0,0,.6); }
+        .wa-banner-portraits { position: absolute; right: 8px; bottom: 6px; display: flex; }
+        .wa-banner-portraits > span { width: 54px; height: 54px; margin-left: -14px; border-radius: 9999px; box-shadow: 0 0 0 2px var(--wa-gold); }
+        .wa-deck-card { border-radius: 14px; padding: 10px 12px 12px; cursor: pointer; background: linear-gradient(180deg, #24142f, #150b1e); border: 1px solid rgba(212,175,55,.5); }
+        .wa-card-head { color: var(--wa-gold-l); font-weight: 800; font-size: 14px; letter-spacing: .2em; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .wa-card-head::before { content: ''; width: 8px; height: 8px; background: var(--wa-shu); transform: rotate(45deg); }
+        .wa-deck-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .wa-deck-row > div { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+        .wa-deck-row > div > span:first-child { width: 100%; max-width: 64px; aspect-ratio: 1; }
+        .wa-deck-row small { font-size: 10px; color: #f5e9cf; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+        @media (prefers-reduced-motion: reduce) { .wa-kasumi, .wa-leader-frame, .wa-sortie::after { animation: none; } }
+
+        /* ---------- ★UI改訂: タイル一覧・キャラ詳細 ---------- */
+        .wa-tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 10px; }
+        .wa-tile { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px 8px; border-radius: 12px; min-width: 0;
+            background: linear-gradient(180deg, #2a1838, #150b1e); border: 1px solid rgba(212,175,55,.35); box-shadow: 0 3px 0 #0b0612; transition: transform .1s; }
+        .wa-tile:active { transform: translateY(2px); box-shadow: none; }
+        .wa-tile-face { width: 64px; height: 64px; }
+        .wa-tile-name { font-size: 12px; font-weight: 700; color: #f8ecd0; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .wa-tile-rar { position: absolute; top: 5px; left: 5px; font-size: 9px; font-weight: 900; padding: 0 5px; border-radius: 4px; color: #1b0f26; background: #9ca3af; }
+        .wa-tile-cnt { position: absolute; top: 5px; right: 6px; font-size: 10px; font-weight: 800; color: #fde68a; }
+        .wa-tile.rar-R .wa-tile-rar { background: #7dd3fc; } .wa-tile.rar-SR .wa-tile-rar { background: #c4b5fd; }
+        .wa-tile.rar-SSR .wa-tile-rar { background: linear-gradient(180deg, #fde68a, #f59e0b); } .wa-tile.rar-UR .wa-tile-rar { background: linear-gradient(180deg, #fecaca, #ef4444); color: #fff; }
+        .wa-tile.rar-神 .wa-tile-rar { background: linear-gradient(180deg, #fffbe6, #fbbf24); }
+        .wa-tile.rar-SSR { border-color: rgba(245,158,11,.6); } .wa-tile.rar-UR { border-color: rgba(239,68,68,.65); background: linear-gradient(180deg, #3a1622, #170a12); }
+        .wa-tile.rar-神 { border-color: #fde68a; background: linear-gradient(180deg, #3a2a14, #1a1208); }
+        .wa-tile-off { opacity: .72; } .wa-tile-off .wa-tile-name { color: #9ca3af; }
+        .wa-dt { position: fixed; inset: 0; z-index: 90; background: rgba(5,2,10,.72); display: flex; align-items: center; justify-content: center; padding: 16px; }
+        .wa-dt.hidden { display: none; }
+        .wa-dt-panel { position: relative; width: min(100%, 520px); max-height: calc(100vh - 32px); overflow-y: auto; border-radius: 18px; padding: 18px;
+            background: radial-gradient(ellipse at 50% 0%, rgba(74,46,105,.7), transparent 60%), linear-gradient(180deg, #23132f, #120a1a);
+            border: 2px solid var(--wa-gold); box-shadow: 0 0 0 3px var(--wa-shu-d), 0 20px 50px rgba(0,0,0,.7); color: #f3ead6; animation: wa-pop .18s ease-out; }
+        @keyframes wa-pop { from { transform: scale(.94); opacity: 0; } }
+        .wa-dt-close { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; border-radius: 9999px; color: var(--wa-gold-l); border: 1px solid rgba(212,175,55,.5); background: rgba(0,0,0,.35); }
+        .wa-dt-hero { display: flex; gap: 14px; align-items: center; }
+        .wa-dt-face { width: 120px; height: 120px; flex-shrink: 0; border-radius: 9999px; padding: 4px; background: conic-gradient(#fff3c4, #b8860b, #fff3c4, #b8860b, #fff3c4); }
+        .wa-dt-face img { width: 100%; height: 100%; border-radius: 9999px; display: block; }
+        .wa-dt-title h3 { font-size: 22px; font-weight: 800; color: #fff6dc; margin: 4px 0 2px; }
+        .wa-dt-title p { font-size: 12px; color: #d6ccb6; line-height: 1.5; }
+        .wa-dt-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 14px; }
+        .wa-dt-stats > div { text-align: center; padding: 6px 2px; border-radius: 8px; background: rgba(0,0,0,.35); border: 1px solid rgba(212,175,55,.3); }
+        .wa-dt-stats small { display: block; font-size: 10px; color: #c9b98f; } .wa-dt-stats b { font-size: 15px; color: #fde68a; font-family: ui-monospace, monospace; }
+        .wa-dt-sec { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: rgba(0,0,0,.3); border-left: 3px solid var(--wa-gold); font-size: 13px; }
+        .wa-dt-sec b { color: #a5f3fc; } .wa-dt-sp b { color: #fde68a; } .wa-dt-sp { border-left-color: var(--wa-shu); }
+        .wa-dt-sec p { color: #d6ccb6; font-size: 12px; line-height: 1.55; margin-top: 2px; }
+        .wa-dt-h { font-family: 'Shippori Mincho', serif; font-weight: 800; color: var(--wa-gold-l); font-size: 12px; letter-spacing: .2em; margin-bottom: 4px; }
+        .wa-dt-syn { display: flex; flex-direction: column; gap: 8px; }
+        .wa-dt-syn li { display: flex; gap: 8px; align-items: center; } .wa-dt-syn small { color: #d6ccb6; }
+        .wa-dt-syn-faces { display: flex; flex-shrink: 0; } .wa-dt-syn-faces > span { width: 34px; height: 34px; margin-right: -6px; }
+        .wa-dt-action { margin-top: 14px; width: 100%; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 15px; color: #fff6e0; letter-spacing: .1em;
+            background: radial-gradient(ellipse at 50% 0%, #ef6a52, var(--wa-shu) 60%, var(--wa-shu-d)); border: 2px solid var(--wa-gold); box-shadow: 0 4px 0 #4a120c; }
+
+        /* 編成 */
+        .wa-slots { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important; gap: 10px !important; }
+        .wa-slot { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 12px 8px 10px; border-radius: 14px; cursor: pointer; min-width: 0; text-align: center;
+            background: radial-gradient(ellipse at 50% 0%, rgba(212,175,55,.18), transparent 60%), linear-gradient(180deg, #2c1a3e, #150b1e);
+            border: 2px solid rgba(212,175,55,.7); box-shadow: 0 0 0 2px #1b0f26, 0 4px 0 #0b0612; }
+        .wa-slot.rar-UR { border-color: #ef4444; } .wa-slot.rar-神 { border-color: #fde68a; box-shadow: 0 0 0 2px #1b0f26, 0 0 16px rgba(253,230,138,.4); }
+        .wa-slot-no { position: absolute; top: 6px; left: 8px; font-family: 'Shippori Mincho', serif; font-weight: 800; color: var(--wa-gold); font-size: 13px; }
+        .wa-slot .wa-tile-rar { top: auto; left: auto; position: static; }
+        .wa-slot-face { width: 76px; height: 76px; margin-bottom: 2px; }
+        .wa-slot-name { font-size: 14px; font-weight: 800; color: #fff3d6; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .wa-slot-stat { font-size: 10px; color: #cbbfa4; font-family: ui-monospace, monospace; }
+        .wa-slot-sp { font-size: 10px; color: #fde68a; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: rgba(0,0,0,.35); border-radius: 9999px; padding: 2px 8px; }
+        .wa-slot-sp small { color: #c9b98f; }
+        .wa-slot-off { position: absolute; inset: 0; border-radius: 12px; background: rgba(127,29,29,.82); color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .15s; }
+        @media (hover: hover) { .wa-slot:hover .wa-slot-off { opacity: 1; } }
+        .wa-slot-empty { border: 2px dashed rgba(212,175,55,.35); background: rgba(0,0,0,.25); box-shadow: none; color: #a8997a; justify-content: center; min-height: 170px; cursor: default; }
+        .wa-slot-empty i { font-size: 22px; color: rgba(212,175,55,.6); } .wa-slot-empty small { font-size: 10px; color: #7d715b; }
+        .wa-info { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; border-radius: 9999px; color: #f6e2a0; background: rgba(0,0,0,.45); z-index: 2; font-size: 14px; }
+        .wa-pool { max-height: 560px; overflow-y: auto; padding: 4px; }
+        .wa-tile { cursor: pointer; }
+        .wa-tile-sub { font-size: 9px; color: #b8ab8e; font-family: ui-monospace, monospace; }
+        .wa-tile-syn { position: absolute; top: 24px; left: 6px; font-size: 12px; }
+        .wa-tile-picked { opacity: .55; border-color: var(--wa-gold) !important; }
+        .wa-tile-badge { position: absolute; bottom: 34px; left: 50%; transform: translateX(-50%) rotate(-6deg); font-size: 10px; font-weight: 900; color: #fff; padding: 1px 8px; border-radius: 4px; background: var(--wa-shu); border: 1px solid var(--wa-gold-l); white-space: nowrap; }
+
+        /* 各画面の見出しパネル（和風の題箋） */
+        main > section > .heian-border:first-child, main > section > .heian-border-gold:first-child {
+            background: radial-gradient(circle at 50% 100%, transparent 38%, rgba(212,175,55,.06) 39% 42%, transparent 43% 55%, rgba(212,175,55,.06) 56% 59%, transparent 60%) 0 0 / 28px 14px,
+                        linear-gradient(90deg, rgba(126,31,22,.55), rgba(42,22,64,.92) 28%, rgba(23,12,34,.96)) !important;
+            border: 2px solid var(--wa-gold) !important; border-left: 8px solid var(--wa-shu) !important; border-radius: 14px !important;
+            box-shadow: 0 0 0 2px #1b0f26, 0 8px 20px rgba(0,0,0,.45) !important; }
+        main > section > .heian-border:first-child h2, main > section > .heian-border-gold:first-child h2 { font-size: 22px; letter-spacing: .08em; }
+        .heian-border { border-color: rgba(212,175,55,.45); background-color: rgba(31,23,43,.85); }
+        .gold-button { box-shadow: 0 3px 0 #6b4a0a, inset 0 1px 0 rgba(255,255,255,.4); }
+        .gold-button:active { transform: translateY(2px); box-shadow: inset 0 1px 0 rgba(255,255,255,.4); }
+        .dex-rank-header { margin-bottom: 8px; }
+
+        /* 画面外のカードは描画を省略（長い一覧の表示を軽く） */
+        #synergyListContainer > *, #achievementGrid > *, #characterGrowthList > * { content-visibility: auto; contain-intrinsic-size: auto 96px; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col bg-heian-bg text-gray-100 overflow-x-hidden">
 
     <!-- Main Top Header Navigation Bar (Hidden during full-screen battle) -->
-    <header id="appMainHeader" class="bg-heian-darkpurple/90 border-b border-heian-gold/30 sticky top-0 z-40 backdrop-blur-md px-3 py-2">
-        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
-            <!-- App Title & Player Status -->
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full border border-heian-gold bg-heian-purple flex items-center justify-center text-heian-gold text-xl font-bold shadow-inner">
-                    <i class="fa-solid fa-torii-gate"></i>
+    <header id="appMainHeader" class="wa-header sticky top-0 z-40">
+        <div class="wa-header-inner">
+            <!-- 貴族（プレイヤー）情報 -->
+            <button type="button" class="wa-player" onclick="switchTab('growth')" title="育成・衣装">
+                <span class="wa-player-medal" id="headerPlayerPortrait"></span>
+                <span class="wa-player-info">
+                    <span id="playerRankBadge" class="wa-rank">正六位・国主</span>
+                    <span id="playerLevelText" class="wa-level">貴族 Lv.1</span>
+                </span>
+            </button>
+            <h1 class="wa-logo font-mincho">戦って覚える<b>315</b></h1>
+            <!-- 通貨・システム -->
+            <div class="wa-res">
+                <div class="wa-pill wa-pill-coin" title="文">
+                    <i class="fa-solid fa-coins"></i><span id="coinDisplay">1,000</span><small>文</small>
                 </div>
-                <div>
-                    <h1 class="font-mincho text-lg md:text-xl font-bold gold-gradient-text leading-tight">戦って覚える315</h1>
-                    <div class="flex items-center gap-2 text-xs text-yellow-200/80">
-                        <span id="playerRankBadge" class="bg-heian-purple/80 px-2 py-0.5 rounded border border-heian-gold/40 text-heian-gold font-semibold">
-                            正六位・国主
-                        </span>
-                        <span id="playerLevelText">貴族 Lv.1</span>
-                    </div>
+                <div class="wa-pill wa-pill-gem" title="宝玉">
+                    <i class="fa-solid fa-gem"></i><span id="gemDisplay">100</span>
                 </div>
-            </div>
-
-            <!-- Currency & Resources -->
-            <div class="flex items-center gap-4 text-sm font-semibold">
-                <div class="flex items-center gap-1.5 bg-black/40 px-3 py-1 rounded-full border border-yellow-500/30">
-                    <i class="fa-solid fa-coins text-amber-400"></i>
-                    <span id="coinDisplay" class="text-amber-300 font-mono">1,000</span>
-                    <span class="text-xs text-amber-200/60">文</span>
-                </div>
-                <div class="flex items-center gap-1.5 bg-black/40 px-3 py-1 rounded-full border border-purple-400/30">
-                    <i class="fa-solid fa-gem text-purple-400"></i>
-                    <span id="gemDisplay" class="text-purple-300 font-mono">100</span>
-                </div>
-                <button onclick="openSettingsModal()" class="text-xs bg-purple-900/40 hover:bg-purple-800/60 text-purple-200 border border-purple-500/40 px-2 py-1 rounded"><i class="fa-solid fa-gear mr-1"></i>設定</button>
-                <button onclick="openDataTransferModal()" class="text-xs bg-cyan-900/40 hover:bg-cyan-800/60 text-cyan-300 border border-cyan-500/40 px-2 py-1 rounded">
-                    <i class="fa-solid fa-arrow-right-arrow-left"></i> データ移行
-                </button>
-                <button onclick="promptResetData()" class="text-xs bg-red-900/40 hover:bg-red-800/60 text-red-300 border border-red-500/40 px-2 py-1 rounded">
-                    <i class="fa-solid fa-rotate-left"></i> リセット
-                </button>
+                <button type="button" class="wa-icon-btn" onclick="openSettingsModal()" title="設定" aria-label="設定"><i class="fa-solid fa-gear"></i></button>
+                <button type="button" class="wa-icon-btn wa-hide-sm" onclick="openDataTransferModal()" title="データ移行" aria-label="データ移行"><i class="fa-solid fa-arrow-right-arrow-left"></i></button>
+                <button type="button" class="wa-icon-btn wa-icon-danger wa-hide-sm" onclick="promptResetData()" title="リセット" aria-label="リセット"><i class="fa-solid fa-rotate-left"></i></button>
             </div>
         </div>
 
@@ -1006,11 +1206,85 @@
         </nav>
     </header>
 
+    <!-- ★UI改訂: 下部タブバー（和風ソシャゲ風） -->
+    <nav id="waTabBar" class="wa-tabbar" aria-label="メインメニュー">
+        <button type="button" data-tab="home" onclick="switchTab('home')"><i class="fa-solid fa-torii-gate"></i><span>ホーム</span></button>
+        <button type="button" data-tab="deck" onclick="switchTab('deck')"><i class="fa-solid fa-users-gear"></i><span>編成</span></button>
+        <button type="button" data-tab="dungeons" class="wa-tab-main" onclick="switchTab('dungeons')"><span class="wa-tab-main-disc"><i class="fa-solid fa-khanda"></i></span><span>出撃</span></button>
+        <button type="button" data-tab="gacha" onclick="switchTab('gacha')"><i class="fa-solid fa-scroll"></i><span>召喚</span></button>
+        <button type="button" data-tab="menu" onclick="openWaMenu()"><i class="fa-solid fa-bars"></i><span>メニュー</span></button>
+    </nav>
+    <div id="waMenuSheet" class="wa-sheet hidden" onclick="if (event.target === this) closeWaMenu()">
+        <div class="wa-sheet-panel">
+            <div class="wa-sheet-title font-mincho"><span>御品書</span><button type="button" onclick="closeWaMenu()" aria-label="閉じる"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="wa-sheet-grid">
+                <button type="button" onclick="closeWaMenu();switchTab('weekday')"><i class="fa-solid fa-calendar-days"></i><span>曜日ダンジョン</span></button>
+                <button type="button" onclick="closeWaMenu();switchTab('bossrush')"><i class="fa-solid fa-dragon"></i><span>ボスラッシュ</span></button>
+                <button type="button" onclick="closeWaMenu();switchTab('pvp')"><i class="fa-solid fa-hand-fist"></i><span>対戦</span></button>
+                <button type="button" onclick="closeWaMenu();switchTab('growth')"><i class="fa-solid fa-vest"></i><span>育成・衣装</span></button>
+                <button type="button" onclick="closeWaMenu();switchTab('synergy')"><i class="fa-solid fa-scroll"></i><span>シナジー図鑑</span></button>
+                <button type="button" onclick="closeWaMenu();switchTab('dex')"><i class="fa-solid fa-book"></i><span>キャラ図鑑</span></button>
+                <button type="button" onclick="closeWaMenu();switchTab('achievements')"><i class="fa-solid fa-trophy"></i><span>実績</span></button>
+                <button type="button" onclick="closeWaMenu();openSettingsModal()"><i class="fa-solid fa-gear"></i><span>設定</span></button>
+                <button type="button" onclick="closeWaMenu();openDataTransferModal()"><i class="fa-solid fa-arrow-right-arrow-left"></i><span>データ移行</span></button>
+                <button type="button" class="wa-danger" onclick="closeWaMenu();promptResetData()"><i class="fa-solid fa-rotate-left"></i><span>リセット</span></button>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content Container (Hidden during battle) -->
     <main id="appMainContent" class="flex-1 max-w-7xl w-full mx-auto p-2 md:p-4">
 
         <!-- VIEW 1: DUNGEON & STAGE SELECT VIEW -->
-        <section id="view-dungeons" class="space-y-4">
+        <!-- ★UI改訂: ホーム画面 -->
+        <section id="view-home" class="wa-home">
+            <div class="wa-home-scene">
+                <div class="wa-sky"></div>
+                <div class="wa-moon"></div>
+                <svg class="wa-hills" viewBox="0 0 400 120" preserveAspectRatio="none" aria-hidden="true">
+                    <path d="M0 80 Q40 40 90 64 T190 52 T300 66 T400 46 L400 120 L0 120Z" fill="#2a1740" opacity=".85"/>
+                    <path d="M0 96 Q60 70 120 88 T250 82 T400 76 L400 120 L0 120Z" fill="#170c24"/>
+                    <g fill="#c8392b">
+                        <rect x="300" y="58" width="5" height="40"/><rect x="330" y="58" width="5" height="40"/>
+                        <path d="M290 54 Q318 48 346 54 L344 59 Q318 54 292 59Z"/><rect x="294" y="63" width="46" height="3.6"/>
+                    </g>
+                </svg>
+                <div class="wa-kasumi wa-kasumi-1"></div>
+                <div class="wa-kasumi wa-kasumi-2"></div>
+                <div class="wa-home-leader" onclick="switchTab('deck')" title="編成を変更">
+                    <div class="wa-leader-frame"><img id="homeLeaderImg" alt=""></div>
+                    <div class="wa-nameplate">
+                        <span id="homeLeaderRarity" class="wa-rar">N</span>
+                        <span id="homeLeaderName" class="font-mincho">貴族</span>
+                    </div>
+                </div>
+                <div class="wa-home-quote font-mincho" id="homeLeaderQuote">いざ、古文の戦場へ。</div>
+            </div>
+
+            <div class="wa-home-side">
+                <button type="button" class="wa-sortie" onclick="switchTab('dungeons')">
+                    <span class="wa-sortie-label font-mincho">出 撃</span>
+                    <span class="wa-sortie-sub" id="homeProgressText">討伐 0 / 0 ステージ</span>
+                </button>
+                <div class="wa-home-grid">
+                    <button type="button" onclick="switchTab('weekday')"><i class="fa-solid fa-calendar-days"></i><span>曜日ダンジョン</span></button>
+                    <button type="button" onclick="switchTab('bossrush')"><i class="fa-solid fa-dragon"></i><span>ボスラッシュ</span></button>
+                    <button type="button" onclick="switchTab('pvp')"><i class="fa-solid fa-hand-fist"></i><span>対戦</span></button>
+                    <button type="button" onclick="switchTab('achievements')"><i class="fa-solid fa-trophy"></i><span>実績</span></button>
+                </div>
+                <button type="button" class="wa-banner" onclick="switchTab('gacha')">
+                    <span class="wa-banner-kicker">召喚</span>
+                    <span class="wa-banner-title font-mincho">古典の英傑を召し出せ</span>
+                    <span class="wa-banner-portraits" id="homeBannerPortraits"></span>
+                </button>
+                <div class="wa-deck-card" onclick="switchTab('deck')">
+                    <div class="wa-card-head font-mincho">出撃部隊</div>
+                    <div class="wa-deck-row" id="homeDeckRow"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-dungeons" class="hidden space-y-4">
             <div class="bg-heian-card/80 p-4 rounded-xl heian-border flex flex-wrap justify-between items-center gap-2">
                 <div>
                             <h2 class="font-mincho text-xl font-bold gold-gradient-text"><i class="fa-solid fa-scroll mr-2"></i>古文常識＆文法識別ダンジョン</h2>
@@ -6630,7 +6904,38 @@
             });
         }
 
+        // ★UI改訂: ホーム画面・下部タブバー
+        const WA_TAB_OF = { home: 'home', deck: 'deck', dungeons: 'dungeons', gacha: 'gacha' };
+        function updateWaTabBar(tabName) {
+            const cur = WA_TAB_OF[tabName] || 'menu';
+            document.querySelectorAll('#waTabBar > button').forEach(b => b.classList.toggle('wa-active', b.dataset.tab === cur));
+        }
+        function openWaMenu() { const m = document.getElementById('waMenuSheet'); if (m) m.classList.remove('hidden'); }
+        function closeWaMenu() { const m = document.getElementById('waMenuSheet'); if (m) m.classList.add('hidden'); }
+        function renderHomeView() {
+            try {
+                const deck = (state.deck || []).map(id => getUnit(id)).filter(Boolean);
+                const leader = deck[0] || getUnit('ch_000');
+                const img = document.getElementById('homeLeaderImg');
+                if (img && leader) { const u = unitPortraitURL(leader); if (img.getAttribute('src') !== u) img.src = u; img.alt = leader.name || ''; }
+                const nm = document.getElementById('homeLeaderName'); if (nm) nm.textContent = leader ? leader.name : '';
+                const rr = document.getElementById('homeLeaderRarity'); if (rr) rr.textContent = leader ? leader.rarity : '';
+                const q = document.getElementById('homeLeaderQuote');
+                if (q && leader) {
+                    const sp = leader.special_move && leader.special_move.name ? leader.special_move.name.split('（')[0] : '';
+                    q.textContent = sp ? `「${sp}」` : 'いざ、古文の戦場へ。';
+                }
+                const prog = document.getElementById('homeProgressText');
+                if (prog) prog.textContent = `討伐 ${Object.keys(state.clearedStages || {}).length} / ${getTotalStageCount()} ステージ`;
+                const row = document.getElementById('homeDeckRow');
+                if (row) row.innerHTML = deck.map(u => `<div><span>${unitIconHTML(u, { badge: false })}</span><small>${u.name}</small></div>`).join('') || '<small class="text-gray-400">編成されていません</small>';
+                const bp = document.getElementById('homeBannerPortraits');
+                if (bp && !bp.firstChild) bp.innerHTML = ['ge_002', 'ok_005', 'so_003'].map(id => getUnit(id)).filter(Boolean).map(u => `<span>${unitIconHTML(u, { badge: false })}</span>`).join('');
+            } catch (e) { }
+        }
+
         function switchTab(tabName) {
+            try { closeWaMenu(); updateWaTabBar(tabName); } catch (e) { }
             try { releaseHiddenTabDom(tabName); } catch (e) { }
             document.querySelectorAll("main > section").forEach(sec => sec.classList.add("hidden"));
             document.querySelectorAll(".nav-btn").forEach(btn => {
@@ -6646,6 +6951,7 @@
                 activeBtn.classList.remove("border-transparent", "text-gray-400");
             }
 
+            if (tabName === "home") renderHomeView();
             if (tabName === "dungeons") renderDungeonsView();
             if (tabName === "weekday") renderWeekdayDungeonsView();
             if (tabName === "deck") renderDeckView();
@@ -6659,6 +6965,7 @@
         }
 
         function renderHeader() {
+            try { const hp = document.getElementById('headerPlayerPortrait'); if (hp) { const me = getUnit('ch_000'); const k = me.gender + me.rarity; if (hp.dataset.k !== k || !hp.firstChild) { hp.dataset.k = k; hp.innerHTML = unitIconHTML(me, { badge: false }); } } } catch (e) { }
             document.getElementById("coinDisplay").textContent = state.coins.toLocaleString();
             document.getElementById("gemDisplay").textContent = state.gems.toLocaleString();
             
@@ -7055,6 +7362,7 @@
             // Render Deck Slots（貴族の固定枠＋出家回数に応じた自由編成枠）
             const slotsContainer = document.getElementById("deckSlotsContainer");
             slotsContainer.innerHTML = "";
+            slotsContainer.classList.add('wa-slots');
             const currentMaxDeck = getMaxDeckSize();
             const subMax = getMaxSubDeckSize();
 
@@ -7067,31 +7375,23 @@
                     const st = getUnitStats(uid);
                     const specLvl = (uid !== 'ch_000' && state.unitSpecialLevels[uid]) ? state.unitSpecialLevels[uid] : 1;
 
-                    slot.className = "bg-heian-card p-2 rounded-xl border border-heian-gold/60 flex flex-col items-center text-center cursor-pointer hover:border-red-500 transition shadow relative group";
+                    // ★UI改訂: 編成枠はコンパクトなカード（詳細は ⓘ から）
+                    slot.className = `wa-slot rar-${unit.rarity}`;
                     slot.onclick = () => toggleDeckUnit(uid);
-
+                    const spName = unit.special_move ? unit.special_move.name.split('（')[0] : '秘技';
                     slot.innerHTML = `
-                        <span class="text-[9px] ${unit.rarity === '神' ? 'rarity-god' : 'bg-amber-500 text-black'} font-extrabold px-1 rounded mb-1">${unit.rarity}</span>
-                        <div class="w-10 h-10 rounded-full bg-heian-purple border border-heian-gold flex items-center justify-center text-heian-gold text-lg mb-1">
-                            ${unitIconHTML(unit)}
-                        </div>
-                        <div class="font-mincho text-xs font-bold text-yellow-100 truncate w-full">${unit.name} ${genderMark(unit)}</div>
-                        <div class="text-[9px] text-gray-300 font-mono mt-0.5">HP ${st.hp} / ATK ${st.atk}</div>
-                        <div class="text-[8px] text-cyan-300 font-bold mt-1 bg-black/60 p-1 rounded w-full text-left border border-cyan-500/20">
-                            <div class="truncate text-cyan-300 font-bold"><i class="fa-solid fa-wand-magic-sparkles mr-0.5"></i>${unit.skill ? unit.skill.name : 'スキルなし'}</div>
-                            <div class="text-[7px] text-gray-300 line-clamp-2 leading-tight mt-0.5 font-normal">${unit.skill ? unit.skill.effect : '効果なし'}</div>
-                        </div>
-                        <div class="text-[8px] text-amber-300 font-bold mt-1 bg-black/60 p-1 rounded w-full text-left border border-amber-500/20">
-                            <div class="truncate text-amber-300 font-bold"><i class="fa-solid fa-wand-magic-sparkles mr-0.5"></i>${unit.special_move ? unit.special_move.name : '秘技'} (Lv.${specLvl})</div>
-                            <div class="text-[7px] text-gray-300 line-clamp-2 leading-tight mt-0.5 font-normal">${unit.special_move ? unit.special_move.effect : '効果なし'}</div>
-                        </div>
-                        <div class="absolute inset-0 bg-red-900/80 rounded-xl opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition">
-                            解除
-                        </div>
+                        <span class="wa-slot-no">${i + 1}</span>
+                        <button type="button" class="wa-info" onclick="event.stopPropagation();openUnitDetail('${uid}')" aria-label="詳細"><i class="fa-solid fa-circle-info"></i></button>
+                        <span class="wa-slot-face">${unitIconHTML(unit)}</span>
+                        <span class="wa-tile-rar">${unit.rarity}</span>
+                        <span class="wa-slot-name font-mincho">${unit.name} ${genderMark(unit)}</span>
+                        <span class="wa-slot-stat">Lv${getUnitLevelValue(uid)}・HP ${st.hp.toLocaleString()}・ATK ${st.atk.toLocaleString()}</span>
+                        <span class="wa-slot-sp" title="${unit.special_move ? unit.special_move.effect : ''}"><i class="fa-solid fa-bolt"></i> ${spName} <small>Lv${specLvl}</small></span>
+                        <span class="wa-slot-off">外す</span>
                     `;
                 } else {
-                    slot.className = "bg-black/30 p-2 rounded-xl border-2 border-dashed border-gray-600 flex flex-col items-center justify-center text-gray-500 min-h-[110px]";
-                    slot.innerHTML = `<i class="fa-solid fa-plus text-lg mb-1"></i><span class="text-[10px]">空き枠</span>`;
+                    slot.className = "wa-slot wa-slot-empty";
+                    slot.innerHTML = `<i class="fa-solid fa-plus"></i><span>空き枠</span><small>下の一覧から選択</small>`;
                 }
                 slotsContainer.appendChild(slot);
             }
@@ -7154,6 +7454,7 @@
             // Render Owned Character Pool
             const poolContainer = document.getElementById("ownedCharacterPool");
             poolContainer.innerHTML = "";
+            poolContainer.className = "wa-tile-grid wa-pool";
 
             // ① 所持キャラ一覧をレア度順（URが上）で表示
             [...state.ownedUnits].sort((a, b) => {
@@ -7176,28 +7477,19 @@
                     });
                 }
 
+                // ★UI改訂: 所持キャラはコンパクトな肖像タイル（タップで編成／ⓘで詳細）
                 const card = document.createElement("div");
-                card.className = `p-2 rounded-xl border flex flex-col items-center text-center cursor-pointer transition relative ${
-                    isSelected ? 'bg-heian-purple/60 border-heian-gold opacity-50' : 'bg-black/50 border-heian-purple/60 hover:border-heian-gold'
-                }`;
+                card.className = `wa-tile rar-${unit.rarity}${isSelected ? ' wa-tile-picked' : ''}`;
+                card.setAttribute('role', 'button');
                 card.onclick = () => tryAssignDeckOrSub(uid);
-
                 card.innerHTML = `
-                    ${hasDeckSynergy ? '<span class="absolute top-1 right-1 text-amber-300 font-extrabold text-xs" title="デッキ内キャラとシナジー発生">⚡</span>' : ''}
-                    <span class="text-[9px] ${unit.rarity === '神' ? 'rarity-god' : 'bg-amber-500 text-black'} font-extrabold px-1 rounded mb-1">${unit.rarity}</span>
-                    <div class="w-10 h-10 rounded-full bg-heian-purple border border-heian-gold flex items-center justify-center text-heian-gold text-lg mb-1">
-                        ${unitIconHTML(unit)}
-                    </div>
-                    <div class="font-mincho text-xs font-bold text-yellow-100 truncate w-full">${unit.name} ${genderMark(unit)}</div>
-                    <div class="text-[9px] text-gray-300 font-mono mt-0.5">HP ${st.hp} / ATK ${st.atk}</div>
-                    <div class="text-[8px] text-cyan-300 mt-1 w-full bg-black/50 p-1 rounded text-left border border-cyan-500/20">
-                        <div class="font-bold truncate"><i class="fa-solid fa-wand-magic-sparkles mr-0.5"></i>${unit.skill ? unit.skill.name : 'スキルなし'}</div>
-                        <div class="text-[7px] text-gray-300 line-clamp-2 leading-tight mt-0.5">${unit.skill ? unit.skill.effect : '効果なし'}</div>
-                    </div>
-                    <div class="text-[8px] text-amber-300 mt-1 w-full bg-black/50 p-1 rounded text-left border border-amber-500/20">
-                        <div class="font-bold truncate"><i class="fa-solid fa-wand-magic-sparkles mr-0.5"></i>${unit.special_move ? unit.special_move.name : '秘技'}</div>
-                        <div class="text-[7px] text-gray-300 line-clamp-2 leading-tight mt-0.5">${unit.special_move ? unit.special_move.effect : '効果なし'}</div>
-                    </div>
+                    ${hasDeckSynergy ? '<span class="wa-tile-syn" title="部隊のキャラとシナジー発生">⚡</span>' : ''}
+                    <button type="button" class="wa-info" onclick="event.stopPropagation();openUnitDetail('${uid}')" aria-label="詳細"><i class="fa-solid fa-circle-info"></i></button>
+                    <span class="wa-tile-face">${unitIconHTML(unit, { badge: false })}</span>
+                    <span class="wa-tile-rar">${unit.rarity}</span>
+                    <span class="wa-tile-name font-mincho">${unit.name}</span>
+                    <span class="wa-tile-sub">Lv${getUnitLevelValue(uid)}・ATK ${st.atk.toLocaleString()}</span>
+                    ${isSelected ? '<span class="wa-tile-badge">編成中</span>' : ''}
                 `;
                 poolContainer.appendChild(card);
             });
@@ -7587,7 +7879,7 @@
                     card.innerHTML = `
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-full bg-heian-purple border border-heian-gold flex items-center justify-center text-heian-gold text-lg shrink-0">
-                                ${unitIconHTML(unit, { hidden: unit.rarity === '神' && !state.ownedUnits.includes(unit.id) })}
+                                ${unitIconHTML(unit, { badge: false, hidden: unit.rarity === '神' && !state.ownedUnits.includes(unit.id) })}
                             </div>
                             <div>
                                 <div class="font-mincho font-bold text-sm text-yellow-100">
@@ -7625,6 +7917,62 @@
             });
             renderDexView();
         }
+        // ============================================================
+        // ★UI改訂: キャラ詳細ポップアップ（図鑑・編成から共通で使う）
+        // ============================================================
+        function openUnitDetail(uid) {
+            const u = getUnit(uid);
+            if (!u) return;
+            const owned = state.ownedUnits.includes(uid);
+            const hidden = u.rarity === '神' && !owned;
+            const esc = (t) => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            let stats = '';
+            if (owned) {
+                try {
+                    const st = getUnitStats(uid);
+                    const lv = getUnitLevelValue(uid);
+                    const sl = uid !== 'ch_000' ? Math.min(50, (state.unitSpecialLevels && state.unitSpecialLevels[uid]) || 1) : 1;
+                    stats = `<div class="wa-dt-stats"><div><small>Lv</small><b>${lv}</b></div><div><small>HP</small><b>${st.hp.toLocaleString()}</b></div><div><small>ATK</small><b>${st.atk.toLocaleString()}</b></div><div><small>必殺Lv</small><b>${sl}</b></div></div>`;
+                } catch (e) { }
+            }
+            const syns = (u.synergies || []).map(sy => {
+                const ids = sy.target_id ? [sy.target_id] : (sy.target_ids || []);
+                const ts = ids.map(id => getUnit(id)).filter(Boolean);
+                return `<li><span class="wa-dt-syn-faces">${ts.map(t => `<span>${unitIconHTML(t, { badge: false, hidden: t.rarity === '神' && !state.ownedUnits.includes(t.id) })}</span>`).join('')}</span><span><b>${esc(sy.title)}</b><br><small>${esc(sy.effect)}</small></span></li>`;
+            }).join('');
+            const inDeck = (state.deck || []).includes(uid);
+            const html = `
+                <div class="wa-dt-panel rar-${esc(u.rarity)}" role="dialog" aria-modal="true">
+                    <button type="button" class="wa-dt-close" onclick="closeUnitDetail()" aria-label="閉じる"><i class="fa-solid fa-xmark"></i></button>
+                    <div class="wa-dt-hero">
+                        <div class="wa-dt-face">${hidden ? unitIconHTML(u, { hidden: true }) : `<img src="${unitPortraitURL(u)}" alt="${esc(u.name)}">`}</div>
+                        <div class="wa-dt-title">
+                            <span class="wa-rar">${esc(u.rarity)}</span>
+                            <h3 class="font-mincho">${hidden ? '？？？' : esc(u.name)} ${hidden ? '' : genderMark(u)}</h3>
+                            <p>${hidden ? '入手すると真の姿が解放されます。' : esc(u.description || '')}</p>
+                        </div>
+                    </div>
+                    ${stats}
+                    <div class="wa-dt-sec"><div class="wa-dt-h">スキル</div>${hidden ? '<p>？？？</p>' : `<b>${esc(u.skill && u.skill.name || 'なし')}</b><p>${esc(u.skill && u.skill.effect || '')}</p>`}</div>
+                    <div class="wa-dt-sec wa-dt-sp"><div class="wa-dt-h">必殺技</div>${hidden ? '<p>？？？</p>' : `<b>${esc(u.special_move && u.special_move.name || 'なし')}</b><p>${esc(u.special_move && u.special_move.effect || '')}</p>`}</div>
+                    ${!hidden && syns ? `<div class="wa-dt-sec"><div class="wa-dt-h">シナジー</div><ul class="wa-dt-syn">${syns}</ul></div>` : ''}
+                    <div class="wa-dt-sec"><div class="wa-dt-h">入手</div><p>${esc(dexObtainText(u))}</p><p>所持数：${owned ? getOwnedUnitCount(uid).toLocaleString() : 0}体</p></div>
+                    ${owned ? `<button type="button" class="wa-dt-action" onclick="closeUnitDetail();switchTab('deck');${inDeck ? '' : `tryAssignDeckOrSub('${uid}')`}">${inDeck ? '編成画面へ' : '部隊に編成する'}</button>` : ''}
+                </div>`;
+            let m = document.getElementById('unitDetailModal');
+            if (!m) {
+                m = document.createElement('div');
+                m.id = 'unitDetailModal';
+                m.className = 'wa-dt';
+                m.addEventListener('click', (e) => { if (e.target === m) closeUnitDetail(); });
+                document.body.appendChild(m);
+            }
+            m.innerHTML = html;
+            m.classList.remove('hidden');
+        }
+        function closeUnitDetail() { const m = document.getElementById('unitDetailModal'); if (m) { m.classList.add('hidden'); m.innerHTML = ''; } }
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeUnitDetail(); try { closeWaMenu(); } catch (x) { } } });
+
         function dexObtainText(u) {
             if (!u) return '';
             if (u.id === 'ch_000') return '最初から所持している主人公（貴族）。';
@@ -7695,37 +8043,17 @@
                 if (shown.length === 0) return;
                 html += '<div class="mt-4">';
                 html += '<div class="dex-rank-header"><span class="dex-rank-label" style="' + (rankLabelCls[rarity] || rankLabelCls.N) + '">ランク ' + rarity + '</span><span class="dex-rank-count">入手 ' + owned + ' / ' + list.length + ' 体</span></div>';
-                html += '<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">';
+                html += '<div class="wa-tile-grid">';
                 shown.forEach(u => {
+                    // ★UI改訂: 図鑑はコンパクトな肖像タイル。詳細はタップでポップアップ
                     const isOwned = state.ownedUnits.includes(u.id);
                     const isGodHidden = u.rarity === '神' && !isOwned;
-                    const nameShow = isGodHidden ? '？？？' : u.name;
-                    const descShow = isGodHidden ? '入手すると真の姿が解放されます。' : (u.description || '');
-                    const skillS = isGodHidden ? { name: '？？？', effect: '所持すると解放されます。' } : (u.skill || { name: 'なし', effect: 'なし' });
-                    const spS = isGodHidden ? { name: '？？？', effect: '所持すると解放されます。' } : (u.special_move || { name: 'なし', effect: 'なし' });
-                    const showDetails = !isGodHidden;
-                    const genderS = isGodHidden ? '' : genderMark(u);
-                    html += '<div class="dex-card ' + (isOwned ? 'dex-owned' : 'dex-unowned') + ' rar-' + rarity + '">';
-                    html += '<div class="flex items-start justify-between gap-1 mb-1">';
-                    html += '<div class="w-12 h-12 rounded-full bg-black/50 border ' + (isOwned ? 'border-yellow-300/60' : 'border-gray-500/50') + ' flex items-center justify-center text-base shrink-0">' + unitIconHTML(u, { hidden: isGodHidden, dim: !isOwned }) + '</div>';
-                    html += '<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gradient-to-r ' + (badgeCls[rarity] || badgeCls.N) + '">' + rarity + '</span>';
-                    html += '</div>';
-                    html += '<div class="font-mincho font-bold text-sm leading-tight ' + (isOwned ? 'text-yellow-100' : 'text-gray-400') + '">' + nameShow + genderS + '</div>';
-                    html += '<div class="text-[10px] text-gray-300 leading-snug mt-1">' + dexShort(descShow, 52) + '</div>';
-                    html += '<div class="text-[10px] mt-1.5 leading-snug"><span class="text-cyan-300 font-bold">入手:</span> <span class="text-gray-300">' + dexObtainText(u) + '</span></div>';
-                    html += '<div class="text-[10px] mt-1 leading-snug"><span class="text-emerald-300 font-bold">所持数:</span> <span class="text-gray-300">' + getOwnedUnitCount(u.id).toLocaleString() + '体</span></div>';
-                    if (showDetails) {
-                        html += '<div class="text-[10px] mt-1.5 leading-snug"><span class="text-purple-300 font-bold">スキル:</span> <span class="text-gray-300">' + skillS.name + '</span></div>';
-                        html += '<div class="text-[9px] text-gray-400 leading-snug">' + dexShort(skillS.effect, 60) + '</div>';
-                        html += '<div class="text-[10px] mt-1 leading-snug"><span class="text-amber-300 font-bold">必殺:</span> <span class="text-gray-300">' + spS.name + '</span></div>';
-                        html += '<div class="text-[9px] text-gray-400 leading-snug">' + dexShort(spS.effect, 60) + '</div>';
-                    } else {
-                        html += '<div class="text-[10px] text-purple-300/80 mt-1">スキル・必殺: ？？？</div>';
-                    }
-                    html += isOwned
-                        ? '<div class="dex-tag mt-1.5 inline-block bg-amber-500/20 text-amber-300 border border-amber-500/40">✨ 入手済み</div>'
-                        : '<div class="dex-tag mt-1.5 inline-block bg-gray-800 text-gray-500 border border-gray-600">未入手</div>';
-                    html += '</div>';
+                    const cnt = isOwned ? getOwnedUnitCount(u.id) : 0;
+                    html += '<button type="button" class="wa-tile rar-' + rarity + (isOwned ? '' : ' wa-tile-off') + '" onclick="openUnitDetail(\'' + u.id + '\')">' +
+                        '<span class="wa-tile-face">' + unitIconHTML(u, { hidden: isGodHidden, dim: !isOwned, badge: false }) + '</span>' +
+                        '<span class="wa-tile-rar">' + rarity + '</span>' +
+                        (cnt > 1 ? '<span class="wa-tile-cnt">×' + cnt + '</span>' : '') +
+                        '<span class="wa-tile-name font-mincho">' + (isGodHidden ? '？？？' : u.name) + '</span></button>';
                 });
                 html += '</div></div>';
             });
@@ -15441,6 +15769,7 @@ ${weekdayPointName}: +${weekdayReward.toLocaleString()}`
             applySmartphoneModeClass();
             renderHeader();
             applyWeekdayGachaTabVisibility();
+            try { renderHomeView(); updateWaTabBar('home'); } catch (e) { }
             if (new URLSearchParams(location.search).get("testown") === "1") { try { ["ge_002","ok_001","ok_002","ok_006","n10_01","wd_mon_01","kaguya_001","br_god_01","butsu_001"].forEach(function(id){ grantOwnedUnit(id); }); } catch (e) {} }
             if (new URLSearchParams(location.search).get("view") === "dex") { try { switchTab("dex"); } catch (e) {} }
             // ★軽量改修: ダンジョン一覧など重い描画は即時には行わず、アイドル時間に分割実行。
