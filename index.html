@@ -1126,6 +1126,9 @@
 
         /* 画面外のカードは描画を省略（長い一覧の表示を軽く） */
         #synergyListContainer > *, #achievementGrid > *, #characterGrowthList > * { content-visibility: auto; contain-intrinsic-size: auto 96px; }
+        /* @@UI-BATTLE@@ 戦闘画面のCSSはこの行の直前に追加 */
+        /* @@UI-GACHA@@ ガチャ画面のCSSはこの行の直前に追加 */
+        /* @@UI-SCREENS@@ その他の画面のCSSはこの行の直前に追加 */
     </style>
 </head>
 <body class="min-h-screen flex flex-col bg-heian-bg text-gray-100 overflow-x-hidden">
