@@ -29,6 +29,9 @@ static func open(parent: Control) -> Control:
 	_section(c, "フォント", JSUI.CYAN)
 	c.add_child(JSUI.label("Noto Sans JP / Noto Serif JP — SIL Open Font License 1.1\nCopyright Google LLC / Adobe（Source Han）. https://fonts.google.com/noto", 21, JSUI.TEXT, null, true))
 
+	_section(c, "キャラクター・アニメーション（KayKit, CC0）", JSUI.GOLD)
+	c.add_child(JSUI.label("KayKit Character Animations 1.1 — Kay Lousberg (www.kaylousberg.com)\nMannequin_Medium と132種類のアニメーション。CC0（パブリックドメイン）。", 21, JSUI.TEXT, null, true))
+
 	_section(c, "テクスチャ・HDRI（Poly Haven, CC0）", JSUI.GOLD)
 	var lines := _polyhaven_lines()
 	var grid := GridContainer.new()

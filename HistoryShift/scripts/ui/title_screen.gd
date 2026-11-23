@@ -112,11 +112,15 @@ func _ready() -> void:
 	foot.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	foot.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	foot.position += Vector2(-40, -28)
+	foot.add_theme_constant_override("outline_size", 6)
+	foot.add_theme_color_override("font_outline_color", Color(JSUI.INK, 0.8))
 	add_child(foot)
 	_era_label = JSUI.label("", 20, Color(JSUI.CYAN, 0.8), JSUI.sans_bold())
 	_era_label.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	_era_label.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	_era_label.position += Vector2(-48, 40)
+	_era_label.add_theme_constant_override("outline_size", 8)
+	_era_label.add_theme_color_override("font_outline_color", Color(JSUI.INK, 0.85))
 	add_child(_era_label)
 	set_backdrop_era(backdrop_era)
 

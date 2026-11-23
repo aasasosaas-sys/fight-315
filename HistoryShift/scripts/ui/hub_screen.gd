@@ -311,7 +311,7 @@ func _build_detail(q: Dictionary) -> void:
 	top.add_child(JSUI.pill(String(era["eraName"]).split("（")[0], JSUI.era_color(era["eraId"]).darkened(0.3), Color.WHITE, 20))
 	top.add_child(JSUI.pill(JSUI.year_text(q["year"]), Color(1, 1, 1, 0.08), JSUI.TEXT, 20))
 	_detail.add_child(top)
-	var title := JSUI.heading(q["topic"], 44)
+	var title := JSUI.heading(q["topic"], 40)
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_detail.add_child(title)
 	# 判定バナー
@@ -339,9 +339,11 @@ func _build_detail(q: Dictionary) -> void:
 	bv.add_child(JSUI.label(msg, 26, Color.WHITE, JSUI.sans_bold(), true))
 	bv.add_child(JSUI.label(sub, 21, JSUI.TEXT, null, true))
 	_detail.add_child(banner)
-	# 問題文
-	var qt := JSUI.label(q["text"], 25, Color(JSUI.TEXT, 0.92), JSUI.serif(), true)
-	qt.add_theme_constant_override("line_spacing", 8)
+	# 問題文（ミッション情報の後ろへ回す）
+	var qsec := _section("問題と選択肢", JSUI.TEXT)
+	_detail.add_child(qsec)
+	var qt := JSUI.label(q["text"], 22, Color(JSUI.TEXT, 0.9), JSUI.serif(), true)
+	qt.add_theme_constant_override("line_spacing", 6)
 	_detail.add_child(qt)
 	# 選択肢
 	var cv := JSUI.vbox(8)
@@ -370,7 +372,8 @@ func _build_detail(q: Dictionary) -> void:
 			cvv.add_child(th)
 		cv.add_child(cp)
 	# 解説
-	_detail.add_child(_section("本来の史実の解説", JSUI.GOLD))
+	var exsec := _section("本来の史実の解説", JSUI.GOLD)
+	_detail.add_child(exsec)
 	var ex := JSUI.panel(JSUI.sb(Color(JSUI.GOLD, 0.06), 10, 0, Color.TRANSPARENT, 0, 16))
 	var est: StyleBoxFlat = ex.get_theme_stylebox("panel")
 	est.border_width_left = 4; est.border_color = Color(JSUI.GOLD, 0.7)
@@ -378,6 +381,7 @@ func _build_detail(q: Dictionary) -> void:
 	exl.add_theme_constant_override("line_spacing", 6)
 	ex.add_child(exl)
 	_detail.add_child(ex)
+	var tail: Array = [qsec, qt, cv, exsec, ex]
 	# ミッション
 	if not correct and ans >= 0:
 		var mis := Game.db.mission_for(q, ans)
@@ -414,6 +418,8 @@ func _build_detail(q: Dictionary) -> void:
 				older += 1
 		if older > 0:
 			_detail.add_child(JSUI.label("ヒント：これより古い時代に誤答が %d 問残っています。因果は過去から未来へ流れるため、古い時代から直すのが確実です。" % older, 20, JSUI.GOLD, null, true))
+	for n in tail:
+		_detail.move_child(n, -1)
 
 
 func _section(text: String, col: Color) -> Control:

@@ -344,7 +344,7 @@ func mound_sdf(sdf: Callable, bbox: Rect2, ref_h: float, height: float, slope_w:
 			var t := clampf(-d / slope_w, 0.0, 1.0)
 			# 段築: 3 段のテラス
 			var terr := t * 3.0
-			var step_t := (floor(terr) + smoothstep(0.15, 0.85, fmod(terr, 1.0))) / 3.0
+			var step_t := (floorf(terr) + smoothstep(0.15, 0.85, fmod(terr, 1.0))) / 3.0
 			var prof := lerpf(t, step_t, 0.55)
 			var id := j * N + i
 			h[id] = maxf(h[id], ref_h + height * prof)

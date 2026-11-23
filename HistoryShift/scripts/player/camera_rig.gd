@@ -115,9 +115,9 @@ func _process(dt: float) -> void:
 	var rb := rot_basis()
 	var foot := mode == Mode.ON_FOOT
 	var plane := mode == Mode.PLANE
-	var want_dist := 16.0 if plane else (( 2.1 if aiming else 4.2) if foot else 8.0)
-	var height := 2.5 if plane else (1.55 if foot else 2.4)
-	var shoulder := (0.75 if aiming else 0.55) if foot else 0.0
+	var want_dist := 16.0 if plane else ((2.9 if aiming else 4.8) if foot else 8.5)
+	var height := 2.5 if plane else (1.75 if foot else 2.6)
+	var shoulder := (1.0 if aiming else 0.75) if foot else 0.0
 	_dist = lerpf(_dist, want_dist, 1.0 - exp(-dt * 10.0))
 	_smooth = _smooth.lerp(target.global_position, 1.0 - exp(-dt * (30.0 if foot else (40.0 if plane else 14.0))))
 	var pivot := _smooth + Vector3.UP * height + rb.x * shoulder

@@ -1,0 +1,564 @@
+class_name EraWorld
+extends Node3D
+## 時代ごとのオープンワールド。地形・水・植生・建築・小道具・空/光を手続き生成する。
+## 使い方: var w := EraWorld.build(Game.db.get_era("heian")); add_child(w)
+
+# ---- 品質設定（UI の設定画面が build 前に書き換える）
+static var quality := 2              # 0=低 1=中 2=高
+static var sdfgi_enabled := true
+static var ssao_enabled := true
+static var ssil_enabled := true
+static var volumetric_enabled := true
+static var glow_enabled := true
+static var grass_enabled := true
+
+## 正準レイアウト（海が +Z 側）。時代ごとに 90° 単位で回転する
+const CANON := {
+	"capital": {"pos": Vector2(40, -20), "r": 120.0},
+	"village": {"pos": Vector2(-330, 170), "r": 82.0},
+	"temple": {"pos": Vector2(330, -170), "r": 62.0},
+	"port": {"pos": Vector2(170, 365), "r": 58.0},
+	"castle": {"pos": Vector2(-320, -175), "r": 78.0},
+	"battlefield": {"pos": Vector2(305, 175), "r": 52.0, "half_len": 178.0},
+	"mountain": {"pos": Vector2(-10, -300), "r": 34.0},
+}
+const RIVER_CANON := [Vector2(-140, -640), Vector2(-160, -440), Vector2(-178, -260), Vector2(-190, -70),
+	Vector2(-175, 110), Vector2(-150, 270), Vector2(-122, 410), Vector2(-112, 560)]
+const ROADS := [["capital", "village", 4.5], ["capital", "castle", 4.5], ["capital", "temple", 4.0],
+	["capital", "battlefield", 4.5], ["capital", "port", 4.5], ["capital", "mountain", 3.5],
+	["village", "castle", 3.5], ["village", "port", 3.5], ["battlefield", "temple", 3.5], ["battlefield", "port", 3.5]]
+
+var era: Dictionary
+var era_id := ""
+var style: Dictionary
+var half_size := 600.0
+var water_level := 0.0
+var player_spawn := Vector3.ZERO
+var terrain: TerrainGen
+var landmarks := {}      # key -> {pos:Vector3, center:Vector2, r, angle, xf:Transform3D, h}
+var beacons := {}
+var _vehicle_spawns := {"horse": [], "car": [], "plane": []}
+var _street_points: Array = []
+var env_nodes := {}
+var grass_node: MultiMeshInstance3D
+var grass_spacing := 0.5
+var build_ms := 0
+var rng := RandomNumberGenerator.new()
+var height_tex: ImageTexture
+var control_tex: ImageTexture
+var static_body: StaticBody3D   # 建物などのコリジョン
+var deco_trees: Array = []      # [species, Vector3, scale]（建築側が植える木）
+
+
+static func build(p_era: Dictionary) -> EraWorld:
+	var t0 := Time.get_ticks_msec()
+	var w := EraWorld.new()
+	w.name = "EraWorld"
+	w.era = p_era
+	w.era_id = String(p_era.get("eraId", "heian"))
+	w._build()
+	w.build_ms = Time.get_ticks_msec() - t0
+	print("[EraWorld] %s built in %d ms" % [w.era_id, w.build_ms])
+	return w
+
+
+func _build() -> void:
+	style = EraStyles.get_style(era_id)
+	var seed_v := hash(era_id) & 0x7fffffff
+	rng.seed = seed_v
+	terrain = TerrainGen.new(int(style["rot"]), seed_v % 100000)
+	terrain.water_level = water_level
+	half_size = terrain.half
+
+	# ---- 地形
+	terrain.generate_base()
+	terrain.carve_river(RIVER_CANON)
+	_setup_landmarks()
+	var layouts := WorldLayouts.new(self)
+	layouts.plan_terrain()
+	_make_roads()
+	terrain.apply_roads()
+	layouts.terrain_features()
+
+	static_body = StaticBody3D.new()
+	static_body.name = "StaticWorld"
+	static_body.collision_layer = 1
+	static_body.collision_mask = 0
+	add_child(static_body)
+
+	# ---- 建築（マスクや占有も塗る）
+	layouts.build_all()
+	terrain.compute_forest(float(style["forest"]))
+
+	# ---- メッシュ・コリジョン
+	height_tex = ImageTexture.create_from_image(terrain.make_height_image())
+	control_tex = ImageTexture.create_from_image(terrain.make_control_image())
+	var tnode := Node3D.new()
+	tnode.name = "Terrain"
+	add_child(tnode)
+	var tmat := _terrain_material()
+	terrain.build_meshes(tnode, tmat, quality)
+	terrain.build_outer(tnode, tmat)
+	add_child(terrain.make_collision())
+
+	_build_water()
+	var veg := WorldVegetation.new(self)
+	veg.build()
+	if grass_enabled:
+		_build_grass()
+	WorldProps.new(self).build()
+	env_nodes = WorldAtmosphere.build_environment(self, style)
+	for key in landmarks:
+		var b := WorldAtmosphere.make_beacon(landmarks[key]["pos"])
+		b.name = "Beacon_" + key
+		add_child(b)
+		beacons[key] = b
+	_compute_vehicle_spawns(layouts)
+
+
+func _ready() -> void:
+	if Engine.has_singleton("Game") or get_node_or_null("/root/Game"):
+		var g = get_node_or_null("/root/Game")
+		if g and g.has_method("set_world"):
+			g.set_world(self)
+
+
+func _process(_delta: float) -> void:
+	if grass_node:
+		var cam := get_viewport().get_camera_3d()
+		if cam:
+			var p := cam.global_position
+			grass_node.global_position = Vector3(snappedf(p.x, grass_spacing), 0.0, snappedf(p.z, grass_spacing))
+
+
+# ================================================================ 公開 API
+func landmark_pos(key: String) -> Vector3:
+	if landmarks.has(key):
+		return landmarks[key]["pos"]
+	return player_spawn
+
+
+func height_at(x: float, z: float) -> float:
+	return terrain.height_at(x, z)
+
+
+func random_ground_point_near(center: Vector3, radius: float, p_rng: RandomNumberGenerator) -> Vector3:
+	var best := Vector3(center.x, height_at(center.x, center.z), center.z)
+	for attempt in 40:
+		var r := radius * sqrt(p_rng.randf())
+		var a := p_rng.randf() * TAU
+		var x := clampf(center.x + cos(a) * r, -half_size + 5.0, half_size - 5.0)
+		var z := clampf(center.z + sin(a) * r, -half_size + 5.0, half_size - 5.0)
+		if terrain.is_water(x, z):
+			continue
+		if terrain.is_occupied(x, z):
+			continue
+		if terrain.normal_at(x, z).y < 0.82:
+			continue
+		return Vector3(x, height_at(x, z), z)
+	return best
+
+
+func set_beacon(key: String, on: bool) -> void:
+	if beacons.has(key):
+		beacons[key].visible = on
+
+
+func vehicle_spawns(kind: String) -> Array:
+	if not (kind in era.get("vehicles", [])):
+		return []
+	return _vehicle_spawns.get(kind, []).duplicate()
+
+
+func street_points() -> Array:
+	return _street_points.duplicate()
+
+
+func set_time_of_day(hours: float) -> void:
+	var sun: DirectionalLight3D = env_nodes.get("sun")
+	var env: Environment = env_nodes.get("env")
+	if sun == null or env == null:
+		return
+	var hs: Dictionary = EraStyles.HDRI_SUN[style["sky"]]
+	# 6 時に日の出、18 時に日没。方位は HDRI の太陽に合わせて空を回す
+	var t := (hours - 6.0) / 12.0
+	var elev := sin(clampf(t, -0.2, 1.2) * PI) * 62.0
+	var az := float(hs["az"]) + (t - 0.5) * 120.0
+	WorldAtmosphere.set_sun_dir(sun, az, maxf(elev, -10.0))
+	env.sky_rotation = Vector3(0, deg_to_rad(az - float(hs["az"])), 0)
+	var day := clampf(elev / 12.0, 0.0, 1.0)
+	sun.light_energy = float(style["sun_energy"]) * day
+	sun.visible = elev > -2.0
+	var pano: PanoramaSkyMaterial = env_nodes.get("sky_mat")
+	if pano:
+		pano.energy_multiplier = lerpf(0.05, 1.0, day)
+	env.ambient_light_energy = lerpf(0.25, 1.0, day)
+
+
+func add_street_point(p: Vector3) -> void:
+	_street_points.append(p)
+
+
+# ================================================================ 内部
+func _setup_landmarks() -> void:
+	var names := {}
+	for lm in era.get("landmarks", []):
+		names[lm["key"]] = lm.get("name", lm["key"])
+	var ang := terrain.canon_basis_angle()
+	for key in CANON:
+		var c: Dictionary = CANON[key]
+		var wpos := terrain.canon_to_world(c["pos"])
+		var r: float = c["r"]
+		var hh: float
+		match key:
+			"port":
+				hh = 2.4
+			"mountain":
+				hh = clampf(terrain.sample_grid(wpos.x, wpos.y), 30.0, 58.0)
+			_:
+				hh = clampf(terrain.sample_grid(wpos.x, wpos.y), 4.5, 26.0)
+		var info := {"key": key, "center": wpos, "r": r, "h": hh, "angle": ang, "name": names.get(key, key)}
+		if c.has("half_len"):
+			var dir := terrain.canon_to_world(Vector2(1, 0))
+			info["a"] = wpos - dir * float(c["half_len"])
+			info["b"] = wpos + dir * float(c["half_len"])
+		info["xf"] = Transform3D(Basis(Vector3.UP, ang), Vector3(wpos.x, hh, wpos.y))
+		info["pos"] = Vector3(wpos.x, hh, wpos.y)
+		landmarks[key] = info
+	for key in landmarks:
+		var info: Dictionary = landmarks[key]
+		var fall := 45.0
+		if key == "mountain":
+			fall = 30.0
+		if info.has("a"):
+			terrain.flatten(info["a"], info["r"], fall, info["h"], info["b"])
+		elif key == "port":
+			_flatten_port(info)
+		else:
+			terrain.flatten(info["center"], info["r"], fall, info["h"])
+
+
+func _flatten_port(info: Dictionary) -> void:
+	# 海側は持ち上げない（岸線を保つ）
+	var c: Vector2 = info["center"]
+	var r: float = info["r"]
+	var fall := 40.0
+	var tg: float = info["h"]
+	for j in range(terrain.gi(c.y - r - fall), terrain.gi(c.y + r + fall) + 1):
+		for i in range(terrain.gi(c.x - r - fall), terrain.gi(c.x + r + fall) + 1):
+			var p := Vector2(terrain.gx(i), terrain.gx(j))
+			var d := p.distance_to(c)
+			var id := j * TerrainGen.N + i
+			var hh: float = terrain.h[id]
+			if hh < water_level + 0.3:
+				continue
+			var t := 1.0 - smoothstep(r, r + fall, d)
+			terrain.h[id] = lerpf(hh, maxf(tg, minf(hh, tg)), t) if hh > tg else lerpf(hh, tg, t * clampf((hh - water_level) / 1.5, 0.0, 1.0))
+
+
+func lm_edge_point(key: String, toward: Vector2) -> Vector2:
+	var info: Dictionary = landmarks[key]
+	if info.has("a"):
+		var a: Vector2 = info["a"]
+		var b: Vector2 = info["b"]
+		var ab := b - a
+		var t := clampf((toward - a).dot(ab) / ab.length_squared(), 0.0, 1.0)
+		var p := a + ab * t
+		return p + (toward - p).normalized() * (float(info["r"]) * 0.8)
+	var c: Vector2 = info["center"]
+	return c + (toward - c).normalized() * (float(info["r"]) * 0.85)
+
+
+func _make_roads() -> void:
+	var rr := RandomNumberGenerator.new()
+	rr.seed = rng.seed + 5
+	for spec in ROADS:
+		var a_key: String = spec[0]
+		var b_key: String = spec[1]
+		var ca: Vector2 = landmarks[a_key]["center"]
+		var cb: Vector2 = landmarks[b_key]["center"]
+		if b_key == "mountain":
+			# 山道は九十九折り
+			var mid := terrain.canon_to_world(Vector2(120, -215))
+			var pa := lm_edge_point(a_key, mid)
+			var mid2 := terrain.canon_to_world(Vector2(80, -280))
+			var pb := lm_edge_point(b_key, mid2)
+			terrain.add_road(pa, mid, spec[2], 10.0, rr)
+			terrain.add_road(mid, mid2, spec[2], 5.0, rr)
+			terrain.add_road(mid2, pb, spec[2], 5.0, rr)
+			continue
+		var pa := lm_edge_point(a_key, cb)
+		var pb := lm_edge_point(b_key, ca)
+		terrain.add_road(pa, pb, spec[2], 28.0, rr)
+
+
+func _terrain_material() -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = WorldMaterials.shader("terrain")
+	var arrs := WorldMaterials.terrain_arrays()
+	if arrs.size() == 3:
+		m.set_shader_parameter("alb_arr", arrs[0])
+		m.set_shader_parameter("nrm_arr", arrs[1])
+		m.set_shader_parameter("rgh_arr", arrs[2])
+	m.set_shader_parameter("control_tex", control_tex)
+	m.set_shader_parameter("macro_tex", WorldMaterials.macro_noise())
+	m.set_shader_parameter("half_size", half_size)
+	m.set_shader_parameter("grid_n", float(TerrainGen.N))
+	m.set_shader_parameter("water_level", water_level)
+	m.set_shader_parameter("L_GRASS", float(WorldMaterials.layer("grass")))
+	m.set_shader_parameter("L_FOREST", float(WorldMaterials.layer("forest")))
+	m.set_shader_parameter("L_ROCK", float(WorldMaterials.layer("rock")))
+	m.set_shader_parameter("L_DIRT", float(WorldMaterials.layer("dirt")))
+	m.set_shader_parameter("L_SAND", float(WorldMaterials.layer("sand")))
+	var road_key: String = style["road"]
+	var plaza_key: String = style["plaza"]
+	m.set_shader_parameter("L_ROAD", float(WorldMaterials.layer(road_key)))
+	m.set_shader_parameter("L_PLAZA", float(WorldMaterials.layer(plaza_key)))
+	var road_scale := {"dirt": 0.2, "cobble": 0.4, "asphalt": 0.2, "sand": 0.25, "concrete": 0.25, "stonewall": 0.3}
+	m.set_shader_parameter("road_scale", road_scale.get(road_key, 0.25))
+	m.set_shader_parameter("plaza_scale", road_scale.get(plaza_key, 0.25))
+	if plaza_key == "sand":
+		m.set_shader_parameter("plaza_tint", Color(1.25, 1.2, 1.1))
+	var gt: Color = style["grass_tint"]
+	m.set_shader_parameter("grass_tint", gt)
+	return m
+
+
+func _build_water() -> void:
+	var noise_tex := WorldMaterials.macro_noise()
+	# 海
+	var sea := MeshInstance3D.new()
+	sea.name = "Sea"
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(3200, 3200)
+	pm.subdivide_width = 220
+	pm.subdivide_depth = 220
+	sea.mesh = pm
+	var c := terrain.canon_to_world(Vector2(0, 1100))
+	sea.position = Vector3(c.x, water_level, c.y)
+	var mat := ShaderMaterial.new()
+	mat.shader = WorldMaterials.shader("water")
+	mat.set_shader_parameter("noise_tex", noise_tex)
+	sea.material_override = mat
+	sea.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(sea)
+	# 水平線まで（遠景用の低分割）
+	var far := MeshInstance3D.new()
+	var pm2 := PlaneMesh.new()
+	pm2.size = Vector2(16000, 16000)
+	far.mesh = pm2
+	var c2 := terrain.canon_to_world(Vector2(0, 2800 + 8000 - 1000))
+	far.position = Vector3(c2.x, water_level - 0.05, c2.y)
+	var mat2 := mat.duplicate()
+	mat2.set_shader_parameter("wave_amp", 0.0)
+	far.material_override = mat2
+	far.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(far)
+	# 川
+	if terrain.river_pts.size() > 1:
+		add_child(_river_mesh(noise_tex))
+
+
+func _river_mesh(noise_tex: Texture2D) -> MeshInstance3D:
+	var pts := terrain.river_pts
+	var surf := terrain.river_surface
+	var verts := PackedVector3Array()
+	var uvs := PackedVector2Array()
+	var norms := PackedVector3Array()
+	var idx := PackedInt32Array()
+	var w := terrain.river_half_w + 3.0
+	var acc := 0.0
+	for k in pts.size():
+		var d: Vector2
+		if k == 0:
+			d = pts[1] - pts[0]
+		elif k == pts.size() - 1:
+			d = pts[k] - pts[k - 1]
+		else:
+			d = pts[k + 1] - pts[k - 1]
+		d = d.normalized()
+		var n := Vector2(-d.y, d.x)
+		if k > 0:
+			acc += pts[k].distance_to(pts[k - 1])
+		var y := surf[k]
+		var l := pts[k] + n * w
+		var r := pts[k] - n * w
+		verts.append(Vector3(l.x, y, l.y)); verts.append(Vector3(r.x, y, r.y))
+		uvs.append(Vector2(acc, 0)); uvs.append(Vector2(acc, w * 2.0))
+		norms.append(Vector3.UP); norms.append(Vector3.UP)
+		if k > 0:
+			var b := (k - 1) * 2
+			# 上から見て時計回りになるよう両方試す（ArrayMesh は向きを法線で判定しないので両面にはしない）
+			idx.append_array([b, b + 1, b + 2, b + 1, b + 3, b + 2])
+	# 向きの確認: 最初の三角形の外積が下向きなら反転
+	if idx.size() >= 3:
+		var a := verts[idx[0]]
+		var b2 := verts[idx[1]]
+		var c := verts[idx[2]]
+		var fn := (b2 - a).cross(c - a)
+		if fn.y > 0.0:
+			for t in range(0, idx.size(), 3):
+				var tmp := idx[t + 1]
+				idx[t + 1] = idx[t + 2]
+				idx[t + 2] = tmp
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	arrays[Mesh.ARRAY_NORMAL] = norms
+	arrays[Mesh.ARRAY_TEX_UV] = uvs
+	arrays[Mesh.ARRAY_INDEX] = idx
+	var am := ArrayMesh.new()
+	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var mi := MeshInstance3D.new()
+	mi.name = "River"
+	mi.mesh = am
+	var mat := ShaderMaterial.new()
+	mat.shader = WorldMaterials.shader("water")
+	mat.set_shader_parameter("noise_tex", noise_tex)
+	mat.set_shader_parameter("wave_amp", 0.0)
+	mat.set_shader_parameter("flow_speed", 1.2)
+	mat.set_shader_parameter("depth_scale", 2.0)
+	mat.set_shader_parameter("shallow_color", Color(0.16, 0.36, 0.3))
+	mat.set_shader_parameter("deep_color", Color(0.05, 0.14, 0.13))
+	mat.set_shader_parameter("foam_width", 0.6)
+	mi.material_override = mat
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return mi
+
+
+## 池・堀などの局所水面（矩形）。y は水面高
+func add_water_rect(center: Vector3, size: Vector2, angle: float) -> void:
+	var mi := MeshInstance3D.new()
+	mi.name = "Pond"
+	var pm := PlaneMesh.new()
+	pm.size = size
+	pm.subdivide_width = int(size.x / 6.0)
+	pm.subdivide_depth = int(size.y / 6.0)
+	mi.mesh = pm
+	mi.position = center
+	mi.rotation.y = angle
+	var mat := ShaderMaterial.new()
+	mat.shader = WorldMaterials.shader("water")
+	mat.set_shader_parameter("noise_tex", WorldMaterials.macro_noise())
+	mat.set_shader_parameter("wave_amp", 0.0)
+	mat.set_shader_parameter("depth_scale", 1.5)
+	mat.set_shader_parameter("shallow_color", Color(0.14, 0.3, 0.26))
+	mat.set_shader_parameter("deep_color", Color(0.04, 0.1, 0.1))
+	mat.set_shader_parameter("foam_width", 0.3)
+	mi.material_override = mat
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(mi)
+
+
+func _build_grass() -> void:
+	var q := quality
+	var radius: float = [26.0, 38.0, 52.0][q]
+	grass_spacing = [0.7, 0.55, 0.42][q]
+	var n := int(radius * 2.0 / grass_spacing)
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = WorldVegetation.grass_clump_mesh(grass_spacing)
+	mm.instance_count = n * n
+	var k := 0
+	for j in n:
+		for i in n:
+			var x := (i - n * 0.5) * grass_spacing
+			var z := (j - n * 0.5) * grass_spacing
+			mm.set_instance_transform(k, Transform3D(Basis(), Vector3(x, 0, z)))
+			k += 1
+	mm.custom_aabb = AABB(Vector3(-radius, -50, -radius), Vector3(radius * 2.0, 450, radius * 2.0))
+	var mmi := MultiMeshInstance3D.new()
+	mmi.name = "Grass"
+	mmi.multimesh = mm
+	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var mat := ShaderMaterial.new()
+	mat.shader = WorldMaterials.shader("grass")
+	mat.set_shader_parameter("height_tex", height_tex)
+	mat.set_shader_parameter("control_tex", control_tex)
+	mat.set_shader_parameter("noise_tex", WorldMaterials.macro_noise())
+	mat.set_shader_parameter("half_size", half_size)
+	mat.set_shader_parameter("grid_n", float(TerrainGen.N))
+	mat.set_shader_parameter("spacing", grass_spacing)
+	mat.set_shader_parameter("radius", radius)
+	mat.set_shader_parameter("water_level", water_level)
+	mat.set_shader_parameter("base_color", style["grass_base"])
+	mat.set_shader_parameter("tip_color", style["grass_tip"])
+	mmi.material_override = mat
+	add_child(mmi)
+	grass_node = mmi
+
+
+func _compute_vehicle_spawns(layouts) -> void:
+	var kinds: Array = era.get("vehicles", [])
+	var spawn2 := Vector2(player_spawn.x, player_spawn.z)
+	# 道沿いの点（スポーン近くから順に）
+	var road_pts: Array = []
+	for line in terrain.road_lines:
+		var pts: PackedVector2Array = line["pts"]
+		for k in range(2, pts.size() - 2, 3):
+			var p := pts[k]
+			if terrain.river_dist_at(p.x, p.y) < terrain.river_half_w + 12.0:
+				continue
+			var d := (pts[k + 1] - pts[k - 1]).normalized()
+			road_pts.append([p, d, float(line["w"])])
+	road_pts.sort_custom(func(a, b): return (a[0] as Vector2).distance_squared_to(spawn2) < (b[0] as Vector2).distance_squared_to(spawn2))
+	if "horse" in kinds:
+		var out: Array = []
+		var used: Array = []
+		for rp in road_pts:
+			if out.size() >= 4:
+				break
+			var p: Vector2 = rp[0]
+			if p.distance_to(spawn2) < 12.0:
+				continue
+			var ok := true
+			for u in used:
+				if p.distance_to(u) < 14.0:
+					ok = false
+			if not ok:
+				continue
+			used.append(p)
+			var side := Vector2(-rp[1].y, rp[1].x) * (float(rp[2]) + 2.0)
+			out.append(_xf_at(p + side, rp[1]))
+		for key in ["village", "castle", "temple", "battlefield", "port"]:
+			var lp: Vector3 = landmarks[key]["pos"]
+			var gp := random_ground_point_near(lp + Vector3(8, 0, 8), 14.0, rng)
+			out.append(_xf_at(Vector2(gp.x, gp.z), Vector2(1, 0).rotated(rng.randf() * TAU)))
+		_vehicle_spawns["horse"] = out
+	if "car" in kinds:
+		var out: Array = []
+		var used: Array = []
+		for rp in road_pts:
+			if out.size() >= 6:
+				break
+			var p: Vector2 = rp[0]
+			if p.distance_to(spawn2) < 10.0 or terrain.is_occupied(p.x, p.y):
+				continue
+			var ok := true
+			for u in used:
+				if p.distance_to(u) < 25.0:
+					ok = false
+			if not ok:
+				continue
+			used.append(p)
+			var side := Vector2(-rp[1].y, rp[1].x) * (float(rp[2]) * 0.5)
+			out.append(_xf_at(p + side, rp[1]))
+		out.append_array(layouts.extra_car_spawns)
+		_vehicle_spawns["car"] = out
+	if "plane" in kinds:
+		_vehicle_spawns["plane"] = layouts.plane_spawns.duplicate()
+		if _vehicle_spawns["plane"].is_empty():
+			var info: Dictionary = landmarks["battlefield"]
+			var a: Vector2 = info["a"]
+			var b: Vector2 = info["b"]
+			var d := (b - a).normalized()
+			var p := a + d * 30.0
+			_vehicle_spawns["plane"] = [_xf_at(p, d)]
+
+
+## 地面上の Transform（-Z が進行方向 dir を向く）
+func _xf_at(p: Vector2, dir: Vector2) -> Transform3D:
+	var y := height_at(p.x, p.y)
+	var fwd := Vector3(dir.x, 0, dir.y).normalized()
+	var basis := Basis.looking_at(fwd, Vector3.UP)
+	return Transform3D(basis, Vector3(p.x, y + 0.1, p.y))
