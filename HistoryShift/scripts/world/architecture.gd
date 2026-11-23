@@ -1254,9 +1254,8 @@ func control_tower(xf: Transform3D) -> void:
 
 
 ## 国会議事堂（中央塔＋左右の翼）
-func diet_building(xf: Transform3D) -> void:
+func diet_building(xf: Transform3D, wd := 110.0) -> void:
 	var granite := Color(0.86, 0.82, 0.74)
-	var wd := 110.0
 	var dp := 30.0
 	var h := 16.0
 	foundation(xf, wd + 2, dp + 2, 1.2, "stonewall", granite)

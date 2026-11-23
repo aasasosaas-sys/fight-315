@@ -38,7 +38,7 @@ static func get_style(era_id: String) -> Dictionary:
 		"heian":
 			s.merge({
 				"rot": 2, "sky": "hazy", "sun_color": Color(1.0, 0.86, 0.72), "sun_energy": 1.35,
-				"fog_color": Color(0.86, 0.78, 0.78), "fog_density": 0.0016, "vol_fog": 0.008,
+				"fog_color": Color(0.86, 0.8, 0.8), "fog_density": 0.0011, "vol_fog": 0.006,
 				"vol_albedo": Color(1.0, 0.9, 0.9),
 				"saturation": 0.92, "contrast": 0.97, "brightness": 1.04,
 				"grass_tint": Color(0.98, 1.0, 0.86), "grass_base": Color(0.14, 0.21, 0.08), "grass_tip": Color(0.55, 0.64, 0.30),

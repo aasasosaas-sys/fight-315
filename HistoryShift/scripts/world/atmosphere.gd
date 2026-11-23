@@ -102,7 +102,7 @@ static func build_environment(world: Node3D, style: Dictionary) -> Dictionary:
 	sun.light_energy = style["sun_energy"]
 	sun.shadow_enabled = true
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS if q >= 1 else DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
-	sun.directional_shadow_max_distance = 300.0 if q >= 2 else (200.0 if q == 1 else 120.0)
+	sun.directional_shadow_max_distance = 220.0 if q >= 2 else (160.0 if q == 1 else 100.0)
 	sun.directional_shadow_split_1 = 0.06
 	sun.directional_shadow_split_2 = 0.18
 	sun.directional_shadow_split_3 = 0.45

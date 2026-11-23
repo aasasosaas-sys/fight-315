@@ -3,8 +3,8 @@ extends RefCounted
 ## 植生: 手続き的な樹木（杉・松・広葉樹・桜・竹）、低木、岩。MultiMesh＋距離 LOD。
 ## 草は EraWorld 側の GPU グラス（grass_clump_mesh を使う）。
 
-const CELL := 120.0
-const NEAR_END := 190.0
+const CELL := 60.0
+const NEAR_END := 150.0
 const FAR_BEGIN := 225.0
 
 var w: EraWorld
@@ -102,6 +102,7 @@ func build() -> void:
 	w._tick("veg emit trees")
 	_trunk_collisions(trunk_cols)
 	_build_rocks(rng)
+	_build_backdrop_forest(rng, weights)
 	w._tick("veg rocks")
 	_build_clutter(rng)
 
@@ -335,6 +336,56 @@ func _build_rocks(rng: RandomNumberGenerator) -> void:
 		mmi.visibility_range_end = 700.0
 		root.add_child(mmi)
 	w.add_child(body)
+
+
+## 境界の外（遠景の山）の森: 遠景 LOD のみ・影なし
+func _build_backdrop_forest(rng: RandomNumberGenerator, weights: Dictionary) -> void:
+	var n: int = [2000, 3500, 5000][EraWorld.quality]
+	var lists := {}
+	var tries := 0
+	var placed := 0
+	var bn := FastNoiseLite.new()
+	while placed < n and tries < n * 6:
+		tries += 1
+		var ang := rng.randf() * TAU
+		var r := t.half + 6.0 + pow(rng.randf(), 1.6) * 420.0
+		var px := cos(ang) * r
+		var pz := sin(ang) * r
+		if absf(px) < t.half + 3.0 and absf(pz) < t.half + 3.0:
+			continue
+		var c := t.world_to_canon(Vector2(px, pz))
+		if maxf(absf(c.x), -c.y) > 480.0:
+			continue
+		var hh := t.base_height(c.x, c.y) - 0.6
+		if hh < w.water_level + 2.0:
+			continue
+		var e := 3.0
+		var nx := t.base_height(c.x + e, c.y) - t.base_height(c.x - e, c.y)
+		var nz := t.base_height(c.x, c.y + e) - t.base_height(c.x, c.y - e)
+		if Vector2(nx, nz).length() / (2.0 * e) > 1.4:
+			continue
+		var sp := _pick_species(weights, rng, px, pz, hh, bn)
+		if sp == "bamboo":
+			sp = "broadleaf"
+		if not lists.has(sp):
+			lists[sp] = []
+		var sc := rng.randf_range(0.9, 1.4)
+		lists[sp].append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * sc), Vector3(px, hh - 0.3, pz)))
+		placed += 1
+	var root := Node3D.new()
+	root.name = "BackdropForest"
+	w.add_child(root)
+	for sp in lists:
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = species_meshes(sp)[1]
+		mm.instance_count = lists[sp].size()
+		for i in lists[sp].size():
+			mm.set_instance_transform(i, lists[sp][i])
+		var mmi := MultiMeshInstance3D.new()
+		mmi.multimesh = mm
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		root.add_child(mmi)
 
 
 ## モデルのバリエーションをセル分割した MultiMesh で配置（xfs はバリエーションに無作為に割当）

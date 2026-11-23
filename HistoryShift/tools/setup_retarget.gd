@@ -11,6 +11,14 @@ const KAYKIT := {
 	"RightUpperLeg": "upperleg.r", "RightLowerLeg": "lowerleg.r", "RightFoot": "foot.r", "RightToes": "toes.r",
 }
 
+const CMU := {
+	"Hips": "Hips", "Spine": "Spine", "Chest": "Spine1", "Head": "Head",
+	"LeftUpperArm": "LeftArm", "LeftLowerArm": "LeftForeArm", "LeftHand": "LeftHand",
+	"RightUpperArm": "RightArm", "RightLowerArm": "RightForeArm", "RightHand": "RightHand",
+	"LeftUpperLeg": "LeftUpLeg", "LeftLowerLeg": "LeftLeg", "LeftFoot": "LeftFoot", "LeftToes": "LeftToeBase",
+	"RightUpperLeg": "RightUpLeg", "RightLowerLeg": "RightLeg", "RightFoot": "RightFoot", "RightToes": "RightToeBase",
+}
+
 const MH := {
 	"Root": "Root", "Hips": "pelvis", "Spine": "spine_01", "Chest": "spine_03",
 	"Head": "head",
@@ -64,6 +72,9 @@ func _patch(glb: String, skel_path: String, bm: BoneMap) -> void:
 func _initialize() -> void:
 	var kk := _make_map(KAYKIT, "res://assets/characters/bonemap_kaykit.tres")
 	var mh := _make_map(MH, "res://assets/characters/bonemap_mh.tres")
+	var cmu := _make_map(CMU, "res://assets/characters/bonemap_cmu.tres")
+	if FileAccess.file_exists("res://assets/characters/mocap/mocap.glb"):
+		_patch("res://assets/characters/mocap/mocap.glb", "Mocap/Skeleton3D", cmu)
 	for f in DirAccess.get_files_at("res://assets/characters/kaykit"):
 		if f.ends_with(".glb"):
 			_patch("res://assets/characters/kaykit/" + f, "Rig_Medium/Skeleton3D", kk)

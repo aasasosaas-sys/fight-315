@@ -7,8 +7,8 @@ const N := 513                       # 2^9+1（Jolt の HeightField 条件）
 const CHUNKS := 8
 const OUTER := 1500.0                # 遠景リングの外径（半分）
 
-var half := 600.0
-var cell := 1200.0 / 512.0
+var half := 220.0
+var cell := 440.0 / 512.0
 var rot := 0                         # 0..3（90°単位）
 var seed_v := 1
 var water_level := 0.0
@@ -26,10 +26,10 @@ var n_detail := FastNoiseLite.new()
 var n_ridge := FastNoiseLite.new()
 var n_forest := FastNoiseLite.new()
 
-var peak := Vector2(40, -470)        # 正準座標
+var peak := Vector2(30, -420)        # 正準座標（プレイ範囲の外にそびえる主峰）
 var river_pts: PackedVector2Array    # ワールド座標
 var river_surface: PackedFloat32Array
-var river_half_w := 10.0
+var river_half_w := 7.0
 var bridges: Array = []              # [{pos:Vector2, dir:Vector2, h:float, len:float}]
 var road_lines: Array = []           # [{pts:PackedVector2Array, hts:PackedFloat32Array, w:float}]
 
@@ -48,12 +48,12 @@ func _init(p_rot: int, p_seed: int) -> void:
 	river_d.fill(1e6)
 	n_hills.seed = p_seed
 	n_hills.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
-	n_hills.frequency = 0.0028
+	n_hills.frequency = 0.007
 	n_hills.fractal_type = FastNoiseLite.FRACTAL_FBM
 	n_hills.fractal_octaves = 4
 	n_detail.seed = p_seed + 7
 	n_detail.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
-	n_detail.frequency = 0.014
+	n_detail.frequency = 0.03
 	n_detail.fractal_octaves = 3
 	n_ridge.seed = p_seed + 13
 	n_ridge.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
@@ -61,7 +61,7 @@ func _init(p_rot: int, p_seed: int) -> void:
 	n_ridge.fractal_type = FastNoiseLite.FRACTAL_RIDGED
 	n_ridge.fractal_octaves = 4
 	n_forest.seed = p_seed + 29
-	n_forest.frequency = 0.006
+	n_forest.frequency = 0.012
 	n_forest.fractal_octaves = 3
 
 
@@ -95,7 +95,7 @@ func gx(i: int) -> float:
 
 
 func shore_v(u: float) -> float:
-	return 425.0 + 32.0 * sin(u * 0.0075 + 1.3) + 14.0 * sin(u * 0.021 + 0.4)
+	return 178.0 + 10.0 * sin(u * 0.02 + 1.3) + 5.0 * sin(u * 0.05 + 0.4) + smoothstep(150.0, 400.0, absf(u)) * 120.0
 
 
 ## ノイズのみの基本地形（正準座標）
@@ -103,23 +103,24 @@ func base_height(u: float, v: float) -> float:
 	var hills := n_hills.get_noise_2d(u, v)
 	var detail := n_detail.get_noise_2d(u, v)
 	var ridge := n_ridge.get_noise_2d(u, v) * 0.5 + 0.5
-	var hgt := 11.0 + hills * 17.0 + detail * 2.5
+	var hgt := 8.0 + hills * 6.0 + detail * 1.5
 	var sd := v - shore_v(u)
-	var land := clampf(-sd / 230.0, 0.0, 1.0)
+	var land := clampf(-sd / 120.0, 0.0, 1.0)
 	land = land * land * (3.0 - 2.0 * land)
 	hgt = lerpf(1.3 + detail * 0.4, hgt, land)
 	if sd > 0.0:
-		hgt = lerpf(1.3, -18.0, smoothstep(0.0, 80.0, sd))
+		hgt = lerpf(1.3, -14.0, smoothstep(0.0, 50.0, sd))
 	# 外周の山
 	var e := maxf(absf(u), -v)
-	var edge := smoothstep(410.0, 600.0, e)
+	var edge := smoothstep(170.0, 420.0, e)
 	if edge > 0.0:
-		hgt += edge * (60.0 + ridge * 110.0) * clampf(-sd / 90.0, 0.0, 1.0)
+		hgt += edge * (30.0 + ridge * 45.0) * clampf(-sd / 60.0, 0.0, 1.0)
+		hgt += smoothstep(380.0, 1100.0, e) * (110.0 + ridge * 170.0) * clampf(-sd / 120.0, 0.0, 1.0)
 	# 主峰
 	var dm := Vector2(u, v).distance_to(peak)
-	if dm < 520.0:
-		var g := exp(-dm * dm / (2.0 * 165.0 * 165.0))
-		hgt += g * (150.0 + ridge * 45.0) + g * detail * 8.0
+	if dm < 700.0:
+		var g := exp(-dm * dm / (2.0 * 150.0 * 150.0))
+		hgt += g * (170.0 + ridge * 40.0) + g * detail * 6.0
 	return hgt
 
 
@@ -180,7 +181,7 @@ func carve_river(canon_pts: Array) -> void:
 		surf[k] = minf(surf[k], surf[k + 1] + ds * 0.012)
 	river_surface = surf
 	var w := river_half_w
-	var band := 70.0
+	var band := 36.0
 	var tmp_d := PackedFloat32Array()
 	tmp_d.resize(N * N)
 	tmp_d.fill(1e6)
@@ -244,12 +245,12 @@ func add_road(a: Vector2, b: Vector2, half_w: float, wiggle: float, rng: RandomN
 	var d := b - a
 	var L := d.length()
 	var nrm := Vector2(-d.y, d.x).normalized()
-	var segs := maxi(2, int(L / 110.0))
+	var segs := maxi(2, int(L / 60.0))
 	for k in range(1, segs):
 		var t := float(k) / segs
 		ctrl.append(a + d * t + nrm * rng.randf_range(-wiggle, wiggle) * sin(t * PI))
 	ctrl.append(b)
-	var pts := _spline(ctrl, 4.0)
+	var pts := _spline(ctrl, 3.0)
 	# 中心線の高さ
 	var hts := PackedFloat32Array()
 	hts.resize(pts.size())
@@ -264,7 +265,7 @@ func add_road(a: Vector2, b: Vector2, half_w: float, wiggle: float, rng: RandomN
 			tmp[k] = (hts[k - 1] + hts[k] * 2.0 + hts[k + 1]) * 0.25
 		hts = tmp
 	# 勾配制限
-	var maxg := 0.13 * 4.0
+	var maxg := 0.16 * 3.0
 	for k in range(1, pts.size()):
 		hts[k] = clampf(hts[k], hts[k - 1] - maxg, hts[k - 1] + maxg)
 	for k in range(pts.size() - 2, -1, -1):
@@ -276,7 +277,7 @@ func add_road(a: Vector2, b: Vector2, half_w: float, wiggle: float, rng: RandomN
 
 ## 全道路をまとめてラスタライズ（交差部は重みの大きい方）
 func apply_roads() -> void:
-	var fall := 14.0
+	var fall := 9.0
 	var best_w := PackedFloat32Array()
 	best_w.resize(N * N)
 	var best_h := PackedFloat32Array()
@@ -436,9 +437,7 @@ func compute_forest(amount: float, clear_zones: Array = []) -> void:
 			# 山・外周は森が多い
 			var c := world_to_canon(Vector2(x, z))
 			var e := maxf(absf(c.x), -c.y)
-			f = maxf(f, smoothstep(380.0, 470.0, e) * 0.9 * clampf((hh - 6.0) / 10.0, 0.0, 1.0))
-			var dm := c.distance_to(peak)
-			f = maxf(f, (1.0 - smoothstep(150.0, 300.0, dm)) * 0.85)
+			f = maxf(f, smoothstep(160.0, 205.0, e) * 0.95 * clampf((hh - 4.0) / 6.0, 0.0, 1.0))
 			f *= (1.0 - road[id]) * (1.0 - plaza[id]) * (1.0 - field[id])
 			if river_d[id] < river_half_w + 6.0:
 				f = 0.0
@@ -446,7 +445,7 @@ func compute_forest(amount: float, clear_zones: Array = []) -> void:
 	for cz in clear_zones:
 		var a: Vector2 = cz[0]
 		var b: Vector2 = cz[1]
-		var r: float = float(cz[2]) + 45.0
+		var r: float = float(cz[2]) + 16.0
 		var mn := Vector2(minf(a.x, b.x), minf(a.y, b.y)) - Vector2(r, r)
 		var mx := Vector2(maxf(a.x, b.x), maxf(a.y, b.y)) + Vector2(r, r)
 		for j in range(gi(mn.y), gi(mx.y) + 1):
@@ -455,7 +454,7 @@ func compute_forest(amount: float, clear_zones: Array = []) -> void:
 				if forest[id] <= 0.0:
 					continue
 				var dd := TerrainGen._seg_dist(Vector2(gx(i), gx(j)), a, b)
-				forest[id] *= smoothstep(float(cz[2]) + 5.0, r, dd)
+				forest[id] *= smoothstep(float(cz[2]) + 1.0, r, dd)
 
 
 # ---------------------------------------------------------------- 問い合わせ
@@ -557,9 +556,9 @@ func make_collision() -> StaticBody3D:
 ## チャンク分割した地形メッシュ（LOD0: 全解像度 / LOD1: 1/4）
 func build_meshes(parent: Node3D, mat: Material, quality: int) -> void:
 	var per := (N - 1) / CHUNKS   # 64
-	var lod_specs := [[1, 0.0, 340.0], [4, 300.0, 0.0]]
+	var lod_specs := [[1, 0.0, 170.0], [4, 150.0, 0.0]]
 	if quality <= 0:
-		lod_specs = [[2, 0.0, 300.0], [4, 260.0, 0.0]]
+		lod_specs = [[2, 0.0, 150.0], [4, 130.0, 0.0]]
 	for cj in CHUNKS:
 		for ci in CHUNKS:
 			for spec in lod_specs:
@@ -644,7 +643,7 @@ func _chunk_mesh(i0: int, j0: int, per: int, step: int) -> ArrayMesh:
 
 ## 遠景リング（コリジョンなし）: プレイ範囲の外側の山並み・海底
 func build_outer(parent: Node3D, mat: Material) -> void:
-	var step := 12.5
+	var step := 10.0
 	var n := int(OUTER * 2.0 / step) + 1
 	var verts := PackedVector3Array()
 	var norms := PackedVector3Array()
@@ -666,7 +665,7 @@ func build_outer(parent: Node3D, mat: Material) -> void:
 				var e := maxf(absf(c.x), -c.y)
 				var sd := c.y - shore_v(c.x)
 				if sd < 0.0:
-					hh += smoothstep(600.0, 900.0, e) * (90.0 + 60.0 * (n_ridge.get_noise_2d(c.x * 0.5, c.y * 0.5) * 0.5 + 0.5))
+					hh += smoothstep(500.0, 1200.0, e) * (120.0 + 160.0 * (n_ridge.get_noise_2d(c.x * 0.5, c.y * 0.5) * 0.5 + 0.5))
 			hs[j * n + i] = hh
 			verts[j * n + i] = Vector3(x, hh, z)
 	for j in n:

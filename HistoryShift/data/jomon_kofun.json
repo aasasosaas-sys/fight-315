@@ -979,7 +979,7 @@
       ],
       "effects": [
         {
-          "open_asia": 20,
+          "open_asia": 10,
           "militarism": 20,
           "warrior": 10
         },
@@ -990,7 +990,7 @@
           "religion": -15
         },
         {
-          "open_asia": 25,
+          "open_asia": 15,
           "court": 10,
           "centralization": 10
         }
@@ -1298,7 +1298,7 @@
       ],
       "effects": [
         {
-          "open_asia": 15,
+          "open_asia": 10,
           "militarism": 10,
           "centralization": 10
         },
@@ -1318,8 +1318,8 @@
         {
           "choice": 0,
           "if": {
-            "open_asia": ">=20",
-            "militarism": ">=15"
+            "open_asia": ">=10",
+            "militarism": ">=20"
           },
           "note": "卑弥呼が南朝に将軍号を求めた先例があったため、ヤマトの大王は半島へ兵を出す前にまず中国の称号を得ようと、早々に上表した。"
         },
@@ -1608,7 +1608,7 @@
         },
         {
           "education": 30,
-          "open_asia": 20,
+          "open_asia": 15,
           "court": 10
         },
         {
@@ -1643,7 +1643,7 @@
         {
           "choice": 2,
           "if": {
-            "open_asia": ">=40"
+            "open_asia": ">=45"
           },
           "note": "奴国・卑弥呼の時代から大陸との通交が途切れず、倭には中国の学問が蓄積されていた。6世紀には逆に倭の学者が百済で教えるほどになった。"
         }
@@ -1919,7 +1919,7 @@
         },
         {
           "religion": -35,
-          "open_asia": -20,
+          "open_asia": -15,
           "education": -15,
           "tech": -10
         }

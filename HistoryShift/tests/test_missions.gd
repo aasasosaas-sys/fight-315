@@ -29,7 +29,9 @@ func _run() -> void:
 		if only.size() > 0 and ("q=" + q["id"]) not in only:
 			continue
 		for c in 4:
-			await _play(game, q, c)
+			var n_methods: int = db.missions_for(q, c).size()
+			for mi in n_methods:
+				await _play(game, q, c, mi)
 	game.state.reset_all()
 	HistoryState.delete_save()
 	print("missions ok=%d fail=%d  (%.1fs)" % [results["ok"], results["fail"], (Time.get_ticks_msec() - t0) / 1000.0])
@@ -39,8 +41,8 @@ func _run() -> void:
 	get_tree().quit(0 if results["fail"] == 0 else 1)
 
 
-func _play(game, q: Dictionary, c: int) -> void:
-	var sess := Session.start_mission(q, c)
+func _play(game, q: Dictionary, c: int, method := 0) -> void:
+	var sess := Session.start_mission(q, c, method)
 	get_tree().root.add_child(sess)
 	await _frames(3)
 	var runner: MissionRunner = sess.runner
@@ -113,6 +115,6 @@ func _play(game, q: Dictionary, c: int) -> void:
 		results["ok"] += 1
 	else:
 		results["fail"] += 1
-		failures.append("%s c%d「%s」 step %d/%d %s" % [q["id"], c, m.get("title", ""), runner.idx + 1, runner.steps.size(), done[1]])
+		failures.append("%s c%d m%d「%s」 step %d/%d %s" % [q["id"], c, method, m.get("title", ""), runner.idx + 1, runner.steps.size(), done[1]])
 	sess.end()
 	await _frames(2)

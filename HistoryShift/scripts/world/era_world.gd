@@ -15,19 +15,26 @@ static var taa_enabled := true      # 高品質時にビューポートの TAA �
 
 ## 正準レイアウト（海が +Z 側）。時代ごとに 90° 単位で回転する
 const CANON := {
-	"capital": {"pos": Vector2(40, -20), "r": 120.0},
-	"village": {"pos": Vector2(-330, 170), "r": 82.0},
-	"temple": {"pos": Vector2(330, -170), "r": 62.0},
-	"port": {"pos": Vector2(170, 365), "r": 58.0},
-	"castle": {"pos": Vector2(-320, -175), "r": 78.0},
-	"battlefield": {"pos": Vector2(305, 175), "r": 52.0, "half_len": 178.0},
-	"mountain": {"pos": Vector2(-10, -300), "r": 34.0},
+	"capital": {"pos": Vector2(0, -38), "r": 70.0},
+	"village": {"pos": Vector2(-122, 42), "r": 50.0},
+	"temple": {"pos": Vector2(128, -108), "r": 40.0},
+	"port": {"pos": Vector2(150, 132), "r": 40.0},
+	"castle": {"pos": Vector2(-122, -112), "r": 50.0},
+	"battlefield": {"pos": Vector2(45, 76), "r": 28.0, "half_len": 50.0},
+	"mountain": {"pos": Vector2(0, -178), "r": 24.0},
 }
-const RIVER_CANON := [Vector2(-172, -300), Vector2(-178, -240), Vector2(-190, -70),
-	Vector2(-175, 110), Vector2(-150, 270), Vector2(-122, 410), Vector2(-112, 560)]
-const ROADS := [["capital", "village", 4.5], ["capital", "castle", 4.5], ["capital", "temple", 4.0],
-	["capital", "battlefield", 4.5], ["capital", "port", 4.5], ["capital", "mountain", 3.5],
-	["village", "castle", 3.5], ["village", "port", 3.5], ["battlefield", "temple", 3.5], ["battlefield", "port", 3.5]]
+## 昭和は滑走路（約 330m）を確保するため戦場と村・港の位置を変える
+const CANON_SHOWA := {
+	"village": {"pos": Vector2(-138, 8), "r": 48.0},
+	"battlefield": {"pos": Vector2(-25, 98), "r": 25.0, "half_len": 140.0},
+	"port": {"pos": Vector2(168, 142), "r": 38.0},
+}
+## 西の境界を流れる川
+const RIVER_CANON := [Vector2(-196, -260), Vector2(-200, -150), Vector2(-198, -40), Vector2(-192, 80),
+	Vector2(-186, 170), Vector2(-180, 260)]
+const ROADS := [["capital", "village", 4.0], ["capital", "castle", 3.5], ["capital", "temple", 3.5],
+	["capital", "battlefield", 4.0], ["capital", "port", 4.0], ["capital", "mountain", 3.0],
+	["village", "castle", 3.0], ["village", "battlefield", 3.0], ["battlefield", "port", 3.5], ["temple", "port", 3.0]]
 
 var era: Dictionary
 var era_id := ""
@@ -242,6 +249,8 @@ func _setup_landmarks() -> void:
 	var ang := terrain.canon_basis_angle()
 	for key in CANON:
 		var c: Dictionary = CANON[key]
+		if era_id == "showa" and CANON_SHOWA.has(key):
+			c = CANON_SHOWA[key]
 		var wpos := terrain.canon_to_world(c["pos"])
 		var r: float = c["r"]
 		var hh: float
@@ -249,9 +258,9 @@ func _setup_landmarks() -> void:
 			"port":
 				hh = 2.4
 			"mountain":
-				hh = clampf(terrain.sample_grid(wpos.x, wpos.y), 30.0, 58.0)
+				hh = clampf(terrain.sample_grid(wpos.x, wpos.y), 14.0, 30.0)
 			_:
-				hh = clampf(terrain.sample_grid(wpos.x, wpos.y), 4.5, 26.0)
+				hh = clampf(terrain.sample_grid(wpos.x, wpos.y), 3.5, 14.0)
 		var info := {"key": key, "center": wpos, "r": r, "h": hh, "angle": ang, "name": names.get(key, key)}
 		if c.has("half_len"):
 			var dir := terrain.canon_to_world(Vector2(1, 0))
@@ -262,9 +271,9 @@ func _setup_landmarks() -> void:
 		landmarks[key] = info
 	for key in landmarks:
 		var info: Dictionary = landmarks[key]
-		var fall := 45.0
+		var fall := 26.0
 		if key == "mountain":
-			fall = 30.0
+			fall = 18.0
 		if info.has("a"):
 			terrain.flatten(info["a"], info["r"], fall, info["h"], info["b"])
 		elif key == "port":
@@ -277,7 +286,7 @@ func _flatten_port(info: Dictionary) -> void:
 	# 海側は持ち上げない（岸線を保つ）
 	var c: Vector2 = info["center"]
 	var r: float = info["r"]
-	var fall := 40.0
+	var fall := 24.0
 	var tg: float = info["h"]
 	for j in range(terrain.gi(c.y - r - fall), terrain.gi(c.y + r + fall) + 1):
 		for i in range(terrain.gi(c.x - r - fall), terrain.gi(c.x + r + fall) + 1):
@@ -314,9 +323,9 @@ func _make_roads() -> void:
 		var cb: Vector2 = landmarks[b_key]["center"]
 		if b_key == "mountain":
 			# 山道は九十九折り
-			var mid := terrain.canon_to_world(Vector2(120, -215))
+			var mid := terrain.canon_to_world(Vector2(70, -125))
 			var pa := lm_edge_point(a_key, mid)
-			var mid2 := terrain.canon_to_world(Vector2(80, -280))
+			var mid2 := terrain.canon_to_world(Vector2(45, -168))
 			var pb := lm_edge_point(b_key, mid2)
 			terrain.add_road(pa, mid, spec[2], 10.0, rr)
 			terrain.add_road(mid, mid2, spec[2], 5.0, rr)
@@ -324,7 +333,7 @@ func _make_roads() -> void:
 			continue
 		var pa := lm_edge_point(a_key, cb)
 		var pb := lm_edge_point(b_key, ca)
-		terrain.add_road(pa, pb, spec[2], 28.0, rr)
+		terrain.add_road(pa, pb, spec[2], 9.0, rr)
 
 
 func _terrain_material() -> ShaderMaterial:

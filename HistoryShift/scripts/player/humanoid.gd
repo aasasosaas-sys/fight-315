@@ -158,8 +158,10 @@ static func anim_library() -> AnimationLibrary:
 	if _lib:
 		return _lib
 	_lib = AnimationLibrary.new()
+	var paths: Array = ["res://assets/characters/mocap/mocap.glb"]
 	for f in ANIM_FILES:
-		var path := "res://assets/characters/kaykit/%s.glb" % f
+		paths.append("res://assets/characters/kaykit/%s.glb" % f)
+	for path in paths:
 		if not ResourceLoader.exists(path):
 			continue
 		var inst: Node = (load(path) as PackedScene).instantiate()
@@ -170,7 +172,8 @@ static func anim_library() -> AnimationLibrary:
 				if n == "T-Pose" or _lib.has_animation(n):
 					continue
 				var a: Animation = ap.get_animation(n).duplicate()
-				a.loop_mode = Animation.LOOP_LINEAR if n in LOOPS else Animation.LOOP_NONE
+				var looped: bool = n in LOOPS or (n.begins_with("Mocap_") and not n in ["Mocap_Fall", "Mocap_Shoot"])
+				a.loop_mode = Animation.LOOP_LINEAR if looped else Animation.LOOP_NONE
 				_lib.add_animation(n, a)
 		inst.free()
 	return _lib
@@ -282,11 +285,20 @@ func _setup_tree(model: Node3D, outfit: int, armed: bool) -> void:
 	_tree.add_animation_library("", anim_library())
 	var bt := AnimationNodeBlendTree.new()
 	var bs := AnimationNodeBlendSpace1D.new()
+	var lib := anim_library()
+	var mocap := lib.has_animation("Mocap_Walk")
 	var idle_name := "Skeletons_Idle" if outfit == Outfit.GUARDIAN else "Idle_A"
 	bs.add_blend_point(_anim_node(idle_name), 0.0)
-	bs.add_blend_point(_anim_node("Walking_A"), 1.8)
-	bs.add_blend_point(_anim_node("Running_HoldingRifle" if armed else "Running_A"), 5.2)
-	bs.add_blend_point(_anim_node("Running_B"), 9.5)
+	if mocap:
+		var soldier := outfit in [Outfit.SOLDIER, Outfit.ASHIGARU, Outfit.SAMURAI]
+		bs.add_blend_point(_anim_node("Mocap_March" if soldier and not armed else "Mocap_Walk"), 1.5)
+		bs.add_blend_point(_anim_node("Mocap_Jog"), 3.6)
+		bs.add_blend_point(_anim_node("Running_HoldingRifle" if armed else "Mocap_Run"), 6.0)
+		bs.add_blend_point(_anim_node("Mocap_Run"), 9.5)
+	else:
+		bs.add_blend_point(_anim_node("Walking_A"), 1.8)
+		bs.add_blend_point(_anim_node("Running_HoldingRifle" if armed else "Running_A"), 5.2)
+		bs.add_blend_point(_anim_node("Running_B"), 9.5)
 	bs.min_space = 0.0
 	bs.max_space = 10.0
 	bt.add_node("loco", bs, Vector2(0, 0))
@@ -303,9 +315,9 @@ func _setup_tree(model: Node3D, outfit: int, armed: bool) -> void:
 	for n in ["loco", "ride", "crouch", "dead", "jump"]:
 		tr.add_input(n)
 	bt.add_node("state", tr, Vector2(400, 0))
-	bt.add_node("ride", _anim_node("Sit_Chair_Idle"), Vector2(200, 200))
+	bt.add_node("ride", _anim_node("Mocap_Sit" if mocap else "Sit_Chair_Idle"), Vector2(200, 200))
 	bt.add_node("crouch", _anim_node("Crouching"), Vector2(200, 300))
-	bt.add_node("dead", _anim_node("Death_A"), Vector2(200, 400))
+	bt.add_node("dead", _anim_node("Mocap_Fall" if mocap else "Death_A"), Vector2(200, 400))
 	bt.add_node("jump", _anim_node("Jump_Idle"), Vector2(200, 500))
 	bt.connect_node("state", 0, "upper")
 	bt.connect_node("state", 1, "ride")

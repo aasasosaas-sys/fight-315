@@ -108,7 +108,7 @@ void fragment() {
 	// 土のパッチ
 	float dirt_w = smoothstep(0.66, 0.84, m2 * 0.7 + m3 * 0.5) * 0.45;
 	// 森の地面
-	float forest_w = ctrl.a;
+	float forest_w = max(ctrl.a, (1.0 - inside) * 0.8);
 	if (forest_w > 0.01) {
 		sample_layer(L_FOREST, wp, gdx, gdy, 0.25, mixv, a2, n2, r2);
 		a2 *= forest_tint;

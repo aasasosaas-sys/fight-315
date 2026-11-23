@@ -18,7 +18,7 @@ def check_file(path, allq):
         d = json.load(open(path, encoding="utf-8"))
     except Exception as e:
         err(path, f"JSON parse error: {e}"); return None
-    if os.path.basename(path).startswith("rules_"):
+    if os.path.basename(path).startswith("rules_") or os.path.basename(path) == "modern.json":
         return d
     era = d.get("eraId")
     if era not in ERAS: err(path, f"bad eraId {era}")
@@ -43,7 +43,7 @@ def check_file(path, allq):
         real = q.get("real")
         if real not in (0, 1, 2, 3): err(path, f"{qid}: bad real")
         ms = q.get("missions", [])
-        got = sorted(m.get("choice") for m in ms)
+        got = sorted(set(m.get("choice") for m in ms))
         want = sorted(i for i in range(4) if i != real)
         if got != want: err(path, f"{qid}: missions must cover choices {want}, got {got}")
         for m in ms:

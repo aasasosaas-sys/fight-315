@@ -69,32 +69,32 @@ func _make_shots() -> void:
 	var b := Basis(Vector3.UP, ang)
 	var cap: Vector3 = lm["capital"]["pos"]
 	# 0: 都の俯瞰
-	shots.append(_look(cap + b * Vector3(110, 70, 190), cap + b * Vector3(0, 0, -20)))
+	shots.append(_look(cap + b * Vector3(75, 48, 115), cap + b * Vector3(0, 0, -18)))
 	# 1: 都の通り（スポーン地点）
 	var sp := world.player_spawn
 	shots.append(_look(sp + Vector3(0, 1.7, 0), cap + Vector3(0, 6, 0)))
 	# 2: 村の通り
 	var vil: Vector3 = lm["village"]["pos"]
-	var vp := vil + b * Vector3(18, 0, 45)
+	var vp := vil + b * Vector3(10, 0, 30)
 	vp.y = world.height_at(vp.x, vp.z) + 1.7
 	shots.append(_look(vp, vil + Vector3(0, 3, 0)))
 	# 3: 城
 	var cas: Vector3 = lm["castle"]["pos"]
-	shots.append(_look(cas + b * Vector3(70, 30, 110), cas + Vector3(0, 12, 0)))
+	shots.append(_look(cas + b * Vector3(48, 24, 72), cas + Vector3(0, 8, 0)))
 	# 4: 港
 	var port: Vector3 = lm["port"]["pos"]
-	shots.append(_look(port + b * Vector3(-60, 18, -70), port + b * Vector3(0, 0, 70)))
+	shots.append(_look(port + b * Vector3(-40, 16, -50), port + b * Vector3(0, 0, 45)))
 	# 5: 寺社
 	var tem: Vector3 = lm["temple"]["pos"]
-	shots.append(_look(tem + b * Vector3(-40, 12, 70), tem + Vector3(0, 10, 0)))
+	shots.append(_look(tem + b * Vector3(-30, 12, 50), tem + Vector3(0, 8, 0)))
 	# 6: 戦場
 	var bf: Vector3 = lm["battlefield"]["pos"]
-	shots.append(_look(bf + b * Vector3(-30, 25, 120), bf + Vector3(0, 0, 0)))
+	shots.append(_look(bf + b * Vector3(-25, 20, 75), bf + Vector3(0, 0, 0)))
 	# 7: 全景
-	shots.append(_look(b * Vector3(150, 330, 700), b * Vector3(0, 0, -60)))
+	shots.append(_look(b * Vector3(110, 210, 390), b * Vector3(0, 0, -40)))
 	# 8: 山
 	var mt: Vector3 = lm["mountain"]["pos"]
-	shots.append(_look(mt + b * Vector3(60, 25, 90), mt + Vector3(0, 5, 0)))
+	shots.append(_look(mt + b * Vector3(40, 20, 60), mt + Vector3(0, 5, 0)))
 	if not only.is_empty():
 		var keep: Array = []
 		for i in only:
