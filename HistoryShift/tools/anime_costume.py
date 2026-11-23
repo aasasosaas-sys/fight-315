@@ -446,7 +446,7 @@ def w_arm(o, L, side, hand=False):
     _finish(o, L)
 
 
-def w_coat(o, L, sleeve_r):
+def w_coat(o, L, sleeve_r, off=0.0):
     """洋服の殻：袖の筒の面に近い頂点は腕、胴の面に近い頂点は胴（腕を下ろすと袖が胴に近いので距離では分けられない）。"""
     _clear(o)
     groups = {}
@@ -456,6 +456,8 @@ def w_coat(o, L, sleeve_r):
         q = mw @ v.co
         w = _torso_w(L, q.z)
         c, rx, ry = tsec(None, min(q.z, L["spine_03"].z))
+        rx += off
+        ry += off
         rr = math.sqrt(((q.x - c.x) / rx) ** 2 + ((q.y - c.y) / ry) ** 2)
         e_tor = abs(rr - 1.0) * min(rx, ry)
         best = None
@@ -471,6 +473,8 @@ def w_coat(o, L, sleeve_r):
                 best = (e, sd, t, (el - sh).dot(ax) / ax.length_squared)
         e_arm, sd, t, te = best
         a = ss(-0.012, 0.012, e_tor - e_arm) * ss(-0.04, 0.14, t)
+        if t > te - 0.08 and e_arm < 0.025:
+            a = 1.0   # 肘から先の袖は必ず腕に
         if q.z > L["spine_03"].z + 0.02 and abs(q.x - L["neck_01"].x) < 0.09:
             a = 0.0
         if a > 0:
@@ -1606,12 +1610,12 @@ def western(body_p, L, female, ks):
     D = G.dims(L)
     # ---- 上着（背広・詰襟の軍服・海軍の白の共通の形）
     jk = coat_shell(L, "jacket", hip_z - (0.1 if female else 0.13), 0.024, hem_flare=0.014, wrist_t=0.94, shoulder_pad=0.01)
-    w_coat(jk, L, (0.05 + 0.024, 0.043 + 0.024, 0.038 + 0.024))
+    w_coat(jk, L, (0.05 + 0.024, 0.043 + 0.024, 0.038 + 0.024), 0.024)
     out["jacket"] = [jk]
     jb = bvh_of(jk)
     # ---- シャツ（昭和の男の白シャツ・女のブラウス）：裾はズボン・もんぺの中
     sh = coat_shell(L, "shirt", waist_z - 0.045, 0.01, hem_flare=0.0, sleeve=(0.047, 0.04, 0.036), wrist_t=0.95)
-    w_coat(sh, L, (0.057, 0.05, 0.046))
+    w_coat(sh, L, (0.057, 0.05, 0.046), 0.01)
     # 書生の着物の袖口からのぞくシャツの袖
     cuffs = []
     for sd in ("l", "r"):
@@ -1746,7 +1750,7 @@ def western(body_p, L, female, ks):
     for sd in (1, -1):
         ct.append(patch("ctab", cs, [(nx + sd * 0.026, nz - 0.008), (nx + sd * 0.056, nz - 0.008), (nx + sd * 0.056, nz + 0.026), (nx + sd * 0.034, nz + 0.026)], 0.003, res=0.005, bvh=cb_))
     out["collar_tab"] = ct
-    for key in ("btn_tunic", "pockets", "belt", "buckle", "epaulet", "collar_tab"):
+    for key in ("btn_tunic", "pockets", "belt", "buckle", "epaulet", "collar_tab", "belt_t"):
         for o in out[key]:
             G.bone_weights(o, L, arms=False)
     # ---- 女袴
