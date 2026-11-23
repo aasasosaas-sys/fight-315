@@ -490,8 +490,8 @@ static func _apply_face(face: MeshInstance3D, sk: Skeleton3D, p: Dictionary) -> 
 					var ic: Color = p.iris
 					mm.set_shader_parameter("_MainTex", _iris_tex((m as ShaderMaterial).get_shader_parameter("_MainTex")))
 					mm.set_shader_parameter("_ShadeTexture", mm.get_shader_parameter("_MainTex"))
-					mm.set_shader_parameter("_Color", ic * 3.2)
-					mm.set_shader_parameter("_ShadeColor", ic * 2.6)
+					mm.set_shader_parameter("_Color", ic * 2.2)
+					mm.set_shader_parameter("_ShadeColor", ic * 1.8)
 			K_EYE:
 				if "Eyeline" in m.resource_name or "Eyelash" in m.resource_name:
 					mm.set_shader_parameter("_Color", lash_c)
