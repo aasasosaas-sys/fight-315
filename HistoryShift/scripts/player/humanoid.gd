@@ -206,6 +206,8 @@ func _construct_skinned(outfit: int, seed: int, armed: bool) -> void:
 		target *= rng.randf_range(0.96, 1.04)
 		model.scale = Vector3.ONE * (target / maxf(h, 0.5))
 		_dress_realistic(model, outfit, rng, armed)
+		if Toon.enabled:
+			_animeify(model, outfit, rng)
 		_setup_tree(model, outfit, armed)
 		return
 	model = (load(MANNEQUIN) as PackedScene).instantiate()
@@ -693,6 +695,32 @@ func _dress_realistic(model: Node3D, outfit: int, rng: RandomNumberGenerator, ar
 		muzzle = Node3D.new()
 		muzzle.position = Vector3(0, 0.02, 0.7)
 		weapon.add_child(muzzle)
+
+
+const HAIR_LAYER := 1 << 1
+
+
+## アニメ調：セル塗り＋輪郭線、写実的な目・眉・まつげを隠してアニメ顔を投影、肌は塗りつぶし
+func _animeify(model: Node3D, outfit: int, rng: RandomNumberGenerator) -> void:
+	var female: bool = get_meta("female", false)
+	var skin := Color(0.98, 0.86, 0.76).lerp(Color(0.9, 0.74, 0.6), rng.randf())
+	if outfit == Outfit.GUARDIAN:
+		skin = Color(0.3, 0.27, 0.36)
+	for node in find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		if not mi.visible:
+			continue
+		var n := String(mi.name).to_lower()
+		if n.contains("low-poly") or n.contains("eyebrow") or n.contains("eyelash"):
+			mi.visible = false
+		elif n.ends_with("_body") or n.ends_with("_bodyw"):
+			Toon.apply(mi, 0.0035, skin)
+		elif n.contains("short") or n.contains("long") or n.contains("bob") or n.contains("ponytail") or n.contains("braid") or n.contains("afro"):
+			mi.layers = HAIR_LAYER
+			Toon.apply(mi, 0.0025)
+		else:
+			Toon.apply(mi, 0.0045)
+	Toon.add_face(_holder("Head"), female, rng.randi() % 3, HAIR_LAYER)
 
 
 func _attach(bone: String) -> Node3D:
