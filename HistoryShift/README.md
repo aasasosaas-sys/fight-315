@@ -54,6 +54,7 @@ godot --headless --path . -s tests/parse_all.gd             # 全スクリプト
 ## クレジット
 - 問題文はすべてオリジナルです（実際の共通テストの過去問ではありません）。
 - テクスチャ・HDRI：[Poly Haven](https://polyhaven.com)（CC0）
-- キャラクター・アニメーション：KayKit Character Animations — Kay Lousberg（CC0）
+- 人物モデル：MakeHuman / MPFB2 で自動生成（CC0）。再生成は `tools/make_humans.py`（Blender bpy + MPFB2）→ `tools/setup_retarget.gd`
+- アニメーション：KayKit Character Animations — Kay Lousberg（CC0、取り込み時に人型プロファイルへリターゲット）
 - フォント：Noto Sans JP / Noto Serif JP（SIL OFL 1.1）
 - エンジン：Godot Engine（MIT）

@@ -25,7 +25,7 @@ func _ready() -> void:
 	var outfit := Humanoid.outfit_for(era_id, "npc")
 	if npc_name.contains("記録者"):
 		outfit = Humanoid.Outfit.MONK
-	_rig = Humanoid.build(outfit, hash(npc_name), false)
+	_rig = Humanoid.build(outfit, hash(npc_name), false, 1 if Humanoid.is_female_name(npc_name) else 0)
 	_rig.rotation.y = PI
 	add_child(_rig)
 	var body := StaticBody3D.new()

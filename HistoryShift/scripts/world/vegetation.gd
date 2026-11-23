@@ -428,6 +428,20 @@ static func leaf_material(sp: String) -> ShaderMaterial:
 	m.set_shader_parameter("leaf_aspect", d["aspect"])
 	if sp == "sakura":
 		m.set_shader_parameter("translucency", 0.6)
+	var atlas := _model_tex("island_tree_02/textures/island_tree_02_leaves_diff_1k.jpg")
+	if atlas:
+		m.set_shader_parameter("leaf_tex", atlas)
+		m.set_shader_parameter("use_tex", 1.0)
+		var tint: Dictionary = {"cedar": Color(0.55, 0.62, 0.5), "pine": Color(0.6, 0.66, 0.52), "broadleaf": Color(0.95, 1.0, 0.9),
+			"sakura": Color(1.0, 0.78, 0.86), "bamboo": Color(0.95, 1.05, 0.75), "bush": Color(0.8, 0.88, 0.75)}
+		m.set_shader_parameter("tex_tint", tint.get(sp, Color.WHITE))
+		if sp == "sakura":
+			m.set_shader_parameter("tex_desat", 1.0)
+			m.set_shader_parameter("tex_tint", Color(1.25, 0.9, 1.0))
+		# 葉を細かく（写真の葉は小さめに並べる）
+		m.set_shader_parameter("leaf_count", float(d["count"]) * 1.25)
+		m.set_shader_parameter("leaf_size", 0.5)
+		m.set_shader_parameter("leaf_aspect", 0.32 if sp in ["cedar", "pine", "bamboo"] else 0.45)
 	_mat_cache[sp] = m
 	return m
 
@@ -442,15 +456,30 @@ static func bark_material(sp: String) -> StandardMaterial3D:
 		m.roughness = 0.45
 		m.vertex_color_use_as_albedo = true
 	else:
-		m.albedo_texture = WorldMaterials.tex("darkwood", "diff")
-		m.normal_enabled = true
-		m.normal_texture = WorldMaterials.tex("darkwood", "nor_gl")
-		m.albedo_color = SPECIES[sp]["bark"] * 1.6
-		m.uv1_scale = Vector3(0.6, 0.6, 1)
+		var bark := _model_tex("island_tree_02/textures/island_tree_02_branches_diff_1k.jpg")
+		if bark:
+			m.albedo_texture = bark
+			m.normal_enabled = true
+			m.normal_texture = _model_tex("island_tree_02/textures/island_tree_02_branches_nor_gl_1k.jpg")
+			m.albedo_color = (SPECIES[sp]["bark"] as Color).lerp(Color.WHITE, 0.5) * 1.25
+			m.uv1_scale = Vector3(0.7, 0.7, 1)
+		else:
+			m.albedo_texture = WorldMaterials.tex("darkwood", "diff")
+			m.normal_enabled = true
+			m.normal_texture = WorldMaterials.tex("darkwood", "nor_gl")
+			m.albedo_color = SPECIES[sp]["bark"] * 1.6
+			m.uv1_scale = Vector3(0.6, 0.6, 1)
 		m.vertex_color_use_as_albedo = true
 		m.roughness = 0.95
 	_mat_cache[k] = m
 	return m
+
+
+static func _model_tex(rel: String) -> Texture2D:
+	var p := WorldModels.DIR + rel
+	if WorldModels.enabled and ResourceLoader.exists(p):
+		return load(p)
+	return null
 
 
 static func species_meshes(sp: String) -> Array:

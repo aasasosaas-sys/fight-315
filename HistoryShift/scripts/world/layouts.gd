@@ -231,6 +231,13 @@ func build_all() -> void:
 	a.flush("Arch_roads")
 	_process_ponds()
 	_lamp_lights()
+	# 後から建った建物・池の上の歩行点を除く
+	var kept: Array = []
+	for p in w._street_points:
+		if not t.is_occupied(p.x, p.z) and not t.is_water(p.x, p.z):
+			p.y = t.height_at(p.x, p.z)
+			kept.append(p)
+	w._street_points = kept
 	# スポーン: 都の南寄りの大通り
 	var cap: Dictionary = w.landmarks["capital"]
 	var sp := wp(cap, 0, 30)

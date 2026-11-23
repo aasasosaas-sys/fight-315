@@ -57,6 +57,8 @@ static func mesh(kind: String) -> Mesh:
 			m = CylinderMesh.new(); (m as CylinderMesh).top_radius = 0.5; (m as CylinderMesh).bottom_radius = 0.5; (m as CylinderMesh).height = 1.0
 		"cone":
 			m = CylinderMesh.new(); (m as CylinderMesh).top_radius = 0.02; (m as CylinderMesh).bottom_radius = 0.5; (m as CylinderMesh).height = 1.0
+		"torus":
+			m = TorusMesh.new(); (m as TorusMesh).inner_radius = 0.35; (m as TorusMesh).outer_radius = 0.5
 		"skirt":
 			m = CylinderMesh.new(); (m as CylinderMesh).top_radius = 0.32; (m as CylinderMesh).bottom_radius = 0.5; (m as CylinderMesh).height = 1.0
 		_:
@@ -111,21 +113,38 @@ const ANIM_FILES := ["Rig_Medium_General", "Rig_Medium_MovementBasic", "Rig_Medi
 const LOOPS := ["Idle_A", "Idle_B", "Walking_A", "Walking_B", "Walking_C", "Running_A", "Running_B", "Running_HoldingRifle", "Running_HoldingBow",
 	"Ranged_2H_Aiming", "Ranged_1H_Aiming", "Ranged_Bow_Aiming_Idle", "Ranged_Magic_Spellcasting", "Sit_Chair_Idle", "Crouching", "Cheering", "Waving",
 	"Jump_Idle", "Skeletons_Idle", "Sneaking", "Walking_Backwards", "Sit_Floor_Idle"]
-const UPPER_BONES := ["spine", "chest", "head", "upperarm.l", "lowerarm.l", "wrist.l", "hand.l", "upperarm.r", "lowerarm.r", "wrist.r", "hand.r"]
-const SKEL := "Rig_Medium/Skeleton3D:"
+const UPPER_BONES := ["Spine", "Chest", "UpperChest", "Neck", "Head", "LeftShoulder", "LeftUpperArm", "LeftLowerArm", "LeftHand",
+	"RightShoulder", "RightUpperArm", "RightLowerArm", "RightHand"]
+const SKEL := "%GeneralSkeleton:"
+const REAL_DIR := "res://assets/characters/mh/"
+const REAL_MALE := ["m_young", "m_adult", "m_suit", "m_soldier"]
+const REAL_FEMALE := ["f_young", "f_adult", "f_tied"]
+const FEMALE_NAMES := ["卑弥呼", "推古", "持統", "光明", "紫式部", "清少納言", "北条政子", "日野富子", "お市", "ねね", "淀", "春日局",
+	"和宮", "津田梅子", "与謝野晶子", "樋口一葉", "平塚らいてう", "市川房枝", "女", "娘", "姫", "妻", "母", "尼"]
+static var _real_ok := -1
 static var _lib: AnimationLibrary
 static var _skinned_ok := -1
 
 var skinned := false
+var realistic := false
+var _female_req := -1
 var _tree: AnimationTree
 var _skel: Skeleton3D
 var _state := ""
 var _aim_amount := 0.0
 
 
-static func build(outfit: int, seed: int, armed: bool) -> Humanoid:
+static func is_female_name(n: String) -> bool:
+	for k in FEMALE_NAMES:
+		if n.contains(k):
+			return true
+	return false
+
+
+static func build(outfit: int, seed: int, armed: bool, female := -1) -> Humanoid:
 	var h := Humanoid.new()
 	h.name = "Humanoid"
+	h._female_req = female
 	if _skinned_ok == -1:
 		_skinned_ok = 1 if ResourceLoader.exists(MANNEQUIN) else 0
 	if _skinned_ok == 1:
@@ -167,7 +186,21 @@ func _construct_skinned(outfit: int, seed: int, armed: bool) -> void:
 	skinned = true
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed
-	var model: Node3D = (load(MANNEQUIN) as PackedScene).instantiate()
+	var real_path := _pick_realistic(outfit, rng)
+	var model: Node3D
+	if real_path != "":
+		realistic = true
+		model = (load(real_path) as PackedScene).instantiate()
+		add_child(model)
+		_skel = model.find_children("*", "Skeleton3D", true, false)[0]
+		var female := real_path.get_file().begins_with("f_")
+		var h := _rest_height(model)
+		var target := (1.6 if female else 1.71) * rng.randf_range(0.96, 1.04)
+		model.scale = Vector3.ONE * (target / maxf(h, 0.5))
+		_dress_realistic(model, outfit, rng, armed)
+		_setup_tree(model, outfit, armed)
+		return
+	model = (load(MANNEQUIN) as PackedScene).instantiate()
 	model.scale = Vector3.ONE * (1.75 / 2.2) * rng.randf_range(0.95, 1.05)
 	add_child(model)
 	_skel = model.find_children("*", "Skeleton3D", true, false)[0]
@@ -190,9 +223,9 @@ func _construct_skinned(outfit: int, seed: int, armed: bool) -> void:
 	var m_legs := mat(pal[1], 0.85)
 	var m_hair := mat(Color(0.05, 0.04, 0.04), 0.5)
 	# 小物（ボーンに追従）
-	var head := _attach("head")
-	var chest := _attach("chest")
-	var hips_a := _attach("hips")
+	var head := _attach("Head")
+	var chest := _attach("Chest")
+	var hips_a := _attach("Hips")
 	match outfit:
 		Outfit.SAMURAI:
 			part(head, "sphere", m_body, Vector3(0, 0.62, 0), Vector3(0.78, 0.5, 0.78))
@@ -223,7 +256,7 @@ func _construct_skinned(outfit: int, seed: int, armed: bool) -> void:
 		_:
 			part(head, "sphere", m_hair, Vector3(0, 0.6, -0.04), Vector3(0.66, 0.5, 0.66))
 	if armed:
-		var hand := _attach("hand.r")
+		var hand := _attach("RightHand")
 		weapon = Node3D.new()
 		weapon.name = "Weapon"
 		hand.add_child(weapon)
@@ -239,7 +272,10 @@ func _construct_skinned(outfit: int, seed: int, armed: bool) -> void:
 		muzzle = Node3D.new()
 		muzzle.position = Vector3(0, 0.08, 1.25)
 		weapon.add_child(muzzle)
-	# アニメーションツリー
+	_setup_tree(model, outfit, armed)
+
+
+func _setup_tree(model: Node3D, outfit: int, armed: bool) -> void:
 	_tree = AnimationTree.new()
 	model.add_child(_tree)
 	_tree.root_node = NodePath("..")
@@ -292,6 +328,154 @@ func _construct_skinned(outfit: int, seed: int, armed: bool) -> void:
 	# 互換用のダミー関節（手続きアニメ用変数を参照するコードのため）
 	hips = Node3D.new(); torso = hips; head = hips; arm_l = hips; arm_r = hips; leg_l = hips; leg_r = hips
 	add_child(hips)
+
+
+func _pick_realistic(outfit: int, rng: RandomNumberGenerator) -> String:
+	if _real_ok == -1:
+		_real_ok = 1 if ResourceLoader.exists(REAL_DIR + "m_young.glb") else 0
+	if _real_ok == 0:
+		return ""
+	var female := false
+	if _female_req >= 0:
+		female = _female_req == 1
+	elif outfit in [Outfit.KIMONO]:
+		female = rng.randf() < 0.8
+	elif outfit in [Outfit.COMMONER, Outfit.WESTERN, Outfit.ANCIENT, Outfit.NOBLE]:
+		female = rng.randf() < 0.4
+	var pool: Array = REAL_FEMALE if female else REAL_MALE
+	if outfit == Outfit.MONK or (not female and outfit == Outfit.COMMONER and rng.randf() < 0.25):
+		pool = ["m_old"]
+	elif outfit in [Outfit.SOLDIER, Outfit.POLICE, Outfit.ASHIGARU]:
+		pool = ["m_soldier", "m_adult"]
+	elif outfit == Outfit.AGENT:
+		pool = ["m_suit"]
+	var name: String = pool[rng.randi() % pool.size()]
+	var path := REAL_DIR + name + ".glb"
+	return path if ResourceLoader.exists(path) else REAL_DIR + "m_young.glb"
+
+
+static func _rest_height(model: Node3D) -> float:
+	var aabb := AABB()
+	var first := true
+	for mi in model.find_children("*", "MeshInstance3D", true, false):
+		var b: AABB = (mi as MeshInstance3D).get_aabb()
+		aabb = b if first else aabb.merge(b)
+		first = false
+	return aabb.end.y
+
+
+## 実寸（メートル）で小物を付けるためのホルダー
+func _holder(bone: String) -> Node3D:
+	var ba := _attach(bone)
+	var h := Node3D.new()
+	var s: float = get_child(0).scale.x if get_child_count() > 0 else 1.0
+	h.scale = Vector3.ONE / maxf(s, 0.01)
+	ba.add_child(h)
+	return h
+
+
+func _tint(mi: MeshInstance3D, c: Color, rough := -1.0) -> void:
+	for si in mi.mesh.get_surface_count():
+		var base := mi.mesh.surface_get_material(si)
+		if base is BaseMaterial3D:
+			var m := (base as BaseMaterial3D).duplicate() as BaseMaterial3D
+			m.albedo_color = c
+			if rough >= 0.0:
+				m.roughness = rough
+			mi.set_surface_override_material(si, m)
+
+
+func _dress_realistic(model: Node3D, outfit: int, rng: RandomNumberGenerator, armed: bool) -> void:
+	var pal := _palette(outfit, rng)
+	var glow := outfit == Outfit.AGENT or outfit == Outfit.GUARDIAN
+	var hair_c := Color(0.12, 0.1, 0.09) if outfit != Outfit.MONK else Color(0.5, 0.5, 0.5)
+	for node in model.find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		var n := String(mi.name).to_lower()
+		if n.ends_with("_body") or n.contains("low-poly") or n.contains("eyelash") or n.contains("eyebrow"):
+			if outfit == Outfit.GUARDIAN and n.ends_with("_body"):
+				_tint(mi, Color(0.25, 0.22, 0.3), 0.3)
+			continue
+		if n.contains("short") or n.contains("long") or n.contains("bob") or n.contains("ponytail") or n.contains("braid") or n.contains("afro"):
+			_tint(mi, hair_c)
+			if outfit == Outfit.MONK:
+				mi.visible = false
+			continue
+		if n.contains("shoes"):
+			_tint(mi, Color(0.18, 0.15, 0.13) if outfit in [Outfit.WESTERN, Outfit.SOLDIER, Outfit.POLICE, Outfit.AGENT] else Color(0.55, 0.45, 0.32))
+			continue
+		# 服：時代の色で染める（明治・昭和はそのまま洋装を活かす）
+		var c: Color = pal[0]
+		if outfit == Outfit.WESTERN:
+			c = Color(1, 1, 1).lerp(pal[0], 0.5)
+		_tint(mi, c.lightened(0.15) if not glow else c, 0.85)
+	var m_acc := mat(pal[2], 0.3, 0.0, 3.0) if glow else mat(pal[2], 0.5, 0.5 if outfit == Outfit.SAMURAI else 0.0)
+	var m_body := mat(pal[0], 0.85)
+	var m_legs := mat(pal[1], 0.9)
+	var m_black := mat(Color(0.05, 0.05, 0.05), 0.5)
+	var m_straw := mat(Color(0.62, 0.5, 0.3), 0.9)
+	var head := _holder("Head")
+	var chest := _holder("Chest")
+	var hips_h := _holder("Hips")
+	match outfit:
+		Outfit.SAMURAI:
+			part(head, "sphere", m_body, Vector3(0, 0.15, -0.01), Vector3(0.27, 0.2, 0.29))          # 兜
+			part(head, "cone", m_body, Vector3(0, 0.08, -0.02), Vector3(0.42, 0.08, 0.42))           # 錣
+			part(head, "box", m_acc, Vector3(0, 0.24, 0.12), Vector3(0.24, 0.1, 0.01), Vector3(-15, 0, 0))  # 鍬形
+			part(chest, "box", m_body, Vector3(0, 0.02, 0.0), Vector3(0.4, 0.42, 0.27))                # 胴
+			part(chest, "box", m_acc, Vector3(-0.25, 0.14, 0), Vector3(0.14, 0.03, 0.22), Vector3(0, 0, 20))
+			part(chest, "box", m_acc, Vector3(0.25, 0.14, 0), Vector3(0.14, 0.03, 0.22), Vector3(0, 0, -20))
+			part(hips_h, "skirt", m_legs, Vector3(0, -0.3, 0), Vector3(0.58, 0.55, 0.46))             # 草摺・袴
+		Outfit.ASHIGARU:
+			part(head, "cone", m_acc, Vector3(0, 0.2, 0), Vector3(0.5, 0.09, 0.5))                    # 陣笠
+			part(chest, "box", m_acc, Vector3(0, 0.0, 0.0), Vector3(0.38, 0.38, 0.25))                 # 胴丸
+		Outfit.NOBLE:
+			part(head, "cyl", m_black, Vector3(0, 0.27, -0.02), Vector3(0.13, 0.28, 0.15), Vector3(-12, 0, 0))  # 烏帽子
+			part(hips_h, "skirt", m_body, Vector3(0, -0.42, 0), Vector3(0.62, 0.88, 0.5))
+			part(chest, "box", m_body, Vector3(0, -0.02, 0), Vector3(0.44, 0.4, 0.3))
+		Outfit.KIMONO:
+			part(hips_h, "skirt", m_body, Vector3(0, -0.42, 0), Vector3(0.5, 0.88, 0.42))
+			part(chest, "box", m_acc, Vector3(0, -0.14, 0), Vector3(0.36, 0.12, 0.25))                # 帯
+		Outfit.MONK:
+			part(hips_h, "skirt", m_legs, Vector3(0, -0.42, 0), Vector3(0.6, 0.88, 0.5))
+			part(chest, "box", m_acc, Vector3(0.05, 0.02, 0), Vector3(0.42, 0.06, 0.3), Vector3(0, 0, -35))  # 袈裟
+		Outfit.ANCIENT:
+			part(hips_h, "skirt", m_body, Vector3(0, -0.32, 0), Vector3(0.58, 0.68, 0.46))
+			part(head, "torus", m_black, Vector3(0, 0.12, 0), Vector3(0.24, 0.12, 0.24))
+		Outfit.COMMONER:
+			part(hips_h, "skirt", m_body, Vector3(0, -0.3, 0), Vector3(0.55, 0.62, 0.45))
+			if rng.randf() < 0.5:
+				part(head, "cone", m_straw, Vector3(0, 0.19, 0), Vector3(0.46, 0.13, 0.46))             # 笠
+		Outfit.WESTERN:
+			if rng.randf() < 0.6:
+				part(head, "cyl", m_legs, Vector3(0, 0.17, 0), Vector3(0.34, 0.012, 0.34))
+				part(head, "cyl", m_legs, Vector3(0, 0.22, 0), Vector3(0.2, 0.1, 0.2))
+		Outfit.SOLDIER, Outfit.POLICE:
+			part(head, "cyl", m_legs, Vector3(0, 0.19, 0), Vector3(0.22, 0.07, 0.22))
+			part(head, "box", m_black, Vector3(0, 0.16, 0.11), Vector3(0.16, 0.012, 0.08))
+		Outfit.GUARDIAN:
+			part(head, "box", m_acc, Vector3(0, 0.1, 0.11), Vector3(0.17, 0.035, 0.02))
+			part(chest, "box", m_acc, Vector3(0, 0.05, 0.14), Vector3(0.03, 0.3, 0.01))
+		Outfit.AGENT:
+			part(head, "box", m_acc, Vector3(0, 0.1, 0.105), Vector3(0.18, 0.035, 0.02))               # バイザー
+	if armed:
+		var hand := _holder("RightHand")
+		weapon = Node3D.new()
+		weapon.name = "Weapon"
+		hand.add_child(weapon)
+		weapon.position = Vector3(0, 0.07, 0.03)
+		weapon.rotation_degrees = Vector3(-90, 0, 0)
+		var metal := mat(Color(0.12, 0.12, 0.13), 0.35, 0.9)
+		if glow:
+			part(weapon, "box", metal, Vector3(0, 0, 0.12), Vector3(0.05, 0.08, 0.36))
+			part(weapon, "box", m_acc, Vector3(0, 0.04, 0.14), Vector3(0.052, 0.012, 0.26))
+		else:
+			var wood := mat(Color(0.35, 0.22, 0.12), 0.7)
+			part(weapon, "box", wood, Vector3(0, -0.01, -0.05), Vector3(0.045, 0.07, 0.42))
+			part(weapon, "cyl", metal, Vector3(0, 0.02, 0.38), Vector3(0.022, 0.62, 0.022), Vector3(90, 0, 0))
+		muzzle = Node3D.new()
+		muzzle.position = Vector3(0, 0.02, 0.7)
+		weapon.add_child(muzzle)
 
 
 func _attach(bone: String) -> Node3D:

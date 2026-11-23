@@ -353,9 +353,9 @@ func _terrain_material() -> ShaderMaterial:
 	m.set_shader_parameter("road_scale", road_scale.get(road_key, 0.25))
 	m.set_shader_parameter("plaza_scale", road_scale.get(plaza_key, 0.25))
 	if road_key == "dirt":
-		m.set_shader_parameter("road_tint", Color(1.3, 1.18, 1.05))
+		m.set_shader_parameter("road_tint", Color(1.12, 1.08, 1.02))
 	if plaza_key == "dirt":
-		m.set_shader_parameter("plaza_tint", Color(1.25, 1.15, 1.02))
+		m.set_shader_parameter("plaza_tint", Color(1.15, 1.1, 1.02))
 	if plaza_key == "sand":
 		m.set_shader_parameter("plaza_tint", Color(1.25, 1.2, 1.1))
 	if era_id == "showa":

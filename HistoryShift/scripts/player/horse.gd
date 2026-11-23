@@ -69,7 +69,7 @@ func _build(seed: int) -> void:
 	Humanoid.part(body, "box", tack, Vector3(0, 1.7, 0.05), Vector3(0.7, 0.08, 0.75))  # 鞍
 	seat = Node3D.new()
 	seat.name = "Seat"
-	seat.position = Vector3(0, 1.22, 0.05)
+	seat.position = Vector3(0, 0.62, 0.1)
 	add_child(seat)
 	_sound = Sfx.loop_player(self, Sfx.hooves(), -8.0)
 
