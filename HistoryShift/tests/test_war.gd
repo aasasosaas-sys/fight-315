@@ -130,6 +130,15 @@ func _run() -> void:
 			if not st.is_correct(q):
 				st.apply_change(q, st.answer(q), "test")
 		_check(st.perfect(), "victory world: chronological repair -> 100点")
+	# 別の勝ち筋（戦国より前に触れず、江戸以降だけで勝てるか）
+	var st_b := HistoryState.new(db)
+	var later: Array = all_ids.filter(func(p): return db.projects[p]["era"] in ["edo", "meiji_taisho", "showa"])
+	var win2 := _greedy(st_b, db, later, "勝利", func(s): return float(s.war["score"]))
+	if win2.is_empty():
+		_apply_set(st_b, db, later)
+		print("edo+meiji+showa only: best %s (score %.1f) — no victory without changes before Edo" % [st_b.war_tier(), st_b.war["score"]])
+	else:
+		print("edo+ strategy: %s" % [win2[0]])
 	# 4. 開戦回避
 	var st2 := HistoryState.new(db)
 	var avoid := _greedy(st2, db, all_ids, "開戦回避", func(s): return minf(float(s.war["pillars"]["diplomacy"]) - 55.0, float(s.war["pillars"]["politics"]) - 45.0), saves)
