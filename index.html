@@ -1126,6 +1126,117 @@
 
         /* 画面外のカードは描画を省略（長い一覧の表示を軽く） */
         #synergyListContainer > *, #achievementGrid > *, #characterGrowthList > * { content-visibility: auto; contain-intrinsic-size: auto 96px; }
+        /* ---------- ★UI改訂: 戦闘画面（スマホモード以外） ---------- */
+        body:not(.smphone-mode) #fullScreenBattleView {
+            padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+            background:
+                linear-gradient(180deg, rgba(18,10,46,.0) 55%, rgba(14,10,20,.95) 100%),
+                linear-gradient(180deg, #120a2e 0%, #2b1850 40%, #5a2546 75%, #2a1020 100%);
+        }
+        body:not(.smphone-mode) #battleStage { display: flex; flex-direction: column; gap: 10px; max-width: 1080px; margin: 0 auto; min-height: 100%; }
+        body:not(.smphone-mode) #battleArena { display: contents; }
+        body:not(.smphone-mode) #battleTopBar { order: 0; }
+        body:not(.smphone-mode) #reviewStatsPanel { order: 1; margin: 0; }
+        body:not(.smphone-mode) #enemySideBox { order: 2; }
+        body:not(.smphone-mode) #quizContainerBox { order: 3; }
+        body:not(.smphone-mode) #playerSideBox { order: 4; margin-top: auto; }
+
+        /* 上部バー */
+        body:not(.smphone-mode) #battleTopBar { padding: 8px 12px; border-radius: 12px; border: 2px solid var(--wa-gold) !important;
+            background: linear-gradient(90deg, rgba(126,31,22,.85), rgba(27,15,38,.92) 40%) !important; box-shadow: 0 0 0 2px #1b0f26, 0 6px 14px rgba(0,0,0,.45) !important; }
+        body:not(.smphone-mode) #battleStageTitle { font-size: 18px; letter-spacing: .06em; }
+        body:not(.smphone-mode) #battleTopBar button[onclick="promptRetreat()"] { border-radius: 9999px; padding: 6px 14px; background: rgba(0,0,0,.45); border-color: rgba(252,165,165,.6); }
+
+        /* 敵: 左に大きな紋章、右に名前・体力・攻勢ゲージ */
+        body:not(.smphone-mode) #enemySideBox { display: grid !important; grid-template-columns: auto 1fr; column-gap: 16px; align-items: center; padding: 12px 16px !important;
+            border-radius: 16px !important; border: 2px solid rgba(239,68,68,.75) !important;
+            background: radial-gradient(ellipse at 0% 50%, rgba(200,57,43,.35), transparent 55%), linear-gradient(90deg, rgba(40,8,12,.92), rgba(22,10,26,.92)) !important;
+            box-shadow: 0 0 0 2px #1b0f26, 0 8px 18px rgba(0,0,0,.5) !important; }
+        body:not(.smphone-mode) #enemySideBox > :not(:nth-child(5)) { grid-column: 2; }
+        body:not(.smphone-mode) #enemySideBox > :nth-child(5) { grid-column: 1; grid-row: 1 / span 4; background: none !important; border: none !important; padding: 0 !important; min-height: 0 !important; margin: 0 !important; }
+        body:not(.smphone-mode) #enemyVisualIcon { width: 96px !important; height: 96px !important; font-size: 44px !important; border: 3px solid var(--wa-gold) !important;
+            background: radial-gradient(circle at 40% 35%, #5a1a1a, #1a0608) !important; color: #fecaca !important; box-shadow: 0 0 0 3px #7e1f16, 0 0 24px rgba(239,68,68,.45) !important; }
+        body:not(.smphone-mode) #enemySubText { font-size: 12px; margin-top: 6px; color: #fecaca; text-align: center; max-width: 120px; }
+        body:not(.smphone-mode) #enemyNameText { font-size: 18px !important; color: #fff1f0 !important; letter-spacing: .06em; }
+        body:not(.smphone-mode) #enemyHpText, body:not(.smphone-mode) #playerHpText { font-size: 13px !important; }
+        body:not(.smphone-mode) #enemySideBox > :nth-child(2), body:not(.smphone-mode) #playerSideBox > :nth-child(2) { flex-shrink: 0; height: 16px; border-radius: 4px !important; border: 2px solid var(--wa-gold-d) !important; background: #0b0610 !important; margin-bottom: 8px !important; }
+        body:not(.smphone-mode) #enemySideBox > :nth-child(3), body:not(.smphone-mode) #playerStatusIcons { min-height: 0 !important; margin-bottom: 4px !important; }
+        body:not(.smphone-mode) #enemySideBox > :nth-child(4) { margin-bottom: 0 !important; }
+
+        /* 問題: 和紙の巻物 */
+        body:not(.smphone-mode) #quizContainerBox { padding: 14px !important; border-radius: 16px !important; border: 2px solid var(--wa-gold) !important;
+            background: linear-gradient(180deg, rgba(36,20,47,.92), rgba(20,11,28,.95)) !important; box-shadow: 0 0 0 2px #1b0f26, 0 10px 24px rgba(0,0,0,.5) !important; }
+        body:not(.smphone-mode) #quizContainerBox > div:first-child { position: relative; padding: 14px 16px 16px !important; margin-bottom: 12px !important; border-radius: 6px !important;
+            background:
+                repeating-linear-gradient(90deg, rgba(120,90,40,.035) 0 2px, transparent 2px 7px),
+                linear-gradient(180deg, #f8f0dc, #efe2c2) !important;
+            border: none !important; border-left: 10px solid #7e1f16 !important; border-right: 10px solid #7e1f16 !important;
+            box-shadow: inset 0 0 18px rgba(120,80,30,.25), 0 4px 10px rgba(0,0,0,.45); }
+        body:not(.smphone-mode) #quizContainerBox > div:first-child > div:first-child { color: #7e1f16 !important; font-size: 12px; letter-spacing: .08em; margin-bottom: 4px !important; }
+        body:not(.smphone-mode) #quizWordDisplay { background: none !important; -webkit-text-fill-color: #1a1210 !important; color: #1a1210 !important; font-size: clamp(30px, 5vw, 46px) !important; letter-spacing: .1em;
+            text-shadow: 0 1px 0 rgba(255,255,255,.6); }
+        body:not(.smphone-mode) #quizChoicesGrid { gap: 10px !important; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important; }
+        body:not(.smphone-mode) #quizChoicesGrid > button { position: relative; min-height: 56px; padding: 12px 14px 12px 44px !important; border-radius: 12px !important; font-size: 15px !important; font-weight: 700 !important; color: #fbf3df;
+            background: linear-gradient(180deg, #3b2353, #22132f) !important; border: 1px solid rgba(212,175,55,.55) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 3px 0 #0b0612; transition: transform .08s; }
+        body:not(.smphone-mode) #quizChoicesGrid > button::before { content: counter(waq, cjk-ideographic); counter-increment: waq; position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+            width: 26px; height: 26px; border-radius: 9999px; display: grid; place-items: center; font-family: 'Shippori Mincho', serif; font-size: 13px; font-weight: 800;
+            color: #fff4e0; background: var(--wa-shu); box-shadow: 0 0 0 1px var(--wa-gold-l); }
+        body:not(.smphone-mode) #quizChoicesGrid { counter-reset: waq; }
+        body:not(.smphone-mode) #quizChoicesGrid > button:active { transform: translateY(2px); box-shadow: inset 0 1px 0 rgba(255,255,255,.1); }
+        @media (hover: hover) { body:not(.smphone-mode) #quizChoicesGrid > button:hover { border-color: var(--wa-gold-l) !important; background: linear-gradient(180deg, #4a2c66, #2a173a) !important; } }
+
+        /* 自陣: 体力と部隊（肖像を大きく） */
+        body:not(.smphone-mode) #playerSideBox { padding: 12px 14px !important; border-radius: 16px !important; border: 2px solid rgba(96,165,250,.7) !important;
+            background: radial-gradient(ellipse at 100% 0%, rgba(59,130,246,.22), transparent 55%), linear-gradient(90deg, rgba(14,20,48,.94), rgba(22,12,32,.94)) !important;
+            box-shadow: 0 0 0 2px #1b0f26, 0 -6px 18px rgba(0,0,0,.4) !important; }
+        body:not(.smphone-mode) #battleActiveSynergies { padding: 4px 8px !important; margin-bottom: 6px !important; }
+        body:not(.smphone-mode) #battlePartyRow { gap: 8px !important; }
+        body:not(.smphone-mode) #battlePartyRow > div { padding: 8px 4px 6px !important; border-radius: 12px !important; background: linear-gradient(180deg, #2a1838, #140a1c) !important; border-color: rgba(212,175,55,.5) !important; }
+        body:not(.smphone-mode) #battlePartyRow > div > div:first-child { width: 60px !important; height: 60px !important; border: none !important; background: none !important; margin-bottom: 2px; }
+        body:not(.smphone-mode) #battlePartyRow > div > span { font-size: 11px !important; }
+        body:not(.smphone-mode) #battlePartyRow .special-ready-btn { padding: 6px 2px !important; font-size: 12px !important; border-radius: 9999px !important; }
+        body:not(.smphone-mode) #battlePartyRow > div > div:last-child > div:first-child { height: 8px !important; }
+        @media (max-width: 640px) {
+            body:not(.smphone-mode) #enemyVisualIcon { width: 64px !important; height: 64px !important; font-size: 30px !important; }
+            body:not(.smphone-mode) #enemySubText { display: none; }
+            body:not(.smphone-mode) #enemyNameText { font-size: 15px !important; }
+            body:not(.smphone-mode) #quizChoicesGrid { grid-template-columns: 1fr 1fr !important; }
+            body:not(.smphone-mode) #quizChoicesGrid > button { font-size: 13px !important; padding: 10px 8px 10px 36px !important; min-height: 52px; }
+            body:not(.smphone-mode) #quizChoicesGrid > button::before { left: 6px; width: 22px; height: 22px; font-size: 11px; }
+            body:not(.smphone-mode) #battlePartyRow > div > div:first-child { width: 46px !important; height: 46px !important; }
+            body:not(.smphone-mode) #battlePartyRow > div > span { font-size: 9px !important; }
+        }
+        /* ★選びやすさ: 選択肢 */
+        #quizChoicesGrid > button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+        body:not(.smphone-mode) #quizChoicesGrid { grid-auto-rows: 1fr; }
+        body:not(.smphone-mode) #quizChoicesGrid > button { min-height: 64px !important; font-size: 17px !important; line-height: 1.35; display: flex; align-items: center; text-wrap: balance; }
+        body:not(.smphone-mode) #quizChoicesGrid > button:active { background: linear-gradient(180deg, #5a3478, #2f1a42) !important; border-color: var(--wa-gold-l) !important; }
+        .wa-choices-in > button { animation: wa-choice-in .16s ease-out both; }
+        .wa-choices-in > button:nth-child(2) { animation-delay: .02s; } .wa-choices-in > button:nth-child(3) { animation-delay: .04s; }
+        .wa-choices-in > button:nth-child(4) { animation-delay: .06s; } .wa-choices-in > button:nth-child(5) { animation-delay: .08s; } .wa-choices-in > button:nth-child(6) { animation-delay: .1s; }
+        @keyframes wa-choice-in { from { opacity: .2; transform: translateY(6px); } }
+        @media (min-width: 641px) and (max-width: 1100px) { body:not(.smphone-mode) #quizChoicesGrid { grid-template-columns: 1fr 1fr !important; } }
+        @media (min-width: 1101px) { body:not(.smphone-mode) #quizChoicesGrid { grid-template-columns: 1fr 1fr 1fr !important; } }
+        @media (max-width: 640px) { body:not(.smphone-mode) #quizChoicesGrid > button { min-height: 60px !important; font-size: 14px !important; } }
+        @media (hover: none) { body:not(.smphone-mode) #quizChoicesGrid > button:hover { background: linear-gradient(180deg, #3b2353, #22132f) !important; border-color: rgba(212,175,55,.55) !important; } }
+        body:not(.smphone-mode) #battlePartyRow .special-ready-btn { white-space: nowrap; }
+        @media (max-width: 640px) { body:not(.smphone-mode) #battlePartyRow .special-ready-btn { font-size: 10px !important; letter-spacing: -.02em; } }
+        @media (prefers-reduced-motion: reduce) { .wa-choices-in > button { animation: none; } }
+        body:not(.smphone-mode) #battleStage { flex-shrink: 0; }
+        body:not(.smphone-mode) #battleStage > *, body:not(.smphone-mode) #battleArena > * { flex-shrink: 0; }
+        @media (max-height: 900px) {
+            body:not(.smphone-mode) #battleStage { gap: 8px; }
+            body:not(.smphone-mode) #battleTopBar { padding: 6px 12px; }
+            body:not(.smphone-mode) #battleTopSubText { display: none; }
+            body:not(.smphone-mode) #enemySideBox { padding: 8px 14px !important; }
+            body:not(.smphone-mode) #enemyVisualIcon { width: 64px !important; height: 64px !important; font-size: 30px !important; }
+            body:not(.smphone-mode) #enemySubText { display: none; }
+            body:not(.smphone-mode) #quizContainerBox { padding: 10px !important; }
+            body:not(.smphone-mode) #quizContainerBox > div:first-child { padding: 8px 14px 10px !important; margin-bottom: 10px !important; }
+            body:not(.smphone-mode) #quizChoicesGrid > button { min-height: 56px !important; }
+            body:not(.smphone-mode) #playerSideBox { padding: 8px 12px !important; }
+            body:not(.smphone-mode) #battleActiveSynergies { padding: 3px 8px !important; margin-bottom: 4px !important; }
+        }
         /* @@UI-BATTLE@@ 戦闘画面のCSSはこの行の直前に追加 */
         /* @@UI-GACHA@@ ガチャ画面のCSSはこの行の直前に追加 */
         /* @@UI-SCREENS@@ その他の画面のCSSはこの行の直前に追加 */
@@ -10232,11 +10343,27 @@ ${draw[0].msg}
                 }
                 btn.textContent = choiceLabel;
                 btn.dataset.correct = isCorrect ? "1" : "0";
-                btn.onclick = () => handleQuizAnswer(isCorrect, btn);
+                btn.type = "button";
+                // ★選びやすさ: 新しい問題が出た直後の誤タップ（連打・ダブルタップ）を無視
+                btn.onclick = () => { if (performance.now() < _quizReadyAt) return; handleQuizAnswer(isCorrect, btn); };
                 container.appendChild(btn);
             });
+            _quizReadyAt = performance.now() + 220;
+            container.classList.remove('wa-choices-in'); void container.offsetWidth; container.classList.add('wa-choices-in');
         }
 
+        let _quizReadyAt = 0;
+        // ★選びやすさ: キーボードの 1〜6 でも選択できる（iPadの外付けキーボード・PC）
+        document.addEventListener('keydown', (e) => {
+            if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+            const n = parseInt(e.key, 10);
+            if (!(n >= 1 && n <= 6)) return;
+            const view = document.getElementById('fullScreenBattleView');
+            if (!view || view.classList.contains('hidden') || !battleState.active) return;
+            if (document.querySelector('.fixed:not(.hidden) input:focus, textarea:focus')) return;
+            const btn = document.querySelectorAll('#quizChoicesGrid > button')[n - 1];
+            if (btn) { e.preventDefault(); btn.click(); }
+        });
         function handleQuizAnswer(isCorrect, btnElement) {
             if (!battleState.active) return;
 
