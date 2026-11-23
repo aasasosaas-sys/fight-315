@@ -1237,6 +1237,26 @@
             body:not(.smphone-mode) #playerSideBox { padding: 8px 12px !important; }
             body:not(.smphone-mode) #battleActiveSynergies { padding: 3px 8px !important; margin-bottom: 4px !important; }
         }
+        /* ★正誤フィードバック */
+        #quizChoicesGrid.wa-revealing > button:not(.wa-ans-correct):not(.wa-ans-wrong) { opacity: .35; }
+        html body #quizChoicesGrid.wa-revealing > button.wa-ans-correct, html body #quizChoicesGrid.wa-revealing > button.wa-ans-wrong { padding-right: 70px !important; }
+        html body #quizChoicesGrid.wa-revealing > button.wa-ans-correct { background: linear-gradient(180deg, #1f7a4d, #0f4a2e) !important; border-color: #6ee7b7 !important; color: #ecfdf5 !important; }
+        html body #quizChoicesGrid.wa-revealing > button.wa-ans-correct::after { content: '○ 正解'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-weight: 900; font-size: 13px; color: #a7f3d0; }
+        html body #quizChoicesGrid.wa-revealing > button.wa-ans-wrong { background: linear-gradient(180deg, #7f1d1d, #4a0f0f) !important; border-color: #fca5a5 !important; color: #fee2e2 !important; }
+        html body #quizChoicesGrid.wa-revealing > button.wa-ans-wrong::after { content: '×'; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-weight: 900; font-size: 20px; color: #fca5a5; }
+        #quizContainerBox { position: relative; }
+        #quizContainerBox.wa-hit::after { content: ''; position: absolute; inset: -2px; border-radius: 16px; pointer-events: none; border: 3px solid #fde68a;
+            box-shadow: 0 0 24px rgba(253,224,71,.7), inset 0 0 24px rgba(253,224,71,.35); animation: wa-hit .38s ease-out forwards; }
+        @keyframes wa-hit { from { opacity: 1; } to { opacity: 0; } }
+        #enemySideBox .damage-float { font-size: 18px !important; font-weight: 900 !important; text-shadow: 0 2px 0 #000, 0 0 10px rgba(0,0,0,.8); }
+        .wa-continue { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 14px; text-align: left; color: #fff6dc;
+            background: linear-gradient(90deg, rgba(126,31,22,.9), rgba(42,22,64,.95)); border: 2px solid var(--wa-gold); box-shadow: 0 0 0 2px #1b0f26, 0 4px 0 #0b0612; }
+        .wa-continue.hidden { display: none; }
+        .wa-continue > i:first-child { width: 36px; height: 36px; border-radius: 9999px; display: grid; place-items: center; background: var(--wa-gold); color: #3b1d0a; flex-shrink: 0; }
+        .wa-continue > span { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+        .wa-continue small { font-size: 11px; color: var(--wa-gold-l); letter-spacing: .2em; }
+        .wa-continue b { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .wa-continue:active { transform: translateY(2px); box-shadow: 0 0 0 2px #1b0f26; }
         /* @@UI-BATTLE@@ 戦闘画面のCSSはこの行の直前に追加 */
         /* @@UI-GACHA@@ ガチャ画面のCSSはこの行の直前に追加 */
         /* @@UI-SCREENS@@ その他の画面のCSSはこの行の直前に追加 */
@@ -1379,6 +1399,11 @@
                 <button type="button" class="wa-sortie" onclick="switchTab('dungeons')">
                     <span class="wa-sortie-label font-mincho">出 撃</span>
                     <span class="wa-sortie-sub" id="homeProgressText">討伐 0 / 0 ステージ</span>
+                </button>
+                <button type="button" class="wa-continue hidden" id="homeContinueBtn" onclick="continueFromHome()">
+                    <i class="fa-solid fa-play"></i>
+                    <span><small>続きから</small><b id="homeContinueText" class="font-mincho">ダンジョン1・ステージ1</b></span>
+                    <i class="fa-solid fa-chevron-right"></i>
                 </button>
                 <div class="wa-home-grid">
                     <button type="button" onclick="switchTab('weekday')"><i class="fa-solid fa-calendar-days"></i><span>曜日ダンジョン</span></button>
@@ -7039,6 +7064,17 @@
                     const sp = leader.special_move && leader.special_move.name ? leader.special_move.name.split('（')[0] : '';
                     q.textContent = sp ? `「${sp}」` : 'いざ、古文の戦場へ。';
                 }
+                const cb = document.getElementById('homeContinueBtn'), ct = document.getElementById('homeContinueText');
+                const cid = getContinueStageId();
+                if (cb && ct) {
+                    if (cid) {
+                        const dn = parseInt(cid.substring(1, 3), 10);
+                        const d = DUNGEONS_DATA.find(x => x.id === dn);
+                        const st = d && d.stages.find(x => x.id === cid);
+                        ct.textContent = `ダンジョン${dn}・${st ? st.name : cid}`;
+                        cb.classList.remove('hidden');
+                    } else cb.classList.add('hidden');
+                }
                 const prog = document.getElementById('homeProgressText');
                 if (prog) prog.textContent = `討伐 ${Object.keys(state.clearedStages || {}).length} / ${getTotalStageCount()} ステージ`;
                 const row = document.getElementById('homeDeckRow');
@@ -7047,6 +7083,18 @@
                 if (bp && !bp.firstChild) bp.innerHTML = ['ge_002', 'ok_005', 'so_003'].map(id => getUnit(id)).filter(Boolean).map(u => `<span>${unitIconHTML(u, { badge: false })}</span>`).join('');
             } catch (e) { }
         }
+
+        // ★ホーム「続きから」: 最後に遊んだ未クリアのステージ → なければ次の未クリアステージ
+        function getContinueStageId() {
+            const cleared = state.clearedStages || {};
+            if (state.lastStageId && !cleared[state.lastStageId] && isStageUnlocked(state.lastStageId)) return state.lastStageId;
+            for (const d of DUNGEONS_DATA) {
+                if (isWeekdayDungeon(d.id)) continue;
+                for (const st of (d.stages || [])) if (!cleared[st.id] && isStageUnlocked(st.id)) return st.id;
+            }
+            return state.lastStageId && isStageUnlocked(state.lastStageId) ? state.lastStageId : null;
+        }
+        function continueFromHome() { const id = getContinueStageId(); if (id) startBattle(id); else switchTab('dungeons'); }
 
         function switchTab(tabName) {
             try { closeWaMenu(); updateWaTabBar(tabName); } catch (e) { }
@@ -9133,6 +9181,9 @@ ${draw[0].msg}
             updateBattleUI();
             generateNewQuiz();
 
+            // ★ホームの「続きから」用に最後に遊んだ本編ステージを記録
+            try { if (!reviewMode && !options.bossRush && !isWeekdayDungeon(dungNum)) state.lastStageId = stageId; } catch (e) { }
+
             // Hide Main App UI, reveal Full Screen Dedicated Battle Screen
             document.getElementById("appMainHeader").classList.add("hidden");
             document.getElementById("appMainContent").classList.add("hidden");
@@ -10476,7 +10527,8 @@ ${draw[0].msg}
                     return;
                 }
             } else {
-                battleState.combo = 0;
+                // ★連撃は誤答で0に戻さず半減（黒猫のウィズ式。1回のミスで全部を失わない）
+                battleState.combo = Math.floor(battleState.combo / 2);
 
                 if (currentQuizQuestion && currentQuizQuestion.word && currentQuizQuestion.primary) {
                     if (!state.wrongWords) state.wrongWords = [];
@@ -10552,7 +10604,34 @@ ${draw[0].msg}
 
             _battlePartySig = ""; _battlePartyEls = null; _battleUiEls = null;
             updateBattleUI();
+            if (!isCorrect) { revealCorrectAnswer(btnElement); return; }
+            pulseCorrectAnswer();
             generateNewQuiz();
+        }
+
+        // ★誤答時は正解の選択肢を約0.85秒示してから次の問題へ（学習で一番大事な瞬間）
+        let _revealToken = 0;
+        function revealCorrectAnswer(chosenBtn) {
+            const grid = document.getElementById('quizChoicesGrid');
+            if (!grid) { generateNewQuiz(); return; }
+            _quizReadyAt = Infinity; // 表示中は入力を受け付けない
+            grid.classList.add('wa-revealing');
+            grid.querySelectorAll('button').forEach(b => {
+                if (b.dataset.correct === '1') b.classList.add('wa-ans-correct');
+                else if (b === chosenBtn) b.classList.add('wa-ans-wrong');
+            });
+            const token = ++_revealToken;
+            setTimeout(() => {
+                if (token !== _revealToken) return;
+                grid.classList.remove('wa-revealing');
+                if (battleState.active) generateNewQuiz();
+            }, 850);
+        }
+        // ★正解時の手応え: 巻物が金色に光る
+        function pulseCorrectAnswer() {
+            const box = document.getElementById('quizContainerBox');
+            if (!box) return;
+            box.classList.remove('wa-hit'); void box.offsetWidth; box.classList.add('wa-hit');
         }
 
         // =========================================================================
