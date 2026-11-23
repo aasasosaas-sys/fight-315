@@ -3,7 +3,7 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://b2v47fhccsk67"
+uid="uid://bkm5b41va1po4"
 path="res://.godot/imported/f06.gltf-5d068f69d02f6c2639508014f150bbb8.scn"
 
 [deps]
@@ -37,16 +37,6 @@ import_script/path=""
 materials/extract=0
 materials/extract_format=0
 materials/extract_path=""
-_subresources={
-"nodes": {
-"PATH:f06/Skeleton3D": {
-"retarget/bone_map": Resource("res://assets/characters/bonemap_mh.tres"),
-"retarget/bone_renamer/rename_bones": true,
-"retarget/rest_fixer/fix_silhouette/enable": true,
-"retarget/rest_fixer/normalize_position_tracks": true,
-"retarget/rest_fixer/overwrite_axis": true
-}
-}
-}
+_subresources={}
 gltf/naming_version=2
 gltf/embedded_image_handling=1

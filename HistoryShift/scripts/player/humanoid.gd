@@ -458,9 +458,9 @@ func _strands(mi: MeshInstance3D, c: Color, hair: bool) -> void:
 const MODERN := [Outfit.WESTERN, Outfit.SOLDIER, Outfit.POLICE, Outfit.AGENT, Outfit.GUARDIAN]
 ## 和装の組み合わせ（Blender で体型から作った衣服メッシュ: kosode / hakama / robe / armor）
 const WASOU := {
-	Outfit.SAMURAI: ["kosode", "hakama", "armor"], Outfit.ASHIGARU: ["kosode", "hakama", "armor"],
-	Outfit.NOBLE: ["kosode", "robe"], Outfit.KIMONO: ["kosode", "robe"], Outfit.MONK: ["kosode", "robe"],
-	Outfit.ANCIENT: ["kosode", "hakama"], Outfit.COMMONER: ["kosode", "hakama"],
+	Outfit.SAMURAI: ["juban", "kosode", "hakama", "armor"], Outfit.ASHIGARU: ["kosode", "hakama", "armor"],
+	Outfit.NOBLE: ["juban", "kosode", "robe"], Outfit.KIMONO: ["juban", "kosode", "robe"], Outfit.MONK: ["juban", "kosode", "robe"],
+	Outfit.ANCIENT: ["kosode", "hakama"], Outfit.COMMONER: ["juban", "kosode", "hakama"],
 }
 static var _fabric_tex := {}
 
@@ -521,11 +521,13 @@ func _dress_realistic(model: Node3D, outfit: int, rng: RandomNumberGenerator, ar
 			if mi.visible:
 				var c: Color = pal[0]
 				match kind:
+					"juban":
+						c = Color(0.93, 0.92, 0.88)
 					"hakama", "robe":
 						c = pal[1] if outfit != Outfit.KIMONO else pal[0]
 					"armor":
 						c = pal[2] if outfit == Outfit.SAMURAI else pal[2].darkened(0.2)
-				var fm := fabric(c, pattern if kind != "armor" else "check", 0.6 if kind == "armor" else 0.88)
+				var fm := fabric(c, "plain" if kind in ["juban", "hakama"] else (pattern if kind != "armor" else "check"), 0.6 if kind == "armor" else 0.88)
 				if kind == "armor":
 					fm.metallic = 0.25
 					fm.uv1_scale = Vector3(14, 14, 14)
@@ -566,15 +568,17 @@ func _dress_realistic(model: Node3D, outfit: int, rng: RandomNumberGenerator, ar
 	var male: bool = not get_meta("female", false)
 	match outfit:
 		Outfit.SAMURAI:
-			part(head, "sphere", m_lacquer, Vector3(0, 0.1, -0.01), Vector3(0.25, 0.17, 0.27))       # 兜の鉢
-			part(head, "cone", m_lacquer, Vector3(0, 0.05, -0.03), Vector3(0.4, 0.07, 0.4))          # 錣
-			part(head, "box", m_acc, Vector3(0, 0.2, 0.12), Vector3(0.22, 0.09, 0.008), Vector3(-15, 0, 0))  # 鍬形
+			part(head, "sphere", m_lacquer, Vector3(0, 0.12, -0.01), Vector3(0.235, 0.16, 0.25))     # 兜の鉢
+			part(head, "skirt", m_lacquer, Vector3(0, 0.03, -0.03), Vector3(0.34, 0.1, 0.34))         # 錣（後ろへ垂れる）
+			part(head, "box", m_acc, Vector3(-0.05, 0.2, 0.11), Vector3(0.012, 0.13, 0.006), Vector3(-10, 0, 22))  # 鍬形
+			part(head, "box", m_acc, Vector3(0.05, 0.2, 0.11), Vector3(0.012, 0.13, 0.006), Vector3(-10, 0, -22))
 		Outfit.ASHIGARU:
 			part(head, "cone", m_lacquer, Vector3(0, 0.15, 0), Vector3(0.46, 0.08, 0.46))              # 陣笠
 		Outfit.NOBLE:
 			part(head, "cyl", m_black, Vector3(0, 0.22, -0.02), Vector3(0.12, 0.24, 0.14), Vector3(-12, 0, 0))  # 烏帽子
 		Outfit.KIMONO:
-			part(chest, "box", m_acc, Vector3(0, -0.17, 0), Vector3(0.33, 0.11, 0.23))                # 帯
+			part(chest, "cyl", m_acc, Vector3(0, -0.2, 0.0), Vector3(0.3, 0.11, 0.22))                 # 帯
+			part(chest, "box", m_acc, Vector3(0, -0.2, -0.12), Vector3(0.16, 0.1, 0.05))               # 帯の結び
 		Outfit.MONK:
 			part(chest, "box", m_acc, Vector3(0.04, 0.0, 0.02), Vector3(0.4, 0.05, 0.27), Vector3(0, 0, -35))  # 袈裟
 		Outfit.ANCIENT:

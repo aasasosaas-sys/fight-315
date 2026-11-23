@@ -152,20 +152,26 @@ def bake_for_export():
             if mod.type == "SUBSURF":
                 obj.modifiers.remove(mod)
             elif mod.type == "MASK":
-                # 服の下の体を消すマスクは使わない（和装・洋装を切り替えるため体は残す）
-                obj.modifiers.remove(mod)
+                if mod.name == "Hide helpers":
+                    # 補助形状（髪・タイツ・スカートの型）は削除する
+                    with bpy.context.temp_override(object=obj):
+                        bpy.ops.object.modifier_apply(modifier=mod.name)
+                else:
+                    # 服の下の体を消すマスクは使わない（和装・洋装を切り替えるため体は残す）
+                    obj.modifiers.remove(mod)
 
 
 import bmesh
 
 # 和装：体の一部を骨のウェイトで切り出して膨らませ、骨格で一緒に動く衣服にする
 GARMENTS = {
-    # 名前: (骨, 基本の膨らみ[m], 下へ行くほどの広がり[m], 脚を中央へ寄せる率)
+    # 名前: (骨, 基本の膨らみ[m], 下へ行くほどの広がり[m], 脚を中央へ寄せる率, 平滑化回数, 衿の V の深さ[m], 袖の垂れ[m])
     "kosode": (["spine_01", "spine_02", "spine_03", "clavicle_l", "clavicle_r", "upperarm_l", "upperarm_r",
-                "lowerarm_l", "lowerarm_r", "pelvis"], 0.016, 0.0, 0.0),
-    "hakama": (["pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r"], 0.03, 0.09, 0.0),
-    "robe": (["pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r"], 0.025, 0.05, 0.55),
-    "armor": (["spine_01", "spine_02", "spine_03", "pelvis"], 0.055, 0.02, 0.0),
+                "lowerarm_l", "lowerarm_r", "pelvis"], 0.02, 0.0, 0.0, 8, 0.17, 0.11),
+    "juban": (["spine_02", "spine_03", "clavicle_l", "clavicle_r"], 0.012, 0.0, 0.0, 6, 0.1, 0.0),
+    "hakama": (["pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r"], 0.03, 0.045, 0.0, 6, 0.0, 0.0),
+    "robe": (["pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r"], 0.035, 0.04, 0.5, 10, 0.0, 0.0),
+    "armor": (["spine_01", "spine_02", "spine_03", "pelvis"], 0.06, 0.02, 0.0, 4, 0.0, 0.0),
 }
 
 
@@ -184,7 +190,11 @@ def make_garments(variant):
     if body is None:
         print("WARN no body for garments"); return
     hips_z = None
-    for key, (bones, base, flare, pinch) in GARMENTS.items():
+    arm = body.find_armature()
+    neck = None
+    if arm and "neck_01" in arm.data.bones:
+        neck = arm.matrix_world @ arm.data.bones["neck_01"].head_local
+    for key, (bones, base, flare, pinch, smooth_n, vdepth, droop) in GARMENTS.items():
         g = body.copy()
         g.data = body.data.copy()
         g.name = "%s_garment_%s" % (variant, key)
@@ -209,12 +219,27 @@ def make_garments(variant):
               [b for b in bones if b not in idx][:4])
         bmesh.ops.delete(bm, geom=kill, context="VERTS")
         bm.normal_update()
+        la = [idx[b] for b in ("lowerarm_l", "lowerarm_r") if b in idx]
         for v in bm.verts:
             t = max(0.0, min(1.0, (hips_z - v.co.z) / max(hips_z - bottom, 0.01)))
             off = base + flare * t
-            v.co += v.normal * off
+            n = v.normal.copy()
+            v.co += n * off
             if pinch > 0.0 and t > 0.0:
                 v.co.x *= (1.0 - pinch * min(1.0, t * 1.4))
+            # 袖の垂れ：前腕の下側を下へ（袂）
+            if droop > 0.0 and deform and la:
+                wl = sum(v[deform].get(i, 0.0) for i in la)
+                if wl > 0.2 and n.z < 0.2:
+                    v.co.z -= droop * min(1.0, wl) * (0.4 + 0.6 * max(0.0, -n.z))
+        # 体の起伏（胸・腹筋）を均して布らしく
+        if smooth_n:
+            for _ in range(smooth_n):
+                bmesh.ops.smooth_vert(bm, verts=bm.verts, factor=0.5, use_axis_x=True, use_axis_y=True, use_axis_z=True)
+        # 衿：前で V 字に開く（右前）
+        if vdepth > 0.0 and neck is not None:
+            cut = [v for v in bm.verts if v.co.y < neck.y + 0.02 and v.co.z > neck.z - vdepth + 1.25 * abs(v.co.x - neck.x)]
+            bmesh.ops.delete(bm, geom=cut, context="VERTS")
         bm.to_mesh(g.data)
         bm.free()
         g.data.materials.clear()
