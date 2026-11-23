@@ -291,7 +291,7 @@ func step(dt: float, xf: Transform3D, sea_y: float) -> void:
 				power = false
 	else:
 		power = crew_aboard
-	if was and not power:
+	if was and not power and pump_kind != "manual":
 		events.append({"type": "power_lost"})
 	# ポンプ: いちばん水の多い区画から汲み出す
 	if pump_on and power and pump_rate > 0.0:

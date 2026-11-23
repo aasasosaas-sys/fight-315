@@ -152,6 +152,9 @@ func _clear(t, xf: Transform3D, sd: ShipData, inner: bool) -> bool:
 			return false
 		if t and float(t.height_at(wp.x, wp.z)) > -(sd.T + 1.0):
 			return false
+		# 川の河口（川の水面のメッシュが船内に出る）を避ける
+		if t and absf(wp.x) < orig_half and absf(wp.z) < orig_half and float(t.river_dist_at(wp.x, wp.z)) < float(t.river_half_w) + 30.0:
+			return false
 	for o in ships:
 		var os := o as Ship
 		if os.anchor.origin.distance_to(xf.origin) < (os.sd.L + sd.L) * 0.5 + 10.0:

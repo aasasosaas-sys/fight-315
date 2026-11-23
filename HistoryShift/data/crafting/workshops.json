@@ -1,0 +1,146 @@
+{
+  "_doc": "弟子入りできる工房・学校。eras の時代の名所 at に立つ（near: plane なら滑走路のそば）。teaches = この工房で上げられる技能の上限。lessons は稽古（ミニゲーム）：game = hammer（拍子よく打つ）/ heat（温度を保つ）/ assembly（手順を正しく選ぶ）/ mix（配合を合わせる）/ target（揺れる照準で的を射る）/ course（乗り物で目印を回る）。stations = ここで製作できる場所の種類。job = 手伝い（稽古と同じ遊びで日銭を稼ぐ）。teacher は特定の実在人物ではなく職の呼び名。basis = 史実の根拠。",
+  "workshops": [
+    {"id": "kaji_village", "name": "村の鍛冶場", "eras": ["jomon_kofun", "asuka_nara", "heian", "kamakura_muromachi", "sengoku", "edo"], "at": "village", "teacher": "村の鍛冶師", "stations": ["forge"],
+     "teaches": {"katana_smith": 55, "machining": 25},
+     "lessons": [
+       {"skill": "katana_smith", "game": "hammer", "title": "鉄を打つ", "text": "赤めた鉄を、相槌に合わせて拍子よく打て。"},
+       {"skill": "katana_smith", "game": "heat", "title": "火加減", "text": "ふいごを踏んで炉の火を保て。熱すぎれば鉄が焼ける。"}
+     ],
+     "job": {"game": "hammer", "pay": 400, "text": "鍬や鎌の修理を手伝う"},
+     "basis": "古墳時代から村々に鍛冶がいて、農具や釘を打った。たたら製鉄で得た鉄を小割りにして鍛えた。"},
+    {"id": "touko", "name": "刀工の鍛冶場", "eras": ["heian", "kamakura_muromachi", "sengoku", "edo"], "at": "castle", "teacher": "刀工の親方", "stations": ["forge"],
+     "teaches": {"katana_smith": 100, "kenjutsu": 20},
+     "lessons": [
+       {"skill": "katana_smith", "game": "hammer", "title": "折り返し鍛錬", "text": "玉鋼を延ばしては折り返す。親方の小槌（こづち）の拍子に合わせて大槌を落とせ。"},
+       {"skill": "katana_smith", "game": "heat", "title": "焼き入れ", "text": "刀身を炉で赤め、明け方の空の色（約800度）になった一瞬で水に入れる。色が来たら保て。"},
+       {"skill": "katana_smith", "game": "assembly", "title": "作刀の手順", "text": "刀ができるまでの順を答えよ。", "steps": ["玉鋼を水へし・小割りにする", "積み沸かしで一つにまとめる", "折り返し鍛錬", "皮鉄で心鉄を包む（造り込み）", "素延べ・火造り", "土置きして焼き入れ", "研ぎ・拵え"]}
+     ],
+     "job": {"game": "hammer", "pay": 900, "text": "向こう鎚（相槌）を打つ"},
+     "basis": "日本刀は平安中期に成立し、鎌倉時代の粟田口吉光・正宗らが名工として知られる。折り返し鍛錬と土置きによる焼き入れで、硬い刃と粘る地鉄、反りと刃文が生まれる。"},
+    {"id": "kunitomo", "name": "国友の鉄砲鍛冶", "eras": ["sengoku", "edo"], "at": "village", "teacher": "鉄砲鍛冶の年寄", "stations": ["gunsmith", "forge"],
+     "teaches": {"gun_smith": 100, "machining": 45, "shageki": 40},
+     "lessons": [
+       {"skill": "gun_smith", "game": "hammer", "title": "銃身の巻張り", "text": "鉄の板を芯金に巻き、継ぎ目を叩いて沸かし付ける。拍子が乱れると筒が裂ける。"},
+       {"skill": "gun_smith", "game": "assembly", "title": "尾栓のねじ", "text": "火縄銃ができるまでの順を答えよ。", "steps": ["真金（芯棒）に鉄板を巻いて銃身を張る", "銃身の内側を錐でさらう", "尾栓の雄ねじと雌ねじを切る", "火皿と火穴をあける", "からくり（引き金と火挟み）を組む", "台木に据え、試し撃ちする"]},
+       {"skill": "shageki", "game": "target", "title": "試し撃ち", "text": "仕上がった筒で的を撃て。火縄銃は引き金を引いてから一拍おくれて火が回る。"}
+     ],
+     "job": {"game": "assembly", "pay": 1200, "text": "からくりの組み立てを手伝う"},
+     "basis": "1543年の種子島への伝来の翌1544年、近江国友村で将軍足利義晴の命により鉄砲がつくられたと伝わる。国友は堺・根来と並ぶ産地となり、江戸時代も幕府の御用鉄砲鍛冶だった。"},
+    {"id": "ensho", "name": "塩硝の里", "eras": ["sengoku", "edo"], "at": "mountain", "teacher": "塩硝づくりの古老", "stations": ["powder"],
+     "teaches": {"powder": 100, "chemistry": 30},
+     "lessons": [
+       {"skill": "powder", "game": "mix", "title": "黒色火薬の配合", "text": "硝石・硫黄・木炭を量れ。よく知られた配合は 75：10：15。", "target": [75, 10, 15], "labels": ["硝石", "硫黄", "木炭"]},
+       {"skill": "powder", "game": "heat", "title": "塩硝の煮詰め", "text": "培養土から灰汁で溶かし出した液を煮詰める。焦がさず、冷まさず。"}
+     ],
+     "job": {"game": "mix", "pay": 800, "text": "火薬の調合を手伝う", "target": [75, 10, 15], "labels": ["硝石", "硫黄", "木炭"]},
+     "basis": "越中五箇山・飛騨白川郷では、合掌造りの床下で草や蚕の糞を土と混ぜて寝かせる培養法で塩硝（硝石）をつくり、加賀藩の秘密の産業とした。黒色火薬は硝石・硫黄・木炭の混合物。"},
+    {"id": "teppo_shuren", "name": "鉄砲稽古場", "eras": ["sengoku", "edo"], "at": "battlefield", "teacher": "砲術師範", "stations": [],
+     "teaches": {"shageki": 100},
+     "lessons": [
+       {"skill": "shageki", "game": "target", "title": "早合と三段の稽古", "text": "揺れる筒先を落ち着かせ、的が照準に重なった瞬間に撃て。"}
+     ],
+     "basis": "戦国時代には稲富流・津田流などの砲術流派が生まれ、江戸時代には各藩が砲術師範を置いた。"},
+    {"id": "dojo", "name": "剣術道場", "eras": ["kamakura_muromachi", "sengoku", "edo", "meiji_taisho"], "at": "capital", "teacher": "道場の師範", "stations": [],
+     "teaches": {"kenjutsu": 100, "sojutsu": 80},
+     "lessons": [
+       {"skill": "kenjutsu", "game": "hammer", "title": "型稽古（受けと返し）", "text": "師範の打ち込みの拍子を読み、受けて返せ。", "flavor": "parry"},
+       {"skill": "sojutsu", "game": "hammer", "title": "槍の突き", "text": "間合いに入った瞬間に突け。", "flavor": "parry"},
+       {"skill": "kenjutsu", "game": "assembly", "title": "立ち合いの心得", "text": "立ち合いの順を答えよ。", "steps": ["礼をする", "帯刀し、間合いをとる", "中段に構える", "相手の起こりを読む", "打ち込み、残心をとる", "刀を納め、礼をする"]}
+     ],
+     "basis": "室町時代後期に香取神道流・陰流などの剣術流派が成立した。江戸時代後期には竹刀と防具の稽古が広まり、北辰一刀流の玄武館など江戸の町道場がにぎわった。"},
+    {"id": "yabusame", "name": "弓馬の稽古場", "eras": ["heian", "kamakura_muromachi", "sengoku", "edo"], "at": "temple", "teacher": "弓馬の師", "stations": [],
+     "teaches": {"kyujutsu": 100, "riding": 100},
+     "lessons": [
+       {"skill": "kyujutsu", "game": "target", "title": "弓の稽古", "text": "弓を引き絞って的を狙え。引き分けて満ちたところで放つ。"},
+       {"skill": "riding", "game": "course", "vehicle": "horse", "title": "馬場を駆ける", "text": "馬に乗り、旗を順に回れ。"}
+     ],
+     "basis": "「弓馬の道」は武士の第一の技とされた。流鏑馬は鶴岡八幡宮で1187年に源頼朝が奉納したのが始まりとされ、小笠原流・武田流などの弓馬術が伝わった。"},
+    {"id": "maki", "name": "牧（馬の牧場）", "eras": ["jomon_kofun", "asuka_nara", "meiji_taisho"], "at": "village", "teacher": "牧の馬飼い", "stations": [],
+     "teaches": {"riding": 70},
+     "lessons": [
+       {"skill": "riding", "game": "course", "vehicle": "horse", "title": "馬の乗り方", "text": "馬に乗り、杭の目印を順に回れ。"}
+     ],
+     "basis": "馬は古墳時代（5世紀）に朝鮮半島から伝わり、律令の時代には各地に官の牧が置かれた。"},
+    {"id": "miyadaiku", "name": "宮大工の作事場", "eras": ["asuka_nara", "heian", "kamakura_muromachi", "sengoku", "edo"], "at": "temple", "teacher": "宮大工の棟梁", "stations": ["shipyard"],
+     "teaches": {"architecture": 100, "shipbuilding": 30},
+     "lessons": [
+       {"skill": "architecture", "game": "assembly", "title": "木組みの手順", "text": "寺の建て方の順を答えよ。", "steps": ["木を選び、山で寝かせる", "墨付け（墨で刻みの線を引く）", "継手・仕口を刻む", "礎石の上に柱を立てる", "貫と梁で組み固める", "斗栱を組み、屋根を葺く"]},
+       {"skill": "architecture", "game": "hammer", "title": "ちょうな掛け", "text": "ちょうなで梁の面を一定の拍子で削れ。"}
+     ],
+     "basis": "法隆寺（607年創建、670年焼失後に再建）は現存する世界最古の木造建築群。宮大工は釘をほとんど使わず、継手・仕口で木を組む。"},
+    {"id": "funadaiku", "name": "造船所", "eras": ["asuka_nara", "heian", "kamakura_muromachi", "sengoku", "edo", "meiji_taisho", "showa"], "at": "port", "teacher": "船大工の棟梁", "stations": ["shipyard"],
+     "teaches": {"shipbuilding": 100, "sailing": 100, "architecture": 40},
+     "lessons": [
+       {"skill": "shipbuilding", "game": "hammer", "title": "船釘を打つ", "text": "板を合わせ、船釘を拍子よく打ち込め。"},
+       {"skill": "sailing", "game": "assembly", "title": "操船の心得", "text": "出港の手順を答えよ。", "steps": ["日和（天気と風）を見る", "積み荷の重さをそろえる", "もやいを解く", "帆を上げ、風を受ける", "舵で針路を保つ", "港の目印を見て入港する"]}
+     ],
+     "job": {"game": "hammer", "pay": 700, "text": "船の修繕を手伝う"},
+     "basis": "遣唐使船は大陸の技術でつくられた。江戸時代には弁才船（千石船）が全国の海運を担い、1865年に横須賀製鉄所（のちの横須賀海軍工廠）の建設が始まった。"},
+    {"id": "rangaku", "name": "蘭学塾", "eras": ["edo"], "at": "capital", "teacher": "蘭方医の塾頭", "stations": ["lab"],
+     "teaches": {"chemistry": 100, "medicine": 100, "komonjo": 60},
+     "lessons": [
+       {"skill": "chemistry", "game": "mix", "title": "舎密（化学）の実験", "text": "蘭書のとおりに薬品を量れ。", "target": [60, 25, 15], "labels": ["硝石", "硫酸", "水"]},
+       {"skill": "medicine", "game": "assembly", "title": "蘭方の診療", "text": "傷の手当ての順を答えよ。", "steps": ["傷口を見て出血を確かめる", "焼酎で洗い清める", "傷口を合わせて縫う", "膏薬を塗る", "さらしで巻く", "熱が出ないか見守る"]},
+       {"skill": "chemistry", "game": "heat", "title": "蒸留", "text": "ランビキ（蒸留器）の火加減を保て。"}
+     ],
+     "job": {"game": "assembly", "pay": 900, "text": "蘭書の写本を手伝う", "steps": ["原書の単語を辞書（ハルマ）で引く", "語順を日本語に組み替える", "訳語を決める", "清書する"]},
+     "basis": "1774年に杉田玄白・前野良沢らが『解体新書』を刊行。宇田川榕菴の『舎密開宗』（1837年）が西洋の化学を紹介し、緒方洪庵の適塾（1838年）から多くの人材が出た。"},
+    {"id": "terakoya", "name": "寺子屋・書院", "eras": ["heian", "kamakura_muromachi", "sengoku", "edo"], "at": "temple", "teacher": "手習いの師匠", "stations": [],
+     "teaches": {"komonjo": 100, "rhetoric": 50},
+     "lessons": [
+       {"skill": "komonjo", "game": "assembly", "title": "くずし字の手習い", "text": "書状の決まった書き方の順を答えよ。", "steps": ["端裏に宛所を書く", "「謹言」で始めず、まず時候と用件を述べる", "本文を書く", "「恐々謹言」で結ぶ", "日付を書く", "差出人の名と花押を据える"]}
+     ],
+     "basis": "平安時代には大学寮や寺で読み書きを学んだ。江戸時代には寺子屋が全国に広がり、幕末には1万を超えたとされる。古文書は書札礼（手紙の作法）を知らないと読めない。"},
+    {"id": "shoka", "name": "商家の帳場", "eras": ["kamakura_muromachi", "sengoku", "edo", "meiji_taisho"], "at": "port", "teacher": "大店の番頭", "stations": [],
+     "teaches": {"rhetoric": 100, "komonjo": 40},
+     "lessons": [
+       {"skill": "rhetoric", "game": "assembly", "title": "商いの口上", "text": "客との駆け引きの順を答えよ。", "steps": ["まず相手の話を聞く", "相手の困りごとを言い当てる", "品の良さを一つだけ強く言う", "値は相手に先に言わせる", "引くところは引いて折り合う", "次の約束を取りつける"]}
+     ],
+     "job": {"game": "assembly", "pay": 1000, "text": "帳付け（そろばん）を手伝う", "steps": ["売上を大福帳に書く", "そろばんで合計を出す", "掛け売りを別に記す", "主人に見せる"]},
+     "basis": "近江商人・伊勢商人や大坂の大店では、丁稚から手代・番頭へと商いの作法と算用を仕込んだ。"},
+    {"id": "hohei_kosho", "name": "砲兵工廠", "eras": ["meiji_taisho", "showa"], "at": "castle", "teacher": "工廠の技師", "stations": ["machine", "gunsmith"],
+     "teaches": {"gun_smith": 100, "machining": 90, "shageki": 60, "chemistry": 50},
+     "lessons": [
+       {"skill": "machining", "game": "assembly", "title": "小銃の組み立て", "text": "ボルトアクション小銃の組み立ての順を答えよ。", "steps": ["銃身に施条（ライフリング）を切る", "機関部を削り出す", "遊底（ボルト）を仕上げる", "銃身と機関部をねじ込む", "銃床に据える", "照尺を合わせて試射する"]},
+       {"skill": "gun_smith", "game": "heat", "title": "銃身の焼き戻し", "text": "炉の温度を指定の幅に保て。"},
+       {"skill": "shageki", "game": "target", "title": "試射", "text": "照尺を合わせ、呼吸を止めて撃て。"}
+     ],
+     "job": {"game": "assembly", "pay": 1500, "text": "工廠の組立工として働く"},
+     "basis": "1871年に東京の小石川に造兵司（のちの東京砲兵工廠）が置かれ、村田銃（1880年）、有坂成章の三十年式・三八式歩兵銃（1905年）が量産された。"},
+    {"id": "machikoba", "name": "町工場", "eras": ["meiji_taisho", "showa"], "at": "village", "teacher": "町工場の親父", "stations": ["machine", "forge"],
+     "teaches": {"machining": 100, "driving": 40},
+     "lessons": [
+       {"skill": "machining", "game": "assembly", "title": "旋盤の段取り", "text": "旋盤で部品を削る順を答えよ。", "steps": ["図面を読む", "材料を切り出す", "チャックに材料をくわえる", "芯を出す", "荒削りする", "仕上げ削りし、ノギスで寸法を測る"]},
+       {"skill": "machining", "game": "hammer", "title": "ヤスリ掛け", "text": "一定の拍子でヤスリを掛けて面を出せ。"}
+     ],
+     "job": {"game": "hammer", "pay": 1200, "text": "部品の仕上げを手伝う"},
+     "basis": "明治後期から東京の大森・蒲田や大阪の東部に小さな機械工場が集まり、昭和には軍需の下請けも担った。"},
+    {"id": "hikou", "name": "飛行学校", "eras": ["meiji_taisho", "showa"], "at": "battlefield", "near": "plane", "teacher": "飛行教官", "stations": ["machine"],
+     "teaches": {"piloting": 100, "machining": 50},
+     "lessons": [
+       {"skill": "piloting", "game": "course", "vehicle": "plane", "title": "飛行訓練", "text": "離陸し、空の輪を順にくぐって戻れ。"},
+       {"skill": "piloting", "game": "assembly", "title": "離陸の手順", "text": "離陸までの手順を答えよ。", "steps": ["機体と燃料を点検する", "プロペラを回して発動機をかける", "暖機して計器を見る", "風上に機首を向ける", "スロットルを開けて滑走する", "速度が乗ったら操縦桿を引く"]}
+     ],
+     "basis": "1910年12月、代々木練兵場で徳川好敏・日野熊蔵が日本で初めて動力飛行に成功。1911年4月、埼玉県所沢に日本初の飛行場（陸軍所沢飛行場）が開かれ、操縦者の養成が始まった。"},
+    {"id": "kyoshujo", "name": "自動車教習所", "eras": ["meiji_taisho", "showa"], "at": "capital", "near": "car", "teacher": "教習所の教官", "stations": [],
+     "teaches": {"driving": 100, "machining": 30},
+     "lessons": [
+       {"skill": "driving", "game": "course", "vehicle": "car", "title": "路上教習", "text": "車に乗り、目印を順に回れ。ぶつけると減点。"}
+     ],
+     "basis": "大正期に東京で自動車の運転を教える学校ができ、1919年の自動車取締令で運転免許の制度が全国で統一された。"},
+    {"id": "shooting_range", "name": "射撃場", "eras": ["meiji_taisho", "showa"], "at": "battlefield", "teacher": "射撃の教官", "stations": [],
+     "teaches": {"shageki": 100},
+     "lessons": [
+       {"skill": "shageki", "game": "target", "title": "射撃訓練", "text": "伏せ撃ちで的を狙え。呼吸を止め、引き金は静かに絞る。"}
+     ],
+     "basis": "明治の陸軍は戸山学校（1873年）で射撃の教育を行い、各地に射撃場が設けられた。"},
+    {"id": "seyakuin", "name": "施薬院・養生所", "eras": ["asuka_nara", "heian", "edo"], "at": "capital", "teacher": "医師", "stations": ["lab"],
+     "teaches": {"medicine": 70, "chemistry": 20},
+     "lessons": [
+       {"skill": "medicine", "game": "mix", "title": "薬の調合", "text": "生薬を量れ。", "target": [50, 30, 20], "labels": ["甘草", "桂皮", "芍薬"]}
+     ],
+     "job": {"game": "mix", "pay": 600, "text": "薬の調合を手伝う", "target": [50, 30, 20], "labels": ["甘草", "桂皮", "芍薬"]},
+     "basis": "730年に光明皇后が貧しい病人のための施薬院を置いた。江戸時代には1722年に小石川養生所が開かれた。"}
+  ]
+}

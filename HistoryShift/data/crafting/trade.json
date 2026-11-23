@@ -1,0 +1,40 @@
+{
+  "_doc": "店（商人）と蔵・武器庫の中身、倒した兵が落とす物。currency は時代ごとのお金の呼び方（中身は文で持つ。1両=4000文、新貨条例の1両=1円）。shops: 時代ごとの店（at の名所）と品ぞろえ。loot: 蔵・武器庫（at の名所に置く。E で探る＝盗み、手配度が上がる）。drops: 兵の武器の種類ごとの落とし物（[品, 最少, 最多]）。",
+  "currency": {
+    "jomon_kofun": {"name": "交易の値打ち", "unit": "文分", "note": "貨幣はまだない。稲や布、鉄の板と物々交換する。"},
+    "asuka_nara": {"name": "銭", "unit": "文", "note": "708年の和同開珎から皇朝十二銭。"},
+    "heian": {"name": "銭・絹", "unit": "文", "note": "10世紀に皇朝銭が途絶え、米や絹が代わりに使われた。"},
+    "kamakura_muromachi": {"name": "宋銭・明銭", "unit": "文", "note": "宋銭・永楽通宝などの輸入銭が流通した。"},
+    "sengoku": {"name": "銭・金銀", "unit": "文", "note": "撰銭（悪銭の選り分け）が問題になり、甲州金や灰吹銀も使われた。"},
+    "edo": {"name": "両・文", "unit": "両", "note": "金貨（両・分・朱）・銀貨・銭（寛永通宝）の三貨制。金1両＝銭4貫文の公定相場。"},
+    "meiji_taisho": {"name": "円", "unit": "円", "note": "1871年の新貨条例で1両＝1円。"},
+    "showa": {"name": "円", "unit": "円", "note": "昭和初期の物価は明治の数倍に。"}
+  },
+  "shops": [
+    {"id": "ichi", "name": "市の商人", "eras": ["jomon_kofun", "asuka_nara", "heian"], "at": "capital", "stock": ["tankyu", "ya", "tekken", "chokuto", "satetsu", "mokutan", "tetsu", "mokuzai", "take", "nuno", "nendo", "yakusou", "iou", "kizugusuri", "toishi", "komedawara"]},
+    {"id": "za", "name": "座の商人", "eras": ["kamakura_muromachi", "sengoku"], "at": "port", "stock": ["tachi", "uchigatana", "yari", "wakyu", "ya", "satetsu", "mokutan", "tetsu", "tamahagane", "dou", "namari", "iou", "shoseki", "mokuzai", "take", "nuno", "nendo", "yakusou", "wata", "kokushoku", "kizugusuri", "toishi", "shuri", "hinawaju", "hayago"]},
+    {"id": "tonya", "name": "問屋", "eras": ["edo"], "at": "port", "stock": ["uchigatana", "wakizashi", "yari", "jutte", "wakyu", "ya", "hinawaju", "hayago", "satetsu", "mokutan", "tetsu", "tamahagane", "dou", "namari", "iou", "shoseki", "mokuzai", "take", "nuno", "nendo", "yakusou", "abura", "wata", "kokushoku", "kizugusuri", "toishi", "shuri", "horoku"]},
+    {"id": "kajiya_shop", "name": "刀剣商", "eras": ["heian", "kamakura_muromachi", "sengoku", "edo"], "at": "castle", "stock": ["tachi", "uchigatana", "wakizashi", "naginata", "yari", "toishi", "tamahagane"]},
+    {"id": "shokai", "name": "商会", "eras": ["meiji_taisho", "showa"], "at": "port", "stock": ["guntou", "murataju", "murata_dan", "dan38", "pistol_dan", "tetsu", "hagane", "dou", "namari", "iou", "shoseki", "shousan", "mokuzai", "nuno", "abura", "wata", "muen", "kizugusuri", "toishi", "shuri", "dynamite"]},
+    {"id": "juhoten", "name": "銃砲店", "eras": ["meiji_taisho", "showa"], "at": "capital", "stock": ["murataju", "murata_dan", "dan38", "pistol_dan", "guntou", "toishi", "shuri", "kokushoku"]}
+  ],
+  "loot": [
+    {"id": "bukiko", "name": "武器庫", "eras": ["kamakura_muromachi", "sengoku", "edo"], "at": "castle", "heat": 2.2, "items": [["yari", 1, 2], ["uchigatana", 0, 1], ["hinawaju", 0, 1], ["hayago", 6, 14], ["kokushoku", 1, 3], ["keg", 0, 1], ["horoku", 1, 3], ["ya", 10, 20]]},
+    {"id": "bukiko_old", "name": "兵庫（つわものぐら）", "eras": ["jomon_kofun", "asuka_nara", "heian"], "at": "castle", "heat": 2.0, "items": [["tekken", 0, 1], ["chokuto", 0, 1], ["tachi", 0, 1], ["wakyu", 0, 1], ["tankyu", 0, 1], ["ya", 10, 24], ["tetsu", 1, 3]]},
+    {"id": "heikiko", "name": "兵器庫", "eras": ["meiji_taisho", "showa"], "at": "castle", "heat": 3.0, "items": [["murataju", 0, 1], ["arisaka38", 1, 1], ["dan38", 10, 30], ["murata_dan", 5, 15], ["pistol14", 0, 1], ["pistol_dan", 8, 16], ["guntou", 0, 1], ["dynamite", 0, 2], ["grenade", 0, 3]]},
+    {"id": "kura_village", "name": "村の蔵", "eras": ["jomon_kofun", "asuka_nara", "heian", "kamakura_muromachi", "sengoku", "edo", "meiji_taisho", "showa"], "at": "village", "heat": 1.2, "items": [["komedawara", 1, 3], ["mokutan", 2, 6], ["satetsu", 1, 5], ["mokuzai", 2, 5], ["take", 1, 4], ["nuno", 1, 3], ["nendo", 1, 4], ["yakusou", 1, 4], ["toishi", 0, 1]]},
+    {"id": "kura_port", "name": "港の蔵", "eras": ["asuka_nara", "heian", "kamakura_muromachi", "sengoku", "edo", "meiji_taisho", "showa"], "at": "port", "heat": 1.6, "items": [["shoseki", 1, 4], ["iou", 1, 4], ["namari", 1, 3], ["dou", 1, 3], ["tetsu", 1, 3], ["wata", 0, 3], ["abura", 0, 2], ["zenitaba", 0, 2]]},
+    {"id": "kanegura", "name": "金蔵", "eras": ["edo"], "at": "castle", "heat": 3.5, "items": [["senryobako", 1, 1], ["koban", 2, 8]]},
+    {"id": "houmotsu", "name": "寺の宝物庫", "eras": ["asuka_nara", "heian", "kamakura_muromachi", "sengoku", "edo"], "at": "temple", "heat": 2.5, "items": [["zenitaba", 1, 3], ["tachi", 0, 1], ["naginata", 0, 1], ["yakusou", 1, 3], ["abura", 1, 2]]}
+  ],
+  "drops": {
+    "bow": [[["wakyu", 1, 1], ["ya", 3, 8]], [["tachi", 1, 1]], [["naginata", 1, 1]], [["chokuto", 1, 1]]],
+    "bow_ancient": [[["tankyu", 1, 1], ["ya", 3, 8]], [["tekken", 1, 1]], [["chokuto", 1, 1]]],
+    "musket": [[["hinawaju", 1, 1], ["hayago", 2, 6]], [["yari", 1, 1]], [["uchigatana", 1, 1]], [["hinawaju", 1, 1], ["hayago", 1, 3]]],
+    "musket_edo": [[["jutte", 1, 1]], [["uchigatana", 1, 1]], [["hinawaju", 1, 1], ["hayago", 2, 5]], [["wakizashi", 1, 1]]],
+    "rifle": [[["murataju", 1, 1], ["murata_dan", 3, 8]], [["arisaka38", 1, 1], ["dan38", 5, 10]], [["guntou", 1, 1]]],
+    "mg": [[["arisaka38", 1, 1], ["dan38", 5, 15]], [["pistol14", 1, 1], ["pistol_dan", 4, 8]], [["grenade", 1, 2]], [["arisaka38", 1, 1], ["dan38", 5, 10]]],
+    "blade": [[["uchigatana", 1, 1]], [["tachi", 1, 1]], [["wakizashi", 1, 1]]],
+    "spear": [[["yari", 1, 1]], [["naginata", 1, 1]]]
+  }
+}
