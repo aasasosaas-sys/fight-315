@@ -4,6 +4,9 @@ extends Node
 ## 1: 銃（既存）  2: 焙烙玉/手榴弾（投げる）  3: 火薬樽（置く）/ダイナマイト（投げる・明治以降）
 ## 4: 大筒/野砲（1 回目で設置、以降は照準点へ砲撃。R で置き直し）  5: 棒火矢（火を噴く矢・必ず延焼）
 ## G: いつでも焙烙玉を投げる。マウスホイール / LB・RB で切替。
+## 1 は手持ちの武器（PlayerArms：素手・刀・弓・銃）。もう一度押すと持ち替え。
+## 2〜5 は持ち物（Game.profile）の焙烙玉・手榴弾・火薬樽・ダイナマイト・大筒＋砲弾・棒火矢を使う（無ければ使えない）。
+## 爆弾の威力・不発は作り手の品質（Crafting）、火薬樽・ダイナマイトは建築の技能でも上がる。
 
 const SLOTS := 5
 var current := 0
@@ -29,12 +32,81 @@ func modern() -> bool:
 
 func tool_name(i: int) -> String:
 	match i:
-		0: return "銃"
-		1: return "手榴弾" if era_id() == "showa" else "焙烙玉"
-		2: return "ダイナマイト" if modern() else "火薬樽"
+		0:
+			var arms = _player.get("arms") if _player else null
+			return arms.weapon_name() if arms != null else "銃"
+		1: return "手榴弾" if _throw_kind() == "grenade" else "焙烙玉"
+		2: return "ダイナマイト" if _drop_kind() == "dynamite" else "火薬樽"
 		3: return "野砲" if modern() else "大筒"
 		4: return "棒火矢"
 	return ""
+
+
+## 持ち物（無ければ -1 = 持ち物を使わない昔の動き。テストや Game.profile が無いとき）
+func _have(id: String) -> int:
+	return Game.profile.count(id) if Game.profile else -1
+
+
+func _throw_kind() -> String:
+	if _have("grenade") > 0:
+		return "grenade"
+	if _have("horoku") > 0:
+		return "horoku"
+	return "grenade" if era_id() == "showa" else "horoku"
+
+
+func _drop_kind() -> String:
+	if _have("dynamite") > 0:
+		return "dynamite"
+	if _have("keg") > 0:
+		return "keg"
+	return "dynamite" if modern() else "keg"
+
+
+func _slot_item(i: int) -> String:
+	match i:
+		1: return _throw_kind()
+		2: return _drop_kind()
+		3: return "taihou"
+		4: return "hiya"
+	return ""
+
+
+func slot_count(i: int) -> int:
+	var id := _slot_item(i)
+	if id == "":
+		return -1
+	if id == "taihou":
+		return _have("hodan") if _have("taihou") > 0 else 0
+	return _have(id)
+
+
+## 持ち物から 1 つ使う。[使えたか, 品質]
+func _consume(id: String) -> Array:
+	if Game.profile == null:
+		return [true, 0.5]
+	if Game.profile.count(id) <= 0:
+		var hud = get_tree().get_first_node_in_group("hud")
+		if hud and hud.has_method("toast"):
+			hud.toast("%sを持っていない（店・蔵・倒した兵から、または工房で作れる）" % CraftDB.item_name(id), 2.2)
+		Sfx.play(get_tree(), Sfx.click(), -6.0)
+		return [false, 0.0]
+	var q := Game.profile.stack_quality(id)
+	Game.profile.take(id, 1)
+	return [true, q]
+
+
+## 品質・建築の技能を爆弾に効かせる
+func _apply_quality(b: Node, id: String, q: float) -> void:
+	if b == null or Game.profile == null:
+		return
+	var st := Crafting.item_stats(id, q)
+	var pw := float(st.get("power", 1.0))
+	if id in ["keg", "dynamite"]:
+		pw *= Skills.demolition_mult(Game.profile.level("architecture"))
+	b.set("power", pw)
+	b.set("dud", float(st.get("dud", 0.0)))
+	Game.profile.practice("powder", 0.1)
 
 
 func hint(i: int) -> String:
@@ -49,9 +121,13 @@ func hint(i: int) -> String:
 ## HUD 表示用
 func hud_text() -> String:
 	var s := "[%d] %s" % [current + 1, tool_name(current)]
+	var n := slot_count(current)
+	if n >= 0:
+		s += " ×%d" % n
 	if current != 0:
 		s += "   " + hint(current)
-	s += "   G:" + tool_name(1)
+	var g := slot_count(1)
+	s += "   G:" + tool_name(1) + (" ×%d" % g if g >= 0 else "")
 	return s
 
 
@@ -73,6 +149,9 @@ func _can_act() -> bool:
 func select(i: int) -> void:
 	i = clampi(i, 0, SLOTS - 1)
 	if i == current:
+		var arms = _player.get("arms") if _player else null
+		if i == 0 and arms != null:
+			arms.cycle()   # もう一度 1 で持ち替え
 		return
 	current = i
 	Sfx.play(get_tree(), Sfx.click(), -8.0)
@@ -99,11 +178,15 @@ func _physics_process(dt: float) -> void:
 	if not _can_act():
 		return
 	if Input.is_action_just_pressed("throw") and _cool <= 0.0:
-		throw_bomb("grenade" if era_id() == "showa" else "horoku")
+		var tk := _throw_kind()
+		var c := _consume(tk)
+		if c[0]:
+			_apply_quality(throw_bomb(tk), tk, c[1])
 	if current == 0:
 		return
 	if current == 3 and Input.is_action_just_pressed("reload"):
-		place_cannon()
+		if Game.profile == null or Game.profile.count("taihou") > 0:
+			place_cannon()
 		return
 	if Input.is_action_just_pressed("fire") and _cool <= 0.0:
 		use_current()
@@ -111,18 +194,30 @@ func _physics_process(dt: float) -> void:
 
 func use_current() -> void:
 	match current:
-		1: throw_bomb("grenade" if era_id() == "showa" else "horoku")
+		1:
+			var tk := _throw_kind()
+			var c := _consume(tk)
+			if c[0]:
+				_apply_quality(throw_bomb(tk), tk, c[1])
 		2:
-			if modern():
-				throw_bomb("dynamite")
-			else:
-				drop_keg()
+			var dk := _drop_kind()
+			var c2 := _consume(dk)
+			if c2[0]:
+				_apply_quality(throw_bomb("dynamite") if dk == "dynamite" else drop_keg(), dk, c2[1])
 		3:
 			if cannon == null or not is_instance_valid(cannon) or cannon.global_position.distance_to(_player.global_position) > 80.0:
-				place_cannon()
+				if Game.profile == null or Game.profile.count("taihou") > 0:
+					place_cannon()
+				else:
+					_consume("taihou")
 			else:
-				fire_cannon(aim_point())
-		4: fire_hiya()
+				var c3 := _consume("hodan")
+				if c3[0]:
+					fire_cannon(aim_point())
+		4:
+			var c4 := _consume("hiya")
+			if c4[0]:
+				_apply_quality(fire_hiya(), "hiya", c4[1])
 
 
 func aim_point() -> Vector3:

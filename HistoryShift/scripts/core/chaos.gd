@@ -40,6 +40,8 @@ var tally: Dictionary = {}            # 集計 kind -> 数（表示用）
 var _sabotaged: Dictionary = {}       # 今回、一般則で壊した名所
 var _battle_kills: Dictionary = {}    # "合戦id/側" -> 倒した数
 var _battle_done: Dictionary = {}
+var _taught: Dictionary = {}          # 今回教えた「人物/技能」
+var _anachro: Dictionary = {}         # 今回過去に残した時代錯誤の品
 
 
 func _init(p_db: HistoryDB, p_state: HistoryState, dir := DIR) -> void:
@@ -105,6 +107,8 @@ func begin_session(era_id: String, p_world: Node = null) -> void:
 	_sabotaged.clear()
 	_battle_kills.clear()
 	_battle_done.clear()
+	_taught.clear()
+	_anachro.clear()
 
 
 func end_session() -> Array:
@@ -204,20 +208,35 @@ func _generic(kind: String, id: String, info: Dictionary, ev: Dictionary) -> Arr
 				out.append(_act(a))
 		"persuade":
 			if nm != "":
-				var ok := HistoryActors.persuade_ok(db.actors[nm], str(info.get("arg", "")), trust(nm))
+				var ok := HistoryActors.persuade_ok(db.actors[nm], str(info.get("arg", "")), trust(nm) + int(info.get("skill_bonus", 0)))
 				if ok:
 					out.append(_act({"verb": "persuade", "target": nm, "arg": info.get("arg", ""), "ok": true}))
 				else:
 					out.append({"refused": true, "id": "", "title": "%sは「%s」をはねつけた" % [nm, info.get("arg", "")], "changes": []})
 		"steer":
 			if nm != "" and db.by_id.has(str(info.get("q", ""))):
-				var ok2 := HistoryActors.steer_ok(db.actors[nm], str(info["q"]), int(info.get("choice", 0)), trust(nm))
+				var ok2 := HistoryActors.steer_ok(db.actors[nm], str(info["q"]), int(info.get("choice", 0)), trust(nm) + int(info.get("skill_bonus", 0)))
 				if ok2:
 					out.append(_act({"verb": "steer", "target": nm, "q": str(info["q"]), "choice": int(info.get("choice", 0)), "ok": true}))
 				else:
 					out.append({"refused": true, "id": "", "title": "%s「……証拠を見せてもらおう」" % nm, "changes": []})
 		"battle":
 			pass
+		"teach":
+			# 技術を教える（actor_interact の「技術を教える」）：人物がいればその人に、いなければその土地の職人に伝わる
+			var sk := str(info.get("skill", ""))
+			if sk != "" and not _taught.has(nm + "/" + sk):
+				_taught[nm + "/" + sk] = true
+				out.append(_act({"verb": "teach", "target": nm if nm != "" else id, "skill": sk, "level": int(info.get("level", 0))}))
+		"anachronism":
+			# 時代錯誤の品が過去に残った（渡した・落とした・職人の前で作った）。同じ品は一度の自由探索で一度だけ
+			var item := str(info.get("item", id))
+			var gap := int(info.get("gap", 0))
+			if gap > 0 and not _anachro.has(item):
+				_anachro[item] = true
+				var a2 := {"verb": "anachronism", "target": nm if nm != "" else item, "item": item, "gap": gap,
+					"type": str(info.get("type", CraftDB.item_type(item))), "cause": str(info.get("cause", "lost"))}
+				out.append(_act(a2))
 		"project":
 			if db.projects.has(id) and WarModel.available(db, state.actions, state.war.get("pillars", {}), id)[0]:
 				out.append(_act({"verb": "project", "target": id}))

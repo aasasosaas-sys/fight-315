@@ -106,7 +106,7 @@ func _check_overlaps() -> void:
 			if hit:
 				# 小さい方を閉じる
 				var other: int = du.id
-				var close := id
+				var close: int = id
 				if defs.has(other) and float(defs[other]["_r"]) < float(d["_r"]):
 					close = other
 				blocked[close] = "overlap"

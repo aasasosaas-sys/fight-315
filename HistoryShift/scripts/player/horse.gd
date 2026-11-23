@@ -14,6 +14,8 @@ var _neck: Node3D
 var _tail: Node3D
 var _sound: AudioStreamPlayer3D
 var _rear := 0.0
+var _air := false
+var _dist_acc := 0.0
 
 
 static func create(seed: int) -> Horse:
@@ -136,6 +138,32 @@ func _play(n: String) -> void:
 		_anim.play(n, 0.25)
 
 
+## 乗り手（主人公）の乗馬の技能。主人公でなければ並（50）
+func _skill() -> float:
+	if driver != null and driver is Player and Game.profile:
+		return Game.profile.level("riding")
+	return 50.0
+
+
+## 落馬（乗馬が下手だと、ぶつかったり跳んで着地したときに振り落とされる）
+func _maybe_throw(cause: String) -> void:
+	if driver == null or not (driver is Player):
+		return
+	if randf() >= Skills.horse_throw_chance(_skill()):
+		return
+	var d = driver
+	d.exit_vehicle()
+	d.velocity += Vector3.UP * 4.0 - global_basis.z * 3.0
+	d.take_hit(8.0, -1)
+	_rear = 1.0
+	speed = 0.0
+	var hud = get_tree().get_first_node_in_group("hud")
+	if hud:
+		hud.toast("落馬した！（%s。乗馬の稽古をすれば振り落とされにくい）" % cause, 3.0)
+	if Game.profile:
+		Game.profile.practice("riding", 0.5)
+
+
 func get_speed() -> float: return absf(speed)
 func get_velocity_vec() -> Vector3: return velocity
 
@@ -172,17 +200,29 @@ func _physics_process(dt: float) -> void:
 		# 馬上で照準中はカメラ方向へ向く
 		if Input.is_action_pressed("aim") and CameraRig.I and absf(throttle) < 0.1:
 			rotation.y = lerp_angle(rotation.y, CameraRig.I.yaw, dt * 4.0)
-	var top := 18.0 if gallop else 9.0
+	# 乗馬の技能：速さ・小回り（Skills.horse_*）
+	var lv := _skill()
+	var top := (18.0 if gallop else 9.0) * Skills.horse_speed_mult(lv)
 	var target := throttle * (top if throttle > 0 else 3.5)
 	speed = move_toward(speed, target, (7.0 if absf(target) > absf(speed) else 10.0) * dt)
-	_turn = lerpf(_turn, steer * lerpf(2.4, 1.3, clampf(absf(speed) / 18.0, 0, 1)), dt * 6.0)
+	_turn = lerpf(_turn, steer * lerpf(2.4, 1.3, clampf(absf(speed) / 18.0, 0, 1)) * Skills.horse_turn_mult(lv), dt * 6.0)
+	if driver is Player and absf(speed) > 2.0 and Game.profile:
+		_dist_acc += absf(speed) * dt
+		if _dist_acc > 50.0:
+			_dist_acc = 0.0
+			Game.profile.practice("riding", 0.15)
 	rotation.y += _turn * dt
 	var fwd := -global_basis.z
 	velocity.x = fwd.x * speed
 	velocity.z = fwd.z * speed
 	if is_on_floor():
+		if _air:
+			_air = false
+			if absf(speed) > 10.0:
+				_maybe_throw("着地で体勢を崩した")
 		if jump and absf(speed) > 3.0:
 			velocity.y = 7.0
+			_air = true
 		else:
 			velocity.y = -1.0
 	else:
@@ -199,6 +239,8 @@ func _physics_process(dt: float) -> void:
 			elif o and o.has_method("panic"):
 				o.panic(global_position)
 		speed *= 0.6
+		if driver != null and get_slide_collision(0).get_normal().y < 0.5:
+			_maybe_throw("ぶつかった")
 	# アニメーション
 	if _anim:
 		var sp := absf(speed)

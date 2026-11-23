@@ -13,6 +13,8 @@ var kind := "cannonball"
 var vel := Vector3.ZERO
 var team := 0
 var life := 8.0
+var power := 1.0       # 品質による威力の倍率（DestructionTools が設定）
+var dud := 0.0
 var _trail: CPUParticles3D
 var _snd: AudioStreamPlayer3D
 
@@ -117,7 +119,10 @@ func _explode(p: Vector3) -> void:
 	var sp: Dictionary = SPEC.get(kind, SPEC["cannonball"])
 	var tree := get_tree()
 	queue_free()
-	Effects.explosion(tree, p, float(sp["radius"]), float(sp["damage"]), team, float(sp["fire"]))
+	if dud > 0.0 and randf() < dud:
+		Effects.burst(tree, p, Vector3.UP, Color(0.8, 0.8, 0.8, 0.7), Color(0.4, 0.4, 0.4), 14, 1.5, 1.0, 1.4, -0.05, false, 40)
+		return
+	Effects.explosion(tree, p, float(sp["radius"]) * (0.8 + 0.2 * power), float(sp["damage"]) * power, team, float(sp["fire"]))
 	if kind == "hiya":
 		Effects.burst(tree, p, Vector3.UP, Color(1.0, 0.7, 0.2), Color(1.0, 0.2, 0.0), 50, 12.0, 0.2, 1.8, 1.0, true, 170)
 

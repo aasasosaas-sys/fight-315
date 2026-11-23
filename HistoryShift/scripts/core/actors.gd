@@ -19,7 +19,23 @@ extends RefCounted
 
 const VIOLENT := ["assassinated", "killed", "suicide", "executed", "accident", "poisoned"]
 const NOKILL_TAGS := ["sacred", "woman", "foreigner", "commoner", "religious", "scholar", "artist"]
-const VERBS := ["kill", "escort", "protect", "persuade", "give", "steal", "forge", "steer", "delay", "sabotage", "battle", "project"]
+const VERBS := ["kill", "escort", "protect", "persuade", "give", "steal", "forge", "steer", "delay", "sabotage", "battle", "project", "teach", "anachronism"]
+##   teach    技術を教えた（skill = 技能 id、level = 教えた者の技能）。TEACH の変化 × level/100 × 影響力（人物がいなければ 0.5）
+##   anachronism 時代錯誤の品が過去に残った（item、gap = 何時代ぶん未来の品か、cause = give/lost/craft）。
+##            data/crafting/items.json の tech[品の種類] × gap（上限3）× 原因の重み
+
+## 技術を教えたときの歴史パラメータの変化（技能ごと）。工業・科学の柱（data/war/model.json の tech/education/economy）に効く。
+## 根拠の例：江戸の蘭学（化学・医学）は明治の近代化の土台になった。国友の鉄砲鍛冶の技術は江戸の機械（からくり）へ流れた。
+const TEACH := {
+	"kenjutsu": {"warrior": 4}, "sojutsu": {"warrior": 3, "militarism": 2}, "kyujutsu": {"warrior": 3},
+	"shageki": {"militarism": 4, "warrior": 2}, "katana_smith": {"tech": 4, "warrior": 2}, "gun_smith": {"tech": 6, "militarism": 4},
+	"powder": {"tech": 4, "militarism": 5}, "machining": {"tech": 8, "economy": 4}, "riding": {"warrior": 2},
+	"sailing": {"open_asia": 4, "commerce": 3}, "driving": {"tech": 3, "economy": 2}, "piloting": {"tech": 6, "militarism": 3},
+	"medicine": {"commoners": 5, "education": 3}, "chemistry": {"tech": 6, "education": 5},
+	"shipbuilding": {"open_asia": 4, "open_west": 3, "commerce": 3}, "architecture": {"economy": 3, "religion": 2},
+	"rhetoric": {"democracy": 2, "commerce": 3}, "komonjo": {"education": 5},
+}
+const ANACHRO_CAUSE := {"give": 1.0, "craft": 0.7, "lost": 0.5}
 
 ## 説得の論点：trait（その性格が正なら受け入れやすい／sign -1 なら負で受け入れる）と効果（影響力を掛ける）
 const ARGS := {
@@ -327,6 +343,21 @@ static func resolve(db: HistoryDB, actions: Array) -> Dictionary:
 				if not pr.is_empty():
 					var pv: Dictionary = pr.get("vars", {})
 					out.append({"vars": pv, "year": int(pr["year"]), "era": str(pr["era"]), "note": str(pr.get("text", ""))})
+			"teach":
+				var sk := str(a.get("skill", ""))
+				if TEACH.has(sk):
+					var kt := clampf(float(a.get("level", 0)) / 100.0, 0.0, 1.0) * (influence(ad) if not ad.is_empty() else 0.5)
+					var who := nm if nm != "" else "%sの職人" % HistoryDB.landmark_name(db.get_era(era), str(a.get("target", "")))
+					out.append({"vars": _scale(TEACH[sk], kt), "year": yr, "era": aera,
+						"note": "%sは未来から来た若者に%sの技を教わり、その工夫を広めた" % [who, Skills.skill_name(sk)]})
+			"anachronism":
+				var tv := CraftDB.tech_vars(str(a.get("type", "")))
+				if not tv.is_empty():
+					var ka := clampf(float(a.get("gap", 1)), 1.0, 3.0) * float(ANACHRO_CAUSE.get(str(a.get("cause", "lost")), 0.5))
+					var iname := CraftDB.item_name(str(a.get("item", "")))
+					var how: String = {"give": "%sが手にした" % nm, "craft": "職人たちが作り方を見て覚えた", "lost": "置き去りにされたのを誰かが拾った"}.get(str(a.get("cause", "lost")), "")
+					out.append({"vars": _scale(tv, ka), "year": yr, "era": era,
+						"note": "まだこの世にないはずの「%s」を、%s。人々はそれを真似ようとした" % [iname, how]})
 			"battle":
 				for b in db.battles:
 					if b["id"] == str(a.get("target", "")):
@@ -411,6 +442,10 @@ static func headline(db: HistoryDB, a: Dictionary) -> String:
 			return "%sを破壊した" % HistoryDB.landmark_name(db.get_era(str(a.get("era", ""))), str(a.get("target", "")))
 		"battle":
 			return "%sで%sに加勢した" % [a.get("battle_name", a.get("target", "")), a.get("side", "")]
+		"teach":
+			return "%sに%sの技を教えた" % [nm, Skills.skill_name(str(a.get("skill", "")))]
+		"anachronism":
+			return "時代錯誤の品「%s」が%sの世に残った" % [CraftDB.item_name(str(a.get("item", ""))), db.get_era(str(a.get("era", ""))).get("eraName", "")]
 		"project":
 			return "国家事業「%s」を成し遂げた" % db.projects.get(str(a.get("target", "")), {}).get("name", a.get("target", ""))
 	return str(a.get("verb", ""))

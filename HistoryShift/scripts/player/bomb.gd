@@ -15,6 +15,8 @@ var team := 0
 var fuse := 3.0
 var _age := 0.0
 var _done := false
+var power := 1.0       # 品質・建築の技能による威力の倍率（DestructionTools が設定）
+var dud := 0.0         # 不発（湿気・導火線の不良）の確率
 var _spark: CPUParticles3D
 var _hiss: AudioStreamPlayer3D
 
@@ -122,7 +124,14 @@ func detonate() -> void:
 	var p := global_position + Vector3.UP * 0.3
 	var tree := get_tree()
 	queue_free()
-	Effects.explosion(tree, p, float(sp["radius"]), float(sp["damage"]), team, float(sp["fire"]))
+	if dud > 0.0 and randf() < dud:
+		# 不発：煙だけ
+		Effects.burst(tree, p, Vector3.UP, Color(0.8, 0.8, 0.8, 0.7), Color(0.4, 0.4, 0.4), 14, 1.5, 1.0, 1.4, -0.05, false, 40)
+		var hud = tree.get_first_node_in_group("hud")
+		if hud and hud.has_method("toast") and team == 0:
+			hud.toast("不発だった……（火薬の質が悪い）", 2.0)
+		return
+	Effects.explosion(tree, p, float(sp["radius"]) * (0.8 + 0.2 * power), float(sp["damage"]) * power, team, float(sp["fire"]))
 	if kind == "horoku":
 		# 焙烙玉は火の粉を撒く
 		Effects.burst(tree, p, Vector3.UP, Color(1.0, 0.7, 0.2), Color(1.0, 0.2, 0.0), 40, 12.0, 0.18, 1.6, 1.2, true, 160)

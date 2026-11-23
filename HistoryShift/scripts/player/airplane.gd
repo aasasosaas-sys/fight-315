@@ -19,6 +19,8 @@ var _sound: AudioStreamPlayer3D
 var _next_shot := 0.0
 var _guns: Array[Node3D] = []
 var _dead := false
+var _wob_t := 0.0
+var _air_t := 0.0
 const TAKEOFF := 30.0
 const GEAR := 1.1
 
@@ -75,6 +77,13 @@ func _build(seed: int) -> void:
 	_visual.add_child(seat)
 	_sound = Sfx.loop_player(self, Sfx.propeller(), -4.0)
 	display_name = "飛行機"
+
+
+## 操縦者（主人公）の飛行機操縦の技能。主人公でなければ並（50）
+func _skill() -> float:
+	if driver != null and driver is Player and Game.profile:
+		return Game.profile.level("piloting")
+	return 50.0
 
 
 func get_speed() -> float: return speed
@@ -182,7 +191,21 @@ func _physics_process(dt: float) -> void:
 			desired = cam.rot_basis() * Vector3.FORWARD
 		elif driver == null:
 			desired = (fwd + Vector3.DOWN * 0.3).normalized()
-		var turn_rate := 1.25 * clampf(speed / 45.0, 0.35, 1.0)
+		# 飛行機操縦の技能：旋回の速さ・機体の揺れ（Skills.plane_*）
+		var lv := _skill()
+		var turn_rate := 1.25 * clampf(speed / 45.0, 0.35, 1.0) * Skills.plane_turn_mult(lv)
+		if driver != null:
+			_wob_t += dt
+			var wob := Skills.plane_wobble(lv)
+			if wob > 0.001:
+				var wa := (global_basis * Vector3(sin(_wob_t * 1.7), 0.0, sin(_wob_t * 2.3 + 1.0))).normalized()
+				if wa.length() > 0.5:
+					global_basis = Basis(wa, wob * dt * sin(_wob_t * 3.1)) * global_basis
+			if driver is Player and Game.profile:
+				_air_t += dt
+				if _air_t > 10.0:
+					_air_t = 0.0
+					Game.profile.practice("piloting", 0.25)
 		var axis := fwd.cross(desired)
 		var ang := fwd.angle_to(desired)
 		if axis.length() > 0.0001 and ang > 0.0005:
@@ -198,7 +221,8 @@ func _physics_process(dt: float) -> void:
 		# 失速
 		var climb := fwd.dot(Vector3.UP)
 		speed -= climb * 9.8 * dt * 0.6
-		var lift := clampf((speed - 18.0) / (TAKEOFF - 18.0), 0.0, 1.0)
+		var stall := minf(Skills.plane_stall_speed(lv), TAKEOFF - 1.0)   # 下手だと高い速さで失速する
+		var lift := clampf((speed - stall) / (TAKEOFF - stall), 0.0, 1.0)
 		velocity = fwd * speed + Vector3.DOWN * (1.0 - lift) * 12.0
 		var col := move_and_collide(velocity * dt)
 		if col:
@@ -207,14 +231,16 @@ func _physics_process(dt: float) -> void:
 				hit_o.ram(speed, velocity, 4.0)   # 墜落機は建物を突き崩す
 			var n := col.get_normal()
 			var level := absf(fwd.dot(Vector3.UP)) < 0.2 and global_basis.y.dot(Vector3.UP) > 0.85
-			if n.y > 0.8 and level and speed < 40.0 and velocity.y > -8.0:
-				airborne = false   # 着陸
+			if n.y > 0.8 and level and speed < Skills.plane_land_speed(lv) and velocity.y > -Skills.plane_land_sink(lv):
+				airborne = false   # 着陸（操縦の技能で許される速さ・降下率が変わる）
+				if driver is Player and Game.profile:
+					Game.profile.practice("piloting", 1.0)
 				_bank = 0.0; _roll_extra = 0.0; _visual.rotation.z = 0.0
 			else:
 				_crash()
 				return
 		if global_position.y < gh + 0.3:
-			if speed < 40.0 and absf(fwd.y) < 0.25:
+			if speed < Skills.plane_land_speed(lv) and absf(fwd.y) < 0.25:
 				airborne = false
 				global_position.y = gh
 			else:

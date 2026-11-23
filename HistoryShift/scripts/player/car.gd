@@ -16,6 +16,8 @@ var _engine: AudioStreamPlayer3D
 var _smoke_t := 0.0
 var _flip_t := 0.0
 var _dead := false
+var _wob_t := 0.0
+var _dist_acc := 0.0
 const REST := 0.45
 const RADIUS := 0.38
 const SPRING := 38000.0
@@ -116,6 +118,13 @@ func _build(seed: int, era_id: String) -> void:
 	display_name = {"classic": "クラシックカー", "truck": "トラック", "sports": "スポーツカー"}.get(style, "自動車")
 
 
+## 運転手（主人公）の自動車運転の技能。誰も乗っていない・主人公でなければ並（50）
+func _skill() -> float:
+	if driver != null and driver is Player and Game.profile:
+		return Game.profile.level("driving")
+	return 50.0
+
+
 func get_speed() -> float: return linear_velocity.length()
 func get_velocity_vec() -> Vector3: return linear_velocity
 
@@ -191,7 +200,16 @@ func _physics_process(dt: float) -> void:
 		boost = Input.is_action_pressed("sprint")
 	var fwd := -global_basis.z
 	var fspeed := linear_velocity.dot(fwd)
-	_steer = lerpf(_steer, steer_in * lerpf(0.6, 0.18, clampf(absf(fspeed) / 35.0, 0, 1)), dt * 6.0)
+	# 自動車運転の技能：ハンドルの反応・グリップ・ふらつき・加速（Skills.car_*）
+	var lv := _skill()
+	if driver != null and absf(fspeed) > 3.0:
+		_wob_t += dt
+		steer_in += (sin(_wob_t * 5.3) + 0.6 * sin(_wob_t * 11.7)) * Skills.car_wobble(lv) * clampf(absf(fspeed) / 20.0, 0.0, 1.0)
+		_dist_acc += absf(fspeed) * dt
+		if _dist_acc > 60.0 and driver is Player and Game.profile:
+			_dist_acc = 0.0
+			Game.profile.practice("driving", 0.15)
+	_steer = lerpf(_steer, steer_in * lerpf(0.6, 0.18, clampf(absf(fspeed) / 35.0, 0, 1)), dt * Skills.car_steer_rate(lv))
 	var space := get_world_3d().direct_space_state
 	var grounded := 0
 	for i in 4:
@@ -220,10 +238,10 @@ func _physics_process(dt: float) -> void:
 		var wf := -wb.z
 		var wr := wb.x
 		var lat := pvel.dot(wr)
-		var grip := 0.9 if not brake else 0.45
+		var grip := Skills.car_grip(lv) * (1.0 if not brake else 0.5)
 		apply_force(-wr * lat * mass * 0.25 * grip / maxf(dt * 4.0, 0.016), mount - global_position)
 		if i >= 2:
-			var power := 9000.0 * (1.8 if boost else 1.0)
+			var power := 9000.0 * (1.8 if boost else 1.0) * Skills.car_power_mult(lv)
 			var top := 34.0 if style != "classic" else 20.0
 			if boost: top *= 1.35
 			if throttle > 0.0 and fspeed < top:

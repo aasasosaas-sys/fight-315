@@ -38,6 +38,18 @@ static func open(parent: Control, on_close: Callable = Callable()) -> Control:
 	fs.toggled.connect(func(on: bool): UISfx.play("click"); fs.text = "オン" if on else "オフ"; GameSettings.set_value("fullscreen", on))
 	v.add_child(_row("フルスクリーン", "", fs))
 
+	# 技術（弟子入り・稽古が面倒な人向け）
+	var mm := CheckButton.new()
+	mm.button_pressed = bool(vals.get("master_mode", false))
+	mm.text = "オン" if mm.button_pressed else "オフ"
+	mm.toggled.connect(func(on: bool): UISfx.play("click"); mm.text = "オン" if on else "オフ"; GameSettings.set_value("master_mode", on))
+	v.add_child(_row("技術完全習得モード", "すべての技能が100（極み）になり、すべてのレシピを作れる。オフに戻すと学んだ値に戻る", mm))
+	var sa := CheckButton.new()
+	sa.button_pressed = bool(vals.get("start_armed", false))
+	sa.text = "オン" if sa.button_pressed else "オフ"
+	sa.toggled.connect(func(on: bool): UISfx.play("click"); sa.text = "オン" if on else "オフ"; GameSettings.set_value("start_armed", on))
+	v.add_child(_row("最初から武装", "時空跳躍のたびに「時空銃」（弾は尽きない）と焙烙玉などを貸与する", sa))
+
 	v.add_child(JSUI.gap(6))
 	var row := JSUI.hbox()
 	row.alignment = BoxContainer.ALIGNMENT_END

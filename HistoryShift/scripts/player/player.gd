@@ -26,6 +26,7 @@ var _vehicle_cd := 0.0
 
 var rig: Humanoid
 var tools: DestructionTools     # 破壊ツール（scripts/player/destruction_tools.gd）
+var arms: PlayerArms            # 手持ち武器（素手・刀・槍・弓・銃。scripts/player/player_arms.gd）。現代の高校生なので最初は素手
 var _chute: Node3D
 var _shape: CollisionShape3D
 
@@ -54,6 +55,8 @@ func _ready() -> void:
 	# 破壊ツール（1-5 で切替、G で焙烙玉）
 	tools = DestructionTools.new()
 	add_child(tools)
+	arms = PlayerArms.new()
+	add_child(arms)
 	Game.player = self
 
 
@@ -74,6 +77,10 @@ func in_vehicle() -> bool:
 func take_hit(amount: float, from_team: int, _point := Vector3.ZERO, _dir := Vector3.ZERO) -> void:
 	if dead or from_team == TEAM or god_mode:
 		return
+	if arms != null:
+		amount = arms.filter_damage(amount, _dir)   # 刀で受ける・受け流す（剣術）
+		if amount <= 0.0:
+			return
 	hp = maxf(0.0, hp - amount)
 	_last_hit = Time.get_ticks_msec() / 1000.0
 	rig.hurt()
@@ -103,14 +110,14 @@ func _physics_process(dt: float) -> void:
 	var blocked := Game.input_blocked
 	_vehicle_cd -= dt
 	if _now() - _last_hit > 4.0:
-		hp = minf(max_hp, hp + regen * dt)
+		hp = minf(max_hp, hp + regen * dt * (Skills.regen_mult(Game.profile.level("medicine")) if Game.profile else 1.0))   # 医術で回復が速い
 
 	if in_vehicle():
 		rig.speed = vehicle.get_speed() if vehicle.has_method("get_speed") else 0.0
 		if not blocked and Input.is_action_just_pressed("vehicle") and _vehicle_cd <= 0.0:
 			exit_vehicle()
 		elif not blocked and vehicle.get("kind") != "plane":
-			_gun(dt)
+			_hand_weapon(dt)
 		return
 
 	var cam := CameraRig.I
@@ -163,13 +170,26 @@ func _physics_process(dt: float) -> void:
 		cam.aiming = not blocked and Input.is_action_pressed("aim")
 
 	if not blocked:
-		_gun(dt)
+		_hand_weapon(dt)
 		if Input.is_action_just_pressed("vehicle") and _vehicle_cd <= 0.0:
 			var v = _nearest_vehicle(5.0)
 			if v:
 				enter_vehicle(v)
 
 
+## 手持ち武器（PlayerArms）。破壊ツールを構えている間は使わない
+func _hand_weapon(dt: float) -> void:
+	if tools != null and tools.blocks_gun():
+		return
+	if arms == null:
+		_gun(dt)
+		return
+	arms.tick(dt)
+	ammo = arms.mag()
+	reloading = arms.reloading
+
+
+## 旧来の銃（PlayerArms が無いときだけ）
 func _gun(_dt: float) -> void:
 	if tools != null and tools.blocks_gun():
 		return

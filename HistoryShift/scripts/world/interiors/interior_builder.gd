@@ -409,8 +409,8 @@ func fittings(i: int, side: int, style: String, colr := Color.WHITE, h := 0.0) -
 				"fusuma", "gold":
 					var pc := colr
 					if style == "gold":
-						pc = Color(1.0, 0.82, 0.42)
-					box("gold" if style == "gold" else "flat", c, Vector3(pw - 0.03, hh, 0.02), pc, yaw)
+						pc = Color(0.93, 0.68, 0.22)   # 金箔地（ベタの濃い金）
+					box("flat", c, Vector3(pw - 0.03, hh, 0.02), pc, yaw)
 					# 縁と引手
 					for sgn in [-1.0, 1.0]:
 						box("darkwood", c + dn * sgn * (pw * 0.5 - 0.02) + n * 0.012, Vector3(0.035, hh, 0.02), Color(0.2, 0.15, 0.12), yaw)
@@ -571,7 +571,7 @@ func byobu(p: Vector3, yaw: float, colr := Color(1.0, 0.82, 0.42), panels := 6, 
 	for k in panels:
 		var a := yaw + (0.35 if k % 2 == 0 else -0.35)
 		var off := Basis(Vector3.UP, yaw) * Vector3((k - panels * 0.5 + 0.5) * pw * 0.94, 0, 0)
-		box("gold" if colr.r > 0.95 else "flat", p + off + Vector3(0, h * 0.5, 0), Vector3(pw, h, 0.03), colr, a)
+		box("flat", p + off + Vector3(0, h * 0.5, 0), Vector3(pw, h, 0.03), Color(0.93, 0.68, 0.22) if colr.r > 0.95 else colr, a)
 		box("darkwood", p + off + Vector3(0, h, 0), Vector3(pw, 0.04, 0.05), Color(0.15, 0.1, 0.08), a)
 		if k % 2 == 1:
 			box("flat", p + off + Vector3(0, h * 0.45, 0) + Basis(Vector3.UP, a) * Vector3(0, 0, 0.02), Vector3(pw * 0.6, 0.18, 0.01), Color(0.3, 0.45, 0.28), a)

@@ -14,6 +14,8 @@ static var values := {
 	"mouse_sensitivity": 1.0,   # 倍率（0.2〜3.0）
 	"volume": 0.8,              # 0〜1
 	"fullscreen": true,
+	"master_mode": false,       # 技術完全習得モード（すべての技能 100・レシピ解禁。scripts/core/player_profile.gd）
+	"start_armed": false,       # 最初から武装（時空銃を貸与。気軽に遊びたい人向け）
 }
 static var _loaded_from_file := false
 

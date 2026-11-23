@@ -23,6 +23,8 @@ var _strafe := 1.0
 var _think := 0.0
 var _alert := false
 var _vy := 0.0
+var _stun := 0.0                  # よろけ（主人公の強い振り・受け流し）
+var _windup := -1.0               # 近接：振りかぶってから当たるまで（受け流しの合図）
 
 
 static func spawn(parent: Node, pos: Vector3, p_label: String, p_era: String, leader := false) -> Enemy:
@@ -61,6 +63,9 @@ func _ready() -> void:
 			"sengoku", "edo": weapon = "musket"
 			"meiji_taisho": weapon = "rifle"
 			"showa": weapon = "mg"
+		# 中世までの兵の一部は刀・槍で斬りかかってくる（受け・受け流しで捌ける）
+		if CraftDB.era_index(era_id) <= CraftDB.era_index("edo") and CraftDB.era_index(era_id) >= CraftDB.era_index("heian") and not is_leader and randf() < 0.35:
+			weapon = "spear" if randf() < 0.4 else "blade"
 		hp = 60.0
 	var outfit := Humanoid.outfit_for(era_id, "guardian" if is_guardian else "enemy")
 	_rig = Humanoid.build_streamed(outfit, randi(), true, -1, "", Humanoid.PRIORITY_GUARD)   # 近づくまで見た目は組み立てない（mission_target は自動で優先）
@@ -114,6 +119,7 @@ func _die() -> void:
 	Wanted.report(global_position, 0.35)
 	# 自由探索の「歴史の揺らぎ」：兵の撃破（修正力は数えない）
 	Game.chaos_event.emit("kill", label, {"type": "guardian" if is_guardian else "soldier", "era": era_id, "pos": global_position, "leader": is_leader})
+	LootDrop.drop_for_enemy(self)   # 武器・弾・銭を落とす（拾える）
 	killed.emit(self)
 	await get_tree().create_timer(6.0 if not is_guardian else 1.2).timeout
 	if is_inside_tree():
@@ -145,13 +151,17 @@ func _physics_process(dt: float) -> void:
 		_strafe = -_strafe
 	if _alert:
 		var flat := Vector3(to.x, 0, to.z).normalized()
-		var ideal := 14.0 if weapon != "bow" else 22.0
+		var ideal := (14.0 if weapon != "bow" else 22.0) if not is_melee() else 1.4
 		if is_guardian: ideal = 10.0
 		if dist > ideal + 6.0:
 			move = flat
 		elif dist < ideal - 5.0:
 			move = -flat
-		move += flat.cross(Vector3.UP) * _strafe * 0.6
+		if is_melee():
+			move = flat if dist > 1.8 else Vector3.ZERO   # 斬りかかる間合いまで詰める
+			if _stun > 0.0 or _windup >= 0.0:
+				move = Vector3.ZERO
+		move += flat.cross(Vector3.UP) * _strafe * (0.6 if not is_melee() else 0.15)
 		# 障害物回避（前方レイ）
 		var space := get_world_3d().direct_space_state
 		var eye := global_position + Vector3.UP * 0.8
@@ -183,7 +193,54 @@ func _physics_process(dt: float) -> void:
 		global_position.y = w.height_at(global_position.x, global_position.z) + 1.0
 
 
+## 主人公の強い振り・受け流しでよろける
+func stagger(t: float) -> void:
+	_stun = maxf(_stun, t)
+	_windup = -1.0
+	_cool = maxf(_cool, t)
+	if _rig:
+		_rig.hurt()
+
+
+func is_melee() -> bool:
+	return weapon in ["blade", "spear"]
+
+
+func _melee(dt: float, dist: float) -> void:
+	var p = Game.player
+	if p == null:
+		return
+	var reach := 2.3 if weapon == "blade" else 3.2
+	# 見た目の武器を刀・槍に替える（人の形は近づいてから組み立てられるので、その後で）
+	if _rig and _rig.weapon and is_instance_valid(_rig.weapon) and _rig.weapon.get_node_or_null("ArmsModel") == null:
+		for c in _rig.weapon.get_children():
+			if c is MeshInstance3D:
+				(c as MeshInstance3D).visible = false
+		_rig.weapon.add_child(WeaponModels.build("uchigatana" if weapon == "blade" else "yari", 0.4))
+	if _windup >= 0.0:
+		_windup -= dt
+		if _windup < 0.0:
+			_cool = randf_range(1.2, 2.0)
+			if dist < reach + 0.5 and not p.in_vehicle():
+				p.take_hit(14.0 if weapon == "blade" else 12.0, 1, global_position + Vector3.UP * 1.2, (p.global_position - global_position).normalized())
+				Sfx.play_at(get_tree(), Sfx.hit(), global_position, -4.0)
+			else:
+				Sfx.play_at(get_tree(), Sfx.whoosh(), global_position, -6.0)
+		return
+	_cool -= dt
+	if dist < reach and _cool <= 0.0:
+		_windup = 0.45    # 振りかぶる（この間に受けると受け流せる）
+		_tag.modulate = Color(1, 0.9, 0.3)
+		get_tree().create_timer(0.45).timeout.connect(func(): if is_instance_valid(_tag): _tag.modulate = Color(1, 0.45, 0.4))
+
+
 func _combat(dt: float, target: Vector3, dist: float) -> void:
+	if _stun > 0.0:
+		_stun -= dt
+		return
+	if is_melee():
+		_melee(dt, dist)
+		return
 	_cool -= dt
 	var rng: float = {"bow": 55.0, "musket": 70.0, "rifle": 90.0, "mg": 80.0, "energy": 60.0}.get(weapon, 60.0)
 	if dist > rng or _cool > 0.0:
