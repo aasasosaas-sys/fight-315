@@ -1,6 +1,6 @@
 shader_type spatial;
 // 海・川・池の水面。頂点の波、フレネル、深度による色と岸の泡、屈折。
-render_mode blend_mix, depth_draw_always, cull_back, diffuse_burley, specular_schlick_ggx;
+render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
 
 uniform sampler2D depth_tex : hint_depth_texture, filter_linear_mipmap;
 uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;

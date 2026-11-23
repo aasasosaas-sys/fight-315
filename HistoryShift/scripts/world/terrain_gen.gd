@@ -407,7 +407,7 @@ func is_occupied(x: float, z: float) -> bool:
 	return occ[gi(z) * N + gi(x)] != 0
 
 
-func compute_forest(amount: float) -> void:
+func compute_forest(amount: float, clear_zones: Array = []) -> void:
 	for j in N:
 		for i in N:
 			var id := j * N + i
@@ -427,6 +427,9 @@ func compute_forest(amount: float) -> void:
 			f *= (1.0 - road[id]) * (1.0 - plaza[id]) * (1.0 - field[id])
 			if river_d[id] < river_half_w + 6.0:
 				f = 0.0
+			for cz in clear_zones:
+				var dd := TerrainGen._seg_dist(Vector2(x, z), cz[0], cz[1])
+				f *= smoothstep(float(cz[2]) + 5.0, float(cz[2]) + 45.0, dd)
 			forest[id] = f
 
 

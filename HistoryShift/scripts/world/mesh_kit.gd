@@ -248,7 +248,7 @@ func grid(mat: String, rows: Array, uvs: Array, col: Color, out_ref: Vector3, us
 func roof(xf: Transform3D, hw: float, hd: float, rise: float, gable_s: float, mat: String, under_mat: String,
 		col := Color.WHITE, curve := 1.35, lift := 0.0, thick := 0.3, under_col := Color(0.55, 0.45, 0.38),
 		gable_mat := "", gable_col := Color.WHITE, segs := 6, side_segs := 8) -> void:
-	if hd > hw:
+	if hd > hw and gable_s < 1.0:
 		xf = xf * Transform3D(Basis(Vector3.UP, PI * 0.5), Vector3.ZERO)
 		var t := hw; hw = hd; hd = t
 	var ridge := hw - hd
@@ -362,7 +362,7 @@ func roof(xf: Transform3D, hw: float, hd: float, rise: float, gable_s: float, ma
 
 ## 棟（むね）: 屋根の頂部の箱
 func ridge_cap(xf: Transform3D, hw: float, hd: float, rise: float, gable_s: float, mat: String, col: Color, size := 0.5) -> void:
-	if hd > hw:
+	if hd > hw and gable_s < 1.0:
 		xf = xf * Transform3D(Basis(Vector3.UP, PI * 0.5), Vector3.ZERO)
 		var t := hw; hw = hd; hd = t
 	var hx := hw - hd + hd * gable_s if gable_s < 1.0 else hw

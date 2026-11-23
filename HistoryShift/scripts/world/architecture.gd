@@ -106,7 +106,9 @@ func roof(xf: Transform3D, y: float, hw: float, hd: float, rise: float, style: S
 			var hx := (hw - hd + hd * gs) if gs < 1.0 else hw
 			if hd > hw:
 				hx = (hd - hw + hw * gs) if gs < 1.0 else hd
-			var axis := Vector3.RIGHT if hw >= hd else Vector3.BACK
+			var axis := Vector3.RIGHT if (hw >= hd or gs >= 1.0) else Vector3.BACK
+			if gs >= 1.0:
+				hx = hw
 			for sgn in [-1.0, 1.0]:
 				kit.box("rooftile", rx * Transform3D(Basis(), axis * sgn * (hx + 0.3) + Vector3(0, rise + 0.45, 0)), Vector3(0.6, 0.9, 0.6), colr * Color(0.6, 0.6, 0.6))
 	else:
@@ -357,7 +359,7 @@ func tsuiji(a: Vector3, b: Vector3, h := 2.8, colr := OCHRE, lines := false) -> 
 	if lines:
 		for k in 5:
 			bx("plaster", xf, Vector3(0, h * 0.35 + k * 0.22, 0), Vector3(1.04, 0.07, L), Color(0.98, 0.98, 0.96))
-	roof(xf, h + 0.05, 0.95, L * 0.5 + 0.2, 0.55, "gable", "rooftile", TILE_DARK, 0.0)
+	roof(xf * Transform3D(Basis(Vector3.UP, PI * 0.5), Vector3.ZERO), h + 0.05, L * 0.5 + 0.2, 0.95, 0.55, "gable", "rooftile", TILE_DARK, 0.0)
 	col(xf, Vector3(0, h * 0.5, 0), Vector3(1.0, h + 0.8, L))
 	t.paint_line(t.plaza, Vector2(a.x, a.z), Vector2(b.x, b.z), 1.6, 0.6, 1.0)
 	t.occupy_rect(Vector2(mid.x, mid.z), -ang + PI * 0.5, L * 0.5, 0.8)
@@ -651,8 +653,8 @@ func castle(xf: Transform3D, base_w := 40.0, base_h := 11.0, tiers := 5, wall_co
 		# 千鳥破風
 		if not last and i % 2 == 1:
 			for sgn in [-1.0, 1.0]:
-				var px := xf * Transform3D(Basis(Vector3.UP, 0.0 if sgn > 0 else PI), Vector3(0, y + hh + 0.3, sgn * (dd * 0.5 + 0.6)))
-				kit.roof(px, 1.3, 2.2, 1.5, 1.0, "rooftile", "plaster", TILE_DARK, 1.1, 0.25, 0.25, PLASTER, "plaster", wall_col)
+				var px := xf * Transform3D(Basis(Vector3.UP, PI * 0.5 if sgn > 0 else -PI * 0.5), Vector3(0, y + hh + 0.3, sgn * (dd * 0.5 + 0.6)))
+				kit.roof(px, 2.2, 1.3, 1.5, 1.0, "rooftile", "plaster", TILE_DARK, 1.1, 0.25, 0.25, PLASTER, "plaster", wall_col)
 		if accent and last:
 			for sgn in [-1.0, 1.0]:
 				var hx := ww * 0.5 + 1.6 - (dd * 0.5 + 1.6) + (dd * 0.5 + 1.6) * 0.42
@@ -1091,7 +1093,7 @@ func boat(xf: Transform3D, kind := "small") -> void:
 			cyl("wood", xf, Vector3(0, y + hh, 0), 0.25, 0.15, mh, 6, DARK)
 			bx("cloth", xf, Vector3(0, y + hh + mh * 0.58, 0.3), Vector3(B * 1.6, mh * 0.62, 0.05), Color(0.94, 0.9, 0.82))
 			bx("wood", xf, Vector3(0, y + hh + mh * 0.9, 0.3), Vector3(B * 1.8, 0.2, 0.2), DARK)
-			roof(xf * Transform3D(Basis(), Vector3(0, y + hh + 1.6, L * 0.3)), 0.0, B * 0.4, 2.0, 0.8, "gable", "rooftile", TILE_DARK, 0.0)
+			roof(xf * Transform3D(Basis(), Vector3(0, y + hh + 1.6, L * 0.3)), 0.0, B * 0.35, 2.2, 0.8, "gable", "rooftile", TILE_DARK, 0.0)
 		"steam":
 			bx("plaster", xf, Vector3(0, y + hh + 1.5, 0), Vector3(B * 0.7, 3.0, L * 0.35), Color(0.92, 0.9, 0.85))
 			cyl("metal", xf, Vector3(0, y + hh + 3.0, -1.0), 1.0, 1.0, 5.0, 10, Color(0.15, 0.15, 0.15))

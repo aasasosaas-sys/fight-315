@@ -89,7 +89,13 @@ func _build() -> void:
 
 	# ---- 建築（マスクや占有も塗る）
 	layouts.build_all()
-	terrain.compute_forest(float(style["forest"]))
+	var zones: Array = []
+	for key in landmarks:
+		var info: Dictionary = landmarks[key]
+		if key == "mountain":
+			continue
+		zones.append([info.get("a", info["center"]), info.get("b", info["center"]), info["r"]])
+	terrain.compute_forest(float(style["forest"]), zones)
 
 	# ---- メッシュ・コリジョン
 	height_tex = ImageTexture.create_from_image(terrain.make_height_image())

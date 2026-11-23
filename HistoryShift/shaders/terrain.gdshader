@@ -99,6 +99,7 @@ void fragment() {
 	sample_layer(L_GRASS, wp, gdx, gdy, 0.24, mix(mixv, 0.8, far_k * 0.6), alb, nrm, rgh);
 	vec3 lush = alb * lush_color * 2.6;
 	alb = mix(alb, lush, smoothstep(0.3, 0.75, m1) * 0.75);
+	alb = mix(alb, alb * vec3(0.78, 1.0, 0.55) * 1.12, 0.65);
 	alb *= grass_tint;
 
 	vec3 a2; vec3 n2; float r2;

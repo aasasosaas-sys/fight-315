@@ -382,13 +382,39 @@ static func _build_cedar(near: MeshKit, far: MeshKit, rng: RandomNumberGenerator
 	var H := 17.0
 	near.cylinder("bark", Transform3D(Basis(), Vector3.ZERO), 0.38, 0.06, H, 8, Color(1, 1, 1), false, true)
 	far.cylinder("bark", Transform3D(Basis(), Vector3.ZERO), 0.38, 0.1, H * 0.6, 5, Color(1, 1, 1), false, true)
-	var tiers := 9
+	var tiers := 7
+	var s := near._s("leaf")
 	for k in tiers:
 		var tt := float(k) / (tiers - 1)
-		var y := lerpf(4.0, H - 0.6, tt)
-		var rr := lerpf(2.7, 0.45, pow(tt, 0.9))
-		cards(near, Vector3(0, y, 0), Vector3(rr, 1.2, rr), int(lerpf(22, 6, tt)), lerpf(1.5, 0.9, tt), rng, -0.15, 0.4 + tt * 0.6)
-	far.cylinder("leaf", Transform3D(Basis(), Vector3(0, 3.4, 0)), 2.6, 0.2, H - 2.8, 7, Color(0.7, 1, 0, 1), false)
+		var y0 := lerpf(3.5, H - 3.2, tt)
+		var th := lerpf(4.2, 3.0, tt)
+		var rr := lerpf(2.9, 0.9, tt)
+		# 円錐の芯（暗い）
+		near.cylinder("leaf", Transform3D(Basis(), Vector3(0, y0, 0)), rr * 0.7, 0.15, th, 8, Color(0.22, 0.5 + tt * 0.5, 0, 1), false)
+		# 円錐表面の葉カード（外向き・やや下向き）
+		var cnt := int(lerpf(34, 14, tt))
+		for i in cnt:
+			var a := rng.randf() * TAU
+			var f := rng.randf()
+			var r := lerpf(rr, 0.25, f) * rng.randf_range(0.85, 1.1)
+			var p := Vector3(cos(a) * r, y0 + f * th, sin(a) * r)
+			var out := Vector3(cos(a), 0.35, sin(a)).normalized()
+			var tang := Vector3(-sin(a), 0, cos(a)).rotated(out, rng.randf_range(-0.6, 0.6))
+			var bit := out.cross(tang).normalized()
+			bit = (bit + Vector3(0, -0.4, 0)).normalized()
+			var hs := rng.randf_range(0.7, 1.0) * lerpf(1.0, 0.7, tt)
+			var shade := clampf(0.5 + f * 0.4 + tt * 0.2, 0.2, 1.0)
+			var col := Color(shade, 0.4 + tt * 0.6, 0, 0)
+			var base: int = s[0].size()
+			var corners := [p - tang * hs - bit * hs, p + tang * hs - bit * hs, p + tang * hs + bit * hs, p - tang * hs + bit * hs]
+			var uvs := [Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)]
+			for c in 4:
+				s[0].append(corners[c])
+				s[1].append(out)
+				s[2].append(uvs[c])
+				s[3].append(col)
+			s[4].append_array([base, base + 1, base + 2, base, base + 2, base + 3])
+	far.cylinder("leaf", Transform3D(Basis(), Vector3(0, 3.4, 0)), 2.6, 0.2, H - 2.8, 7, Color(0.6, 1, 0, 1), false)
 
 
 static func _build_pine(near: MeshKit, far: MeshKit, rng: RandomNumberGenerator) -> void:

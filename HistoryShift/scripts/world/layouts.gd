@@ -448,7 +448,7 @@ func _kairo(cs: Array, gates: Array) -> void:
 			# 外側は壁
 			a.bx("plaster", xf, Vector3(-1.6, 0.4 + 1.7, 0), Vector3(0.25, 3.4, L), Architecture.PLASTER)
 			a.bx("plaster", xf, Vector3(0, 0.4 + 3.4, 0), Vector3(3.6, 0.25, L + 0.2), Architecture.VERMILION)
-			a.roof(xf, 0.4 + 3.6, 2.8, L * 0.5 + 1.2, 1.3, "gable", "rooftile", Architecture.TILE_DARK, 0.0, Color(0.7, 0.4, 0.3))
+			a.roof(xf * Transform3D(Basis(Vector3.UP, PI * 0.5), Vector3.ZERO), 0.4 + 3.6, L * 0.5 + 1.2, 2.8, 1.3, "gable", "rooftile", Architecture.TILE_DARK, 0.0, Color(0.7, 0.4, 0.3))
 			a.col(xf, Vector3(-1.6, 2.0, 0), Vector3(0.4, 4.0, L))
 			t.occupy_rect(Vector2(mid.x, mid.z), -ang + PI * 0.5, L * 0.5, 2.2)
 

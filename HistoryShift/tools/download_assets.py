@@ -32,7 +32,11 @@ MODELS_CORE = ["shrub_01", "shrub_02", "boulder_01", "rock_07", "rock_moss_set_0
                "cannon_01", "street_lamp_01", "covered_car", "service_pistol", "horse_statue_01",
                "Lantern_01", "treasure_chest"]
 MODELS_FULL = ["island_tree_01", "island_tree_02", "dutch_ship_medium", "modular_electricity_poles",
-               "modular_wooden_pier", "bolt_action_rifle_7_62", "dead_tree_trunk", "wooden_lantern_01"]
+               "modular_wooden_pier", "bolt_action_rifle_7_62", "dead_tree_trunk", "wooden_lantern_01",
+               # 自然物（ワールド生成が自動で使う。無くても手続き生成で代替）
+               "shrub_03", "shrub_04", "rock_09", "rock_moss_set_02", "stone_01", "tree_stump_02",
+               "dry_branches_medium_01", "dead_tree_trunk_02", "namaqualand_boulder_02", "pine_sapling_small",
+               "fir_sapling", "root_cluster_01", "grass_bermuda_01"]
 
 
 def get_json(url):
