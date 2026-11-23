@@ -1128,6 +1128,301 @@
         #synergyListContainer > *, #achievementGrid > *, #characterGrowthList > * { content-visibility: auto; contain-intrinsic-size: auto 96px; }
         /* @@UI-BATTLE@@ 戦闘画面のCSSはこの行の直前に追加 */
         /* @@UI-GACHA@@ ガチャ画面のCSSはこの行の直前に追加 */
+        /* =====================================================================
+           ★UI改訂（和風ソシャゲ風）: ダンジョン / ステージ選択 / 曜日 / ボスラッシュ / 育成 / 実績 / シナジー / 対戦
+           （静的な装飾のみ。無限アニメ・blur・filterは使わない）
+           ===================================================================== */
+        .wa-s-card, .wa-s-dg, .wa-s-modal, .wa-s-br-hero, .wa-s-pvp-rank {
+            --wa-s-pat: radial-gradient(circle at 50% 100%, transparent 38%, rgba(212,175,55,.06) 39% 42%, transparent 43% 55%, rgba(212,175,55,.06) 56% 59%, transparent 60%) 0 0 / 28px 14px;
+        }
+        .wa-s-card { position: relative; border-radius: 16px; padding: 14px; color: #f3ead6;
+            background: radial-gradient(ellipse 90% 60% at 50% 0%, rgba(74,46,105,.45), transparent 70%), linear-gradient(180deg, #24142f, #130a1b);
+            border: 1.5px solid rgba(212,175,55,.6); box-shadow: 0 0 0 2px #1b0f26, 0 6px 16px rgba(0,0,0,.45); }
+        .wa-s-head { display: flex; align-items: center; gap: 8px; color: var(--wa-gold-l); font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 15px; letter-spacing: .14em; margin-bottom: 10px; }
+        .wa-s-head::before { content: ''; width: 8px; height: 8px; flex-shrink: 0; background: var(--wa-shu); transform: rotate(45deg); }
+        .wa-s-head small { margin-left: auto; font-family: 'Zen Kaku Gothic New', sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0; color: #b8ab8e; }
+        .wa-s-bar { position: relative; flex: 1; height: 8px; border-radius: 9999px; overflow: hidden; background: #0b0612; border: 1px solid rgba(212,175,55,.35); }
+        .wa-s-bar > i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 9999px; background: linear-gradient(90deg, #9a7b1c, #f6d36b 70%, #fff3c4); }
+        .wa-s-rar { display: inline-block; font-size: 10px; font-weight: 900; line-height: 1.5; padding: 0 6px; border-radius: 4px; color: #1b0f26; background: #9ca3af; font-family: 'Zen Kaku Gothic New', sans-serif; letter-spacing: 0; }
+        .rar-R .wa-s-rar { background: #7dd3fc; } .rar-SR .wa-s-rar { background: #c4b5fd; }
+        .rar-SSR .wa-s-rar { background: linear-gradient(180deg, #fde68a, #f59e0b); }
+        .rar-UR .wa-s-rar { background: linear-gradient(180deg, #fecaca, #ef4444); color: #fff; }
+        .rar-神 .wa-s-rar { background: linear-gradient(180deg, #fffbe6, #fbbf24); }
+        .wa-s-shu-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 10px 26px; border-radius: 14px;
+            color: #fff6e0; font-weight: 800; font-size: 16px; letter-spacing: .14em;
+            background: radial-gradient(ellipse at 50% 0%, #ef6a52, var(--wa-shu) 58%, var(--wa-shu-d)); border: 2px solid var(--wa-gold);
+            box-shadow: 0 0 0 2px #1b0f26, 0 4px 0 #4a120c, inset 0 2px 0 rgba(255,255,255,.22); text-shadow: 0 2px 0 #5a160e; transition: transform .1s; }
+        .wa-s-shu-btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 0 0 2px #1b0f26, 0 1px 0 #4a120c; }
+        .wa-s-shu-btn:disabled { opacity: .55; cursor: not-allowed; }
+        .wa-s-ghost-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 8px 18px; border-radius: 12px;
+            color: #f6e2a0; font-weight: 700; font-size: 13px; background: linear-gradient(180deg, #3a2352, #1d1029); border: 1px solid rgba(212,175,55,.55); box-shadow: 0 3px 0 #0a0510; }
+        .wa-s-ghost-btn:active { transform: translateY(2px); box-shadow: none; }
+        .wa-s-stamp { position: absolute; display: grid; place-items: center; width: 58px; height: 58px; border-radius: 9999px; transform: rotate(-14deg); pointer-events: none;
+            font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 15px; line-height: 1.05; color: #e5523d; text-align: center;
+            border: 2px solid rgba(229,82,61,.85); box-shadow: inset 0 0 0 3px rgba(20,8,14,.6), inset 0 0 0 4px rgba(229,82,61,.6); background: rgba(40,10,14,.35); }
+
+        /* ---------- ダンジョン一覧（本編・曜日 共通カード） ---------- */
+        .wa-s-dgrid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+        @media (max-width: 640px) { .wa-s-dgrid { grid-template-columns: 1fr; gap: 10px; } }
+        .wa-s-dg { position: relative; display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; border-radius: 16px; cursor: pointer; overflow: hidden; color: #f8ecd0;
+            background: var(--wa-s-pat), radial-gradient(ellipse 80% 100% at 100% 0%, var(--dg1, #4A2E69), transparent 72%), linear-gradient(165deg, #2a1838, #120a1a 85%);
+            border: 1.5px solid rgba(212,175,55,.55); box-shadow: 0 0 0 2px #1b0f26, 0 5px 0 #0b0612; transition: transform .1s, border-color .15s; }
+        .wa-s-dg:active { transform: translateY(2px); box-shadow: 0 0 0 2px #1b0f26, 0 2px 0 #0b0612; }
+        @media (hover: hover) { .wa-s-dg:hover { border-color: var(--wa-gold-l); } }
+        .wa-s-dg-top { display: flex; align-items: center; gap: 8px; min-height: 22px; }
+        .wa-s-dg-no { font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 12px; color: #fff4e0; padding: 2px 14px 2px 8px; white-space: nowrap;
+            background: linear-gradient(90deg, var(--wa-shu), #9f2a1f); clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 50%, 100% 100%, 0 100%); }
+        .wa-s-dg-now { font-size: 10px; font-weight: 900; color: #1b0f26; padding: 1px 7px; border-radius: 4px; background: linear-gradient(180deg, #fff1b8, #d4a017); letter-spacing: .1em; }
+        .wa-s-dg-stars { margin-left: auto; color: #fbbf24; font-size: 12px; letter-spacing: 1px; white-space: nowrap; }
+        .wa-s-dg-stars span { color: rgba(251,191,36,.28); }
+        .wa-s-dg-body { display: flex; align-items: center; gap: 12px; min-height: 60px; }
+        .wa-s-dg-medal { width: 56px; height: 56px; flex-shrink: 0; border-radius: 9999px; display: grid; place-items: center; font-size: 22px; color: #fff3c4;
+            background: radial-gradient(circle at 35% 30%, var(--dg1, #4A2E69), #1b0f26 82%); box-shadow: 0 0 0 2px var(--wa-gold), 0 0 0 4px #1b0f26, 0 0 0 5px rgba(212,175,55,.4), 0 4px 10px rgba(0,0,0,.5); }
+        .wa-s-dg h3 { font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 16px; line-height: 1.35; color: #fff6dc; text-shadow: 0 1px 2px rgba(0,0,0,.7);
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .wa-s-dg-pow { font-size: 11px; color: #e9c46a; font-family: ui-monospace, monospace; margin-top: 3px; }
+        .wa-s-dg-prog { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #cbbfa4; }
+        .wa-s-dg-prog b { font-family: ui-monospace, monospace; color: #fde68a; white-space: nowrap; }
+        .wa-s-dg-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 9px; border-top: 1px solid rgba(212,175,55,.2); font-size: 12px; color: #cbbfa4; }
+        .wa-s-dg-go { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 4px 18px; border-radius: 9999px; color: #fff6e0; font-weight: 800; font-size: 13px; letter-spacing: .16em;
+            background: radial-gradient(ellipse at 50% 0%, #ef6a52, var(--wa-shu) 60%, var(--wa-shu-d)); border: 1.5px solid var(--wa-gold); box-shadow: 0 3px 0 #4a120c; }
+        .wa-s-dg .wa-s-stamp { right: 12px; top: 40px; }
+        .wa-s-dg-clear { border-color: var(--wa-gold); }
+        .wa-s-dg-clear .wa-s-dg-body { padding-right: 56px; }
+        .wa-s-dg-cur { border-color: #ef6a52; box-shadow: 0 0 0 2px #1b0f26, 0 0 0 4px rgba(200,57,43,.45), 0 5px 0 #0b0612; }
+        .wa-s-dg-lock { color: #8d8298; background: linear-gradient(165deg, #1e1528, #0f0a15); border-color: rgba(212,175,55,.18); box-shadow: 0 0 0 2px #120a19, 0 4px 0 #07040b; }
+        .wa-s-dg-lock h3 { color: #9a8fa6; text-shadow: none; }
+        .wa-s-dg-lock .wa-s-dg-no { background: #4b4155; color: #c9bfd4; }
+        .wa-s-dg-lock .wa-s-dg-medal { background: #1a1322; color: #6f6479; box-shadow: 0 0 0 2px rgba(212,175,55,.25), 0 0 0 4px #120a19; }
+        .wa-s-dg-lock .wa-s-dg-stars, .wa-s-dg-lock .wa-s-dg-pow, .wa-s-dg-lock .wa-s-dg-prog b { color: #6f6479; }
+        .wa-s-dg-lock .wa-s-bar > i { background: #4b4155; }
+        .wa-s-dg-lock .wa-s-dg-go { background: #2a2131; border-color: rgba(212,175,55,.2); color: #8d8298; box-shadow: none; letter-spacing: .06em; }
+        .wa-s-closed { grid-column: 1 / -1; text-align: center; padding: 34px 16px; }
+        .wa-s-closed i { font-size: 38px; color: #f9a8d4; } .wa-s-closed h3 { font-family: 'Shippori Mincho', serif; font-size: 20px; font-weight: 800; color: #fbcfe8; margin: 10px 0 6px; }
+        .wa-s-closed p { font-size: 12px; color: #cbbfa4; }
+        #view-dungeons .heian-border:first-child button, #view-weekday #todayWeekdayLabel { white-space: nowrap; }
+        #view-dungeons .heian-border:first-child button { min-height: 40px; padding: 6px 14px !important; border-radius: 10px !important; border: 1px solid rgba(212,175,55,.6) !important;
+            background: linear-gradient(180deg, #3a2352, #1d1029) !important; color: #f6e2a0 !important; font-weight: 700; box-shadow: 0 3px 0 #0a0510; }
+
+        /* ---------- モーダル（ステージ選択・ステージ説明） ---------- */
+        .wa-s-modal { position: relative; width: 100%; max-height: min(88vh, 860px); display: flex; flex-direction: column; overflow: hidden; border-radius: 18px; color: #f3ead6;
+            background: radial-gradient(ellipse 90% 40% at 50% 0%, rgba(74,46,105,.7), transparent 70%), linear-gradient(180deg, #23132f, #110919);
+            border: 2px solid var(--wa-gold); box-shadow: 0 0 0 3px var(--wa-shu-d), 0 20px 50px rgba(0,0,0,.7); animation: wa-pop .18s ease-out; }
+        .wa-s-modal-w { max-width: 760px; } .wa-s-modal-n { max-width: 540px; }
+        .wa-s-modal-head { display: flex; align-items: center; gap: 10px; padding: 12px 12px 12px 16px; border-bottom: 2px solid rgba(212,175,55,.55);
+            background: var(--wa-s-pat), linear-gradient(90deg, rgba(126,31,22,.6), rgba(42,22,64,.9) 40%, rgba(23,12,34,.95)); border-left: 6px solid var(--wa-shu); }
+        .wa-s-modal-head h3 { flex: 1; min-width: 0; font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 18px; line-height: 1.35; color: #fff3c4; letter-spacing: .04em; }
+        .wa-s-x { width: 40px; height: 40px; flex-shrink: 0; border-radius: 9999px; color: var(--wa-gold-l); border: 1px solid rgba(212,175,55,.5); background: rgba(0,0,0,.35); font-size: 17px; }
+        .wa-s-modal-body { flex: 1; overflow-y: auto; padding: 14px; -webkit-overflow-scrolling: touch; }
+        .wa-s-modal-foot { display: flex; justify-content: space-between; gap: 10px; padding: 12px 14px; border-top: 1px solid rgba(212,175,55,.3); background: rgba(0,0,0,.25); }
+        .wa-s-stg-sum { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .wa-s-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; font-size: 12px; color: #f3ead6; background: rgba(0,0,0,.4); border: 1px solid rgba(212,175,55,.4); }
+        .wa-s-chip b { color: #fde68a; font-family: ui-monospace, monospace; } .wa-s-chip i { color: var(--wa-gold); }
+        .wa-s-stg-sum .wa-s-bar { min-width: 120px; }
+        .wa-s-stg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+        @media (max-width: 480px) { .wa-s-stg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } }
+        .stage-node.wa-s-node { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 26px 8px 10px; min-height: 150px; border-radius: 14px; text-align: center; cursor: pointer;
+            background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(212,175,55,.12), transparent 70%), linear-gradient(180deg, #2c1a3e, #150b1e);
+            border: 1.5px solid rgba(212,175,55,.45); box-shadow: 0 0 0 2px #1b0f26, 0 4px 0 #0b0612; transition: transform .1s; }
+        .stage-node.wa-s-node:hover { transform: none; box-shadow: 0 0 0 2px #1b0f26, 0 4px 0 #0b0612; }
+        @media (hover: hover) { .stage-node.wa-s-node:hover { border-color: var(--wa-gold-l); } }
+        .stage-node.wa-s-node:active { transform: translateY(2px); box-shadow: 0 0 0 2px #1b0f26; }
+        .wa-s-node-no { position: absolute; top: 4px; left: 8px; font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 20px; line-height: 1.1; color: var(--wa-gold); }
+        .wa-s-node-ic { width: 44px; height: 44px; border-radius: 9999px; display: grid; place-items: center; font-size: 19px; color: #fff3c4; margin-bottom: 2px;
+            background: radial-gradient(circle at 35% 30%, #5b3a82, #1b0f26 85%); box-shadow: 0 0 0 2px rgba(212,175,55,.75), 0 0 0 4px #1b0f26; }
+        .wa-s-node-name { font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 13px; line-height: 1.3; color: #fff6dc; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .wa-s-node-pow { font-size: 10px; color: #e9c46a; font-family: ui-monospace, monospace; }
+        .wa-s-node-st { margin-top: auto; font-size: 11px; font-weight: 800; padding: 2px 12px; border-radius: 9999px; color: #f6e2a0; background: rgba(0,0,0,.45); border: 1px solid rgba(212,175,55,.35); }
+        .stage-node.wa-s-node-clear { border-color: var(--wa-gold); background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(212,175,55,.25), transparent 70%), linear-gradient(180deg, #33223a, #170d1c); }
+        .wa-s-node-clear .wa-s-node-st { color: #bbf7d0; border-color: rgba(74,222,128,.45); background: rgba(20,60,35,.55); }
+        .wa-s-node .wa-s-stamp { width: 40px; height: 40px; font-size: 11px; top: 4px; right: 4px; border-width: 1.5px; }
+        .stage-node.wa-s-node-next { border-color: #ef6a52; box-shadow: 0 0 0 2px #1b0f26, 0 0 0 4px rgba(200,57,43,.5), 0 4px 0 #0b0612; }
+        .stage-node.wa-s-node-next:hover { box-shadow: 0 0 0 2px #1b0f26, 0 0 0 4px rgba(200,57,43,.5), 0 4px 0 #0b0612; }
+        .wa-s-node-next .wa-s-node-st { color: #fff6e0; background: radial-gradient(ellipse at 50% 0%, #ef6a52, var(--wa-shu) 60%, var(--wa-shu-d)); border-color: var(--wa-gold); letter-spacing: .2em; }
+        .stage-node.wa-s-node-lock { cursor: not-allowed; background: linear-gradient(180deg, #1c1424, #0f0a15); border-color: rgba(212,175,55,.15); }
+        .wa-s-node-lock .wa-s-node-no { color: #6f6479; } .wa-s-node-lock .wa-s-node-name { color: #8d8298; } .wa-s-node-lock .wa-s-node-pow { color: #6f6479; }
+        .wa-s-node-lock .wa-s-node-ic { background: #1a1322; color: #6f6479; box-shadow: 0 0 0 2px rgba(212,175,55,.2), 0 0 0 4px #120a19; }
+        .wa-s-node-lock .wa-s-node-st { color: #8d8298; border-color: rgba(255,255,255,.1); }
+        .wa-s-ex-hero { display: flex; gap: 14px; align-items: flex-start; }
+        .wa-s-ex-ic { width: 64px; height: 64px; flex-shrink: 0; border-radius: 9999px; display: grid; place-items: center; font-size: 26px; color: #fff3c4;
+            background: radial-gradient(circle at 35% 30%, #6b3d8f, #1b0f26 85%); box-shadow: 0 0 0 2px var(--wa-gold), 0 0 0 4px #1b0f26, 0 0 0 5px rgba(212,175,55,.4); }
+        #stageExplainDesc { font-size: 14px; line-height: 1.75; color: #efe5cf; }
+        .wa-s-ex-rows { display: grid; gap: 8px; margin-top: 14px; }
+        .wa-s-ex-rows > div { padding: 9px 12px; border-radius: 10px; background: rgba(0,0,0,.35); border-left: 3px solid var(--wa-gold); font-size: 12px; line-height: 1.6; color: #e5dcc6; }
+        .wa-s-ex-rows > div:empty { display: none; }
+        .wa-s-ex-rows > #stageExplainEnemyPreview { border-left-color: var(--wa-shu); }
+        #stageExplainTitle .text-amber-300 { font-size: 12px; color: #e9c46a; letter-spacing: 0; }
+        #stageExplainFightBtn { min-width: 160px; }
+
+        /* ---------- ボスラッシュ ---------- */
+        .wa-s-br-hero { position: relative; overflow: hidden; border-radius: 18px; padding: 16px; color: #f8ecd0;
+            background: var(--wa-s-pat), radial-gradient(ellipse 70% 90% at 85% 0%, rgba(200,57,43,.45), transparent 70%), linear-gradient(170deg, #3a1420, #1a0a14 60%, #120814);
+            border: 2px solid var(--wa-gold); box-shadow: 0 0 0 3px var(--wa-shu-d), 0 8px 22px rgba(0,0,0,.5); }
+        .wa-s-br-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+        @media (max-width: 560px) { .wa-s-br-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } }
+        .wa-s-stat { text-align: center; padding: 10px 6px; border-radius: 12px; background: rgba(0,0,0,.4); border: 1px solid rgba(212,175,55,.4); box-shadow: inset 0 1px 0 rgba(255,255,255,.05); }
+        .wa-s-stat small { display: block; font-size: 11px; color: #e9c46a; font-weight: 700; letter-spacing: .08em; }
+        .wa-s-stat b { display: block; font-family: ui-monospace, monospace; font-size: 26px; line-height: 1.25; font-weight: 800; color: #fff3c4; }
+        .wa-s-stat span { display: block; font-size: 10px; color: #a8997a; }
+        .wa-s-stat-red b { color: #fca5a5; }
+        .wa-s-br-go { display: flex; justify-content: center; margin-top: 14px; }
+        .wa-s-br-go .wa-s-shu-btn { width: min(100%, 420px); min-height: 60px; font-size: 20px; font-family: 'Shippori Mincho', serif; }
+        .wa-s-br-cont { margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: rgba(60,10,14,.6); border: 1.5px solid rgba(239,68,68,.6); }
+        .wa-s-br-cont h4 { font-weight: 800; color: #fca5a5; font-size: 14px; margin-bottom: 4px; }
+        .wa-s-br-cont .wa-s-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 10px; }
+        .wa-s-br-cols { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 14px; }
+        @media (max-width: 860px) { .wa-s-br-cols { grid-template-columns: 1fr; } }
+        .wa-s-lvhead { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+        .wa-s-lvhead p { font-size: 11px; color: #b8ab8e; margin-top: -4px; }
+        #bossRushWorldLevelDisplay { font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 28px; line-height: 1; color: #fff3c4; white-space: nowrap; text-shadow: 0 2px 0 #5a160e; }
+        .wa-s-lvgrid { display: grid !important; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+        .wa-s-lv { min-height: 46px; border-radius: 10px; font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 17px; color: #f6e2a0;
+            background: linear-gradient(180deg, #3a2352, #1d1029); border: 1px solid rgba(212,175,55,.45); box-shadow: 0 3px 0 #0a0510; }
+        .wa-s-lv:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
+        .wa-s-lv-on { color: #fff6e0; background: radial-gradient(ellipse at 50% 0%, #ef6a52, var(--wa-shu) 60%, var(--wa-shu-d)); border: 2px solid var(--wa-gold); box-shadow: 0 3px 0 #4a120c; }
+        .wa-s-lv:disabled { opacity: .6; cursor: not-allowed; }
+        .wa-s-lvnote { margin-top: 10px; font-size: 11px; color: #a8997a; line-height: 1.6; }
+        .wa-s-rules { display: grid; gap: 6px; }
+        .wa-s-rules li { position: relative; padding: 8px 10px 8px 30px; border-radius: 10px; background: rgba(0,0,0,.3); font-size: 12px; line-height: 1.55; color: #e5dcc6; }
+        .wa-s-rules li b { position: absolute; left: 8px; top: 8px; width: 16px; height: 16px; display: grid; place-items: center; border-radius: 4px; font-size: 10px; color: #fff4e0; background: var(--wa-shu); }
+
+        /* ---------- 育成・衣装 ---------- */
+        .wa-s-growth { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 14px; align-items: start; }
+        @media (max-width: 900px) { .wa-s-growth { grid-template-columns: 1fr; } }
+        .wa-s-noble { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .wa-s-noble-face { position: relative; width: 112px; height: 112px; border-radius: 9999px; padding: 4px; background: conic-gradient(#fff3c4, #b8860b, #fff3c4, #b8860b, #fff3c4); box-shadow: 0 0 0 3px var(--wa-shu-d), 0 8px 18px rgba(0,0,0,.55); }
+        .wa-s-noble-face > span:first-child { display: block; width: 100%; height: 100%; }
+        .wa-s-noble-lv { position: absolute; right: -6px; bottom: -2px; font-family: 'Shippori Mincho', serif; font-size: 13px; font-weight: 800; color: #fff4e0; padding: 1px 10px; border-radius: 9999px;
+            background: linear-gradient(180deg, var(--wa-shu), var(--wa-shu-d)); border: 1.5px solid var(--wa-gold); }
+        .wa-s-noble h3 { font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 20px; color: #fff6dc; letter-spacing: .1em; }
+        .wa-s-noble h3 small { font-size: 11px; color: #b8ab8e; letter-spacing: 0; font-weight: 500; }
+        .wa-s-rank { font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 13px; color: #fff4e0; padding: 3px 16px; background: linear-gradient(90deg, var(--wa-shu-d), var(--wa-shu), var(--wa-shu-d));
+            clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 8px 100%, 0 50%); }
+        .wa-s-seg { display: flex; width: 100%; padding: 3px; gap: 3px; border-radius: 12px; background: rgba(0,0,0,.45); border: 1px solid rgba(212,175,55,.35); }
+        .wa-s-seg > button { flex: 1; min-height: 38px; border-radius: 9px; font-size: 12px; font-weight: 700; color: #b8ab8e; white-space: nowrap; }
+        .wa-s-seg > button.wa-s-on { color: #1b0f26; font-weight: 900; background: linear-gradient(180deg, #fff1b8, #d4a017); box-shadow: 0 2px 0 #6b4a0a; }
+        .wa-s-sub { width: 100%; margin-top: 6px; font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 13px; color: var(--wa-gold-l); letter-spacing: .2em; display: flex; align-items: center; gap: 8px; }
+        .wa-s-sub::before, .wa-s-sub::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(212,175,55,.55), transparent); }
+        .wa-s-parts { width: 100%; display: grid; gap: 8px; }
+        .wa-s-part { display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 10px; border-radius: 12px; background: rgba(0,0,0,.35); border: 1px solid rgba(212,175,55,.28); }
+        .wa-s-part-ic { width: 38px; height: 38px; flex-shrink: 0; border-radius: 10px; display: grid; place-items: center; font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 16px; color: #fff3c4;
+            background: linear-gradient(160deg, #5b3a82, #241433); border: 1px solid rgba(212,175,55,.55); }
+        .wa-s-part-main { flex: 1; min-width: 0; }
+        .wa-s-part-main b { display: block; font-size: 13px; color: #fff3d6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .wa-s-part-main b em { font-style: normal; color: #fbbf24; font-family: ui-monospace, monospace; font-size: 12px; margin-left: 4px; }
+        .wa-s-part-main small { display: block; font-size: 10px; color: #b8ab8e; font-family: ui-monospace, monospace; }
+        .wa-s-up { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; min-height: 46px; padding: 4px 8px; border-radius: 10px; line-height: 1.2;
+            color: #1b0f26; background: linear-gradient(180deg, #fff1b8, #e0b23a 55%, #b8860b); border: 1px solid #fff3c4; box-shadow: 0 3px 0 #6b4a0a; font-weight: 800; }
+        .wa-s-up:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
+        .wa-s-up small { font-size: 10px; font-weight: 700; color: #4a2e0a; }
+        .wa-s-up b { font-size: 13px; font-family: ui-monospace, monospace; white-space: nowrap; }
+        .wa-s-up b::before { content: '文 '; font-size: 10px; font-family: 'Zen Kaku Gothic New', sans-serif; }
+        .wa-s-up-sp { color: #fff6e0; background: radial-gradient(ellipse at 50% 0%, #ef6a52, var(--wa-shu) 60%, var(--wa-shu-d)); border-color: var(--wa-gold); box-shadow: 0 3px 0 #4a120c; }
+        .wa-s-up-sp small { color: #ffe1c9; }
+        .wa-s-up.wa-s-poor { filter: none; opacity: .5; }
+        .wa-s-up:disabled { opacity: .45; cursor: not-allowed; }
+        .wa-s-up:disabled b::before { content: ''; }
+        .wa-s-part .wa-s-up { width: 84px; flex-shrink: 0; }
+        .wa-s-glist { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 10px; }
+        @media (min-width: 901px) { .wa-s-glist { max-height: max(440px, calc(100vh - 290px)); overflow-y: auto; padding: 2px 4px 2px 2px; } }
+        #characterGrowthList > .wa-s-gc { contain-intrinsic-size: auto 168px; }
+        .wa-s-gc { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 8px 10px; padding: 10px; border-radius: 14px;
+            background: linear-gradient(180deg, #2a1838, #150b1e); border: 1px solid rgba(212,175,55,.35); box-shadow: 0 3px 0 #0b0612; }
+        .wa-s-gc.rar-SSR { border-color: rgba(245,158,11,.55); } .wa-s-gc.rar-UR { border-color: rgba(239,68,68,.6); background: linear-gradient(180deg, #34142a, #160a14); }
+        .wa-s-gc.rar-神 { border-color: #fde68a; background: linear-gradient(180deg, #3a2a14, #1a1208); }
+        .wa-s-gc-face { position: relative; width: 64px; height: 64px; align-self: start; }
+        .wa-s-gc-face .wa-s-rar { position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%); box-shadow: 0 0 0 1.5px #1b0f26; }
+        .wa-s-gc-deck { position: absolute; top: -4px; left: -4px; font-size: 9px; font-weight: 900; color: #fff; padding: 0 5px; border-radius: 4px; background: var(--wa-shu); border: 1px solid var(--wa-gold-l); }
+        .wa-s-gc-main { min-width: 0; }
+        .wa-s-gc-name { font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 16px; color: #fff3d6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .wa-s-gc-stat { display: flex; gap: 10px; font-size: 11px; color: #b8ab8e; margin-top: 1px; }
+        .wa-s-gc-stat b { font-family: ui-monospace, monospace; color: #fde68a; font-size: 13px; }
+        .wa-s-gc-sp { margin-top: 4px; font-size: 11px; color: #fde68a; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .wa-s-gc-sp i { color: var(--wa-shu); margin-right: 3px; } .wa-s-gc-sp em { font-style: normal; color: #f6e2a0; font-family: ui-monospace, monospace; margin-left: 3px; }
+        .wa-s-gc-eff { min-height: 2.9em; font-size: 10px; color: #a89c84; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .wa-s-gc-btns { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+        /* ---------- シナジー ---------- */
+        .wa-s-syngrid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+        .wa-s-syngrid > * + * { margin-top: 0 !important; }
+        #synergyListContainer > .wa-s-syn { contain-intrinsic-size: auto 132px; }
+        .wa-s-synsum { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 12px; background: rgba(0,0,0,.35); border: 1px solid rgba(212,175,55,.35); font-size: 12px; color: #cbbfa4; }
+        .wa-s-synsum b { font-family: ui-monospace, monospace; color: #fde68a; font-size: 15px; }
+        .wa-s-synsum .wa-s-bar { min-width: 120px; max-width: 320px; }
+        .wa-s-syn { position: relative; display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 14px; cursor: pointer;
+            background: radial-gradient(ellipse 80% 60% at 0% 0%, rgba(212,175,55,.12), transparent 70%), linear-gradient(180deg, #2a1838, #150b1e);
+            border: 1.5px solid rgba(212,175,55,.6); box-shadow: 0 3px 0 #0b0612; transition: transform .1s; }
+        .wa-s-syn:active { transform: translateY(2px); box-shadow: none; }
+        .wa-s-syn-off { background: linear-gradient(180deg, #1c1424, #110b17); border-color: rgba(212,175,55,.18); }
+        .wa-s-syn-faces { display: flex; align-items: center; min-height: 52px; padding-right: 64px; }
+        .wa-s-syn-faces > span { position: relative; width: 46px; height: 46px; flex-shrink: 0; border-radius: 9999px; box-shadow: 0 0 0 2px rgba(212,175,55,.7), 0 0 0 4px #1b0f26; }
+        .wa-s-syn-faces > span + span { margin-left: -6px; }
+        .wa-s-syn-faces > span:first-child { width: 52px; height: 52px; margin-right: 30px; box-shadow: 0 0 0 2px var(--wa-gold), 0 0 0 4px #1b0f26; }
+        .wa-s-syn-faces > span:first-child::after { content: '×'; position: absolute; right: -25px; top: 50%; margin-top: -14px; width: 20px; text-align: center; font-weight: 900; font-size: 24px; line-height: 28px; color: var(--wa-shu); }
+        .wa-s-syn-faces > .wa-s-dimf > .uport { opacity: .42; }
+        .wa-s-syn-off .wa-s-syn-faces > span { box-shadow: 0 0 0 2px rgba(212,175,55,.25), 0 0 0 4px #120a19; }
+        .wa-s-syn-title { font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 15px; color: #fff3c4; line-height: 1.3; }
+        .wa-s-syn-title small { display: block; margin-top: 2px; font-family: 'Zen Kaku Gothic New', sans-serif; font-weight: 500; font-size: 11px; color: #e9c46a; line-height: 1.4; }
+        .wa-s-syn-eff { font-size: 12px; color: #e5dcc6; line-height: 1.5; padding: 6px 10px; border-radius: 8px; background: rgba(0,0,0,.35); border-left: 3px solid var(--wa-gold); }
+        .wa-s-syn-off .wa-s-syn-title { color: #a89c84; } .wa-s-syn-off .wa-s-syn-title small { color: #8d8298; } .wa-s-syn-off .wa-s-syn-eff { color: #8d8298; border-left-color: rgba(212,175,55,.25); }
+        .wa-s-syn-st { position: absolute; top: 12px; right: 12px; font-size: 10px; font-weight: 900; padding: 2px 8px; border-radius: 4px; color: #1b0f26; background: linear-gradient(180deg, #fff1b8, #d4a017); }
+        .wa-s-syn-off .wa-s-syn-st { color: #a89c84; background: #2a2131; }
+
+        /* ---------- 実績 ---------- */
+        #achievementGrid.wa-s-achgrid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 10px; }
+        #achievementGrid > .wa-s-ach { contain-intrinsic-size: auto 88px; }
+        .wa-s-ach { position: relative; display: flex; gap: 12px; align-items: center; min-height: 84px; padding: 12px; border-radius: 14px;
+            background: linear-gradient(180deg, #2a1838, #150b1e); border: 1.5px solid rgba(212,175,55,.6); box-shadow: 0 3px 0 #0b0612; }
+        .wa-s-ach-medal { width: 52px; height: 52px; flex-shrink: 0; border-radius: 9999px; display: grid; place-items: center; font-size: 20px; color: #3a2400;
+            background: radial-gradient(circle at 35% 30%, #fff3c4, #e0b23a 55%, #8a6a12); box-shadow: 0 0 0 2px #fff3c4, 0 0 0 4px var(--wa-shu-d), 0 3px 8px rgba(0,0,0,.5); }
+        .wa-s-ach-main { flex: 1; min-width: 0; padding-right: 44px; }
+        .wa-s-ach-main b { display: block; font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 14px; color: #fff3c4; line-height: 1.35; }
+        .wa-s-ach-main p { font-size: 11px; color: #cbbfa4; line-height: 1.5; margin-top: 2px; }
+        .wa-s-ach .wa-s-stamp { width: 44px; height: 44px; font-size: 12px; right: 8px; top: 50%; margin-top: -22px; }
+        .wa-s-ach-off { background: linear-gradient(180deg, #1c1424, #110b17); border-color: rgba(212,175,55,.18); }
+        .wa-s-ach-off .wa-s-ach-medal { color: #6f6479; background: #1a1322; box-shadow: 0 0 0 2px rgba(212,175,55,.25), 0 0 0 4px #120a19; }
+        .wa-s-ach-off .wa-s-ach-main b { color: #a89c84; } .wa-s-ach-off .wa-s-ach-main p { color: #8d8298; }
+        .wa-s-ach-todo { position: absolute; right: 10px; top: 10px; font-size: 10px; color: #8d8298; border: 1px solid rgba(255,255,255,.12); border-radius: 4px; padding: 0 6px; }
+        #view-achievements > .heian-border-gold:first-child .h-2 { height: 12px; border-color: rgba(212,175,55,.5); background: #0b0612; }
+        #achievementSummary { font-family: ui-monospace, monospace; font-size: 14px; font-weight: 800; color: #fde68a; }
+
+        /* ---------- 対戦（ホーム） ---------- */
+        .wa-s-pvp-rank { position: relative; border-radius: 18px; padding: 14px; margin-bottom: 14px; color: #f3ead6;
+            background: var(--wa-s-pat), radial-gradient(ellipse 60% 100% at 0% 0%, rgba(74,46,105,.65), transparent 70%), linear-gradient(170deg, #26142f, #120a1a);
+            border: 2px solid var(--wa-gold); box-shadow: 0 0 0 3px var(--wa-shu-d), 0 8px 22px rgba(0,0,0,.5); }
+        .wa-s-pvp-top { display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(0, 260px); gap: 14px; align-items: center; }
+        @media (max-width: 640px) { .wa-s-pvp-top { grid-template-columns: auto minmax(0, 1fr); } .wa-s-pvp-pt { grid-column: 1 / -1; } }
+        .wa-s-pvp-medal { width: 76px; height: 76px; border-radius: 9999px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1;
+            background: radial-gradient(circle at 35% 30%, var(--tc, #4a2e69), #1b0f26 88%); box-shadow: 0 0 0 3px var(--wa-gold), 0 0 0 5px #1b0f26, 0 0 0 6px rgba(212,175,55,.5); }
+        .wa-s-pvp-medal b { font-family: 'Shippori Mincho', serif; font-size: 28px; font-weight: 800; color: #fff3c4; }
+        .wa-s-pvp-medal small { font-size: 10px; color: #e9c46a; margin-top: 2px; }
+        .wa-s-pvp-cur small { font-size: 11px; color: #e9c46a; font-weight: 700; letter-spacing: .2em; }
+        .wa-s-pvp-cur h3 { font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 28px; line-height: 1.2; color: #fff6dc; text-shadow: 0 2px 0 rgba(0,0,0,.6); }
+        .wa-s-pvp-cur h3 i { display: inline-block; width: 10px; height: 10px; margin-right: 8px; vertical-align: middle; transform: rotate(45deg); background: var(--tc, #D4AF37); box-shadow: 0 0 0 1.5px #fff3c4; }
+        .wa-s-pvp-cur p { font-size: 12px; color: #cbbfa4; }
+        .wa-s-pvp-pt { padding: 10px 12px; border-radius: 12px; background: rgba(0,0,0,.4); border: 1px solid rgba(212,175,55,.4); }
+        .wa-s-pvp-pt > div:first-child { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 11px; color: #b8ab8e; }
+        .wa-s-pvp-pt > div:first-child b { font-family: ui-monospace, monospace; font-size: 22px; color: #fde68a; }
+        .wa-s-pvp-pt .wa-s-bar { margin: 6px 0 4px; display: block; }
+        .wa-s-pvp-pt > span { font-size: 11px; color: #a7f3d0; font-weight: 700; }
+        .wa-s-ladder { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 6px; margin-top: 14px; }
+        .wa-s-ladder > div { position: relative; display: flex; align-items: center; gap: 6px; min-height: 30px; padding: 3px 8px; border-radius: 8px; font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 12px;
+            color: #6f6479; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.08); white-space: nowrap; overflow: hidden; }
+        .wa-s-ladder > div::before { content: ''; width: 8px; height: 8px; flex-shrink: 0; transform: rotate(45deg); background: #3a3142; }
+        .wa-s-ladder > .wa-s-got { color: #fff3d6; background: rgba(212,175,55,.1); border-color: rgba(212,175,55,.45); }
+        .wa-s-ladder > .wa-s-got::before { background: var(--tc); box-shadow: 0 0 0 1px #fff3c4; }
+        .wa-s-ladder > .wa-s-next { color: #fff6e0; border: 1.5px solid #ef6a52; background: rgba(200,57,43,.2); }
+        .wa-s-ladder > .wa-s-next::before { background: var(--wa-shu); }
+        .wa-s-pvp-note { margin-top: 10px; font-size: 10px; color: #8d8298; line-height: 1.6; }
+        .wa-s-pvp-reward { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 8px 12px; border-radius: 12px; background: linear-gradient(90deg, rgba(212,175,55,.18), rgba(0,0,0,.3)); border: 1px solid rgba(212,175,55,.45); font-size: 12px; color: #e5dcc6; }
+        .wa-s-pvp-reward > span:first-child { width: 44px; height: 44px; flex-shrink: 0; border-radius: 9999px; box-shadow: 0 0 0 2px var(--wa-gold), 0 0 0 4px #1b0f26; }
+        .wa-s-pvp-reward b { color: #fde68a; font-family: 'Shippori Mincho', serif; }
+        .wa-s-pvp-intro h3 { font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 20px; color: #fff3c4; margin-bottom: 4px; }
+        .wa-s-pvp-intro > p { font-size: 13px; color: #cbbfa4; line-height: 1.7; }
+        .wa-s-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; margin: 12px 0 14px; }
+        .wa-s-steps > div { display: flex; gap: 8px; align-items: flex-start; padding: 9px 10px; border-radius: 10px; background: rgba(0,0,0,.35); border: 1px solid rgba(212,175,55,.25); font-size: 12px; line-height: 1.5; color: #e5dcc6; }
+        .wa-s-steps > div > b { width: 22px; height: 22px; flex-shrink: 0; display: grid; place-items: center; border-radius: 6px; font-family: 'Shippori Mincho', serif; color: #fff4e0; background: var(--wa-shu); font-size: 12px; }
+        .wa-s-pvp-intro .wa-s-shu-btn { width: min(100%, 360px); min-height: 56px; font-size: 18px; font-family: 'Shippori Mincho', serif; }
         /* @@UI-SCREENS@@ その他の画面のCSSはこの行の直前に追加 */
     </style>
 </head>
@@ -1301,7 +1596,7 @@
             </div>
 
             <!-- Dungeon Cards Grid -->
-            <div id="dungeonGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div id="dungeonGrid" class="wa-s-dgrid">
                 <!-- Dynamically populated -->
             </div>
         </section>
@@ -1315,7 +1610,7 @@
                 </div>
             </div>
             <!-- Weekday Dungeon Cards Grid -->
-            <div id="weekdayDungeonGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div id="weekdayDungeonGrid" class="wa-s-dgrid">
                 <!-- Dynamically populated -->
             </div>
         </section>
@@ -1407,44 +1702,36 @@
                 <p class="text-xs text-gray-300">「貴族」は伝統衣装パーツの強化で位階が上昇！その他のキャラは銭でステータスと必殺技を個別に強化できます。</p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div class="wa-s-growth">
                 <!-- Noble Customization Panel -->
-                <div class="bg-heian-card/90 p-4 rounded-xl heian-border border-amber-500/30 flex flex-col items-center">
-                    <div class="w-24 h-24 rounded-full border-2 border-heian-gold bg-heian-purple flex items-center justify-center text-5xl text-heian-gold shadow-lg mb-2 relative">
-                        <i class="fa-solid fa-user-ninja"></i>
-                        <span id="nobleLevelBadge" class="absolute -bottom-1 -right-1 bg-amber-500 text-black text-xs font-extrabold px-2 py-0.5 rounded-full border border-black">
-                            Lv.1
-                        </span>
+                <div class="wa-s-card wa-s-noble">
+                    <div class="wa-s-noble-face">
+                        <span id="nobleGrowthPortrait"></span>
+                        <span id="nobleLevelBadge" class="wa-s-noble-lv">Lv.1</span>
                     </div>
-                    <h3 class="font-mincho text-lg font-bold text-yellow-200">貴族 (初期所持)</h3>
-                    <div class="flex gap-1 text-xs mb-2 w-full">
-                        <button onclick="setNobleGender('男性')" id="noble-gender-男性" class="flex-1 py-1 px-1 bg-amber-600 text-black font-bold rounded">♂ 男性</button>
-                        <button onclick="setNobleGender('女性')" id="noble-gender-女性" class="flex-1 py-1 px-1 bg-heian-purple text-gray-300 rounded hover:text-white">♀ 女性</button>
-                    </div>
-                    <div id="nobleRankDisplay" class="text-xs font-bold text-amber-400 bg-black/50 px-3 py-1 rounded-full border border-amber-500/40 my-2 text-center">
-                        位階: 正六位・国主
+                    <h3>貴族 <small>(初期所持)</small></h3>
+                    <div id="nobleRankDisplay" class="wa-s-rank">位階: 正六位・国主</div>
+                    <div class="wa-s-seg">
+                        <button onclick="setNobleGender('男性')" id="noble-gender-男性" class="wa-s-on">♂ 男性</button>
+                        <button onclick="setNobleGender('女性')" id="noble-gender-女性">♀ 女性</button>
                     </div>
 
                     <!-- Outfit Category Tabs -->
-                    <div class="w-full border-t border-heian-purple/60 pt-3">
-                        <div class="flex gap-1 text-xs mb-3">
-                            <button onclick="setOutfitCategory('束帯')" id="outfit-tab-束帯" class="flex-1 py-1 px-1 bg-amber-600 text-black font-bold rounded">男性 束帯</button>
-                            <button onclick="setOutfitCategory('直衣')" id="outfit-tab-直衣" class="flex-1 py-1 px-1 bg-heian-purple text-gray-300 rounded hover:text-white">男性 直衣</button>
-                            <button onclick="setOutfitCategory('十二単')" id="outfit-tab-十二単" class="flex-1 py-1 px-1 bg-heian-purple text-gray-300 rounded hover:text-white">女性 十二単</button>
-                        </div>
-                        <div id="outfitPartsContainer" class="space-y-2 w-full max-h-72 overflow-y-auto">
-                            <!-- JS populates equipment items -->
-                        </div>
+                    <div class="wa-s-sub">装束強化</div>
+                    <div class="wa-s-seg">
+                        <button onclick="setOutfitCategory('束帯')" id="outfit-tab-束帯" class="wa-s-on">男性 束帯</button>
+                        <button onclick="setOutfitCategory('直衣')" id="outfit-tab-直衣">男性 直衣</button>
+                        <button onclick="setOutfitCategory('十二単')" id="outfit-tab-十二単">女性 十二単</button>
+                    </div>
+                    <div id="outfitPartsContainer" class="wa-s-parts">
+                        <!-- JS populates equipment items -->
                     </div>
                 </div>
 
                 <!-- Other Characters Growth List -->
-                <div class="lg:col-span-2 bg-heian-card/90 p-4 rounded-xl heian-border">
-                    <h3 class="text-sm font-bold text-yellow-200 mb-3 flex items-center justify-between">
-                        <span>所持キャラ レベル強化</span>
-                        <span class="text-xs text-gray-400">銭を消費してステータス・必殺技を別個に強化</span>
-                    </h3>
-                    <div id="characterGrowthList" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[500px] overflow-y-auto">
+                <div class="wa-s-card">
+                    <div class="wa-s-head">所持キャラ強化<small>顔をタップで詳細 ／ 銭でステータス・必殺技を個別に強化</small></div>
+                    <div id="characterGrowthList" class="wa-s-glist">
                         <!-- JS Populates units level up cards -->
                     </div>
                 </div>
@@ -1458,7 +1745,7 @@
                 <p class="text-xs text-gray-300">どのキャラクター同士を組み合わせると強力なシナジーが発生するかを確認できます。</p>
             </div>
 
-            <div id="synergyListContainer" class="space-y-3">
+            <div id="synergyListContainer" class="wa-s-syngrid">
                 <!-- JS populates synergy visual list with pairs -->
             </div>
         </section>
@@ -1630,88 +1917,75 @@
                 <p class="text-[11px] text-purple-200 mt-2">実績を全て解放すると？？？を手に入れれます</p>
                 <div class="mt-4 max-w-xl mx-auto"><div class="flex justify-between text-xs text-amber-200 mb-1"><span>獲得状況</span><span id="achievementSummary">0 / 0</span></div><div class="h-2 bg-black/50 rounded-full overflow-hidden border border-heian-gold/30"><div id="achievementProgressBar" class="h-full bg-gradient-to-r from-amber-700 via-yellow-300 to-amber-500 rounded-full transition-all duration-500" style="width:0%"></div></div></div>
             </div>
-            <div id="achievementGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+            <div id="achievementGrid" class="wa-s-achgrid"></div>
         </section>
 
         <!-- VIEW 6: BOSS RUSH TAB -->
         <section id="view-bossrush" class="hidden space-y-4">
-            <div class="bg-gradient-to-b from-red-950/80 to-heian-darkpurple p-6 rounded-2xl heian-border-gold text-center relative overflow-hidden shadow-2xl">
-                <h2 class="font-mincho text-2xl md:text-3xl font-extrabold gold-gradient-text mb-1"><i class="fa-solid fa-dragon mr-2 text-red-400"></i>無限ボスラッシュ</h2>
-                <p class="text-xs md:text-sm text-yellow-100/90 mb-4">ダンジョン1の200ステージを合計3周、全600ステージ連続撃破で完全制覇。2周目は5倍、3周目は10倍で難易度が上昇します。</p>
+            <div class="bg-heian-card/80 p-4 rounded-xl heian-border">
+                <h2 class="font-mincho text-xl font-bold gold-gradient-text"><i class="fa-solid fa-dragon mr-2"></i>無限ボスラッシュ</h2>
+                <p class="text-xs text-gray-300">ダンジョン1の200ステージを合計3周、全600ステージ連続撃破で完全制覇。2周目は5倍、3周目は10倍で難易度が上昇します。</p>
+            </div>
 
-                <div class="max-w-2xl mx-auto mb-5 bg-black/40 border border-red-500/40 rounded-xl p-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono">
-                    <div class="bg-black/50 rounded p-2 border border-amber-500/40">
-                        <div class="text-[9px] text-amber-300">最高到達</div>
-                        <div id="bossRushBestVal" class="text-base font-extrabold text-yellow-200 mt-0.5">0</div>
-                        <div class="text-[8px] text-gray-400">累計ステージ</div>
-                    </div>
-                    <div class="bg-black/50 rounded p-2 border border-amber-500/40">
-                        <div class="text-[9px] text-amber-300">現在 周回</div>
-                        <div id="bossRushRoundVal" class="text-base font-extrabold text-orange-300 mt-0.5">-</div>
-                        <div class="text-[8px] text-gray-400">1〜3周目</div>
-                    </div>
-                    <div class="bg-black/50 rounded p-2 border border-amber-500/40">
-                        <div class="text-[9px] text-amber-300">現在 ステージ</div>
-                        <div id="bossRushStageVal" class="text-base font-extrabold text-orange-300 mt-0.5">-</div>
-                        <div class="text-[8px] text-gray-400">1〜200</div>
-                    </div>
-                    <div class="bg-black/50 rounded p-2 border border-amber-500/40">
-                        <div class="text-[9px] text-amber-300">今回 撃破数</div>
-                        <div id="bossRushKillVal" class="text-base font-extrabold text-red-300 mt-0.5">0</div>
-                        <div class="text-[8px] text-gray-400">倒した敵</div>
+            <div class="wa-s-br-hero">
+                <div class="wa-s-br-stats">
+                    <div class="wa-s-stat"><small>最高到達</small><b id="bossRushBestVal">0</b><span>累計ステージ</span></div>
+                    <div class="wa-s-stat"><small>現在 周回</small><b id="bossRushRoundVal">-</b><span>1〜3周目</span></div>
+                    <div class="wa-s-stat"><small>現在 ステージ</small><b id="bossRushStageVal">-</b><span>1〜200</span></div>
+                    <div class="wa-s-stat wa-s-stat-red"><small>今回 撃破数</small><b id="bossRushKillVal">0</b><span>倒した敵</span></div>
+                </div>
+                <div class="wa-s-br-go">
+                    <button onclick="startBossRush()" id="bossRushStartBtn" class="wa-s-shu-btn"><i class="fa-solid fa-skull"></i>ボスラッシュ開始</button>
+                </div>
+                <div id="bossRushContinueBox" class="hidden wa-s-br-cont">
+                    <h4><i class="fa-solid fa-skull-crossbones mr-1"></i>戦闘中断中</h4>
+                    <div id="bossRushContinueStatus" class="text-xs text-gray-200"></div>
+                    <div class="wa-s-row">
+                        <button onclick="continueBossRush()" class="wa-s-shu-btn"><i class="fa-solid fa-play"></i>次の敵へ挑む</button>
+                        <button onclick="abandonBossRush()" class="wa-s-ghost-btn"><i class="fa-solid fa-flag"></i>撤退</button>
                     </div>
                 </div>
+            </div>
 
-                <div class="max-w-3xl mx-auto mb-5 bg-black/40 border border-heian-gold/40 rounded-xl p-4">
-                    <div class="flex items-center justify-between mb-2">
+            <div class="wa-s-br-cols">
+                <div class="wa-s-card">
+                    <div class="wa-s-lvhead">
                         <div>
-                            <div class="text-sm font-bold text-amber-300"><i class="fa-solid fa-globe mr-1"></i>世界レベル</div>
-                            <p class="text-[10px] text-gray-400 mt-0.5">敵HP・攻撃力・獲得金額に倍率を掛けます。いつでも変更可能。</p>
+                            <div class="wa-s-head" style="margin-bottom:8px">世界レベル</div>
+                            <p>敵HP・攻撃力・獲得金額に倍率を掛けます。いつでも変更可能。</p>
                         </div>
-                        <div id="bossRushWorldLevelDisplay" class="text-2xl font-extrabold text-yellow-200 font-mono">Lv.1</div>
+                        <div id="bossRushWorldLevelDisplay">Lv.1</div>
                     </div>
-                    <div id="bossRushWorldLevelGrid" class="grid grid-cols-5 sm:grid-cols-10 gap-1.5"></div>
-                    <div class="mt-2 text-[10px] text-gray-400 leading-relaxed">
-                        Lv.1 = 等倍 ／ Lv.2〜5 = 2〜5倍 ／ Lv.6 = 10倍・Lv.7 = 20倍・Lv.8 = 30倍・Lv.9 = 50倍・Lv.10 = 100倍
-                    </div>
+                    <div id="bossRushWorldLevelGrid" class="wa-s-lvgrid"></div>
+                    <div class="wa-s-lvnote">Lv.1 = 等倍 ／ Lv.2〜5 = 2〜5倍 ／ Lv.6 = 10倍・Lv.7 = 20倍・Lv.8 = 30倍・Lv.9 = 50倍・Lv.10 = 100倍</div>
                 </div>
-
-                <div class="max-w-2xl mx-auto mb-5 bg-black/40 border border-red-500/40 rounded-xl p-3 text-left">
-                    <div class="text-sm font-bold text-red-300 mb-1"><i class="fa-solid fa-circle-info mr-1"></i>ルール</div>
-                    <ul class="text-[11px] text-gray-200 leading-relaxed space-y-1">
-                        <li>・1周目：ダンジョン1の200ステージを順番に連続撃破</li>
-                        <li>・2周目：敵倍率 <span class="text-red-300 font-bold">5倍</span> で再挑戦</li>
-                        <li>・3周目：敵倍率 <span class="text-red-300 font-bold">10倍</span> で再挑戦、600ステージで完全制覇</li>
-                        <li>・<span class="text-amber-300 font-bold">負けた場合</span>：今回撃破数 × <span class="text-amber-300 font-bold">600文</span> を獲得（世界レベル倍適用）</li>
+                <div class="wa-s-card">
+                    <div class="wa-s-head">ルール</div>
+                    <ul class="wa-s-rules">
+                        <li><b>1</b>1周目：ダンジョン1の200ステージを順番に連続撃破</li>
+                        <li><b>2</b>2周目：敵倍率 <span class="text-red-300 font-bold">5倍</span> で再挑戦</li>
+                        <li><b>3</b>3周目：敵倍率 <span class="text-red-300 font-bold">10倍</span> で再挑戦、600ステージで完全制覇</li>
+                        <li><b>!</b><span class="text-amber-300 font-bold">負けた場合</span>：今回撃破数 × <span class="text-amber-300 font-bold">600文</span> を獲得（世界レベル倍適用）</li>
                     </ul>
-                </div>
-
-                <div class="flex flex-wrap justify-center gap-2">
-                    <button onclick="startBossRush()" id="bossRushStartBtn" class="gold-button px-6 py-3 rounded-lg text-sm font-extrabold shadow-lg"><i class="fa-solid fa-skull mr-1.5"></i>ボスラッシュ開始</button>
-                </div>
-
-                <div id="bossRushContinueBox" class="hidden max-w-2xl mx-auto mt-4 bg-red-900/40 border border-red-500/60 rounded-xl p-4 text-left">
-                    <div class="text-sm font-bold text-red-300 mb-2"><i class="fa-solid fa-skull-crossbones mr-1"></i>戦闘中断中</div>
-                    <div id="bossRushContinueStatus" class="text-[11px] text-gray-200 mb-2"></div>
-                    <div class="flex justify-center gap-2">
-                        <button onclick="continueBossRush()" class="gold-button px-4 py-2 rounded text-xs"><i class="fa-solid fa-play mr-1"></i>次の敵へ挑む</button>
-                        <button onclick="abandonBossRush()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-xs text-gray-200"><i class="fa-solid fa-flag mr-1"></i>撤退</button>
-                    </div>
                 </div>
             </div>
         </section>
     <section id="view-pvp" class="hidden space-y-4">
-        <div id="pvpMainTitlePanel" class="mb-4"></div>
-        <div class="bg-heian-card rounded-2xl heian-border-gold p-5 md:p-6 shadow-xl">
-            <h2 class="font-mincho text-xl md:text-2xl font-bold gold-gradient-text mb-2"><i class="fa-solid fa-hand-fist text-emerald-300 mr-2"></i>ネット対戦（PeerJS）</h2>
-            <p class="text-sm text-gray-300 leading-relaxed">PeerJS を介したリアルタイム対戦モードです。ホストが部屋を作り、ゲストが「対戦コード」を入力して最大16人まで入室できます。ホストはレベル均一・枠数・ランク別上限・敵ギミックを自由に設定できます。</p>
-            <ul class="text-xs text-gray-400 mt-3 space-y-1 list-disc list-inside">
-                <li>ホスト設定 → 編成 → 1対1の申込 → 対戦 → ホーム復帰 → 再戦 or 設定変更、の流れです。</li>
-                <li>ホストが退出した場合は、残ったプレイヤーへ自動でホスト権限が移ります。</li>
-                <li>対戦中のクイズはこのアプリと同じ古文単語プール（木曜ギミック有効時は古語逆引き）を使用します。</li>
-            </ul>
-            <div class="mt-4 flex flex-wrap gap-3">
-                <button onclick="PVPROOT.openOverlay()" class="gold-button px-5 py-2.5 rounded-lg text-sm font-extrabold shadow-lg"><i class="fa-solid fa-right-to-bracket mr-1.5"></i>対戦ホームを開く</button>
+        <div class="bg-heian-card/80 p-4 rounded-xl heian-border">
+            <h2 class="font-mincho text-xl font-bold gold-gradient-text"><i class="fa-solid fa-hand-fist mr-2"></i>ネット対戦</h2>
+            <p class="text-xs text-gray-300">PeerJS を介したリアルタイム対戦。勝利で対戦ポイントを集め、称号を昇進させよう。</p>
+        </div>
+        <div id="pvpMainTitlePanel"></div>
+        <div class="wa-s-card wa-s-pvp-intro">
+            <h3><i class="fa-solid fa-hand-fist text-emerald-300 mr-2"></i>ネット対戦（PeerJS）</h3>
+            <p>ホストが部屋を作り、ゲストが「対戦コード」を入力して最大16人まで入室できます。ホストはレベル均一・枠数・ランク別上限・敵ギミックを自由に設定できます。</p>
+            <div class="wa-s-steps">
+                <div><b>壱</b><span>ホスト設定 → 編成 → 1対1の申込 → 対戦 → ホーム復帰 → 再戦 or 設定変更、の流れです。</span></div>
+                <div><b>弐</b><span>ホストが退出した場合は、残ったプレイヤーへ自動でホスト権限が移ります。</span></div>
+                <div><b>参</b><span>対戦中のクイズはこのアプリと同じ古文単語プール（木曜ギミック有効時は古語逆引き）を使用します。</span></div>
+            </div>
+            <div class="flex justify-center">
+                <button onclick="PVPROOT.openOverlay()" class="wa-s-shu-btn"><i class="fa-solid fa-right-to-bracket"></i>対戦ホームを開く</button>
             </div>
         </div>
     </section>
@@ -1861,12 +2135,12 @@
 
     <!-- MODAL: Stage Selector Modal -->
     <div id="stageSelectModal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-3">
-        <div class="bg-heian-card max-w-xl w-full rounded-2xl heian-border p-5 max-h-[85vh] flex flex-col">
-            <div class="flex justify-between items-center pb-3 border-b border-heian-purple mb-3">
-                <h3 id="stageModalDungeonTitle" class="font-mincho text-lg font-bold gold-gradient-text">ダンジョン名</h3>
-                <button onclick="closeModal('stageSelectModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <div class="wa-s-modal wa-s-modal-w">
+            <div class="wa-s-modal-head">
+                <h3 id="stageModalDungeonTitle">ダンジョン名</h3>
+                <button onclick="closeModal('stageSelectModal')" class="wa-s-x" aria-label="閉じる"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div id="stageListContainer" class="flex-1 overflow-y-auto space-y-2 p-1">
+            <div id="stageListContainer" class="wa-s-modal-body">
                 <!-- Stages listed by JS -->
             </div>
         </div>
@@ -1906,25 +2180,25 @@
 
     <!-- MODAL: Stage Explain Modal (復元) -->
     <div id="stageExplainModal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-3">
-        <div class="bg-heian-card max-w-lg w-full rounded-2xl heian-border-gold p-5 max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center pb-3 border-b border-heian-purple mb-3">
-                <h3 id="stageExplainTitle" class="font-mincho text-lg font-bold gold-gradient-text leading-snug">ステージ説明</h3>
-                <button onclick="closeStageExplain()" class="text-gray-400 hover:text-white shrink-0"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <div class="wa-s-modal wa-s-modal-n">
+            <div class="wa-s-modal-head">
+                <h3 id="stageExplainTitle">ステージ説明</h3>
+                <button onclick="closeStageExplain()" class="wa-s-x" aria-label="閉じる"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="flex items-start gap-4 mb-2">
-                <div class="w-14 h-14 rounded-full bg-heian-purple border-2 border-heian-gold flex items-center justify-center text-heian-gold text-2xl shadow-lg shrink-0">
-                    <span id="stageExplainIcon"><i class="fa-solid fa-scroll"></i></span>
+            <div class="wa-s-modal-body">
+                <div class="wa-s-ex-hero">
+                    <div class="wa-s-ex-ic"><span id="stageExplainIcon"><i class="fa-solid fa-scroll"></i></span></div>
+                    <div id="stageExplainDesc" class="flex-1 min-w-0"></div>
                 </div>
-                <div class="flex-1 min-w-0">
-                    <div id="stageExplainDesc" class="text-xs text-gray-200 leading-relaxed"></div>
-                    <div id="stageExplainPower" class="text-[11px] text-amber-300 font-mono mt-1.5"></div>
-                    <div id="stageExplainEnemyPreview" class="text-[11px] text-gray-300 mt-1"></div>
-                    <div id="stageExplainSrs" class="text-[10px] text-gray-400 mt-1"></div>
+                <div class="wa-s-ex-rows">
+                    <div id="stageExplainPower"></div>
+                    <div id="stageExplainEnemyPreview"></div>
+                    <div id="stageExplainSrs"></div>
                 </div>
             </div>
-            <div class="mt-4 pt-3 border-t border-heian-purple/60 flex justify-between gap-2">
-                <button onclick="closeStageExplain()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-xs text-gray-200"><i class="fa-solid fa-arrow-left mr-1"></i>戻る</button>
-                <button id="stageExplainFightBtn" onclick="startBattleFromExplain()" class="gold-button px-6 py-2 rounded-lg text-xs flex items-center gap-1.5 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"><i class="fa-solid fa-circle-play"></i><span id="stageExplainFightBtnText">戦う</span></button>
+            <div class="wa-s-modal-foot">
+                <button onclick="closeStageExplain()" class="wa-s-ghost-btn"><i class="fa-solid fa-arrow-left"></i>戻る</button>
+                <button id="stageExplainFightBtn" onclick="startBattleFromExplain()" class="wa-s-shu-btn"><i class="fa-solid fa-circle-play"></i><span id="stageExplainFightBtnText">戦う</span></button>
             </div>
         </div>
     </div>
@@ -6093,27 +6367,31 @@
             const cur = PVP_TITLES[pvpTitleIndex()];
             const earned = pvpTitleCount();
             const isMax = earned >= PVP_TITLES.length;
-            const nPanels = PVP_TITLES.map(function (t, i) {
-                const got = i < earned;
-                return '<div class="text-center rounded-lg px-1 py-1 ' + (got ? '' : 'opacity-40') + '" style="border:1px solid ' + t.color + '55;background:' + t.color + '14">' +
-                    '<div class="text-[9px] font-mincho font-black truncate" style="color:' + (got ? t.color : '#9ca3af') + '">' + t.name + '</div></div>';
+            const pct = isMax ? 100 : Math.max(0, Math.min(100, Math.round(pvpPoints() / PVP_TITLE_COST * 100)));
+            const ladder = PVP_TITLES.map(function (t, i) {
+                const cls = i < earned ? 'wa-s-got' : (i === earned ? 'wa-s-next' : '');
+                return '<div class="' + cls + '" style="--tc:' + t.color + '" title="' + t.desc + '">' + t.name + '</div>';
             }).join('');
-            return '<div class="bg-heian-darkpurple border-2 border-heian-gold/50 rounded-2xl p-4 shadow-xl mb-4">' +
-                '<div class="flex flex-wrap items-center justify-between gap-2">' +
-                '  <div class="flex items-center gap-3">' +
-                '    <div class="w-12 h-12 rounded-full flex items-center justify-center text-lg font-black shadow-lg" style="background:linear-gradient(135deg,' + cur.color + '22,' + cur.color + '66);border:2px solid ' + cur.color + ';color:' + cur.color + '">' + earned + '</div>' +
-                '    <div><div class="text-[10px] text-amber-200 font-bold tracking-wider">現在の称号</div>' +
-                '      <div class="font-mincho font-black text-xl" style="color:' + cur.color + ';text-shadow:0 0 12px ' + cur.color + '88">' + cur.name + '</div>' +
-                '      <div class="text-[10px] text-gray-400">' + cur.desc + '</div></div>' +
-                '  </div>' +
-                '  <div class="text-right">' +
-                '    <div class="text-[10px] text-gray-400">対戦ポイント</div>' +
-                '    <div class="font-mono font-black text-amber-300 text-lg">' + pvpPoints().toLocaleString() + ' pt</div>' +
-                (isMax ? '<div class="text-[10px] text-yellow-300 font-bold">★ 全称号コンプリート！</div>' : '<div class="text-[10px] text-emerald-300 font-bold">次の称号「' + PVP_TITLES[earned].name + '」まで あと ' + pvpPointsToNext().toLocaleString() + ' pt</div>') +
+            let reward = '';
+            try {
+                const god = getUnit(PVP_GOD_UNIT_ID);
+                if (god) {
+                    const has = (state.ownedUnits || []).includes(god.id);
+                    reward = '<div class="wa-s-pvp-reward"><span>' + unitIconHTML(god, { badge: false, hidden: !has }) + '</span><span>最高称号「<b>太政大臣</b>」到達で神キャラ「<b>' + (has ? god.name : '？？？') + '</b>」' + (has ? 'を獲得済み' : 'が仲間に') + '</span></div>';
+                }
+            } catch (e) { }
+            return '<div class="wa-s-pvp-rank">' +
+                '<div class="wa-s-pvp-top">' +
+                '  <div class="wa-s-pvp-medal" style="--tc:' + cur.color + '"><b>' + earned + '</b><small>称号</small></div>' +
+                '  <div class="wa-s-pvp-cur"><small>現在の称号</small><h3 style="--tc:' + cur.color + '"><i></i>' + cur.name + '</h3><p>' + cur.desc + '</p></div>' +
+                '  <div class="wa-s-pvp-pt"><div><span>対戦ポイント</span><b>' + pvpPoints().toLocaleString() + ' pt</b></div>' +
+                '    <div class="wa-s-bar"><i style="width:' + pct + '%"></i></div>' +
+                (isMax ? '<span style="color:#fde68a">★ 全称号コンプリート！</span>' : '<span>次の称号「' + PVP_TITLES[earned].name + '」まで あと ' + pvpPointsToNext().toLocaleString() + ' pt</span>') +
                 '  </div>' +
                 '</div>' +
-                '<div class="mt-3 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-1.5">' + nPanels + '</div>' +
-                '<div class="mt-2 text-[9px] text-gray-500">※ 公式設定の対戦のみポイント獲得対象。勝ち+30 / 負け-10（相手の称号が5個以上上なら+10）／ 試合全体で20問以上正解＆30秒以上プレーで変動。ポイントは0未満になりません。</div>' +
+                '<div class="wa-s-ladder">' + ladder + '</div>' +
+                reward +
+                '<div class="wa-s-pvp-note">※ 公式設定の対戦のみポイント獲得対象。勝ち+30 / 負け-10（相手の称号が5個以上上なら+10）／ 試合全体で20問以上正解＆30秒以上プレーで変動。ポイントは0未満になりません。</div>' +
                 '</div>';
         }
 
@@ -6360,7 +6638,7 @@
             LAST_ACHIEVEMENT_RENDERED_VERSION = nextVersion;
             grid.innerHTML = defs.map(d => {
                 const ok = !!state.achievements?.[d.id];
-                return `<div class="achievement-card ${ok ? 'unlocked' : 'locked'}"><div class="flex gap-3 items-start"><div class="achievement-medal"><i class="fa-solid ${d.icon}"></i></div><div class="min-w-0"><div class="font-bold text-amber-100 text-sm leading-snug">${d.name}</div><div class="text-[11px] text-gray-300 mt-1 leading-relaxed">${d.desc}</div><div class="text-[10px] mt-2 font-bold ${ok ? 'text-green-300' : 'text-gray-500'}">${ok ? '✓ 獲得済み' : '未獲得'}</div></div></div></div>`;
+                return `<div class="wa-s-ach${ok ? '' : ' wa-s-ach-off'}"><div class="wa-s-ach-medal"><i class="fa-solid ${d.icon}"></i></div><div class="wa-s-ach-main"><b>${d.name}</b><p>${d.desc}</p></div>${ok ? '<span class="wa-s-stamp">達成</span>' : '<span class="wa-s-ach-todo">未獲得</span>'}</div>`;
             }).join('');
         }
         function markAchievementWorld(kind, world) { const w=String(parseInt(world,10)||1); if(!state.achievementWorldClears) state.achievementWorldClears={}; if(!state.achievementWorldClears[w]) state.achievementWorldClears[w]={}; state.achievementWorldClears[w][kind]=true; }
@@ -7040,62 +7318,66 @@
             return !!state.clearedStages[prevId];
         }
 
+        // ★UI改訂: ダンジョンカード（本編・曜日で共通の見た目。onclick・解放判定は従来どおり）
+        function buildWaDungeonCard(dung, opts) {
+            const clearedInDungeon = dung.stages.filter(stg => state.clearedStages[stg.id]).length;
+            const isFullyCleared = clearedInDungeon === dung.stages.length;
+            const progressPct = Math.round((clearedInDungeon / dung.stages.length) * 100);
+            const stars = Math.min(5, 1 + Math.floor(dung.id / 6));
+            const pal = DUNGEON_PALETTES[dung.id % DUNGEON_PALETTES.length];
+            const isUnlocked = isDungeonUnlocked(dung.id);
+            const isCurrent = isUnlocked && !isFullyCleared && !opts.curTaken;
+            const m = /^(.*?ダンジョン\s*\d+)\s*[:：]\s*(.+)$/.exec(dung.title || '');
+            const label = m ? m[1] : `${opts.label} ${dung.id}`;
+            const name = m ? m[2] : dung.title;
+
+            const card = document.createElement("div");
+            card.className = `wa-s-dg${isFullyCleared ? ' wa-s-dg-clear' : ''}${isUnlocked ? '' : ' wa-s-dg-lock'}${isCurrent ? ' wa-s-dg-cur' : ''}`;
+            card.style.setProperty('--dg1', pal[0]);
+            card.onclick = isUnlocked
+                ? () => openStageModal(dung.id)
+                : () => showCustomAlert("ダンジョン未開放", "前のダンジョンを全て制覇すると解放されます！");
+            card.innerHTML = `
+                <div class="wa-s-dg-top">
+                    <span class="wa-s-dg-no">${label}</span>
+                    ${isCurrent ? '<span class="wa-s-dg-now">挑戦中</span>' : ''}
+                    <span class="wa-s-dg-stars" title="難易度">${'★'.repeat(stars)}<span>${'★'.repeat(5 - stars)}</span></span>
+                </div>
+                <div class="wa-s-dg-body">
+                    <div class="wa-s-dg-medal"><i class="fa-solid ${isUnlocked ? (dung.icon || opts.icon) : 'fa-lock'}"></i></div>
+                    <div class="min-w-0">
+                        <h3>${name}</h3>
+                        <div class="wa-s-dg-pow"><i class="fa-solid fa-bolt mr-1"></i>推定戦闘力 ${getStageRecommendedPower(dung.id, 1).toLocaleString()}〜${getStageRecommendedPower(dung.id, dung.stages.length).toLocaleString()}</div>
+                    </div>
+                </div>
+                <div class="wa-s-dg-prog">
+                    <span>討伐</span>
+                    <div class="wa-s-bar"><i style="width:${progressPct}%"></i></div>
+                    <b>${clearedInDungeon} / ${dung.stages.length}</b>
+                </div>
+                <div class="wa-s-dg-foot">
+                    <span>全${dung.stages.length}ステージ${opts.extra || ''}</span>
+                    ${isUnlocked
+                        ? `<span class="wa-s-dg-go"><i class="fa-solid fa-circle-play"></i>${isFullyCleared ? '再戦' : '出撃'}</span>`
+                        : `<span class="wa-s-dg-go"><i class="fa-solid fa-lock"></i>未開放</span>`}
+                </div>
+                ${isFullyCleared ? '<span class="wa-s-stamp">完全<br>制覇</span>' : ''}
+            `;
+            return { card, isCurrent };
+        }
+
         function renderDungeonsView() {
             const grid = document.getElementById("dungeonGrid");
             grid.innerHTML = "";
-
+            const frag = document.createDocumentFragment();
+            let curTaken = false;
             // ⑤ 本編タブには通常ダンジョン（1〜30）のみ表示
             DUNGEONS_DATA.filter(dung => !isWeekdayDungeon(dung.id)).forEach(dung => {
-                let clearedInDungeon = dung.stages.filter(stg => state.clearedStages[stg.id]).length;
-                let isFullyCleared = clearedInDungeon === dung.stages.length;
-                const progressPct = Math.round((clearedInDungeon / dung.stages.length) * 100);
-                const stars = Math.min(5, 1 + Math.floor(dung.id / 6));
-                const pal = DUNGEON_PALETTES[dung.id % DUNGEON_PALETTES.length];
-                const isUnlocked = isDungeonUnlocked(dung.id);
-
-                const card = document.createElement("div");
-                card.className = `dungeon-card p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between relative ${
-                    isFullyCleared ? 'dungeon-card-clear' : 'dungeon-card-normal'
-                } ${isUnlocked ? '' : 'dungeon-card-locked'}`;
-                card.style.background = `linear-gradient(160deg, ${pal[0]}cc, ${pal[1]}e6)`;
-                card.onclick = isUnlocked
-                    ? () => openStageModal(dung.id)
-                    : () => showCustomAlert("ダンジョン未開放", "前のダンジョンを全て制覇すると解放されます！");
-
-                card.innerHTML = `
-                    <div class="flex items-start justify-between mb-2 relative z-10">
-                        <span class="dungeon-badge">ダンジョン ${dung.id}</span>
-                        <span class="dungeon-stars" title="難易度">${'★'.repeat(stars)}${'☆'.repeat(5 - stars)}</span>
-                    </div>
-                    <div class="flex items-center gap-3 relative z-10">
-                        <div class="dungeon-medal">
-                            <i class="fa-solid ${dung.icon || 'fa-scroll'} text-sm"></i>
-                        </div>
-                        <div class="min-w-0">
-                            <h3 class="font-mincho font-bold text-sm text-yellow-100 leading-snug">${dung.title}</h3>
-                            <div class="text-[10px] text-amber-300/90 font-mono mt-1"><i class="fa-solid fa-bolt mr-1 text-[9px]"></i>推定戦闘力: ${getStageRecommendedPower(dung.id, 1).toLocaleString()}〜${getStageRecommendedPower(dung.id, dung.stages.length).toLocaleString()}</div>
-                        </div>
-                    </div>
-                    <div class="mt-3 relative z-10">
-                        <div class="flex justify-between text-[10px] text-gray-300 mb-1">
-                            <span>討伐進行度</span>
-                            <span class="font-mono font-bold text-amber-300">${clearedInDungeon} / ${dung.stages.length} <span class="text-green-400">(${progressPct}%)</span></span>
-                        </div>
-                        <div class="w-full h-2 bg-black/50 rounded-full overflow-hidden border border-heian-gold/30">
-                            <div class="h-full rounded-full dungeon-progress-bar transition-all duration-500" style="width:${progressPct}%"></div>
-                        </div>
-                    </div>
-                    <div class="mt-3 pt-2 border-t border-white/10 flex justify-between items-center text-xs text-gray-200 relative z-10">
-                        <span>全${dung.stages.length}ステージ</span>
-                        ${isUnlocked
-                            ? `<span class="font-bold text-heian-gold"><i class="fa-solid fa-circle-play mr-1"></i>出撃する</span>`
-                            : `<span class="font-bold text-gray-400"><i class="fa-solid fa-lock mr-1"></i>未開放</span>`}
-                    </div>
-                    ${isFullyCleared ? '<div class="dungeon-seal">完 全 制 覇</div>' : ''}
-                    ${isUnlocked ? '' : '<div class="dungeon-lock-seal"><i class="fa-solid fa-lock"></i></div>'}
-                `;
-                grid.appendChild(card);
+                const r = buildWaDungeonCard(dung, { label: 'ダンジョン', icon: 'fa-scroll', curTaken });
+                if (r.isCurrent) curTaken = true;
+                frag.appendChild(r.card);
             });
+            grid.appendChild(frag);
         }
 
         // ⑤ 曜日ダンジョン専用タブの表示（本編と同じカードUI・宝石100消費の案内付き）
@@ -7108,63 +7390,19 @@
             const todayIds = TODAY_WEEKDAY_IDS || [];
             if (todayIds.length === 0) {
                 const closed = document.createElement('div');
-                closed.className = 'col-span-full bg-black/50 border-2 border-heian-gold/40 rounded-2xl p-8 text-center';
-                closed.innerHTML = `<div class="text-4xl mb-3"><i class="fa-solid fa-moon text-pink-300"></i></div><h3 class="font-mincho text-xl font-bold text-pink-200 mb-2">本日は曜日ダンジョンのお休みです</h3><p class="text-xs text-gray-300">曜日ダンジョンは毎週月曜〜金曜の開催です。明日の開門をお楽しみに！</p>`;
+                closed.className = 'wa-s-card wa-s-closed';
+                closed.innerHTML = `<i class="fa-solid fa-moon"></i><h3>本日は曜日ダンジョンのお休みです</h3><p>曜日ダンジョンは毎週月曜〜金曜の開催です。明日の開門をお楽しみに！</p>`;
                 grid.appendChild(closed);
                 return;
             }
-
+            const frag = document.createDocumentFragment();
+            let curTaken = false;
             DUNGEONS_DATA.filter(dung => isWeekdayDungeon(dung.id) && todayIds.indexOf(dung.id) >= 0).forEach(dung => {
-                let clearedInDungeon = dung.stages.filter(stg => state.clearedStages[stg.id]).length;
-                let isFullyCleared = clearedInDungeon === dung.stages.length;
-                const progressPct = Math.round((clearedInDungeon / dung.stages.length) * 100);
-                const stars = Math.min(5, 1 + Math.floor(dung.id / 6));
-                const pal = DUNGEON_PALETTES[dung.id % DUNGEON_PALETTES.length];
-                const isUnlocked = isDungeonUnlocked(dung.id);
-
-                const card = document.createElement("div");
-                card.className = `dungeon-card p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between relative ${
-                    isFullyCleared ? 'dungeon-card-clear' : 'dungeon-card-normal'
-                } ${isUnlocked ? '' : 'dungeon-card-locked'}`;
-                card.style.background = `linear-gradient(160deg, ${pal[0]}cc, ${pal[1]}e6)`;
-                card.onclick = isUnlocked
-                    ? () => openStageModal(dung.id)
-                    : () => showCustomAlert("ダンジョン未開放", "前のダンジョンを全て制覇すると解放されます！");
-
-                card.innerHTML = `
-                    <div class="flex items-start justify-between mb-2 relative z-10">
-                        <span class="dungeon-badge">曜日 ${dung.id}</span>
-                        <span class="dungeon-stars" title="難易度">${'★'.repeat(stars)}${'☆'.repeat(5 - stars)}</span>
-                    </div>
-                    <div class="flex items-center gap-3 relative z-10">
-                        <div class="dungeon-medal">
-                            <i class="fa-solid ${dung.icon || 'fa-calendar-day'} text-sm"></i>
-                        </div>
-                        <div class="min-w-0">
-                            <h3 class="font-mincho font-bold text-sm text-yellow-100 leading-snug">${dung.title}</h3>
-                            <div class="text-[10px] text-amber-300/90 font-mono mt-1"><i class="fa-solid fa-bolt mr-1 text-[9px]"></i>推定戦闘力: ${getStageRecommendedPower(dung.id, 1).toLocaleString()}〜${getStageRecommendedPower(dung.id, dung.stages.length).toLocaleString()}</div>
-                        </div>
-                    </div>
-                    <div class="mt-3 relative z-10">
-                        <div class="flex justify-between text-[10px] text-gray-300 mb-1">
-                            <span>討伐進行度</span>
-                            <span class="font-mono font-bold text-amber-300">${clearedInDungeon} / ${dung.stages.length} <span class="text-green-400">(${progressPct}%)</span></span>
-                        </div>
-                        <div class="w-full h-2 bg-black/50 rounded-full overflow-hidden border border-heian-gold/30">
-                            <div class="h-full rounded-full dungeon-progress-bar transition-all duration-500" style="width:${progressPct}%"></div>
-                        </div>
-                    </div>
-                    <div class="mt-3 pt-2 border-t border-white/10 flex justify-between items-center text-xs text-gray-200 relative z-10">
-                        <span>全${dung.stages.length}ステージ / 宝玉${100}消費</span>
-                        ${isUnlocked
-                            ? `<span class="font-bold text-heian-gold"><i class="fa-solid fa-circle-play mr-1"></i>出撃する</span>`
-                            : `<span class="font-bold text-gray-400"><i class="fa-solid fa-lock mr-1"></i>未開放</span>`}
-                    </div>
-                    ${isFullyCleared ? '<div class="dungeon-seal">完 全 制 覇</div>' : ''}
-                    ${isUnlocked ? '' : '<div class="dungeon-lock-seal"><i class="fa-solid fa-lock"></i></div>'}
-                `;
-                grid.appendChild(card);
+                const r = buildWaDungeonCard(dung, { label: '曜日', icon: 'fa-calendar-day', curTaken, extra: ` ／ 宝玉${100}消費` });
+                if (r.isCurrent) curTaken = true;
+                frag.appendChild(r.card);
             });
+            grid.appendChild(frag);
         }
 
         function openStageModal(dungeonId) {
@@ -7204,34 +7442,39 @@
             // 一覧ヘッダー（討伐状況・推奨戦闘力）
             const clearedCount = dung.stages.filter(s => state.clearedStages[s.id]).length;
             const header = document.createElement("div");
-            header.className = "mb-3 p-3 rounded-xl bg-black/50 border border-heian-gold/40 flex flex-wrap items-center justify-between gap-2";
+            header.className = "wa-s-stg-sum";
             header.innerHTML = `
-                <div class="text-xs text-gray-300">
-                    <i class="fa-solid fa-scroll mr-1 text-amber-400"></i>全${dung.stages.length}ステージ ・ 討伐済み <span class="text-green-400 font-bold">${clearedCount}</span>
-                </div>
-                <div class="text-[10px] text-amber-300 font-mono"><i class="fa-solid fa-bolt mr-1"></i>推定戦闘力 ${getStageRecommendedPower(dung.id, 1).toLocaleString()}〜${getStageRecommendedPower(dung.id, dung.stages.length).toLocaleString()}</div>
+                <span class="wa-s-chip"><i class="fa-solid fa-flag"></i>討伐 <b>${clearedCount} / ${dung.stages.length}</b></span>
+                <div class="wa-s-bar"><i style="width:${Math.round(clearedCount / dung.stages.length * 100)}%"></i></div>
+                <span class="wa-s-chip"><i class="fa-solid fa-bolt"></i>推定戦闘力 <b>${getStageRecommendedPower(dung.id, 1).toLocaleString()}〜${getStageRecommendedPower(dung.id, dung.stages.length).toLocaleString()}</b></span>
             `;
             container.appendChild(header);
 
             // ステージをノード式グリッドで表示（本物のゲームのステージ選択風）
             const nodeGrid = document.createElement("div");
-            nodeGrid.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5";
+            nodeGrid.className = "wa-s-stg-grid";
+            let nextMarked = false;
 
             dung.stages.forEach((stgObj, idx) => {
                 const isCleared = !!state.clearedStages[stgObj.id];
                 const isUnlocked = isStageUnlocked(stgObj.id);
+                const isNext = isUnlocked && !isCleared && !nextMarked;
+                if (isNext) nextMarked = true;
+                const shortName = String(stgObj.name || '').replace(/^ステージ\s*\d+\s*[:：]\s*/, '');
                 const node = document.createElement("div");
-                node.className = `stage-node p-3 pt-5 rounded-xl border-2 flex flex-col items-center text-center cursor-pointer transition relative ${isCleared ? 'stage-node-clear' : ''} ${isUnlocked ? '' : 'stage-node-locked'}`;
+                node.className = `stage-node wa-s-node${isCleared ? ' wa-s-node-clear' : ''}${isUnlocked ? '' : ' wa-s-node-lock'}${isNext ? ' wa-s-node-next' : ''}`;
                 node.setAttribute("data-stage-id", stgObj.id); // ★修正: キャッシュ再利用時にも再バインドできるようIDを保持
+                node.title = stgObj.name;
                 node.onclick = isUnlocked
                     ? () => openStageExplain(dung, stgObj)
                     : () => showCustomAlert("ステージ未開放", `${idx > 0 ? dung.stages[idx - 1].name : '前のステージ'}をクリアすると解放されます。`);
                 node.innerHTML = `
-                    <span class="stage-node-num">${idx + 1}</span>
-                    <i class="fa-solid ${stgObj.icon || 'fa-scroll'} text-lg my-1 stage-node-icon"></i>
-                    <span class="font-mincho text-xs font-bold text-yellow-100 leading-tight">${stgObj.name}</span>
-                    <span class="text-[9px] text-amber-300/90 font-mono mt-1"><i class="fa-solid fa-bolt mr-0.5 text-[8px]"></i>推奨 ${getStageRecommendedPower(dung.id, idx + 1).toLocaleString()}</span>
-                    <span class="text-[9px] mt-1.5 font-bold px-2 py-0.5 rounded-full ${isCleared ? 'text-green-400 bg-green-900/40 border border-green-500/40' : isUnlocked ? 'text-gray-500 bg-black/40 border border-gray-700' : 'text-gray-400 bg-black/40 border border-gray-700'}">${isCleared ? '✓ 討伐済' : isUnlocked ? '未攻略' : '🔒 未開放'}</span>
+                    <span class="wa-s-node-no">${idx + 1}</span>
+                    <span class="wa-s-node-ic"><i class="fa-solid ${isUnlocked ? (stgObj.icon || 'fa-scroll') : 'fa-lock'}"></i></span>
+                    <span class="wa-s-node-name">${shortName}</span>
+                    <span class="wa-s-node-pow"><i class="fa-solid fa-bolt mr-0.5"></i>推奨 ${getStageRecommendedPower(dung.id, idx + 1).toLocaleString()}</span>
+                    <span class="wa-s-node-st">${isCleared ? '✓ 討伐済' : isNext ? '挑 戦' : isUnlocked ? '未攻略' : '未開放'}</span>
+                    ${isCleared ? '<span class="wa-s-stamp">討伐</span>' : ''}
                 `;
                 nodeGrid.appendChild(node);
             });
@@ -7706,11 +7949,7 @@
             ["束帯", "直衣", "十二単"].forEach(c => {
                 const btn = document.getElementById(`outfit-tab-${c}`);
                 if (btn) {
-                    if (c === cat) {
-                        btn.className = "flex-1 py-1 px-1 bg-amber-600 text-black font-bold rounded";
-                    } else {
-                        btn.className = "flex-1 py-1 px-1 bg-heian-purple text-gray-300 rounded hover:text-white";
-                    }
+                    btn.className = (c === cat) ? "wa-s-on" : "";
                 }
             });
             renderGrowthView();
@@ -7720,40 +7959,39 @@
             const rankInfo = getNobleRankInfo(state.noble.level);
             document.getElementById("nobleLevelBadge").textContent = `Lv.${state.noble.level}`;
             document.getElementById("nobleRankDisplay").textContent = `位階: ${rankInfo.rankStr}`;
+            try {
+                const np = document.getElementById('nobleGrowthPortrait');
+                const me = getUnit('ch_000');
+                if (np && me) { const k = me.gender + me.rarity; if (np.dataset.k !== k || !np.firstChild) { np.dataset.k = k; np.innerHTML = unitIconHTML(me, { badge: false }); } }
+            } catch (e) { }
             ['男性','女性'].forEach(g => {
                 const b = document.getElementById('noble-gender-' + g);
-                if (b) b.className = (state.noble.gender === g) ? 'flex-1 py-1 px-1 bg-amber-600 text-black font-bold rounded' : 'flex-1 py-1 px-1 bg-heian-purple text-gray-300 rounded hover:text-white';
+                if (b) b.className = (state.noble.gender === g) ? 'wa-s-on' : '';
             });
+            ["束帯", "直衣", "十二単"].forEach(c => { const t = document.getElementById(`outfit-tab-${c}`); if (t) t.className = (c === activeOutfitCategory) ? 'wa-s-on' : ''; });
+            const coins = state.coins;
 
             // Outfit Parts List
             const partsContainer = document.getElementById("outfitPartsContainer");
-            partsContainer.innerHTML = "";
-
             const parts = OUTFIT_PARTS[activeOutfitCategory] || [];
-            parts.forEach(part => {
+            partsContainer.innerHTML = parts.map(part => {
                 const lvl = state.noble.outfits[part.id] || 1;
                 const cost = part.cost * lvl;
-
-                const row = document.createElement("div");
-                row.className = "p-2 rounded bg-black/60 border border-heian-purple/60 flex justify-between items-center text-xs";
-                row.innerHTML = `
-                    <div>
-                        <div class="font-bold text-yellow-100">${part.name} <span class="text-amber-400 font-mono">Lv.${lvl}</span></div>
-                        <div class="text-[10px] text-gray-300">追加HP +${Math.floor(part.baseHp * 0.50 * Math.max(0, lvl - 1))} / ATK +${Math.floor(part.baseAtk * (1 + 0.45 * Math.max(0, lvl - 1)))}</div>
-                    </div>
-                    <button onclick="upgradeOutfit('${part.id}', ${cost})" class="gold-button px-2.5 py-1 rounded text-[10px] shrink-0">
-                        強化 (${cost}文)
-                    </button>
-                `;
-                partsContainer.appendChild(row);
-            });
+                return `<div class="wa-s-part">
+                        <span class="wa-s-part-ic">${String(part.name || '').charAt(0)}</span>
+                        <div class="wa-s-part-main">
+                            <b>${part.name}<em>Lv.${lvl}</em></b>
+                            <small>HP +${Math.floor(part.baseHp * 0.50 * Math.max(0, lvl - 1))} / ATK +${Math.floor(part.baseAtk * (1 + 0.45 * Math.max(0, lvl - 1)))}</small>
+                        </div>
+                        <button onclick="upgradeOutfit('${part.id}', ${cost})" class="wa-s-up${coins < cost ? ' wa-s-poor' : ''}"><small>強化</small><b>${cost.toLocaleString()}</b></button>
+                    </div>`;
+            }).join('');
 
             // Gacha Units Growth List
             const growthContainer = document.getElementById("characterGrowthList");
-            growthContainer.innerHTML = "";
 
             // ③ 育成一覧はパーティ編成中のキャラを優先して上に表示（次いでレア度順）
-            [...state.ownedUnits].filter(id => id !== "ch_000").sort((a, b) => {
+            growthContainer.innerHTML = [...state.ownedUnits].filter(id => id !== "ch_000").sort((a, b) => {
                 const inA = state.deck.includes(a), inB = state.deck.includes(b);
                 if (inA !== inB) return inA ? -1 : 1;
                 const ua = getUnit(a), ub = getUnit(b);
@@ -7761,7 +7999,7 @@
                 const rb = ub ? rarityRank(ub.rarity) : 0;
                 if (rb !== ra) return rb - ra;
                 return state.ownedUnits.indexOf(a) - state.ownedUnits.indexOf(b);
-            }).forEach(uid => {
+            }).map(uid => {
                 const unit = getUnit(uid);
                 const statLvl = state.unitLevels[uid] || 1;
                 const specLvl = Math.min(50, state.unitSpecialLevels[uid] || 1);
@@ -7769,36 +8007,21 @@
                 const statCost = 150 * statLvl;
                 const specCost = specLvl >= 50 ? 0 : 300 * specLvl;
                 const st = getUnitStats(uid);
-
-                const card = document.createElement("div");
-                card.className = "p-3 rounded-xl bg-black/50 border border-heian-purple/60 flex flex-col justify-between";
-                card.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-start mb-1">
-                            <span class="font-mincho font-bold text-yellow-100 text-sm flex items-center gap-1.5">
-                                <span class="inline-block w-7 h-7 shrink-0">${unitIconHTML(unit, { badge: false })}</span> ${unit.name} ${genderMark(unit)}
-                            </span>
-                            <span class="text-[10px] ${unit.rarity === '神' ? 'rarity-god' : 'bg-amber-500 text-black'} font-black px-1.5 py-0.5 rounded">${unit.rarity}</span>
+                const sp = unit.special_move;
+                return `<div class="wa-s-gc rar-${unit.rarity}">
+                        <button type="button" class="wa-s-gc-face" onclick="openUnitDetail('${uid}')" aria-label="${unit.name}の詳細">${unitIconHTML(unit, { badge: false })}<span class="wa-s-rar">${unit.rarity}</span>${state.deck.includes(uid) ? '<span class="wa-s-gc-deck">編成中</span>' : ''}</button>
+                        <div class="wa-s-gc-main">
+                            <div class="wa-s-gc-name">${unit.name} ${genderMark(unit)}</div>
+                            <div class="wa-s-gc-stat"><span>HP <b>${st.hp.toLocaleString()}</b></span><span>ATK <b>${st.atk.toLocaleString()}</b></span></div>
+                            <div class="wa-s-gc-sp"><i class="fa-solid fa-wand-magic-sparkles"></i>${sp ? sp.name : '秘技'}<em>Lv.${specLvl}</em></div>
+                            <p class="wa-s-gc-eff">${sp ? sp.effect : '効果なし'}</p>
                         </div>
-                        <div class="text-[10px] text-gray-300 font-mono mb-1.5">HP: ${st.hp} / ATK: ${st.atk}</div>
-                        <div class="bg-black/60 p-1.5 rounded border border-amber-500/30 mb-2 text-left">
-                            <div class="text-[10px] font-bold text-amber-300 flex items-center gap-1">
-                                <i class="fa-solid fa-wand-magic-sparkles"></i> 必殺技: ${unit.special_move ? unit.special_move.name : '秘技'} <span class="text-amber-400 font-mono">(Lv.${specLvl})</span>
-                            </div>
-                            <div class="text-[9px] text-gray-300 mt-0.5 leading-snug">${unit.special_move ? unit.special_move.effect : '効果なし'}</div>
+                        <div class="wa-s-gc-btns">
+                            <button onclick="upgradeUnitLevel('${uid}', ${statCost})" class="wa-s-up${coins < statCost ? ' wa-s-poor' : ''}"><small>ステータス強化 Lv.${statLvl}</small><b>${statCost.toLocaleString()}</b></button>
+                            <button ${specLvl >= 50 ? 'disabled' : `onclick="upgradeUnitSpecial('${uid}', ${specCost})"`} class="wa-s-up wa-s-up-sp${specLvl < 50 && coins < specCost ? ' wa-s-poor' : ''}"><small>必殺技強化 Lv.${specLvl}</small><b>${specLvl >= 50 ? 'MAX' : specCost.toLocaleString()}</b></button>
                         </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 mt-1 pt-2 border-t border-heian-purple/40">
-                        <button onclick="upgradeUnitLevel('${uid}', ${statCost})" class="bg-purple-900/80 hover:bg-purple-800 text-purple-200 border border-purple-400/40 p-1.5 rounded text-[10px] font-bold text-center">
-                            ステータス強化 (Lv.${statLvl})<br><span class="text-amber-300 font-mono">${statCost}文</span>
-                        </button>
-                        <button ${specLvl >= 50 ? 'disabled' : `onclick="upgradeUnitSpecial('${uid}', ${specCost})"`} class="bg-amber-900/80 ${specLvl >= 50 ? 'opacity-60 cursor-not-allowed' : 'hover:bg-amber-800'} text-amber-200 border border-amber-400/40 p-1.5 rounded text-[10px] font-bold text-center">
-                            必殺技強化 (Lv.${specLvl})<br><span class="text-amber-300 font-mono">${specLvl >= 50 ? 'MAX' : specCost + '文'}</span>
-                        </button>
-                    </div>
-                `;
-                growthContainer.appendChild(card);
-            });
+                    </div>`;
+            }).join('');
         }
 
         function upgradeOutfit(partId, cost) {
@@ -7846,7 +8069,13 @@
 
         function renderSynergyView() {
             const container = document.getElementById("synergyListContainer");
-            container.innerHTML = "";
+            const owned = new Set(state.ownedUnits);
+            // 肖像: 未所持の神は秘匿、未所持はうすく表示（filterを使わず軽量に）
+            const face = (u) => owned.has(u.id) ? `<span>${unitIconHTML(u, { badge: false })}</span>`
+                : `<span class="wa-s-dimf">${unitIconHTML(u, { badge: false, hidden: u.rarity === '神' })}</span>`;
+            const deckIdsList = [];
+            const cards = [];
+            let unlocked = 0;
 
             ALL_GACHA_CHARACTERS().forEach(unit => {
                 if (!unit.synergies || unit.synergies.length === 0) return;
@@ -7863,44 +8092,29 @@
                         });
                     }
 
-                    const isSourceOwned = state.ownedUnits.includes(unit.id);
-                    const areTargetsOwned = targets.every(t => state.ownedUnits.includes(t.id));
+                    const isSourceOwned = owned.has(unit.id);
+                    const areTargetsOwned = targets.every(t => owned.has(t.id));
                     const isFullyOwned = isSourceOwned && areTargetsOwned;
-
-                    const card = document.createElement("div");
-                    card.className = `p-3 rounded-xl border ${
-                        isFullyOwned ? 'bg-heian-card/90 border-heian-gold/60' : 'bg-black/40 border-heian-purple/40 opacity-60'
-                    } flex flex-wrap justify-between items-center gap-3`;
-                    // ④ シナジー図鑑のカードをタップでパーティへ自動追加
-                    card.style.cursor = "pointer";
-                    card.title = "タップでパーティに追加";
-                    card.onclick = () => addUnitsToDeck([unit.id, ...targets.map(t => t.id)]);
-
-                    const targetsStr = targets.map(t => `<span class="text-amber-300 font-bold">${synergyDisplayName(t)}</span>`).join(' ＆ ');
-                    const effectText = synergyDisplayEffect(unit, targets, syn);
-
-                    card.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-heian-purple border border-heian-gold flex items-center justify-center text-heian-gold text-lg shrink-0">
-                                ${unitIconHTML(unit, { badge: false, hidden: unit.rarity === '神' && !state.ownedUnits.includes(unit.id) })}
-                            </div>
-                            <div>
-                                <div class="font-mincho font-bold text-sm text-yellow-100">
-                                    【${synergyDisplayName(unit)} × ${targetsStr}】 <span class="text-amber-400 font-sans text-xs ml-1">${syn.title}</span>
-                                </div>
-                                <div class="text-xs text-gray-300 mt-0.5">${syn.effect}</div>
-                            </div>
-                        </div>
-                        <div>
-                            ${isFullyOwned ? 
-                                '<span class="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-bold px-2 py-1 rounded">解放済</span>' : 
-                                '<span class="bg-gray-800 text-gray-400 text-[10px] px-2 py-1 rounded">未所持キャラ有り</span>'
-                            }
-                        </div>
-                    `;
-                    container.appendChild(card);
+                    if (isFullyOwned) unlocked++;
+                    // ④ シナジー図鑑のカードをタップでパーティへ自動追加（クリックは下でまとめて委譲）
+                    const idx = deckIdsList.push([unit.id, ...targets.map(t => t.id)]) - 1;
+                    const targetsStr = targets.map(t => synergyDisplayName(t)).join(' ＆ ');
+                    cards.push(`<div class="wa-s-syn${isFullyOwned ? '' : ' wa-s-syn-off'}" data-syn="${idx}" title="タップでパーティに追加">
+                        <div class="wa-s-syn-faces">${face(unit)}${targets.map(face).join('')}</div>
+                        <div class="wa-s-syn-title">${syn.title}<small>${synergyDisplayName(unit)} × ${targetsStr}</small></div>
+                        <div class="wa-s-syn-eff">${syn.effect}</div>
+                        <span class="wa-s-syn-st">${isFullyOwned ? '解放済' : '未所持あり'}</span>
+                    </div>`);
                 });
             });
+            const total = cards.length;
+            container.innerHTML = `<div class="wa-s-synsum"><span>解放済みシナジー <b>${unlocked}</b> / ${total}</span><div class="wa-s-bar"><i style="width:${total ? Math.round(unlocked / total * 100) : 0}%"></i></div><span>カードをタップで部隊に追加</span></div>` + cards.join('');
+            container.onclick = (e) => {
+                const card = e.target.closest && e.target.closest('.wa-s-syn');
+                if (!card || !container.contains(card)) return;
+                const ids = deckIdsList[+card.dataset.syn];
+                if (ids) addUnitsToDeck(ids);
+            };
         }
 
 
@@ -12104,10 +12318,9 @@ ${weekdayPointName}: +${weekdayReward.toLocaleString()}`
                 getAvailableBossRushLevels().forEach(i => {
                     const b = document.createElement("button");
                     const isActive = i === lv;
-                    b.className = `py-2 px-1 rounded-lg text-xs font-bold transition border-2 ${isActive ? 'bg-amber-500 text-black border-amber-200 shadow' : 'bg-black/60 text-amber-200 border-amber-500/40 hover:bg-amber-900/40'}`;
+                    b.className = `wa-s-lv${isActive ? ' wa-s-lv-on' : ''}`;
                     b.textContent = `${i}`;
                     b.disabled = !!activeRun;
-                    if (activeRun) b.classList.add('opacity-70', 'cursor-not-allowed');
                     b.onclick = () => setWorldLevel(i);
                     grid.appendChild(b);
                 });
