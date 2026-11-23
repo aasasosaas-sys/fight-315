@@ -1,0 +1,226 @@
+{
+ "eraId": "meiji_taisho",
+ "figures": [
+  {
+   "name": "大久保利通",
+   "at": "castle",
+   "guards": 4,
+   "guard": "政府の護衛",
+   "lines": [
+    "地租を金納にせねば、国の財政は立ち行かぬ。"
+   ]
+  },
+  {
+   "name": "伊藤博文",
+   "at": "capital",
+   "guards": 4,
+   "guard": "近衛兵",
+   "lines": [
+    "憲法はプロイセンに学ぶ。"
+   ]
+  },
+  {
+   "name": "小村寿太郎",
+   "at": "port",
+   "guards": 3,
+   "guard": "外務省の護衛",
+   "lines": [
+    "関税自主権、必ず取り戻してみせる。"
+   ]
+  },
+  {
+   "name": "高橋是清",
+   "at": "castle",
+   "guards": 3,
+   "guard": "日銀の守衛",
+   "lines": [
+    "外債はロンドンで集めてまいります。"
+   ]
+  },
+  {
+   "name": "加藤高明",
+   "at": "battlefield",
+   "guards": 3,
+   "guard": "護憲派の壮士",
+   "lines": [
+    "普通選挙を実現するのは我が内閣だ。"
+   ]
+  }
+ ],
+ "rules": [
+  {
+   "id": "mt_kill_okubo",
+   "title": "地租改正、先送り",
+   "trigger": {
+    "kind": "kill",
+    "id": "大久保利通"
+   },
+   "force": {
+    "q": "meiji_taisho_01",
+    "choice": 0
+   },
+   "text": "改革の大黒柱・大久保利通が倒れ、地租改正は先送りに。税は相変わらずその年の収穫に応じて米で納める方式のまま、政府の財政は豊作・凶作に振り回された。"
+  },
+  {
+   "id": "mt_kill_ito",
+   "title": "伊藤なき憲法",
+   "trigger": {
+    "kind": "kill",
+    "id": "伊藤博文"
+   },
+   "force": {
+    "q": "meiji_taisho_02",
+    "choice": 3
+   },
+   "text": "憲法起草の中心・伊藤博文が倒れた。政府は自由民権派の要求を抑えきれず、国民の代表が集まる憲法制定会議を開いて民定憲法を作ることになった。"
+  },
+  {
+   "id": "mt_kill_komura",
+   "title": "外交の要、失われる",
+   "trigger": {
+    "kind": "kill",
+    "id": "小村寿太郎"
+   },
+   "vars": {
+    "open_west": -15,
+    "militarism": 15
+   },
+   "year": 1904,
+   "text": "小村寿太郎が倒れ、日本の外交は迷走。欧米との交渉は行き詰まり、政府はますます軍事力に頼るようになった。"
+  },
+  {
+   "id": "mt_kill_takahashi",
+   "title": "財政の達人、散る",
+   "trigger": {
+    "kind": "kill",
+    "id": "高橋是清"
+   },
+   "vars": {
+    "economy": -25,
+    "commerce": -15
+   },
+   "year": 1914,
+   "text": "財政の達人・高橋是清が倒れた。大戦景気をうまく生かす舵取り役がおらず、日本は輸出を伸ばせないまま輸入超過に苦しんだ。"
+  },
+  {
+   "id": "mt_kill_kato",
+   "title": "護憲三派、まとまらず",
+   "trigger": {
+    "kind": "kill",
+    "id": "加藤高明"
+   },
+   "vars": {
+    "democracy": -20
+   },
+   "year": 1924,
+   "text": "護憲三派をまとめる加藤高明が倒れ、普通選挙法の成立は大きく遠のいた。政党政治への期待もしぼんでしまった。"
+  },
+  {
+   "id": "mt_destroy_kasumigaseki",
+   "title": "官庁街、壊滅",
+   "trigger": {
+    "kind": "destroy",
+    "id": "castle",
+    "value": 600
+   },
+   "vars": {
+    "centralization": -20,
+    "economy": -15
+   },
+   "year": 1880,
+   "text": "霞が関の大蔵省・外務省が崩れ落ち、書類も予算も吹き飛んだ。中央集権の明治政府は、しばらく地方の府県に頭を下げて回ることになった。"
+  },
+  {
+   "id": "mt_destroy_yokohama",
+   "title": "生糸倉庫、全滅",
+   "trigger": {
+    "kind": "destroy",
+    "id": "port",
+    "type": [
+     "warehouse",
+     "brick"
+    ],
+    "value": 400
+   },
+   "vars": {
+    "economy": -25,
+    "commerce": -20,
+    "open_west": -10
+   },
+   "year": 1910,
+   "text": "横浜港の生糸倉庫が壊された。日本の輸出の柱だった生糸がアメリカに届かず、大戦景気どころか貿易赤字が続くことになった。"
+  },
+  {
+   "id": "mt_usui_bridge",
+   "title": "碓氷峠の鉄道橋、落ちる",
+   "trigger": [
+    {
+     "kind": "bridge",
+     "id": "mountain"
+    },
+    {
+     "kind": "destroy",
+     "id": "mountain",
+     "value": 30
+    }
+   ],
+   "vars": {
+    "tech": -25,
+    "economy": -10
+   },
+   "year": 1893,
+   "text": "碓氷峠のレンガ造りの鉄道橋（めがね橋）が落ちた。信越本線は分断され、生糸も石炭も運べない。工業化の歩みは大きく遅れ、重化学工業はほとんど育たなかった。"
+  },
+  {
+   "id": "mt_destroy_hibiya",
+   "title": "日比谷、焼け野原",
+   "trigger": {
+    "kind": "destroy",
+    "id": "battlefield",
+    "value": 300
+   },
+   "vars": {
+    "democracy": -15
+   },
+   "year": 1905,
+   "text": "日比谷の広場が壊滅した。日比谷焼打ち事件のような民衆の集会の場がなくなり、民衆が政治に声を上げる機会は減った。"
+  },
+  {
+   "id": "mt_massacre",
+   "title": "民権運動、激化",
+   "trigger": {
+    "kind": "kill",
+    "type": "soldier",
+    "min": 30
+   },
+   "vars": {
+    "democracy": 20,
+    "commoners": 20,
+    "unity": -15
+   },
+   "year": 1880,
+   "text": "巡査隊が謎の人物に次々と倒され、政府の威信は地に落ちた。勢いづいた自由民権運動は全国に広がり、民衆の政治参加を求める声が一気に強まった。"
+  },
+  {
+   "id": "mt_fire_asakusa",
+   "title": "浅草、大火",
+   "trigger": [
+    {
+     "kind": "fire",
+     "at": "temple",
+     "min": 5
+    },
+    {
+     "kind": "fire",
+     "min": 12
+    }
+   ],
+   "vars": {
+    "commerce": -15,
+    "economy": -10
+   },
+   "year": 1890,
+   "text": "浅草の仲見世から火の手が上がり、東京の繁華街が灰になった。浅草十二階も芝居小屋も焼け、東京の商業は大打撃を受けた。"
+  }
+ ]
+}

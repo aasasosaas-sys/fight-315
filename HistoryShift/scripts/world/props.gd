@@ -40,7 +40,9 @@ func build() -> void:
 
 
 func _prop(kind: String, p: Vector3, rng: RandomNumberGenerator) -> RigidBody3D:
-	var b := RigidBody3D.new()
+	var b := BreakableProp.new()
+	b.kind = kind
+	b.hp = {"crate": 45.0, "barrel": 70.0, "bucket": 15.0}.get(kind, 40.0)
 	b.name = kind.capitalize()
 	b.collision_layer = 32
 	b.collision_mask = 1 | 2 | 4 | 8 | 16 | 32

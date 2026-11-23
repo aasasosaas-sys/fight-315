@@ -10,6 +10,8 @@ var changes: Array = []
 var reason := ""
 var score_before := 0
 var correct_before := 0
+var chaos_hits: Array = []      # 自由探索の混乱（ChaosTracker.session_hits）。空でなければ混乱版の画面になる
+var chaos_era := ""
 
 var _chain_box: VBoxContainer
 var _score_l: Label
@@ -19,7 +21,9 @@ func _ready() -> void:
 	theme = JSUI.theme()
 	JSUI.full_rect(self)
 	add_child(JSUI.background("ink"))
-	if success:
+	if not chaos_hits.is_empty():
+		_build_chaos()
+	elif success:
 		_build_success()
 	else:
 		_build_failure()
@@ -174,6 +178,131 @@ func _build_success() -> void:
 	hub.call_deferred("grab_focus")
 
 
+## 自由探索で暴れた結果、変わってしまった歴史
+func _build_chaos() -> void:
+	var broken := Game.state.chaos_broken()
+	var m := JSUI.margin(40)
+	JSUI.full_rect(m)
+	m.add_theme_constant_override("margin_left", 90)
+	m.add_theme_constant_override("margin_right", 90)
+	add_child(m)
+	var v := JSUI.vbox(18)
+	m.add_child(v)
+	v.add_child(JSUI.label("HISTORY DISRUPTED", 22, JSUI.SHU, JSUI.sans_bold()))
+	var head := JSUI.label("それで、未来が変わっちゃった！", 76, Color.WHITE, JSUI.serif_bold())
+	head.add_theme_constant_override("outline_size", 10)
+	head.add_theme_color_override("font_outline_color", Color(JSUI.SHU, 0.25))
+	head.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.5))
+	head.add_theme_constant_override("shadow_offset_y", 5)
+	v.add_child(head)
+	head.pivot_offset = Vector2(400, 60)
+	head.scale = Vector2(1.2, 1.2)
+	head.modulate.a = 0.0
+	var tw := create_tween().set_parallel()
+	tw.tween_property(head, "scale", Vector2.ONE, 0.6).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
+	tw.tween_property(head, "modulate:a", 1.0, 0.3)
+	UISfx.play("error" if not broken.is_empty() else "success")
+	var era := Game.db.get_era(chaos_era)
+	v.add_child(JSUI.label("%s での自由探索 ― 歴史の揺らぎ %d 件" % [era.get("eraName", chaos_era), chaos_hits.size()], 26, JSUI.MUTED, null, true))
+	v.add_child(JSUI.hline(Color(JSUI.SHU, 0.35), 2))
+	var body := JSUI.hbox(40)
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	v.add_child(body)
+	var left_col := JSUI.vbox(14)
+	left_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.add_child(left_col)
+	var left_sc := ScrollContainer.new()
+	left_sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	left_sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	left_col.add_child(left_sc)
+	var left := JSUI.vbox(14)
+	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left_sc.add_child(left)
+	for i in chaos_hits.size():
+		var h: Dictionary = chaos_hits[i]
+		var col := JSUI.SHU if h.get("broke", false) else JSUI.GOLD
+		var p := JSUI.panel(JSUI.sb(Color(col, 0.08), 12, 0, Color.TRANSPARENT, 0, 16))
+		var pst: StyleBoxFlat = p.get_theme_stylebox("panel")
+		pst.border_width_left = 6; pst.border_color = col
+		var pv := JSUI.vbox(4)
+		p.add_child(pv)
+		pv.add_child(JSUI.label("歴史が揺らいだ：" + str(h.get("title", "")), 24, col, JSUI.sans_bold(), true))
+		var tl := JSUI.label(str(h.get("text", "")), 22, JSUI.TEXT, JSUI.serif(), true)
+		tl.add_theme_constant_override("line_spacing", 6)
+		pv.add_child(tl)
+		left.add_child(p)
+		JSUI.fade_in(p, 0.35, 0.4 + i * 0.3)
+	# その後の歴史（この時代以降で、史実から変わった時代の流れ）
+	var started := false
+	var tl_lines: PackedStringArray = []
+	for item in Game.state.era_timeline():
+		var e: Dictionary = item["era"]
+		if e["eraId"] == chaos_era:
+			started = true
+		if started and item["changed"]:
+			tl_lines.append("■ %s　%s" % [e["eraName"], " ".join(item["lines"])])
+	if not tl_lines.is_empty():
+		var tp := JSUI.panel(JSUI.sb(Color(JSUI.CYAN, 0.06), 12, 0, Color.TRANSPARENT, 0, 18))
+		var tst: StyleBoxFlat = tp.get_theme_stylebox("panel")
+		tst.border_width_left = 6; tst.border_color = JSUI.CYAN
+		var tv := JSUI.vbox(6)
+		tp.add_child(tv)
+		tv.add_child(JSUI.label("その後の歴史", 20, JSUI.CYAN, JSUI.sans_bold()))
+		for t in tl_lines.slice(0, 4):
+			tv.add_child(JSUI.label(t, 21, JSUI.TEXT, null, true))
+		left.add_child(tp)
+		JSUI.fade_in(tp, 0.5, 0.6 + chaos_hits.size() * 0.3)
+	# 得点
+	var sc := JSUI.hbox(18)
+	var new_score := Game.state.score()
+	var delta := new_score - score_before
+	sc.add_child(JSUI.label("得点", 26, JSUI.MUTED))
+	sc.add_child(JSUI.label("%d点" % score_before, 40, JSUI.MUTED, JSUI.serif_bold()))
+	sc.add_child(JSUI.label("→", 40, JSUI.MUTED))
+	_score_l = JSUI.label("%d点" % new_score, 64, JSUI.GOLD if delta >= 0 else JSUI.SHU, JSUI.serif_bold())
+	sc.add_child(_score_l)
+	sc.add_child(JSUI.label("（%s%d）" % ["+" if delta >= 0 else "", delta], 34, JSUI.CYAN if delta >= 0 else JSUI.SHU, JSUI.sans_bold()))
+	for c in sc.get_children():
+		(c as Label).size_flags_vertical = Control.SIZE_SHRINK_END
+	left_col.add_child(sc)
+	if not broken.is_empty():
+		left_col.add_child(JSUI.label("混乱のせいで %d 問の確定解答が崩れた。ハブから時空跳躍して史実を修復しよう（古い時代から直すのが近道）。" % broken.size(), 22, JSUI.SHU, null, true))
+	elif Game.state.exam_submitted:
+		left_col.add_child(JSUI.label("確定解答は無事だった。……今のところは。", 22, JSUI.CYAN, null, true))
+	# 右：因果の連鎖
+	var right := JSUI.panel()
+	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var rv := JSUI.vbox(12)
+	right.add_child(rv)
+	var rh := JSUI.hbox(12)
+	rh.add_child(JSUI.label("書き換わった設問", 28, JSUI.SHU, JSUI.serif_bold()))
+	rh.add_child(JSUI.spacer())
+	rh.add_child(JSUI.label("%d 問" % changes.size(), 22, JSUI.MUTED, JSUI.sans_bold()))
+	rv.add_child(rh)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	rv.add_child(scroll)
+	_chain_box = JSUI.vbox(10)
+	_chain_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(_chain_box)
+	if changes.is_empty():
+		_chain_box.add_child(JSUI.label("試験の設問の史実は変わらなかった。だが、その後の歴史の流れは確かに変わっている。", 22, JSUI.MUTED, null, true))
+	for i in changes.size():
+		var row := _chain_row(changes[i])
+		_chain_box.add_child(row)
+		JSUI.fade_in(row, 0.35, 0.7 + i * 0.3)
+	body.add_child(right)
+	var row2 := JSUI.hbox()
+	row2.alignment = BoxContainer.ALIGNMENT_END
+	var hub := JSUI.button("ハブへ" if Game.state.exam_submitted else "戻る", "primary", 28, 300)
+	hub.add_theme_font_override("font", JSUI.serif_bold())
+	hub.pressed.connect(func(): UISfx.play("confirm"); to_hub.emit())
+	row2.add_child(hub)
+	v.add_child(row2)
+	hub.call_deferred("grab_focus")
+
+
 func _chain_row(c: Dictionary) -> Control:
 	var cq: Dictionary = c["question"]
 	var depth := int(c["depth"])
@@ -186,16 +315,20 @@ func _chain_row(c: Dictionary) -> Control:
 	p.add_child(v)
 	var h := JSUI.hbox(10)
 	v.add_child(h)
-	h.add_child(JSUI.pill("直接改変" if depth == 0 else "連鎖 %d" % depth, Color(col, 0.22), col, 16))
+	var is_chaos: bool = c.get("chaos", false)
+	h.add_child(JSUI.pill(("時空の混乱" if is_chaos else "直接改変") if depth == 0 else ("混乱の波及" if is_chaos else "連鎖 %d" % depth), Color(col, 0.22), col, 16))
 	var t := JSUI.label("%s『%s』" % [JSUI.year_text(cq["year"]), cq["topic"]], 22, Color.WHITE, JSUI.sans_bold())
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	h.add_child(t)
 	var ok := Game.state.is_correct(cq)
-	h.add_child(JSUI.label("✓" if ok else "×", 28, JSUI.CYAN if ok else JSUI.SHU, JSUI.sans_bold()))
+	if Game.state.answer(cq) < 0:
+		h.add_child(JSUI.label("－", 28, JSUI.MUTED, JSUI.sans_bold()))
+	else:
+		h.add_child(JSUI.label("✓" if ok else "×", 28, JSUI.CYAN if ok else JSUI.SHU, JSUI.sans_bold()))
 	var from := int(c["from"]); var to := int(c["to"])
 	v.add_child(JSUI.label("%s %s　→　%s %s" % [JSUI.circled(from), cq["choices"][from], JSUI.circled(to), cq["choices"][to]], 19, JSUI.TEXT, null, true))
-	if depth > 0:
+	if depth > 0 or c.get("chaos", false):
 		v.add_child(JSUI.label(String(c.get("cause", "")), 18, JSUI.MUTED, null, true))
 	return p
 

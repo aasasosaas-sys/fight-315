@@ -152,7 +152,7 @@ static func time_warp(tree: SceneTree, pos: Vector3) -> void:
 
 
 ## 爆発：範囲ダメージ・物理インパルス・誘爆・町人パニック・手配度上昇
-static func explosion(tree: SceneTree, pos: Vector3, radius: float, damage: float, from_team: int) -> void:
+static func explosion(tree: SceneTree, pos: Vector3, radius: float, damage: float, from_team: int, fire_chance := 0.2) -> void:
 	burst(tree, pos, Vector3.UP, Color(1, 0.62, 0.18), Color(1, 0.2, 0.05), 70, 14.0, 1.6, 0.7, -0.2, true, 180)
 	burst(tree, pos, Vector3.UP, Color(0.22, 0.2, 0.19, 0.85), Color(0.4, 0.38, 0.35), 34, 5.0, 4.5, 3.2, -0.08, false, 90)
 	burst(tree, pos, Vector3.UP, Color(1, 0.88, 0.45), Color.WHITE, 40, 24.0, 0.14, 1.3, 1.5, true, 180)
@@ -168,6 +168,8 @@ static func explosion(tree: SceneTree, pos: Vector3, radius: float, damage: floa
 	qp.shape = shape
 	qp.transform = Transform3D(Basis(), pos)
 	qp.collide_with_areas = false
+	# 地形・建物（WORLD）と破片は除外：建物の被害は Destruction が空間索引で処理する
+	qp.collision_mask = 0xFFFF & ~(1 | 64)
 	var done := {}
 	for hit in space.intersect_shape(qp, 64):
 		var obj: Object = hit["collider"]
@@ -189,6 +191,7 @@ static func explosion(tree: SceneTree, pos: Vector3, radius: float, damage: floa
 		if target and target.has_method("panic"):
 			target.panic(pos)
 	Wanted.report(pos, 0.9)
+	Destruction.blast_at(tree, pos, radius, damage, from_team, fire_chance)
 
 
 ## 当たったコライダーから take_hit を持つノードを親方向に探す

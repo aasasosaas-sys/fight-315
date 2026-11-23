@@ -3,7 +3,7 @@ extends Node3D
 ##   xvfb-run -a -s "-screen 0 1920x1080x24" godot --path . --rendering-driver vulkan --resolution 1600x900 res://tests/shot_faces.tscn
 ## 書き出し: faces_full.png（全身 12x2）, faces_close.png（顔 8x3）, faces_34.png（顔 斜め 8x3）
 ## 環境変数: SHOT_OUT（出力先, 末尾 /）, SHOT_TAG（接頭辞, 既定 faces）, NO_FACE=1（AnimeFace なしで比較）,
-##           FACE_SEED（種のずらし）, FACE_ONLY="0,3,5"（番号を絞る）
+##           FACE_SEED（種のずらし）, FACE_ONLY="0,3,5"（番号を絞る）, FACE_FIXED='{"beard":"mustache"}'（上書き）
 const OUT_DEFAULT := "/tmp/claude-0/-home-user-fight-315/d60522a2-6e99-536b-9a07-fc183994e33b/scratchpad/shots/"
 
 ## [素体, 服装, 髪型, 年齢, 明治以降]
@@ -53,6 +53,9 @@ func _ready() -> void:
 	if OS.get_environment("FACE_ONLY") != "":
 		for s in OS.get_environment("FACE_ONLY").split(","):
 			only.append(int(s))
+	var fixed := {}
+	if OS.get_environment("FACE_FIXED") != "":
+		fixed = JSON.parse_string(OS.get_environment("FACE_FIXED"))
 	_env()
 	var x := 0.0
 	var t0 := Time.get_ticks_msec()
@@ -68,7 +71,7 @@ func _ready() -> void:
 		var p := {}
 		if not no_face:
 			var t1 := Time.get_ticks_msec()
-			p = AnimeFace.apply(n, 1000 + i * 37 + seed_off, {"age": String(c[3]), "female": female, "modern": bool(c[4])})
+			p = AnimeFace.apply(n, 1000 + i * 37 + seed_off, {"age": String(c[3]), "female": female, "modern": bool(c[4]), "fixed": fixed})
 			print("[%d] %s %s %s %s  (%d ms)" % [i, c[0], c[1], c[2], c[3], Time.get_ticks_msec() - t1])
 			var keys := p.keys()
 			keys.sort()
@@ -102,8 +105,8 @@ func _ready() -> void:
 		var fr0 := _facing(chars[ci][1], "Hips")
 		var base_p: Vector3 = Vector3(fr0[0].x, 0.0, fr0[0].z)
 		var fwd0: Vector3 = fr0[1]
-		cam.position = base_p + Vector3(0, 0.88, 0) + fwd0 * 3.6
-		cam.look_at(base_p + Vector3(0, 0.8, 0))
+		cam.position = base_p + Vector3(0, 0.95, 0) + fwd0 * 4.4
+		cam.look_at(base_p + Vector3(0, 0.85, 0))
 		for f in 3:
 			await get_tree().process_frame
 		sheet.blit_rect(_crop(tw, th), Rect2i(0, 0, tw, th), Vector2i((ci % cols) * tw, (ci / cols) * th))
@@ -118,12 +121,12 @@ func _ready() -> void:
 		cam.fov = 20
 		for ci in chars.size():
 			var sk: Skeleton3D = chars[ci][1]
-			var fr := _facing(sk, "Head")
-			var hp: Vector3 = fr[0]
-			var fwd: Vector3 = fr[1]
+			var hf := _facing(sk, "Head")
+			var hp: Vector3 = hf[0]
+			var fwd: Vector3 = hf[1]
 			var hs: float = sk.global_transform.basis.get_scale().x
-			var look := hp + Vector3(0, 0.07 * hs, 0)
-			var dist := 0.62 * maxf(hs, 0.8) * (1.15 if String(CAST[chars[ci][2]][3]) == "child" else 1.0)
+			var look := hp + Vector3(0, 0.035 * hs, 0)
+			var dist := 0.95 * maxf(hs, 0.8) * (1.15 if String(CAST[chars[ci][2]][3]) == "child" else 1.0)
 			var ang := 0.0 if view == "close" else deg_to_rad(35.0)
 			cam.position = look + fwd.rotated(Vector3.UP, ang) * dist + Vector3(0, 0.02, 0)
 			cam.look_at(look)

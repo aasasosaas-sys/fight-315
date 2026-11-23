@@ -1,0 +1,209 @@
+{
+ "eraId": "showa",
+ "figures": [
+  {
+   "name": "松岡洋右",
+   "at": "capital",
+   "guards": 3,
+   "guard": "外務省の警備員",
+   "lines": [
+    "我が代表堂々退場す…の予定であります。"
+   ]
+  },
+  {
+   "name": "米内光政",
+   "at": "castle",
+   "guards": 3,
+   "guard": "海軍の衛兵",
+   "lines": [
+    "三国同盟には反対です。"
+   ]
+  },
+  {
+   "name": "十河信二",
+   "at": "port",
+   "guards": 2,
+   "guard": "国鉄の職員",
+   "lines": [
+    "新幹線は必ず造る。狭軌の時代は終わりだ。"
+   ]
+  },
+  {
+   "name": "下村治",
+   "at": "castle",
+   "guards": 2,
+   "guard": "大蔵省の守衛",
+   "lines": [
+    "日本経済は、まだまだ伸びます。"
+   ]
+  }
+ ],
+ "rules": [
+  {
+   "id": "sh_kill_matsuoka",
+   "title": "全権、退場せず",
+   "trigger": {
+    "kind": "kill",
+    "id": "松岡洋右"
+   },
+   "vars": {
+    "militarism": -25,
+    "open_west": 15
+   },
+   "year": 1932,
+   "text": "強硬派の全権・松岡洋右が倒れ、ジュネーヴの空気は一変した。代わりの代表は粘り強く交渉し、勧告案は否決。日本は連盟にとどまった。"
+  },
+  {
+   "id": "sh_kill_yonai",
+   "title": "海軍の良識、失われる",
+   "trigger": {
+    "kind": "kill",
+    "id": "米内光政"
+   },
+   "vars": {
+    "militarism": 15
+   },
+   "year": 1939,
+   "text": "三国同盟に反対していた米内光政が倒れ、軍部の暴走に歯止めがかからなくなった。"
+  },
+  {
+   "id": "sh_kill_sogo",
+   "title": "新幹線の父、不在",
+   "trigger": {
+    "kind": "kill",
+    "id": "十河信二"
+   },
+   "vars": {
+    "tech": -20,
+    "economy": -10
+   },
+   "year": 1958,
+   "text": "「新幹線の父」十河信二が倒れ、東海道新幹線の計画は「狭軌で十分」と立ち消えに。日本の鉄道技術は世界をリードしそこねた。"
+  },
+  {
+   "id": "sh_kill_shimomura",
+   "title": "所得倍増、幻に",
+   "trigger": {
+    "kind": "kill",
+    "id": "下村治"
+   },
+   "vars": {
+    "economy": -30
+   },
+   "year": 1959,
+   "text": "池田内閣の経済ブレーン・下村治が倒れ、国民所得倍増計画は作られなかった。高度経済成長は失速し、日本は長い停滞の時代に入った。"
+  },
+  {
+   "id": "sh_destroy_boj",
+   "title": "日本銀行、崩壊",
+   "trigger": {
+    "kind": "destroy",
+    "id": "castle",
+    "value": 800
+   },
+   "vars": {
+    "economy": -20,
+    "commoners": -10
+   },
+   "year": 1927,
+   "text": "日本銀行の本店が崩れ落ちた。金融恐慌のさなかに銀行の銀行が消え、取付け騒ぎは収まるどころか全国に飛び火した。"
+  },
+  {
+   "id": "sh_destroy_diet",
+   "title": "議事堂、崩落",
+   "trigger": [
+    {
+     "kind": "destroy",
+     "id": "capital",
+     "type": "monument"
+    },
+    {
+     "kind": "destroy",
+     "id": "capital",
+     "value": 1600
+    }
+   ],
+   "vars": {
+    "democracy": -20,
+    "militarism": 15
+   },
+   "year": 1936,
+   "text": "1936年に完成したばかりの国会議事堂が崩れた。議会政治はますます弱まり、軍部の発言力が強まった。"
+  },
+  {
+   "id": "sh_sink_fleet",
+   "title": "艦隊、壊滅",
+   "trigger": {
+    "kind": "sink",
+    "min": 3
+   },
+   "vars": {
+    "militarism": -30,
+    "open_west": 10
+   },
+   "year": 1940,
+   "text": "開戦前に艦隊が沈められ、海軍は「これでは戦えない」と頭を抱えた。日米開戦の決断は大きく揺らぎ、和平を求める声が強まった。"
+  },
+  {
+   "id": "sh_destroy_airfield",
+   "title": "飛行場、全滅",
+   "trigger": {
+    "kind": "destroy",
+    "type": [
+     "hangar",
+     "airfield"
+    ]
+   },
+   "vars": {
+    "militarism": -20,
+    "tech": -10
+   },
+   "year": 1940,
+   "text": "飛行場の格納庫が壊滅した。航空戦力を失った軍部は強気の作戦を立てられず、対外強硬論はしぼんだ。"
+  },
+  {
+   "id": "sh_massacre",
+   "title": "憲兵隊、壊滅",
+   "trigger": {
+    "kind": "kill",
+    "type": "soldier",
+    "min": 30
+   },
+   "vars": {
+    "militarism": -25,
+    "democracy": 20
+   },
+   "year": 1935,
+   "text": "恐れられた憲兵隊が謎の人物に蹴散らされた。言論への締めつけがゆるみ、軍部に物申す議員や新聞が次々と現れた。"
+  },
+  {
+   "id": "sh_destroy_yokohama",
+   "title": "大さん橋、崩落",
+   "trigger": {
+    "kind": "destroy",
+    "id": "port",
+    "value": 400
+   },
+   "vars": {
+    "open_west": -15,
+    "economy": -10
+   },
+   "year": 1950,
+   "text": "横浜港の大さん橋が崩れ、外国航路の客船も貨物船も入れなくなった。戦後の貿易の再開は大きく遅れた。"
+  },
+  {
+   "id": "sh_destroy_meiji_jingu",
+   "title": "明治神宮、倒壊",
+   "trigger": {
+    "kind": "destroy",
+    "id": "temple",
+    "value": 200
+   },
+   "vars": {
+    "unity": -15
+   },
+   "year": 1940,
+   "text": "明治神宮の社殿が崩れ、人々の心のよりどころが一つ失われた。国内には不安と動揺が広がった。"
+  }
+ ]
+}

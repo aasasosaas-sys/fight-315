@@ -44,6 +44,13 @@ var _banner: Label
 var _hit_t := 0.0
 var _vig := 0.0
 var _bold: Font
+var _shift: PanelContainer        # 「歴史が揺らいだ！」通知
+var _shift_head: Label
+var _shift_text: Label
+var _shift_detail: Label
+var _shift_fx: ColorRect          # 画面のゆらぎ（色収差風の走査線）
+var _shift_queue: Array = []
+var _shift_busy := false
 
 
 func _ready() -> void:
@@ -173,6 +180,7 @@ func _ready() -> void:
 	_dialog.visible = false
 	_root.add_child(_dialog)
 
+	_build_shift()
 	_build_pause()
 	_build_death()
 
@@ -222,6 +230,57 @@ func _button(parent: Node, t: String, cb: Callable) -> Button:
 	b.pressed.connect(cb)
 	parent.add_child(b)
 	return b
+
+
+func _build_shift() -> void:
+	_shift_fx = ColorRect.new()
+	_shift_fx.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_shift_fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var sh := Shader.new()
+	sh.code = """shader_type canvas_item;
+uniform float amount = 0.0;
+uniform vec4 tint : source_color = vec4(0.37, 0.91, 1.0, 1.0);
+uniform sampler2D screen_tex : hint_screen_texture, filter_linear;
+void fragment() {
+	float wob = sin(UV.y * 90.0 + TIME * 40.0) * 0.004 * amount;
+	float band = step(0.82, fract(UV.y * 6.0 - TIME * 1.7)) * amount;
+	vec2 off = vec2(0.006 * amount + wob + band * 0.012, 0.0);
+	vec3 c;
+	c.r = texture(screen_tex, SCREEN_UV + off).r;
+	c.g = texture(screen_tex, SCREEN_UV).g;
+	c.b = texture(screen_tex, SCREEN_UV - off).b;
+	float edge = smoothstep(0.35, 0.8, length(UV - 0.5) * 1.3);
+	c = mix(c, tint.rgb, (edge * 0.45 + band * 0.12) * amount);
+	COLOR = vec4(c, 1.0);
+}"""
+	var sm := ShaderMaterial.new()
+	sm.shader = sh
+	_shift_fx.material = sm
+	_shift_fx.visible = false
+	_root.add_child(_shift_fx)
+	_shift = PanelContainer.new()
+	_shift.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_shift.position = Vector2(-560, 200)
+	_shift.custom_minimum_size = Vector2(1120, 0)
+	_shift.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_shift.add_theme_stylebox_override("panel", _box(Color(0.05, 0.03, 0.09, 0.9), CYAN))
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 6)
+	_shift.add_child(v)
+	_shift_head = _label("歴史が揺らいだ！", 54, CYAN, v)
+	_shift_head.add_theme_font_override("font", load("res://assets/fonts/NotoSerifJP-Bold.ttf"))
+	_shift_head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_shift_head.add_theme_constant_override("outline_size", 12)
+	_shift_head.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	_shift_text = _label("", 25, Color.WHITE, v)
+	_shift_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_shift_text.custom_minimum_size = Vector2(1080, 0)
+	_shift_detail = _label("", 23, GOLD, v)
+	_shift_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_shift_detail.custom_minimum_size = Vector2(1080, 0)
+	_shift_detail.add_theme_font_override("font", _bold)
+	_shift.visible = false
+	_root.add_child(_shift)
 
 
 func _build_pause() -> void:
@@ -304,6 +363,58 @@ func banner(t: String, color := GOLD, dur := 3.0) -> void:
 	tw.tween_property(_banner, "modulate:a", 1.0, 0.3)
 	tw.tween_interval(dur)
 	tw.tween_property(_banner, "modulate:a", 0.0, 0.6)
+
+
+## 自由探索の混乱で歴史が変わったときの派手な通知。text の1行目が見出し、detail は設問の ○× 一覧。
+## broke_answer = true なら確定解答が崩れた（赤）、false なら青。
+func history_shift(text: String, broke_answer: bool, detail := "") -> void:
+	_shift_queue.append([text, broke_answer, detail])
+	if not _shift_busy:
+		_next_shift()
+
+
+func is_history_shift_showing() -> bool:
+	return _shift_busy
+
+
+func _next_shift() -> void:
+	if _shift_queue.is_empty():
+		_shift_busy = false
+		return
+	_shift_busy = true
+	var item: Array = _shift_queue.pop_front()
+	var broke: bool = item[1]
+	var col := RED if broke else CYAN
+	_shift_head.text = "歴史が揺らいだ！" + ("　―　解答が崩れた！" if broke else "")
+	_shift_head.add_theme_color_override("font_color", Color(1, 0.45, 0.4) if broke else CYAN)
+	(_shift.get_theme_stylebox("panel") as StyleBoxFlat).border_color = col
+	_shift_text.text = item[0]
+	_shift_detail.text = item[2]
+	_shift_detail.visible = item[2] != ""
+	_shift.visible = true
+	_shift.modulate.a = 0.0
+	_shift.pivot_offset = Vector2(560, 60)
+	_shift.scale = Vector2(1.35, 1.35)
+	var base_x := _shift.position.x
+	var tw := _shift.create_tween()
+	tw.tween_property(_shift, "modulate:a", 1.0, 0.15)
+	tw.parallel().tween_property(_shift, "scale", Vector2.ONE, 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	for i in 6:
+		tw.tween_property(_shift, "position:x", base_x + (14.0 if i % 2 == 0 else -14.0) * (1.0 - i / 6.0), 0.04)
+	tw.tween_property(_shift, "position:x", base_x, 0.04)
+	tw.tween_interval(5.5)
+	tw.tween_property(_shift, "modulate:a", 0.0, 0.6)
+	tw.tween_callback(func():
+		_shift.visible = false
+		_next_shift())
+	# 画面のゆらぎ
+	var sm := _shift_fx.material as ShaderMaterial
+	sm.set_shader_parameter("tint", Color(1, 0.3, 0.25) if broke else CYAN)
+	_shift_fx.visible = true
+	var fx := _shift_fx.create_tween()
+	fx.tween_method(func(x: float): sm.set_shader_parameter("amount", x), 1.0, 0.0, 1.8).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	fx.tween_callback(func(): _shift_fx.visible = false)
+	Sfx.play(get_tree(), Sfx.warp(), -6.0)
 
 
 func damage_flash(amount: float) -> void:

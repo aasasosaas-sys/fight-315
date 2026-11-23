@@ -1,0 +1,221 @@
+{
+ "eraId": "sengoku",
+ "figures": [
+  {
+   "name": "織田信長",
+   "at": "village",
+   "guards": 5,
+   "guard": "織田家の馬廻",
+   "lines": [
+    "是非に及ばず。",
+    "で、あるか。…そなた、南蛮の者か？"
+   ]
+  },
+  {
+   "name": "羽柴秀吉",
+   "at": "mountain",
+   "guards": 4,
+   "guard": "羽柴家の足軽",
+   "lines": [
+    "上様の仇は、この秀吉が討つ！"
+   ]
+  },
+  {
+   "name": "種子島時堯",
+   "at": "port",
+   "guards": 2,
+   "guard": "種子島家の侍",
+   "lines": [
+    "この南蛮の筒、二千両でも安いものよ。"
+   ]
+  },
+  {
+   "name": "石田三成",
+   "at": "castle",
+   "guards": 4,
+   "guard": "石田家の兵",
+   "lines": [
+    "内府殿の専横、もはや見過ごせぬ。"
+   ]
+  },
+  {
+   "name": "小早川秀秋",
+   "at": "battlefield",
+   "guards": 4,
+   "guard": "小早川家の兵",
+   "lines": [
+    "東につくか、西につくか…。"
+   ]
+  }
+ ],
+ "rules": [
+  {
+   "id": "sg_kill_nobunaga",
+   "title": "信長、本能寺の前に死す",
+   "trigger": {
+    "kind": "kill",
+    "id": "織田信長"
+   },
+   "force": {
+    "q": "sengoku_05",
+    "choice": 3
+   },
+   "text": "あなたのせいで織田信長が本能寺の変より前に倒れた。主を失った織田家は分裂し、将軍足利義昭を奉じた毛利輝元が上洛。天下統一は室町幕府の再興という形で進むことになった。"
+  },
+  {
+   "id": "sg_kill_hideyoshi",
+   "title": "中国大返し、起きず",
+   "trigger": {
+    "kind": "kill",
+    "id": "羽柴秀吉"
+   },
+   "force": {
+    "q": "sengoku_05",
+    "choice": 2
+   },
+   "text": "羽柴秀吉が倒れ、備中から京へ大急ぎで引き返す者はいなかった。山崎の戦いで勝ったのは明智光秀。光秀は征夷大将軍となり、京都に幕府を開いた。"
+  },
+  {
+   "id": "sg_kill_tokitaka",
+   "title": "鉄砲、買われず",
+   "trigger": {
+    "kind": "kill",
+    "id": "種子島時堯"
+   },
+   "force": {
+    "q": "sengoku_01",
+    "choice": 3
+   },
+   "text": "二千両で鉄砲を買い、刀鍛冶に複製させるはずの種子島時堯が倒れた。国産の鉄砲は生まれず、戦国大名は高価な輸入品の鉄砲を奪い合うことになった。"
+  },
+  {
+   "id": "sg_sink_namban",
+   "title": "南蛮船、撃沈",
+   "trigger": {
+    "kind": "sink",
+    "min": 1
+   },
+   "force": {
+    "q": "sengoku_01",
+    "choice": 1
+   },
+   "text": "ポルトガル人を乗せた船が種子島で沈められ、鉄砲の伝来は半世紀以上も遅れた。日本に鉄砲をもたらしたのは、のちに平戸へ来たオランダ人。製法は島津氏の門外不出となった。"
+  },
+  {
+   "id": "sg_fire_kyoto",
+   "title": "本能寺、先に焼ける",
+   "trigger": {
+    "kind": "fire",
+    "at": "capital",
+    "min": 5
+   },
+   "force": {
+    "q": "sengoku_05",
+    "choice": 0
+   },
+   "text": "あなたが京の町を燃やしたせいで、本能寺は信長が泊まる前に焼け落ちていた。宿所を変えた信長は光秀の襲撃をかわして安土へ戻り、そのまま天下統一を成し遂げてしまった。"
+  },
+  {
+   "id": "sg_destroy_azuchi",
+   "title": "安土城下、壊滅",
+   "trigger": {
+    "kind": "destroy",
+    "id": "village",
+    "value": 300
+   },
+   "force": {
+    "q": "sengoku_02",
+    "choice": 2
+   },
+   "vars": {
+    "commerce": -15
+   },
+   "year": 1578,
+   "text": "安土の城下町が壊された。復興の資金に困った信長は、楽市どころか座の商人から冥加金をとって商売を独占させた。自由な商売の町は生まれなかった。"
+  },
+  {
+   "id": "sg_destroy_osaka",
+   "title": "大坂城、崩落",
+   "trigger": [
+    {
+     "kind": "destroy",
+     "id": "castle",
+     "type": "castle_keep"
+    },
+    {
+     "kind": "destroy",
+     "id": "castle",
+     "value": 600
+    }
+   ],
+   "vars": {
+    "centralization": -20,
+    "unity": -35
+   },
+   "year": 1590,
+   "text": "天下人の城・大坂城が崩れ落ち、豊臣政権は拠点を失った。諸大名の結束はガタガタになり、西軍の顔ぶれもすっかり変わってしまった。"
+  },
+  {
+   "id": "sg_kill_mitsunari",
+   "title": "三成なき関ヶ原",
+   "trigger": {
+    "kind": "kill",
+    "id": "石田三成"
+   },
+   "force": {
+    "q": "sengoku_04",
+    "choice": 0
+   },
+   "text": "石田三成が倒れ、家康に反発する豊臣恩顧の大名たちは加藤清正を旗頭に担ぎ上げた。三成と犬猿の仲だった清正が西軍を率いるとは、誰も予想していなかった。"
+  },
+  {
+   "id": "sg_kill_hideaki",
+   "title": "裏切り者、現れず",
+   "trigger": {
+    "kind": "kill",
+    "id": "小早川秀秋"
+   },
+   "vars": {
+    "set": {
+     "ruler": "豊臣",
+     "capital": "大坂"
+    },
+    "unity": -10
+   },
+   "year": 1600,
+   "text": "関ヶ原で東軍に寝返るはずの小早川秀秋が倒れた。松尾山の大軍は西軍のまま踏みとどまり、豊臣秀頼のもと大坂の政権が続いた。江戸幕府は……あれ？"
+  },
+  {
+   "id": "sg_massacre",
+   "title": "一向一揆、燃え広がる",
+   "trigger": {
+    "kind": "kill",
+    "type": "soldier",
+    "min": 30
+   },
+   "vars": {
+    "commoners": 30,
+    "religion": 30,
+    "unity": -10
+   },
+   "year": 1570,
+   "text": "足軽たちが謎の荒武者に次々と討ち取られ、大名の軍は張り子の虎だと噂が立った。本願寺の門徒は各地で一斉に一揆を起こし、「百姓の持ちたる国」が次々と生まれた。"
+  },
+  {
+   "id": "sg_destroy_nanbanji",
+   "title": "南蛮寺、倒壊",
+   "trigger": {
+    "kind": "destroy",
+    "id": "temple",
+    "type": "hall",
+    "value": 200
+   },
+   "vars": {
+    "open_west": -25,
+    "religion": -10
+   },
+   "year": 1576,
+   "text": "京の南蛮寺が崩れた。宣教師たちは「この国は危険だ」とマカオへ引き揚げ、南蛮貿易もキリスト教の布教も急速にしぼんでいった。"
+  }
+ ]
+}

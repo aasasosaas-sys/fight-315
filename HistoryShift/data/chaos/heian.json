@@ -1,0 +1,236 @@
+{
+ "eraId": "heian",
+ "figures": [
+  {
+   "name": "平将門",
+   "at": "castle",
+   "guards": 4,
+   "guard": "将門の郎党",
+   "lines": [
+    "坂東は坂東の者が治める。新皇とでも呼んでもらおうか。"
+   ]
+  },
+  {
+   "name": "藤原秀郷",
+   "at": "battlefield",
+   "guards": 3,
+   "guard": "秀郷の郎党",
+   "lines": [
+    "将門追討の命、この秀郷が承った。"
+   ]
+  },
+  {
+   "name": "藤原純友",
+   "at": "port",
+   "guards": 3,
+   "guard": "純友の海賊衆",
+   "lines": [
+    "瀬戸内の海は我らのものよ。"
+   ]
+  },
+  {
+   "name": "藤原頼通",
+   "at": "village",
+   "guards": 3,
+   "guard": "摂関家の随身",
+   "lines": [
+    "宇治に極楽浄土を写した御堂を建てようと思う。"
+   ]
+  },
+  {
+   "name": "平清盛",
+   "at": "port",
+   "guards": 4,
+   "guard": "平家の侍",
+   "lines": [
+    "大輪田泊を修築し、宋の船を都の近くまで入れるのだ。"
+   ]
+  }
+ ],
+ "rules": [
+  {
+   "id": "he_kill_hidesato",
+   "title": "将門、討たれず",
+   "trigger": {
+    "kind": "kill",
+    "id": "藤原秀郷"
+   },
+   "force": {
+    "q": "heian_05",
+    "choice": 1
+   },
+   "text": "将門を討つはずの藤原秀郷が倒れた。朝廷の追討軍は坂東で連戦連敗、新皇・平将門の関東政権は何代も続いた。坂東武者の独立心はここに始まる。"
+  },
+  {
+   "id": "he_kill_masakado",
+   "title": "新皇、現れず",
+   "trigger": {
+    "kind": "kill",
+    "id": "平将門"
+   },
+   "vars": {
+    "warrior": -20
+   },
+   "year": 935,
+   "text": "平将門が乱の前に倒れ、坂東の武士は朝廷の番犬のまま牙を抜かれた。地方の武士が力を伸ばす流れは大きく遅れることになる。"
+  },
+  {
+   "id": "he_kill_sumitomo",
+   "title": "瀬戸内、静まる",
+   "trigger": {
+    "kind": "kill",
+    "id": "藤原純友"
+   },
+   "vars": {
+    "warrior": -10,
+    "centralization": 10
+   },
+   "year": 939,
+   "text": "海賊を率いる藤原純友が倒れ、瀬戸内の海は朝廷の手に戻った。武士の手を借りずに済んだ朝廷は「やはり律令の世よ」と胸を張った。"
+  },
+  {
+   "id": "he_kill_yorimichi",
+   "title": "鳳凰堂、建たず",
+   "trigger": {
+    "kind": "kill",
+    "id": "藤原頼通"
+   },
+   "force": {
+    "q": "heian_06",
+    "choice": 0
+   },
+   "text": "藤原頼通が倒れ、宇治の平等院鳳凰堂は建てられなかった。極楽往生を願う人々の心は、貴族の御堂ではなく、ひたすら念仏を唱える新しい教団へと向かっていった。"
+  },
+  {
+   "id": "he_kill_kiyomori",
+   "title": "平氏政権、幻に",
+   "trigger": {
+    "kind": "kill",
+    "id": "平清盛"
+   },
+   "vars": {
+    "warrior": -15,
+    "commerce": -15,
+    "open_asia": -15
+   },
+   "year": 1160,
+   "text": "平清盛が倒れ、武士として初の太政大臣も日宋貿易もまぼろしに。平家の栄華はなく、「平家にあらずんば人にあらず」という言葉も生まれなかった。"
+  },
+  {
+   "id": "he_destroy_owada",
+   "title": "大輪田泊、崩壊",
+   "trigger": {
+    "kind": "destroy",
+    "id": "port",
+    "value": 300
+   },
+   "vars": {
+    "commerce": -20,
+    "open_asia": -15
+   },
+   "year": 1160,
+   "text": "清盛が修築するはずの大輪田泊が壊された。宋の大型船は瀬戸内の奥まで入れず、宋銭も陶磁器も届かない。日宋貿易は細々としたものに終わった。"
+  },
+  {
+   "id": "he_destroy_dairi",
+   "title": "大内裏、焼亡",
+   "trigger": [
+    {
+     "kind": "destroy",
+     "id": "capital",
+     "type": [
+      "hall",
+      "gate"
+     ],
+     "value": 600
+    },
+    {
+     "kind": "fire",
+     "at": "capital",
+     "min": 12
+    }
+   ],
+   "vars": {
+    "court": -20,
+    "centralization": -15
+   },
+   "year": 960,
+   "text": "平安京の大内裏が崩れ落ちた。史実でも960年に内裏が初めて焼けているが、今回は再建の目処も立たない。朝廷の威信は大きく傷ついた。"
+  },
+  {
+   "id": "he_destroy_isawa",
+   "title": "胆沢城、陥落",
+   "trigger": {
+    "kind": "destroy",
+    "id": "castle",
+    "value": 300
+   },
+   "vars": {
+    "militarism": 15,
+    "unity": -15,
+    "warrior": 15
+   },
+   "year": 802,
+   "text": "坂上田村麻呂が築いた胆沢城が崩れ、東北の戦いが再燃した。朝廷は戦慣れした地方の武人を頼らざるを得ず、武士の力が早くから育った。"
+  },
+  {
+   "id": "he_destroy_toji",
+   "title": "東寺、倒壊",
+   "trigger": [
+    {
+     "kind": "destroy",
+     "id": "temple",
+     "type": "pagoda"
+    },
+    {
+     "kind": "destroy",
+     "id": "temple",
+     "value": 550
+    }
+   ],
+   "vars": {
+    "religion": -20
+   },
+   "year": 823,
+   "text": "空海が嵯峨天皇から賜った東寺が崩れた。真言密教の都の拠点が失われ、鎮護国家の祈りは頼りないものになった。"
+  },
+  {
+   "id": "he_burn_hiei",
+   "title": "比叡山、焼き討ち（770年早い）",
+   "trigger": [
+    {
+     "kind": "destroy",
+     "id": "mountain",
+     "value": 200
+    },
+    {
+     "kind": "fire",
+     "at": "mountain",
+     "min": 5
+    }
+   ],
+   "vars": {
+    "religion": -30,
+    "education": -10
+   },
+   "year": 800,
+   "text": "比叡山延暦寺が燃えた。織田信長より770年も早い焼き討ちである。最澄が開いた天台の学問所が失われ、のちに法然・親鸞・日蓮らを育てる「日本仏教の母山」は存在しなくなった。"
+  },
+  {
+   "id": "he_massacre",
+   "title": "検非違使、壊滅",
+   "trigger": {
+    "kind": "kill",
+    "type": "soldier",
+    "min": 30
+   },
+   "vars": {
+    "warrior": 30,
+    "unity": -15,
+    "centralization": -20
+   },
+   "year": 930,
+   "text": "都の治安を守る検非違使が謎の人物に蹴散らされた。貴族たちは身を守るため競って地方の武士を雇い、坂東では武士団が朝廷の言うことを聞かなくなった。"
+  }
+ ]
+}

@@ -19,6 +19,7 @@ var hud: Hud
 var runner: MissionRunner
 var wanted: Wanted
 var _ended := false
+var figures: Array = []    # 自由探索に現れる歴史上の人物（HistFigure）
 
 
 static func start_mission(q: Dictionary, p_choice: int, p_method := 0) -> Session:
@@ -121,8 +122,62 @@ func _ready() -> void:
 		runner.start()
 	else:
 		hud.banner(era["eraName"] + "　自由探索", Color(0.37, 0.91, 1.0), 2.5)
-		hud.set_objective("自由探索", "好きに暴れろ。乗り物は F で奪える。Esc でメニュー。", "")
+		hud.set_objective("自由探索", "好きに暴れろ。乗り物は F で奪える。Esc でメニュー。\n※ 人物を倒したり名所を壊したりすると、歴史が変わってしまうかも……", "")
 		hud.toast("馬・車・飛行機を探して乗り回せ！", 4.0)
+		_begin_chaos()
+
+
+# ------------------------------------------------------------------ 自由探索の「歴史の揺らぎ」
+func _begin_chaos() -> void:
+	if Game.chaos == null:
+		return
+	Game.chaos.begin_session(era["eraId"], world)
+	if not Game.chaos.shifted.is_connected(_on_history_shift):
+		Game.chaos.shifted.connect(_on_history_shift)
+	_spawn_figures()
+
+
+func _spawn_figures() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(era.get("eraId", "")) + 31
+	for spec in Game.chaos.figures_for(era["eraId"]):
+		var key: String = spec.get("at", "capital")
+		var center: Vector3 = world.landmark_pos(key)
+		var pos: Vector3 = world.random_ground_point_near(center, 9.0, rng)
+		var f := HistFigure.spawn(self, pos + Vector3.UP * 0.5, str(spec.get("name", "人物")), era["eraId"], spec.get("lines", []))
+		figures.append(f)
+		var label: String = spec.get("guard", Wanted.GUARDS.get(era["eraId"], "護衛"))
+		for i in int(spec.get("guards", 0)):
+			var ang := TAU * i / maxf(1.0, float(spec.get("guards", 1)))
+			var gp: Vector3 = world.random_ground_point_near(pos + Vector3(cos(ang), 0, sin(ang)) * 4.0, 1.5, rng)
+			var e := Enemy.spawn(self, gp + Vector3.UP * 0.5, label, era["eraId"], i == 0 and int(spec.get("guards", 0)) >= 4)
+			e.aggro_range = 16.0
+			f.guards.append(e)
+		hud.compass_points["◆" + f.figure_name] = pos
+	hud.extra_markers = figures.duplicate()
+
+
+## 自由探索中に混乱ルールが発動した：派手に知らせる
+func _on_history_shift(hit: Dictionary) -> void:
+	if hud == null or _ended:
+		return
+	var lines: PackedStringArray = []
+	var number := {}
+	for i in Game.db.questions.size():
+		number[Game.db.questions[i]["id"]] = i + 1
+	var changes: Array = hit.get("changes", [])
+	for c in changes.slice(0, 3):
+		var q: Dictionary = c["question"]
+		var ans := Game.state.answer(q)
+		var mark := "－" if ans < 0 else ("○" if Game.state.is_correct(q) else "×")
+		lines.append("%s 問%02d『%s』の史実 → %s" % [mark, number.get(q["id"], 0), q["topic"], JSUI.circled(int(c["to"]))])
+	if changes.size() > 3:
+		lines.append("……ほか %d 問の史実も連鎖して変化" % (changes.size() - 3))
+	if changes.is_empty():
+		lines.append("（試験の設問の史実は無事。だが、その後の歴史の流れが変わった）")
+	hud.history_shift("%s\n%s" % [hit.get("title", ""), hit.get("text", "")], bool(hit.get("broke", false)), "\n".join(lines))
+	if player:
+		Effects.time_warp(get_tree(), player.global_position)
 
 
 func _spawn_civilians(n: int) -> void:
@@ -207,8 +262,18 @@ func _on_abort() -> void:
 	aborted.emit()
 
 
+func _exit_tree() -> void:
+	# end() を経ずに破棄された場合も、混乱の記録を止める
+	if mode == "free" and Game.chaos and Game.chaos.world == world:
+		Game.chaos.end_session()
+
+
 func end() -> void:
 	_ended = true
+	if mode == "free" and Game.chaos:
+		Game.chaos.end_session()
+		if Game.chaos.shifted.is_connected(_on_history_shift):
+			Game.chaos.shifted.disconnect(_on_history_shift)
 	get_tree().paused = false
 	Wanted.clear()
 	Game.set_world(null)

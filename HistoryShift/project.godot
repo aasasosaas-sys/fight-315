@@ -69,3 +69,7 @@ world_night={
 "type": "float",
 "value": 0.0
 }
+destruct_tex={
+"type": "sampler2D",
+"value": ""
+}

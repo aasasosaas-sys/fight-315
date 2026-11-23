@@ -1,0 +1,229 @@
+{
+ "eraId": "kamakura_muromachi",
+ "figures": [
+  {
+   "name": "北条時宗",
+   "at": "capital",
+   "guards": 4,
+   "guard": "鎌倉の御家人",
+   "lines": [
+    "元の国書には返事をせぬ。九州の守りを固めよ。"
+   ]
+  },
+  {
+   "name": "足利尊氏",
+   "at": "castle",
+   "guards": 4,
+   "guard": "足利家の武者",
+   "lines": [
+    "帝の新政には、武士の恩賞が足りぬ…。"
+   ]
+  },
+  {
+   "name": "楠木正成",
+   "at": "mountain",
+   "guards": 3,
+   "guard": "楠木党",
+   "lines": [
+    "帝のために、この命を捧げましょう。"
+   ]
+  },
+  {
+   "name": "足利義満",
+   "at": "temple",
+   "guards": 4,
+   "guard": "幕府の奉公衆",
+   "lines": [
+    "明と国交を開けば、銅銭がどっさり入るぞ。"
+   ]
+  },
+  {
+   "name": "細川勝元",
+   "at": "castle",
+   "guards": 3,
+   "guard": "細川家の兵",
+   "lines": [
+    "山名殿とは、もはや戦うほかあるまい。"
+   ]
+  },
+  {
+   "name": "山名宗全",
+   "at": "village",
+   "guards": 3,
+   "guard": "山名家の兵",
+   "lines": [
+    "細川の若造に好きにはさせぬ。"
+   ]
+  }
+ ],
+ "rules": [
+  {
+   "id": "km_kill_tokimune",
+   "title": "執権不在の元寇",
+   "trigger": {
+    "kind": "kill",
+    "id": "北条時宗"
+   },
+   "vars": {
+    "unity": -20,
+    "centralization": -15
+   },
+   "year": 1270,
+   "text": "執権・北条時宗が倒れ、元の国書への返事をめぐって鎌倉は大揉めに。御家人の動員も遅れ、幕府の威信は大きく揺らいだ。"
+  },
+  {
+   "id": "km_kill_takauji",
+   "title": "尊氏なき建武の新政",
+   "trigger": {
+    "kind": "kill",
+    "id": "足利尊氏"
+   },
+   "force": {
+    "q": "kamakura_muromachi_06",
+    "choice": 1
+   },
+   "text": "足利尊氏が倒れ、後醍醐天皇に背く有力武士はいなくなった。恩賞に不満な武士たちも結集する旗頭がなく、建武の新政はなんだかんだで長続きした。"
+  },
+  {
+   "id": "km_kill_masashige",
+   "title": "南朝の名将、散る",
+   "trigger": {
+    "kind": "kill",
+    "id": "楠木正成"
+   },
+   "vars": {
+    "court": -15
+   },
+   "year": 1333,
+   "text": "楠木正成が早々に倒れ、天皇方の軍はまとまりを失った。後醍醐天皇の政治を武力で支える者はいなくなった。"
+  },
+  {
+   "id": "km_kill_yoshimitsu",
+   "title": "勘合貿易、先送り",
+   "trigger": {
+    "kind": "kill",
+    "id": "足利義満"
+   },
+   "force": {
+    "q": "kamakura_muromachi_03",
+    "choice": 2
+   },
+   "text": "足利義満が倒れ、明との国交は開かれないままに。勘合貿易が始まったのは、くじ引きで将軍になった足利義教の代になってからだった。"
+  },
+  {
+   "id": "km_kill_onin_lords",
+   "title": "応仁の乱、起こらず？",
+   "trigger": {
+    "kind": "kill",
+    "id": [
+     "細川勝元",
+     "山名宗全"
+    ]
+   },
+   "vars": {
+    "unity": 20,
+    "centralization": 30
+   },
+   "year": 1460,
+   "text": "東軍・西軍の総大将の一人が倒れ、応仁の乱は始まる前にしぼんだ。幕府は有力守護をまとめ直し、京都が焼け野原になることもなかった。"
+  },
+  {
+   "id": "km_destroy_kinkaku",
+   "title": "金閣、倒壊",
+   "trigger": {
+    "kind": "destroy",
+    "id": "temple",
+    "type": "hall",
+    "value": 200
+   },
+   "vars": {
+    "education": -15,
+    "commerce": -10
+   },
+   "year": 1398,
+   "text": "義満の北山殿・金閣が崩れ落ちた。北山文化の象徴を失い、明から招いた禅僧たちの学問所も散り散りに。"
+  },
+  {
+   "id": "km_destroy_rokuhara",
+   "title": "六波羅探題、陥落",
+   "trigger": {
+    "kind": "destroy",
+    "id": "castle",
+    "value": 400
+   },
+   "vars": {
+    "court": 30,
+    "warrior": -20
+   },
+   "year": 1222,
+   "text": "京都で朝廷を見張る六波羅探題が崩された。監視の目がなくなった朝廷は息を吹き返し、西国の御家人は幕府の命令を聞かなくなった。"
+  },
+  {
+   "id": "km_destroy_bori",
+   "title": "博多の守り、崩壊",
+   "trigger": [
+    {
+     "kind": "destroy",
+     "id": "battlefield",
+     "value": 100
+    },
+    {
+     "kind": "destroy",
+     "id": "port",
+     "value": 400
+    }
+   ],
+   "vars": {
+    "unity": -15,
+    "warrior": -10
+   },
+   "year": 1280,
+   "text": "博多の町と湾岸の守りが壊され、石築地（元寇防塁）を築く人手も資材も失われた。弘安の役では元軍がやすやすと上陸した。御家人たちは命がけで戦ったが恩賞はなく、幕府への不満が爆発した。"
+  },
+  {
+   "id": "km_sink",
+   "title": "博多の貿易船、海の藻屑に",
+   "trigger": {
+    "kind": "sink",
+    "min": 3
+   },
+   "vars": {
+    "open_asia": -30,
+    "commerce": -10
+   },
+   "year": 1270,
+   "text": "博多津の唐船が次々と沈められた。「日本に行く船は帰ってこない」と大陸の商人は博多を避け、宋銭も禅僧も届かなくなった。"
+  },
+  {
+   "id": "km_massacre",
+   "title": "武士、恐るるに足らず",
+   "trigger": {
+    "kind": "kill",
+    "type": "soldier",
+    "min": 30
+   },
+   "vars": {
+    "commoners": 30,
+    "religion": 30,
+    "unity": -10
+   },
+   "year": 1420,
+   "text": "侍所の武士が謎の怪人に次々と打ち倒されたと聞き、惣村の百姓や一向宗の門徒は「武士も大したことはない」と悟った。守護を倒す一揆が、史実よりずっと早く各地で起こった。"
+  },
+  {
+   "id": "km_fire_sakamoto",
+   "title": "坂本、炎上",
+   "trigger": {
+    "kind": "fire",
+    "at": "village",
+    "min": 5
+   },
+   "vars": {
+    "commoners": -30,
+    "commerce": -15
+   },
+   "year": 1420,
+   "text": "近江の坂本が燃え、馬借たちは荷も馬も失った。蜂起の口火を切る者がいなくなり、正長の土一揆は起こらなかった。"
+  }
+ ]
+}

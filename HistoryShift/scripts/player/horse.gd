@@ -192,6 +192,8 @@ func _physics_process(dt: float) -> void:
 		for i in get_slide_collision_count():
 			var c := get_slide_collision(i)
 			var o = c.get_collider()
+			if o and o.has_method("ram"):
+				o.ram(absf(speed), fwd * absf(speed), 0.6)
 			if o and o.has_method("take_hit") and o.has_method("is_enemy"):
 				o.take_hit(30.0, 0, c.get_position(), fwd)
 			elif o and o.has_method("panic"):

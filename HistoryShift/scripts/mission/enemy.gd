@@ -112,6 +112,8 @@ func _die() -> void:
 	if is_guardian:
 		Effects.burst(get_tree(), global_position + Vector3.UP, Vector3.UP, Effects.GUARD, Effects.CYAN, 40, 6.0, 0.25, 0.9, -0.2, true, 180)
 	Wanted.report(global_position, 0.35)
+	# 自由探索の「歴史の揺らぎ」：兵の撃破（修正力は数えない）
+	Game.chaos_event.emit("kill", label, {"type": "guardian" if is_guardian else "soldier", "era": era_id, "pos": global_position, "leader": is_leader})
 	killed.emit(self)
 	await get_tree().create_timer(6.0 if not is_guardian else 1.2).timeout
 	if is_inside_tree():

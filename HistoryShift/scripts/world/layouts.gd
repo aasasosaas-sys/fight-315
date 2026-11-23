@@ -248,12 +248,16 @@ func build_all() -> void:
 		_connect_roads(lm)
 		plaza(lm, 0, 0, 13, 13, 0.85)
 		var fn := "_%s_%s" % [key, _era_group(key)]
+		a.landmark = key
 		if has_method(fn):
 			call(fn, lm)
 		a.flush("Arch_" + key)
+	a.landmark = "river"
 	_bridges()
+	a.landmark = "roads"
 	_road_decor()
 	a.flush("Arch_roads")
+	a.landmark = ""
 	_process_ponds()
 	_lamp_lights()
 	# 後から建った建物・池の上の歩行点を除く
@@ -394,6 +398,12 @@ func _house_builder() -> Callable:
 
 # ================================================================ 共通の建物群
 func _raised_hall(xf: Transform3D, wd: float, dp: float, fh: float) -> void:
+	a.begin_unit("hall", xf, {"kind_detail": "raised_hall"})
+	_raised_hall_body(xf, wd, dp, fh)
+	a.end_unit()
+
+
+func _raised_hall_body(xf: Transform3D, wd: float, dp: float, fh: float) -> void:
 	for i in 5:
 		for j in 3:
 			a.cyl("wood", xf, Vector3(-wd * 0.5 + wd * i / 4.0, -0.5, -dp * 0.5 + dp * j / 2.0), 0.3, 0.28, fh + 0.5, 8, Architecture.DARK)
@@ -432,6 +442,7 @@ func _kairo(cs: Array, gates: Array) -> void:
 			var mid := (A + B) * 0.5
 			mid.y = minf(a.ground(A), a.ground(B))
 			var xf := Transform3D(Basis(Vector3.UP, ang), mid)
+			a.begin_unit("wall", xf, {"kind_detail": "kairo"})
 			a.foundation(xf, 4.6, L + 4.6, 0.4)
 			var n := int(L / 3.2)
 			for k in n + 1:
@@ -442,10 +453,17 @@ func _kairo(cs: Array, gates: Array) -> void:
 			a.bx("plaster", xf, Vector3(0, 0.4 + 3.4, 0), Vector3(3.6, 0.25, L + 0.2), Architecture.VERMILION)
 			a.roof(xf * Transform3D(Basis(Vector3.UP, PI * 0.5), Vector3.ZERO), 0.4 + 3.6, L * 0.5 + 1.2, 2.8, 1.3, "gable", "rooftile", Architecture.TILE_DARK, 0.0, Color(0.7, 0.4, 0.3))
 			a.col(xf, Vector3(-1.6, 2.0, 0), Vector3(0.4, 4.0, L))
+			a.end_unit()
 			t.occupy_rect(Vector2(mid.x, mid.z), -ang + PI * 0.5, L * 0.5, 2.2)
 
 
 func _kinkaku(xf: Transform3D) -> void:
+	a.begin_unit("hall", xf, {"kind_detail": "kinkaku"})
+	_kinkaku_body(xf)
+	a.end_unit()
+
+
+func _kinkaku_body(xf: Transform3D) -> void:
 	a.foundation(xf, 13.5, 11.5, 0.6)
 	var gold := Architecture.GOLD
 	# 1 層: 白木と障子

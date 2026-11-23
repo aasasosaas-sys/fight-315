@@ -9,6 +9,7 @@ const FAR_BEGIN := 225.0
 
 var w: EraWorld
 var t: TerrainGen
+var _tree_map := {}   # 木の位置 -> w.tree_defs の添字
 static var _mesh_cache := {}
 static var _mat_cache := {}
 
@@ -188,6 +189,15 @@ func _emit_species(sp: String, xfs: Array) -> void:
 			mm.instance_count = arr.size()
 			for i in arr.size():
 				mm.set_instance_transform(i, arr[i])
+			if sp != "bush":
+				# 倒せる木として登録（Destruction が空間索引を作る）
+				for i in arr.size():
+					var o: Vector3 = (arr[i] as Transform3D).origin
+					if lod == 0:
+						_tree_map[o] = w.tree_defs.size()
+						w.tree_defs.append({"sp": sp, "xf": arr[i], "inst": [[mm, i]], "col": null})
+					elif _tree_map.has(o):
+						w.tree_defs[_tree_map[o]]["inst"].append([mm, i])
 			var mmi := MultiMeshInstance3D.new()
 			mmi.multimesh = mm
 			if lod == 0:
@@ -232,6 +242,8 @@ func _trunk_collisions(list: Array) -> void:
 		c.shape = shapes[r]
 		c.position = p + Vector3(0, 3.5, 0)
 		body.add_child(c)
+		if _tree_map.has(p):
+			w.tree_defs[_tree_map[p]]["col"] = c
 		count += 1
 		if count > 2500:
 			break

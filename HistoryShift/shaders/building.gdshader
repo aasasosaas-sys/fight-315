@@ -4,6 +4,7 @@ shader_type spatial;
 render_mode diffuse_burley;
 
 #include "res://shaders/toon.gdshaderinc"
+#include "res://shaders/destruct.gdshaderinc"
 
 uniform sampler2D albedo_tex : source_color, hint_default_white, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D normal_tex : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
@@ -36,6 +37,7 @@ varying vec3 v_wpos;
 varying vec3 v_wnrm;
 
 void vertex() {
+	destruct_vertex(VERTEX, UV2);
 	v_wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	v_wnrm = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	UV *= uv_scale;
@@ -76,6 +78,16 @@ void fragment() {
 	float above = v_wpos.y - gh;
 	float g = (1.0 - smoothstep(0.0, 1.2, above)) * grime;
 	a = mix(a, a * vec3(0.78, 0.74, 0.8), g * 0.45);
+	vec3 d_emis = vec3(0.0);
+	if (v_dstate.g + v_dstate.b > 0.001 || v_dcut.x < 1e5) {
+		vec2 dp = vec2(dot(v_wpos.xz, vec2(0.71, 0.71)) + v_wpos.y * 0.3, v_wpos.y + dot(v_wpos.xz, vec2(0.6, -0.8)) * 0.5);
+		float n2 = texture(macro_tex, dp * 0.11).r;
+		float n3 = texture(macro_tex, dp * 0.45 + vec2(0.37, 0.11)).r;
+		if (v_dcut.x < 1e5 && v_wpos.y > destruct_jag(n2, n3)) {
+			discard;
+		}
+		a = destruct_albedo(a, v_wpos, texture(macro_tex, v_wpos.xz * 0.05 + v_wpos.y * 0.07).r, n2, n3, d_emis);
+	}
 	ALBEDO = clamp(a, 0.0, 1.0);
 	NORMAL_MAP = mix(texture(normal_tex, UV).rgb, vec3(0.5, 0.5, 1.0), flat_normal);
 	NORMAL_MAP_DEPTH = normal_depth;
@@ -97,7 +109,7 @@ void fragment() {
 	// 夜: 軒下・壁面がほのかに暖色（屋内の灯りの照り返し）
 	float under = smoothstep(0.2, -0.6, v_wnrm.y) * 0.5 + (1.0 - abs(v_wnrm.y)) * 0.15;
 	if (glass < 0.5) {
-		EMISSION = a * vec3(1.0, 0.62, 0.3) * world_night * under * 0.35;
+		EMISSION = a * vec3(1.0, 0.62, 0.3) * world_night * under * 0.35 + d_emis;
 		if (window_glow > 0.5 && vlum < 0.125 && abs(v_wnrm.y) < 0.3) {
 			// 格子窓・開口部から漏れる灯り
 			EMISSION += vec3(1.0, 0.66, 0.32) * world_night * 1.4;

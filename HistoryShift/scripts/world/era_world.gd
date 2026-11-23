@@ -57,6 +57,10 @@ var control_tex: ImageTexture
 var static_body: StaticBody3D   # 建物などのコリジョン
 var deco_trees: Array = []      # [species, Vector3, scale]（建築側が植える木）
 var pond_requests: Array = []   # 池（建築側が要求）
+var next_unit_id := 0           # 破壊ユニットの ID（Architecture.begin_unit が採番）
+var unit_defs: Array = []       # 破壊ユニットの定義（Destruction が Destructible に変換）
+var tree_defs: Array = []       # 倒せる木 [species, Transform3D, [MultiMesh, index]...]
+var destruction: Destruction    # 破壊システム（ワールドごとに作り直し＝再入場でリセット）
 
 
 static func build(p_era: Dictionary) -> EraWorld:
@@ -142,6 +146,8 @@ func _build() -> void:
 		_build_grass()
 	WorldProps.new(self).build()
 	_tick("props")
+	destruction = Destruction.attach(self)
+	_tick("destruction")
 	env_nodes = WorldAtmosphere.build_environment(self, style)
 	for key in landmarks:
 		var b := WorldAtmosphere.make_beacon(landmarks[key]["pos"])

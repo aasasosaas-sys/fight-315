@@ -211,11 +211,12 @@ static func pattern_tex(pattern: String, base: Color, accent: Color) -> Texture2
 static func build(base: String, outfit := "modern", palette: Dictionary = {}, hair := "") -> Node3D:
 	var n: Node3D = (load(VRM_DIR + base + ".vrm") as PackedScene).instantiate()
 	_prepare(n)
-	if hair != "":
-		AnimeHair.apply(n, hair)
 	var sk: Skeleton3D = n.find_children("*", "Skeleton3D", true, false)[0]
 	if outfit != "modern":
 		_dress(n, sk, base, outfit, palette if not palette.is_empty() else PALETTES.get(outfit, {}))
+	# 髪型は和装の体の差し替えの後に（先にやると元の後ろ髪が差し替えた体に残る）
+	if hair != "":
+		AnimeHair.apply(n, hair)
 	var ap := AnimationPlayer.new()
 	ap.name = "Anim"
 	n.add_child(ap)

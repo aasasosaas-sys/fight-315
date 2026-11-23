@@ -1,0 +1,208 @@
+{
+ "eraId": "asuka_nara",
+ "figures": [
+  {
+   "name": "中臣鎌足",
+   "at": "capital",
+   "guards": 3,
+   "guard": "中臣家の舎人",
+   "lines": [
+    "皇子、今はまだ即位を急がれますな。",
+    "…何者だ。蘇我の手の者か。"
+   ]
+  },
+  {
+   "name": "蘇我馬子",
+   "at": "temple",
+   "guards": 4,
+   "guard": "蘇我家の兵",
+   "lines": [
+    "飛鳥寺の造営は我が蘇我の誇りよ。"
+   ]
+  },
+  {
+   "name": "小野妹子",
+   "at": "port",
+   "guards": 2,
+   "guard": "遣隋使の護衛",
+   "lines": [
+    "この国書、隋の皇帝にお渡しせねば。",
+    "「日出づる処の天子」…本当にこの文面で大丈夫だろうか。"
+   ]
+  },
+  {
+   "name": "橘諸兄",
+   "at": "capital",
+   "guards": 3,
+   "guard": "衛府の兵",
+   "lines": [
+    "開墾した田を永く私有させれば、田は増えよう。"
+   ]
+  }
+ ],
+ "rules": [
+  {
+   "id": "an_kill_kamatari",
+   "title": "鎌足なき乙巳の変",
+   "trigger": {
+    "kind": "kill",
+    "id": "中臣鎌足"
+   },
+   "force": {
+    "q": "asuka_nara_02",
+    "choice": 0
+   },
+   "text": "中臣鎌足が倒れ、「今は即位を急ぐべきではない」と諫める者がいなくなった。中大兄皇子は蘇我入鹿を討つとその場で即位し、のちに都も近江へ。孝徳天皇の出番は消えた。"
+  },
+  {
+   "id": "an_kill_umako",
+   "title": "飛鳥寺、未完に終わる",
+   "trigger": {
+    "kind": "kill",
+    "id": "蘇我馬子"
+   },
+   "vars": {
+    "religion": -25,
+    "education": -10
+   },
+   "year": 600,
+   "text": "仏教の最大の後ろ盾・蘇我馬子が倒れ、飛鳥寺の造営は中断。「篤く三宝を敬え」どころか、仏教そのものが朝廷から遠ざけられていった。"
+  },
+  {
+   "id": "an_kill_imoko",
+   "title": "国書、届かず",
+   "trigger": {
+    "kind": "kill",
+    "id": "小野妹子"
+   },
+   "force": {
+    "q": "asuka_nara_05",
+    "choice": 2
+   },
+   "text": "小野妹子が倒れ、代わりの使者は「日出づる処の天子」の国書をうまく取り繕えなかった。煬帝の怒りは解けず国交は断絶、留学生も留学僧も海を渡れなくなった。"
+  },
+  {
+   "id": "an_kill_moroe",
+   "title": "諸兄政権、崩壊",
+   "trigger": {
+    "kind": "kill",
+    "id": "橘諸兄"
+   },
+   "vars": {
+    "centralization": -20,
+    "court": -10
+   },
+   "year": 740,
+   "text": "政権を担っていた橘諸兄が倒れ、朝廷は大混乱。土地の管理も手が回らず、743年の法令をきっかけに班田収授はなし崩しに放棄されてしまった。"
+  },
+  {
+   "id": "an_destroy_daigokuden",
+   "title": "大極殿、崩落",
+   "trigger": {
+    "kind": "destroy",
+    "id": "capital",
+    "type": "hall",
+    "value": 400
+   },
+   "force": {
+    "q": "asuka_nara_06",
+    "choice": 3
+   },
+   "text": "平城京の大極殿が崩れ落ちた。もともと恭仁京・難波宮・紫香楽宮と都を転々としていた聖武天皇は「もう平城京には戻らぬ」と宣言し、大仏ともども紫香楽に腰を落ち着けた。"
+  },
+  {
+   "id": "an_destroy_horyuji",
+   "title": "法隆寺、再び失われる",
+   "trigger": [
+    {
+     "kind": "destroy",
+     "id": "temple",
+     "type": "pagoda"
+    },
+    {
+     "kind": "destroy",
+     "id": "temple",
+     "value": 350
+    }
+   ],
+   "vars": {
+    "religion": -15,
+    "education": -15
+   },
+   "year": 604,
+   "text": "『日本書紀』は670年に法隆寺が全焼したと記すが、今回の倒壊はあなたのせいだ。飛鳥文化の至宝と学問僧たちの経典が失われ、仏教と学問の歩みは大きく遅れた。"
+  },
+  {
+   "id": "an_destroy_mizuki",
+   "title": "水城、決壊",
+   "trigger": {
+    "kind": "destroy",
+    "id": "castle",
+    "value": 300
+   },
+   "vars": {
+    "militarism": 20,
+    "warrior": 15,
+    "unity": -10
+   },
+   "year": 664,
+   "text": "白村江の敗戦後に築いた大宰府の水城が壊された。唐・新羅の来襲に怯えた豪族たちは私兵をかき集め、国じゅうが武装する物騒な時代になった。"
+  },
+  {
+   "id": "an_sink",
+   "title": "遣隋使船、沈没",
+   "trigger": {
+    "kind": "sink",
+    "min": 2
+   },
+   "vars": {
+    "open_asia": -30
+   },
+   "year": 607,
+   "text": "難波津を出た遣隋使の船が沈められた。隋に渡るのは命がけという評判が立ち、大陸との往来は細る一方。仏典も律令の知識も届かない。"
+  },
+  {
+   "id": "an_seta_bridge",
+   "title": "瀬田の唐橋、落ちる",
+   "trigger": {
+    "kind": "bridge",
+    "id": "battlefield"
+   },
+   "vars": {
+    "unity": -15,
+    "militarism": 10
+   },
+   "year": 672,
+   "text": "壬申の乱の決戦の地・瀬田の唐橋が落とされた。大海人皇子の軍は近江大津宮へ攻め込めず、戦いは長期化。国じゅうの豪族が二つに割れて争い続けた。"
+  },
+  {
+   "id": "an_massacre",
+   "title": "都の兵、総崩れ",
+   "trigger": {
+    "kind": "kill",
+    "type": "soldier",
+    "min": 30
+   },
+   "vars": {
+    "unity": -30,
+    "militarism": 10
+   },
+   "year": 700,
+   "text": "都を守る衛府の兵が謎の怪人に次々と打ち倒された。藤原広嗣の乱どころではない大混乱に、聖武天皇は都を転々とするほかなかった。"
+  },
+  {
+   "id": "an_fire",
+   "title": "平城京の大火",
+   "trigger": {
+    "kind": "fire",
+    "min": 10
+   },
+   "vars": {
+    "economy": -15,
+    "commerce": -10
+   },
+   "year": 710,
+   "text": "平城京の町並みが次々と燃え、市の蔵も官人の屋敷も灰になった。和同開珎で買う物すらなくなり、都の経済は大打撃を受けた。"
+  }
+ ]
+}

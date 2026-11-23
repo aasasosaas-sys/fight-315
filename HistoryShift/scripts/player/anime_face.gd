@@ -24,8 +24,8 @@ const ACC_NAME := "AnimeFaceAcc"
 
 ## 瞳（日本人らしい焦茶〜黒）
 const IRIS := [
-	Color(0.20, 0.11, 0.07), Color(0.28, 0.16, 0.09), Color(0.36, 0.21, 0.11),
-	Color(0.13, 0.09, 0.08), Color(0.09, 0.07, 0.08), Color(0.44, 0.27, 0.14),
+	Color(0.22, 0.12, 0.08), Color(0.28, 0.16, 0.1), Color(0.34, 0.2, 0.12),
+	Color(0.15, 0.1, 0.09), Color(0.1, 0.08, 0.09), Color(0.38, 0.24, 0.14),
 ]
 ## 肌（色白 → 日焼けした農民・漁師）。テクスチャに掛け合わせる
 const SKIN := {
@@ -33,7 +33,7 @@ const SKIN := {
 	"tan": Color(0.9, 0.77, 0.66), "deep": Color(0.82, 0.66, 0.54),
 }
 ## 黒髪の色味（暗いテクスチャへの掛け色）: 青み黒 / 黒 / 焦茶 / 栗
-const HAIR_TINTS := [Color(1.0, 1.0, 1.0), Color(0.9, 0.88, 0.86), Color(1.3, 1.04, 0.86), Color(1.5, 1.08, 0.82)]
+const HAIR_TINTS := [Color(1.0, 1.0, 1.0), Color(0.82, 0.8, 0.8), Color(0.9, 0.88, 0.86), Color(1.18, 1.0, 0.88), Color(1.3, 1.06, 0.9)]
 const BEARDS := ["none", "stubble", "mustache", "goatee", "full", "dojo", "mustache_goatee"]
 const MOODS := {
 	"neutral": {},
@@ -96,6 +96,7 @@ static func roll(seed: int, age := "", female := false, modern := false) -> Dict
 	p["eye_h"] = _q(rng.randf_range(-1.0, 1.0) + (0.6 if child else 0.0) - (0.4 if elder else 0.0))
 	p["eye_tilt"] = _q(rng.randf_range(-1.0, 1.0) - (0.7 if elder else 0.0))
 	p["eye_y"] = _q(rng.randf_range(-1.0, 1.0))
+	p["nose"] = _q(rng.randf_range(-1.0, 1.0) - (0.6 if child else 0.0) - (0.3 if female else 0.0))
 	p["mouth_w"] = _q(rng.randf_range(-1.0, 1.0) - (0.5 if child else 0.0))
 	p["brow_y"] = _q(rng.randf_range(-1.0, 1.0))
 	p["brow_thick"] = _q(rng.randf_range(-1.0, 1.0) + (0.4 if not female else -0.4))
@@ -124,6 +125,8 @@ static func roll(seed: int, age := "", female := false, modern := false) -> Dict
 	p["freckles"] = rng.randf_range(0.5, 1.0) if rng.randf() < (0.18 if child else 0.06) else 0.0
 	p["wrinkles"] = rng.randf_range(0.6, 1.0) if elder else (rng.randf_range(0.15, 0.35) if age == "adult" and rng.randf() < 0.35 else 0.0)
 	p["mole"] = rng.randi_range(1, 4) if rng.randf() < 0.14 else 0
+	p["lid"] = rng.randf_range(0.5, 0.9) if rng.randf() < (0.45 if female else 0.3) else 0.0
+	p["beni"] = rng.randf_range(0.4, 0.9) if female and not child and rng.randf() < 0.55 else 0.0
 	# 髭（男の大人・老人）
 	var beard := "none"
 	var stubble := 0.0
@@ -139,7 +142,7 @@ static func roll(seed: int, age := "", female := false, modern := false) -> Dict
 		stubble = rng.randf_range(0.3, 0.6)
 	p["beard"] = beard
 	p["stubble"] = stubble
-	p["long_beard"] = elder and not female and beard in ["goatee", "dojo", "mustache_goatee"] and rng.randf() < 0.55
+	p["long_beard"] = elder and not female and beard in ["goatee", "dojo", "mustache_goatee"] and rng.randf() < 0.0  # 試作: fixed で明示したときだけ
 	p["scar"] = (not female and not child and rng.randf() < 0.05)
 	# 表情のくせ
 	var moods: Array = ["neutral", "neutral", "gentle", "stern", "calm", "cheerful", "worried", "sharp"]
@@ -350,9 +353,9 @@ static func _warp(v: Vector3, kind: int, w_seam: float, I: Dictionary, P: Packed
 	var frontk := _ss(E.z - 0.06, E.z - 0.025, d.z)
 	# 下顔（目の高さ → 口の高さ）
 	var lower := _ss(E.y, M.y, d.y)
-	dd.x += d.x * P[0] * 0.075 * lower * frontk                      # jaw: 顎の幅
+	dd.x += d.x * P[0] * 0.11 * lower * frontk                      # jaw: 顎の幅
 	if d.y < E.y:
-		dd.y += (d.y - E.y) * P[1] * 0.07 * frontk                    # face_len: 顔の長さ
+		dd.y += (d.y - E.y) * P[1] * 0.085 * frontk                    # face_len: 顔の長さ
 	var gch := exp(-(d.x * d.x) / (0.022 * 0.022)) * _ss(M.y - 0.004, float(I.chin), d.y) * frontk
 	dd.y -= P[2] * 0.005 * gch                                       # chin: 顎先
 	dd.z += P[2] * 0.003 * gch
@@ -367,14 +370,19 @@ static func _warp(v: Vector3, kind: int, w_seam: float, I: Dictionary, P: Packed
 	var ge := exp(-(ue * ue + ve * ve) / (R * R)) * _ss(E.z - 0.04, E.z - 0.01, d.z)
 	if ge > 0.002:
 		var gk := ge if kind != K_IRIS else 1.0 * ge
-		var dx := P[4] * 0.0028 * ge                                  # eye_gap
+		var dx := P[4] * 0.0035 * ge                                  # eye_gap
 		var dy := P[7] * 0.0022 * ge                                  # eye_y
-		var sy := P[5] * 0.08 * gk * (0.5 if kind == K_IRIS else 1.0) # eye_h: 縦の大きさ
-		var th := P[6] * 0.11 * ge                                    # eye_tilt: つり目(+)／たれ目(-)
+		var sy := P[5] * 0.11 * gk * (0.5 if kind == K_IRIS else 1.0) # eye_h: 縦の大きさ
+		var th := P[6] * 0.15 * ge                                    # eye_tilt: つり目(+)／たれ目(-)
 		var u2 := ue * cos(th) - ve * (1.0 + sy) * sin(th)
 		var v2 := ue * sin(th) + ve * (1.0 + sy) * cos(th)
 		dd.x += s * (u2 - ue + dx)
 		dd.y += v2 - ve + dy
+	# 鼻（高さ）
+	var ny: float = I.nose_y
+	var gn := exp(-(d.x * d.x) / (0.008 * 0.008) - (d.y - ny) * (d.y - ny) / (0.012 * 0.012)) * frontk
+	dd.z += P[12] * 0.0025 * gn
+	dd.y += P[12] * 0.0008 * gn
 	# 口の幅
 	var gm := exp(-(d.x * d.x) / (0.03 * 0.03) - (d.y - M.y) * (d.y - M.y) / (0.014 * 0.014)) * frontk
 	dd.x += d.x * P[8] * 0.12 * gm
@@ -382,8 +390,8 @@ static func _warp(v: Vector3, kind: int, w_seam: float, I: Dictionary, P: Packed
 	if kind == K_BROW:
 		var B: Vector3 = I.brow
 		var ub := ax - B.x
-		var vb := (d.y - B.y) * (1.0 + P[10] * 0.28)
-		var tb := P[11] * 0.14
+		var vb := (d.y - B.y) * (1.0 + P[10] * (0.45 if P[10] > 0.0 else 0.3))
+		var tb := P[11] * 0.18
 		var u3 := ub * cos(tb) - vb * sin(tb)
 		var v3 := ub * sin(tb) + vb * cos(tb)
 		dd.x += s * (u3 - ub)
@@ -399,7 +407,7 @@ static func _sculpt(face: MeshInstance3D, sk: Skeleton3D, p: Dictionary) -> Arra
 	if not bool(I.ok):
 		return null
 	var P := PackedFloat32Array([float(p.jaw), float(p.face_len), float(p.chin), float(p.cheek), float(p.eye_gap),
-		float(p.eye_h), float(p.eye_tilt), float(p.eye_y), float(p.mouth_w), float(p.brow_y), float(p.brow_thick), float(p.brow_angle)])
+		float(p.eye_h), float(p.eye_tilt), float(p.eye_y), float(p.mouth_w), float(p.brow_y), float(p.brow_thick), float(p.brow_angle), float(p.get("nose", 0.0))])
 	var ck := "%d|%s" % [src.get_instance_id(), str(P)]
 	if _mesh_cache.has(ck):
 		return _mesh_cache[ck]
@@ -490,8 +498,8 @@ static func _apply_face(face: MeshInstance3D, sk: Skeleton3D, p: Dictionary) -> 
 					var ic: Color = p.iris
 					mm.set_shader_parameter("_MainTex", _iris_tex((m as ShaderMaterial).get_shader_parameter("_MainTex")))
 					mm.set_shader_parameter("_ShadeTexture", mm.get_shader_parameter("_MainTex"))
-					mm.set_shader_parameter("_Color", ic * 2.2)
-					mm.set_shader_parameter("_ShadeColor", ic * 1.8)
+					mm.set_shader_parameter("_Color", ic * 1.9)
+					mm.set_shader_parameter("_ShadeColor", ic * 1.6)
 			K_EYE:
 				if "Eyeline" in m.resource_name or "Eyelash" in m.resource_name:
 					mm.set_shader_parameter("_Color", lash_c)
@@ -561,6 +569,9 @@ static func _overlay(I: Dictionary, p: Dictionary, hair_c: Color) -> ShaderMater
 	m.set_shader_parameter("blush_lines", float(p.blush_lines))
 	m.set_shader_parameter("blush_col", Color(1.0, 0.42, 0.42) if not String(p.skin) in ["tan", "deep"] else Color(0.9, 0.36, 0.3))
 	m.set_shader_parameter("freckles", float(p.freckles))
+	m.set_shader_parameter("lid", float(p.get("lid", 0.0)))
+	m.set_shader_parameter("lid_col", Color(0.5, 0.28, 0.24) * sk)
+	m.set_shader_parameter("beni", float(p.get("beni", 0.0)))
 	var F := E.x
 	var mole := int(p.mole)
 	var rng := RandomNumberGenerator.new()
@@ -586,17 +597,34 @@ static func _overlay(I: Dictionary, p: Dictionary, hair_c: Color) -> ShaderMater
 
 static func _apply_body_skin(sk: Skeleton3D, p: Dictionary) -> void:
 	var c: Color = SKIN.get(String(p.skin), SKIN["light"])
+	var has_anime_hair := sk.get_node_or_null("AnimeHair") != null
 	for mi: MeshInstance3D in sk.find_children("*", "MeshInstance3D", false, false):
-		if mi.name == "Face" or mi.mesh == null:
+		if mi.name == "Face" or mi.mesh == null or mi.material_override != null:
 			continue
 		for si in mi.mesh.get_surface_count():
+			var m := mi.mesh.surface_get_material(si)
+			if has_anime_hair and m and "HairBack" in m.resource_name:
+				# 和装の体に差し替えた後も元の後ろ髪が残っていることがあるので隠す
+				mi.set_surface_override_material(si, _hide_mat())
+				continue
 			if mi.get_surface_override_material(si) != null:
 				continue
-			var m := mi.mesh.surface_get_material(si)
-			if m is ShaderMaterial and "SKIN" in m.resource_name and not "HairBack" in m.resource_name:
+			if m is ShaderMaterial and "SKIN" in m.resource_name:
 				var mm := (m as ShaderMaterial).duplicate() as ShaderMaterial
 				_tint(mm, c)
 				mi.set_surface_override_material(si, mm)
+
+
+static var _hide: ShaderMaterial
+
+
+static func _hide_mat() -> ShaderMaterial:
+	if _hide == null:
+		var sh := Shader.new()
+		sh.code = "shader_type spatial;\nrender_mode unshaded, cull_disabled;\nvoid fragment() { discard; }\n"
+		_hide = ShaderMaterial.new()
+		_hide.shader = sh
+	return _hide
 
 
 static func _hair_color(p: Dictionary) -> Color:
@@ -820,7 +848,7 @@ static func _apply_accessories(sk: Skeleton3D, face: MeshInstance3D, p: Dictiona
 	var er: float = I.eye_r
 	# 歪み後の目の位置
 	var P := PackedFloat32Array([float(p.jaw), float(p.face_len), float(p.chin), float(p.cheek), float(p.eye_gap),
-		float(p.eye_h), float(p.eye_tilt), float(p.eye_y), float(p.mouth_w), float(p.brow_y), float(p.brow_thick), float(p.brow_angle)])
+		float(p.eye_h), float(p.eye_tilt), float(p.eye_y), float(p.mouth_w), float(p.brow_y), float(p.brow_thick), float(p.brow_angle), float(p.get("nose", 0.0))])
 	var H: Vector3 = I.H
 	var Ew := _warp(H + E, K_EYE, 1.0, I, P) - H
 	var front_z := E.z + er * 0.9
@@ -839,22 +867,6 @@ static func _apply_accessories(sk: Skeleton3D, face: MeshInstance3D, p: Dictiona
 			ring.position = Vector3(sd * Ew.x, Ew.y - er * 0.05, front_z + 0.004)
 			ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			space.add_child(ring)
-			var lens := MeshInstance3D.new()
-			var cm := CylinderMesh.new()
-			cm.top_radius = er * 1.2
-			cm.bottom_radius = er * 1.2
-			cm.height = 0.0004
-			cm.radial_segments = 24
-			lens.mesh = cm
-			var lm := StandardMaterial3D.new()
-			lm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-			lm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-			lm.albedo_color = Color(0.85, 0.92, 1.0, 0.12)
-			lens.material_override = lm
-			lens.rotation_degrees = Vector3(90, 0, 0)
-			lens.position = ring.position
-			lens.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			space.add_child(lens)
 			# つる（耳へ）
 			var arm := MeshInstance3D.new()
 			var bm := BoxMesh.new()
@@ -907,34 +919,33 @@ static func _apply_accessories(sk: Skeleton3D, face: MeshInstance3D, p: Dictiona
 		strap.scale = Vector3(1.0, 1.0, (front_z - E.z + 0.1) / (2.0 * fw2))
 		space.add_child(strap)
 	if bool(p.long_beard):
-		var bmesh := _long_beard_mesh(float(I.chin), float(I.mouth.y), E.x, float(p.get("_seed", 0)))
+		var bmesh := _long_beard_mesh(float(I.chin), float(I.mouth.z), E.x, float(p.get("_seed", 0)))
 		var bmi := MeshInstance3D.new()
 		bmi.mesh = bmesh
 		var hc := _hair_color(p)
 		bmi.material_override = _toon_mat(hc, true, 0.05)
-		var chin_z := float(I.mouth.z) - 0.004
-		bmi.position = Vector3(0, 0, chin_z)
 		space.add_child(bmi)
 
 
 ## 仙人の顎髭（顎先から垂れる、先の細い房）
-static func _long_beard_mesh(chin_y: float, mouth_y: float, F: float, sd: float) -> ArrayMesh:
+static func _long_beard_mesh(chin_y: float, mouth_z: float, F: float, sd: float) -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = int(sd) * 13 + 3
-	var length := F * rng.randf_range(2.2, 3.6)
-	var top_y := chin_y + F * 0.35
-	var w0 := F * 0.42
+	var length := F * rng.randf_range(1.6, 2.6)
+	var top_y := chin_y + F * 0.3
+	var z0 := mouth_z - F * 0.32
+	var w0 := F * 0.5
 	var rings := 8
-	var seg := 10
+	var seg := 12
 	var pts: Array = []
 	for r in rings + 1:
 		var t := float(r) / rings
-		var y := top_y - t * (length + F * 0.35)
-		var z := -F * 0.25 + t * t * F * 0.3 - (1.0 - t) * F * 0.1
-		var w := w0 * (1.0 - t * 0.85) * (1.0 + 0.25 * sin(t * PI))
-		var d := w * 0.55
+		var y := top_y - t * length
+		var z := z0 - t * F * 0.1 + t * t * F * 0.35
+		var w := w0 * (1.0 - t * 0.8) * (1.0 + 0.3 * sin(t * PI))
+		var d := w * 0.65
 		var ring: Array = []
 		for s in seg:
 			var a := TAU * s / seg
@@ -948,7 +959,7 @@ static func _long_beard_mesh(chin_y: float, mouth_y: float, F: float, sd: float)
 			var b1: Vector3 = pts[r + 1][(s + 1) % seg]
 			for v in [a0, b0, a1, a1, b0, b1]:
 				st.add_vertex(v)
-	var tip := Vector3(0, top_y - length - F * 0.5, -F * 0.0)
+	var tip := Vector3(0, top_y - length - F * 0.35, z0 + F * 0.3)
 	for s in seg:
 		st.add_vertex(pts[rings][s])
 		st.add_vertex(tip)

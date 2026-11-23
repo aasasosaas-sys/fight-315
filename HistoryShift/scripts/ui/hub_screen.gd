@@ -89,6 +89,9 @@ func _header() -> Control:
 	h.add_child(_stat("誤答", str(total - cc), JSUI.SHU if total - cc > 0 else JSUI.MUTED))
 	h.add_child(_stat("歴史改変", "%d 回" % Game.state.alterations, JSUI.GOLD))
 	h.add_child(_stat("史実修復", "%d 回" % Game.state.restorations, JSUI.TEXT))
+	var cb := Game.state.chaos_broken().size()
+	if cb > 0 or Game.state.chaos_count > 0:
+		h.add_child(_stat("混乱で崩壊", "%d 問" % cb, JSUI.SHU if cb > 0 else JSUI.MUTED))
 	h.add_child(JSUI.spacer())
 	var end_b := JSUI.button("エンディングへ", "gold", 28, 300)
 	end_b.add_theme_font_override("font", JSUI.serif_bold())
@@ -200,7 +203,9 @@ func _row(q: Dictionary, number: int) -> Button:
 	topic.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	topic.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	h.add_child(topic)
-	if Game.state.is_altered(q):
+	if Game.state.is_chaos_touched(q):
+		h.add_child(JSUI.pill("混乱で崩壊" if not correct else "時空の混乱", Color(JSUI.SHU, 0.25), JSUI.SHU if not correct else JSUI.GOLD, 16))
+	elif Game.state.is_altered(q):
 		h.add_child(JSUI.pill("改変済", Color(JSUI.GOLD, 0.2), JSUI.GOLD, 16))
 	h.add_child(_ans_chip("解答", Game.state.answer(q), JSUI.TEXT))
 	h.add_child(_ans_chip("世界", Game.state.world_choice(q), JSUI.CYAN if correct else JSUI.SHU))
@@ -332,7 +337,11 @@ func _build_detail(q: Dictionary) -> void:
 		sub = "（この問題の史実はあなたの手で書き換えられている）" if Game.state.is_altered(q) else "（本来の史実どおり）"
 	else:
 		msg = "不正解 ― この世界の史実はあなたの解答と異なる"
-		if ans == q["real"]:
+		if Game.state.is_chaos_touched(q):
+			var why := Game.state.reason(q)
+			sub = "自由探索での大暴れの余波で史実がずれてしまった（%s）。%s" % [why if why != "" else "時空の混乱",
+				"史実を修復せよ。" if ans == q["real"] else "あなたの解答「%s」が史実になるよう、歴史を改変せよ。" % JSUI.circled(ans)]
+		elif ans == q["real"]:
 			sub = "本来は正解だったが、過去の改変の連鎖で史実がずれてしまった。史実を修復せよ。"
 		else:
 			sub = "あなたの解答「%s」が史実になるよう、歴史を改変せよ。" % JSUI.circled(ans)
@@ -482,14 +491,18 @@ func _show_log() -> void:
 		lv.add_child(JSUI.label("まだ歴史は一度も書き換えられていない。", 24, JSUI.MUTED))
 	for i in log.size():
 		var line: String = log[i]
-		var chain := line.find("（連鎖：") >= 0
+		var chain := line.find("（連鎖：") >= 0 or line.find("（波及：") >= 0
+		var chaos := line.find("時空の混乱") >= 0 or line.find("混乱の波及") >= 0
 		var p := JSUI.panel(JSUI.sb(Color(1, 1, 1, 0.03), 8, 0, Color.TRANSPARENT, 0, 12))
 		var st: StyleBoxFlat = p.get_theme_stylebox("panel")
-		st.border_width_left = 4; st.border_color = JSUI.CYAN if chain else JSUI.GOLD
+		st.border_width_left = 4; st.border_color = JSUI.SHU if chaos else (JSUI.CYAN if chain else JSUI.GOLD)
 		var h := JSUI.hbox(12)
 		p.add_child(h)
 		h.add_child(JSUI.label("%03d" % (i + 1), 20, JSUI.DIM, JSUI.sans_bold()))
-		h.add_child(JSUI.pill("連鎖" if chain else "改変", Color(JSUI.CYAN, 0.2) if chain else Color(JSUI.GOLD, 0.2), JSUI.CYAN if chain else JSUI.GOLD, 16))
+		if chaos:
+			h.add_child(JSUI.pill("混乱", Color(JSUI.SHU, 0.2), JSUI.SHU, 16))
+		else:
+			h.add_child(JSUI.pill("連鎖" if chain else "改変", Color(JSUI.CYAN, 0.2) if chain else Color(JSUI.GOLD, 0.2), JSUI.CYAN if chain else JSUI.GOLD, 16))
 		var l := JSUI.label(line, 21, JSUI.TEXT, null, true)
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		h.add_child(l)

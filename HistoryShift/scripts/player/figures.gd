@@ -139,7 +139,7 @@ const ARCH := {
 		"palette": {"jacket": "kon", "collar_st": "kon", "trousers": "kon", "shoes": "kuro", "pcap_top": "kon", "epaulet": "kin"},
 		"acc": ["tanken", "medals"], "face": {"age": 60}},
 	# イエズス会の宣教師（黒の修道服＝裾長の衣で代用）
-	"jesuit": {"outfit": "kimono", "hair": "zangiri", "hair_color": "brown", "hide": FEMALE_OBI + ["eri", "haneri"],
+	"jesuit": {"outfit": "kimono", "hair": "zangiri", "hair_color": "brown", "hide": ["taiko", "obiage", "obijime", "eri", "haneri"],
 		"palette": {"kosode": "kuro:plain", "robe": "kuro:plain", "obi": "kuro", "tabi": "kuro", "zori": "cha", "zori_hanao": "cha"},
 		"acc": ["crucifix", "white_collar"], "face": {"age": 45, "beard": "full", "eye_color": "brown"}},
 	# 欧米の外交官
@@ -502,14 +502,19 @@ static func decorate(model: Node3D, spec: Variant, seed: int = 0, opts: Dictiona
 	var face: Dictionary = s.get("face", {})
 	var face_done := false
 	if ResourceLoader.exists(FACE_SCRIPT):
-		var fs: Script = load(FACE_SCRIPT)
-		if fs and fs.has_method("apply") or (fs is GDScript and (fs as GDScript).can_instantiate()):
-			var fo := face.duplicate()
-			fo["fixed"] = face.duplicate()
-			fs.call("apply", model, seed, fo)
-			face_done = true
-	if not face_done:
+		var fs := load(FACE_SCRIPT) as GDScript
+		if fs and fs.can_instantiate():
+			var applied: Variant = fs.call("apply", model, seed, face_opts(s))
+			face_done = applied is Dictionary and not (applied as Dictionary).is_empty()
+	if face_done:
+		# AnimeFace の髭は顔に描く（口髭・顎髭・頬髭）。描けない形の口髭だけメッシュで足す
+		var mf := {"mustache": face.get("mustache", "none"), "hair_color": face.get("hair_color", "black")}
+		if String(mf["mustache"]) in ["kaiser", "walrus", "toothbrush", "handlebar"]:
+			_fallback_facial_hair(ctx, mf)
+	else:
 		_fallback_facial_hair(ctx, face)
+	if String(face.get("eyes", "")) == "closed":
+		_close_eyes(model, 0.9)
 	# 家紋
 	var kamon: String = s.get("kamon", "")
 	if kamon != "":
@@ -527,6 +532,86 @@ static func decorate(model: Node3D, spec: Variant, seed: int = 0, opts: Dictiona
 ## 登録済みの人物名の一覧
 static func names() -> Array:
 	return FIGURES.keys()
+
+
+## 人物の顔の指定 → AnimeFace.apply の opts（"fixed" で乱択の値を上書きする）
+## face の項目: age(int) / beard(none|goatee|short|full|long) / mustache(none|thin|full|kaiser|walrus|toothbrush|handlebar)
+##   sideburns / brows(thick|bushy|hikimayu) / eyes(gentle|sharp|closed|large) / jaw(broad|round) / skin / eye_color / hair_color
+static func face_opts(s: Dictionary) -> Dictionary:
+	var f: Dictionary = s.get("face", {})
+	var female: bool = s.get("female", false)
+	var age_n := int(f.get("age", 35))
+	var age := "child" if age_n < 13 else ("young" if age_n < 26 else ("adult" if age_n < 56 else "elder"))
+	var fx := {"height": 1.0, "glasses": false, "eyepatch": false, "scar": false, "mole": 0, "freckles": 0.0, "stoop": 0.0 if age_n < 70 else 5.0}
+	if not female:
+		var b: String = f.get("beard", "none")
+		var m: String = f.get("mustache", "none")
+		var has_m := m != "none"
+		var beard := "none"
+		match b:
+			"full", "short":
+				beard = "full"
+			"long":
+				beard = "mustache_goatee" if has_m else "goatee"
+			"goatee":
+				beard = "mustache_goatee" if has_m else "goatee"
+			_:
+				if has_m:
+					beard = "dojo" if m == "thin" else ("none" if m in ["kaiser", "toothbrush", "handlebar"] else "mustache")
+		if bool(f.get("sideburns", false)) and beard == "none":
+			beard = "stubble"
+		fx["beard"] = beard
+		fx["long_beard"] = b == "long"
+		fx["stubble"] = 0.0
+		fx["blush"] = 0.0
+	var hc: String = s.get("hair_color", f.get("hair_color", "black"))
+	fx["hair_gray"] = 2 if hc == "white" else (1 if hc == "gray" else 0)
+	if hc in ["brown", "blond", "auburn", "shaved"]:
+		fx["hair_tint"] = HAIR_TINT[hc]
+	elif hc == "black":
+		fx["hair_tint"] = Color(1, 1, 1)
+	match String(f.get("eyes", "")):
+		"gentle": fx["mood"] = "gentle"
+		"sharp": fx["mood"] = "sharp"
+		"closed": fx["mood"] = "calm"
+		"large":
+			fx["mood"] = "neutral"
+			fx["eye_h"] = 1.0
+			fx["iris_scale"] = 1.06
+		_: fx["mood"] = "neutral" if age_n < 56 else "calm"
+	match String(f.get("brows", "")):
+		"thick": fx["brow_thick"] = 1.0
+		"bushy":
+			fx["brow_thick"] = 1.0
+			fx["brow_y"] = -0.5
+		"hikimayu":
+			fx["brow_thick"] = -1.0
+			fx["brow_y"] = 1.0
+	match String(f.get("jaw", "")):
+		"broad":
+			fx["jaw"] = 1.0
+			fx["cheek"] = 0.5
+		"round":
+			fx["cheek"] = 1.0
+			fx["chin"] = -0.5
+	if f.has("skin"):
+		fx["skin"] = f["skin"]
+	match String(f.get("eye_color", "")):
+		"blue": fx["iris"] = Color(0.24, 0.42, 0.66)
+		"brown": fx["iris"] = Color(0.42, 0.26, 0.13)
+		"gray": fx["iris"] = Color(0.45, 0.5, 0.55)
+	return {"age": age, "female": female, "modern": false, "fixed": fx}
+
+
+## 目を閉じる（鑑真など）。VRoid の表情（Fcl_EYE_Close）を使う
+static func _close_eyes(model: Node3D, w: float) -> void:
+	for mi: MeshInstance3D in model.find_children("Face", "MeshInstance3D", true, false):
+		if mi.mesh == null:
+			continue
+		for bi in mi.mesh.get_blend_shape_count():
+			var bn := String(mi.mesh.get_blend_shape_name(bi))
+			if bn.ends_with("EYE_Close"):
+				mi.set_blend_shape_value(bi, w)
 
 
 # ===========================================================================
@@ -1145,18 +1230,23 @@ static func _crest(kind: String, x: float, y: float) -> int:
 				return 0
 			for k in 3:
 				var th := PI / 2 + TAU * k / 3
-				var hc := Vector2(cos(th), sin(th)) * 0.42
-				var hd := p.distance_to(hc)
-				if hd < 0.34:
+				var hc := Vector2(cos(th), sin(th)) * 0.4
+				if p.distance_to(hc) < 0.3:
 					return 1
 				var rel := fposmod(th - ang, TAU)
-				if rel < 2.2:
-					var t := rel / 2.2
-					var cr := 0.42 + 0.5 * t
-					var hw := 0.34 * pow(1.0 - t, 0.8)
+				if rel < 2.3:
+					var t := rel / 2.3
+					var cr := 0.4 + 0.52 * t
+					var hw := 0.3 * pow(1.0 - t, 0.75)
 					if absf(r - cr) < hw:
-						var nk := Vector2(cos(th + TAU / 3), sin(th + TAU / 3)) * 0.42
-						if p.distance_to(nk) > 0.39:
+						var ok := true
+						for kk in 3:
+							if kk == k:
+								continue
+							var th2 := PI / 2 + TAU * kk / 3
+							if p.distance_to(Vector2(cos(th2), sin(th2)) * 0.4) < 0.35:
+								ok = false
+						if ok:
 							return 1
 			return 0
 		"mokko":     # 織田木瓜
@@ -1266,17 +1356,23 @@ static func _crest(kind: String, x: float, y: float) -> int:
 		"sagarifuji":   # 下り藤（藤原・本願寺）
 			for sgn: float in [-1.0, 1.0]:
 				var q := Vector2(x * sgn, y)
-				# 上の葉
-				var lf := Vector2(q.x - 0.32, q.y - 0.72).rotated(-0.3)
-				if pow(lf.x / 0.3, 2.0) + pow(lf.y / 0.1, 2.0) < 1.0:
-					return 1
-				# 花房（外側を下へ、下端で内へ巻く）
-				for i in 9:
-					var t := float(i) / 8.0
-					var a := PI * 0.5 + t * PI * 1.15
-					var cc := Vector2(0.0, 0.05) + Vector2(-cos(a) * 0.68, sin(a) * 0.7)
-					if q.distance_to(cc) < 0.12 * (1.0 - t * 0.45):
-						return 1
+				# 上の葉（三枚）
+				for li in 3:
+					var la := 1.75 - li * 0.32
+					var lc := Vector2(cos(la), sin(la)) * 0.78
+					var lq := (q - lc).rotated(-(la - PI / 2) - 0.2)
+					if pow(lq.x / 0.2, 2.0) + pow(lq.y / 0.075, 2.0) < 1.0:
+						return 1 if absf(lq.y) > 0.012 or absf(lq.x) > 0.17 else 0
+				# 花房：外側を下へ垂れ、下端で内へ巻く。花は二列、下ほど小さい
+				for i in 13:
+					var t := float(i) / 12.0
+					var a := 1.25 - t * 2.75
+					var rr := 0.62 - 0.12 * t * t
+					var c := Vector2(cos(a) * rr * 0.9, sin(a) * rr)
+					var sz := lerpf(0.13, 0.045, t)
+					var nrm := Vector2(cos(a), sin(a))
+					if q.distance_to(c + nrm * sz * 0.55) < sz or q.distance_to(c - nrm * sz * 0.45) < sz * 0.85:
+						return 1 if q.distance_to(c) > sz * 0.25 or t > 0.7 else 2
 			return 0
 		"takesuzume":   # 竹に雀（上杉）：竹の輪と向かい合う雀
 			if _in_ring(x, y, 0.8, 0.92) and not (y < -0.7 and absf(x) < 0.25):
@@ -1361,3 +1457,1045 @@ static func _decal(ctx: Dictionary, bone: String, tex: Texture2D, col: Color, po
 	var x := y.cross(z).normalized()
 	z = x.cross(y).normalized()
 	_put(ctx, bone, d, Transform3D(Basis(x, y, z), pos))
+
+
+# ===========================================================================
+# 帯状の面（path に沿って幅 width、各点の外向き法線 normals）
+# ===========================================================================
+
+static func _ribbon(path: PackedVector3Array, normals: PackedVector3Array, width: Variant, thick := 0.004, nu := 2) -> ArrayMesh:
+	var n := path.size()
+	var fn := func(u: float, v: float) -> Vector3:
+		var fi := v * (n - 1)
+		var i0 := mini(int(floor(fi)), n - 2)
+		var t := fi - i0
+		var p := path[i0].lerp(path[i0 + 1], t)
+		var nn := normals[i0].lerp(normals[i0 + 1], t).normalized()
+		var tg := (path[mini(i0 + 1, n - 1)] - path[i0]).normalized()
+		var sd := tg.cross(nn).normalized()
+		var w: float = width if (width is float or width is int) else lerpf((width as Vector2).x, (width as Vector2).y, v)
+		return p + sd * (u - 0.5) * w
+	return _surf(fn, nu, (n - 1) * 3, false, thick)
+
+
+static func _merge(items: Array) -> ArrayMesh:
+	## items: [[mesh, Transform3D], ...] → 1 つのメッシュ
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for it: Array in items:
+		var m: Mesh = it[0]
+		var xf: Transform3D = it[1]
+		for si in m.get_surface_count():
+			st.append_from(m, si, xf)
+	return st.commit()
+
+
+# ===========================================================================
+# 小物
+# ===========================================================================
+
+static func _accessory(ctx: Dictionary, spec: String) -> void:
+	var parts := spec.split(":")
+	var id := parts[0]
+	var c1: String = parts[1] if parts.size() > 1 else ""
+	var c2: String = parts[2] if parts.size() > 2 else ""
+	var L: Dictionary = ctx["L"]
+	var k: float = L["k"]
+	match id:
+		"katana", "wakizashi", "tachi", "chokuto", "kanto_tachi", "gunto", "tanken":
+			_sword(ctx, id, c1)
+		"sensu", "tessen":
+			var g := _grip(ctx, "r", 0.7)
+			var poly := PackedVector2Array([Vector2(-0.011, 0), Vector2(0.011, 0), Vector2(0.017, 0.27), Vector2(-0.017, 0.27)])
+			var col := c1 if c1 != "" else ("kuro" if id == "tessen" else "shiraki")
+			var m := _mi(_extrude(poly, 0.014), _mat(ctx, col), "Fan")
+			_put(ctx, g["bone"], m, _xf(g["pos"] - (g["axis"] as Vector3) * 0.04 * k, g["axis"], g["fingers"], k))
+			if id == "tessen":
+				var e := _mi(_extrude(PackedVector2Array([Vector2(-0.018, 0.25), Vector2(0.018, 0.25), Vector2(0.018, 0.272), Vector2(-0.018, 0.272)]), 0.016), _mat(ctx, "kin"), "FanTip")
+				_put(ctx, g["bone"], e, _xf(g["pos"] - (g["axis"] as Vector3) * 0.04 * k, g["axis"], g["fingers"], k))
+		"ogi_open", "hiougi":
+			var g := _grip(ctx, "r", 0.9)
+			var poly := PackedVector2Array()
+			var spread := deg_to_rad(150.0 if id == "ogi_open" else 120.0)
+			var R := 0.27 if id == "ogi_open" else 0.24
+			for i in 17:
+				var a := PI / 2 - spread / 2 + spread * i / 16.0
+				poly.append(Vector2(cos(a), sin(a)) * R)
+			for i in 17:
+				var a := PI / 2 + spread / 2 - spread * i / 16.0
+				poly.append(Vector2(cos(a), sin(a)) * 0.05)
+			var col := c1 if c1 != "" else ("kin" if id == "ogi_open" else "shiraki")
+			var fan := Node3D.new()
+			fan.name = NODE_PREFIX + "OpenFan"
+			fan.add_child(_mi(_extrude(poly, 0.005), _mat(ctx, col, true, "asanoha" if id == "hiougi" else "", "kin", Vector2(1, 1)), "Leaf"))
+			fan.add_child(_mi(_extrude(PackedVector2Array([Vector2(-0.008, -0.01), Vector2(0.008, -0.01), Vector2(0.004, 0.06), Vector2(-0.004, 0.06)]), 0.012), _mat(ctx, "kogecha"), "Rivet"))
+			if id == "ogi_open":
+				var sun := _mi(_extrude(_circle_poly(0.06, 24, 0.0, 0.17), 0.007), _mat(ctx, "shu", false), "Sun")
+				fan.add_child(sun)
+			else:
+				var cols := ["enji", "moegi", "shiro", "murasaki", "ki", "sakura"]
+				for i in cols.size():
+					var x := -0.02 + 0.008 * i
+					var cord := _mi(_tube(PackedVector3Array([Vector3(x, 0.0, 0), Vector3(x * 1.5, -0.12, 0.01), Vector3(x * 2.0, -0.28, 0.0)]), PackedFloat32Array([1, 1, 1]), 0.003, 0.003, 6), _mat(ctx, cols[i], false), "Cord")
+					fan.add_child(cord)
+			_put(ctx, g["bone"], fan, _xf(g["pos"] - (g["axis"] as Vector3) * 0.03 * k, g["axis"], g["fingers"], k))
+		"shaku":
+			var g := _grip(ctx, "r", 0.9)
+			var poly := PackedVector2Array([Vector2(-0.024, -0.06), Vector2(0.024, -0.06), Vector2(0.032, 0.26), Vector2(0.026, 0.285), Vector2(0, 0.292), Vector2(-0.026, 0.285), Vector2(-0.032, 0.26)])
+			var m := _mi(_extrude(poly, 0.009), _mat(ctx, c1 if c1 != "" else "zouge"), "Shaku")
+			_put(ctx, g["bone"], m, _xf(g["pos"], g["axis"], g["fingers"], k))
+		"gunbai":
+			var g := _grip(ctx, "r", 0.8)
+			var n := Node3D.new()
+			n.name = NODE_PREFIX + "Gunbai"
+			var leaf := PackedVector2Array()
+			for i in 28:
+				var a := TAU * i / 28.0
+				leaf.append(Vector2(cos(a) * 0.15, 0.32 + sin(a) * 0.15 + (0.0 if sin(a) > -0.5 else (sin(a) + 0.5) * 0.06)))
+			n.add_child(_mi(_extrude(leaf, 0.012), _mat(ctx, c1 if c1 != "" else "urushi"), "Leaf"))
+			n.add_child(_mi(_extrude(_circle_poly(0.06, 24, 0.0, 0.33), 0.016), _mat(ctx, "kin", false), "Sun"))
+			n.add_child(_mi(_extrude(PackedVector2Array([Vector2(-0.014, -0.05), Vector2(0.014, -0.05), Vector2(0.02, 0.19), Vector2(-0.02, 0.19)]), 0.02), _mat(ctx, "kin"), "Handle"))
+			_put(ctx, g["bone"], n, _xf(g["pos"], g["axis"], g["fingers"], k))
+		"scroll":
+			var g := _grip(ctx, "l", 0.3)
+			var n := Node3D.new()
+			n.name = NODE_PREFIX + "Scroll"
+			n.add_child(_mi(_cyl(0.022, 0.24, 16), _mat(ctx, "kinari", true, "asanoha", "kin", Vector2(2, 2)), "Roll"))
+			for sy: float in [-1.0, 1.0]:
+				var knob := _mi(_cyl(0.012, 0.03, 10), _mat(ctx, "kogecha"), "Knob")
+				knob.position = Vector3(0, sy * 0.135, 0)
+				n.add_child(knob)
+			_put(ctx, g["bone"], n, _xf(g["pos"], g["axis"], g["fingers"], k))
+		"book":
+			var g := _grip(ctx, "l", 0.2)
+			var n := Node3D.new()
+			n.name = NODE_PREFIX + "Book"
+			var cover := _mi(_box(Vector3(0.15, 0.21, 0.022)), _mat(ctx, c1 if c1 != "" else "kon"), "Cover")
+			cover.position = Vector3(0.06, 0.06, 0)
+			n.add_child(cover)
+			var pages := _mi(_box(Vector3(0.152, 0.2, 0.016)), _mat(ctx, "kinari", false), "Pages")
+			pages.position = Vector3(0.062, 0.06, 0)
+			n.add_child(pages)
+			_put(ctx, g["bone"], n, _xf(g["pos"], g["axis"], g["fingers"], k))
+		"tanzaku":
+			var g := _grip(ctx, "l", 0.4)
+			var m := _mi(_box(Vector3(0.06, 0.36, 0.004)), _mat(ctx, "kinari", true, "asanoha", "kin", Vector2(1, 3)), "Tanzaku")
+			m.position = Vector3(0, 0.12, 0)
+			var n := Node3D.new()
+			n.name = NODE_PREFIX + "TanzakuRoot"
+			n.add_child(m)
+			_put(ctx, g["bone"], n, _xf(g["pos"], g["axis"], g["fingers"], k))
+		"juzu":
+			var g := _grip(ctx, "l", 0.2)
+			var items: Array = []
+			var bead := _sphere(0.0085, 8)
+			for i in 27:
+				var a := TAU * i / 27.0
+				items.append([bead, Transform3D(Basis(), Vector3(cos(a) * 0.075, 0, sin(a) * 0.055))])
+			var big := _sphere(0.014, 10)
+			items.append([big, Transform3D(Basis(), Vector3(0.075, 0, 0))])
+			var n := Node3D.new()
+			n.name = NODE_PREFIX + "Juzu"
+			var ring := _mi(_merge(items), _mat(ctx, c1 if c1 != "" else "kogecha"), "Beads")
+			n.add_child(ring)
+			var tassel := _mi(_cyl(0.004, 0.06, 8, 0.016), _mat(ctx, "murasaki"), "Tassel")
+			tassel.position = Vector3(0.11, 0, 0)
+			tassel.rotation = Vector3(0, 0, PI / 2)
+			n.add_child(tassel)
+			var fingers: Vector3 = g["fingers"]
+			_put(ctx, g["bone"], n, Transform3D(Basis(Vector3(fingers.x, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, fingers.x)).scaled(Vector3.ONE * k), g["pos"] + fingers * 0.01 * k))
+		"vajra":
+			var g := _grip(ctx, "r", 0.6)
+			var n := Node3D.new()
+			n.name = NODE_PREFIX + "Vajra"
+			var gold := _mat(ctx, "kin")
+			n.add_child(_mi(_lathe([Vector2(0, -0.06), Vector2(0.012, -0.055), Vector2(0.009, -0.03), Vector2(0.014, -0.015), Vector2(0.009, 0), Vector2(0.014, 0.015), Vector2(0.009, 0.03), Vector2(0.012, 0.055), Vector2(0, 0.06)], 12), gold, "Grip"))
+			for sy: float in [-1.0, 1.0]:
+				for i in 3:
+					var a := TAU * i / 3.0
+					var o := Vector3(cos(a), 0, sin(a))
+					var pts := PackedVector3Array([Vector3(0, sy * 0.055, 0), o * 0.02 + Vector3(0, sy * 0.075, 0), o * 0.022 + Vector3(0, sy * 0.1, 0), Vector3(0, sy * 0.125, 0)])
+					n.add_child(_mi(_tube(pts, PackedFloat32Array([1, 1, 0.8, 0.5]), 0.004, 0.004, 6), gold, "Prong"))
+				var mid := _mi(_tube(PackedVector3Array([Vector3(0, sy * 0.055, 0), Vector3(0, sy * 0.13, 0)]), PackedFloat32Array([1, 0.4]), 0.005, 0.005, 6), gold, "Prong")
+				n.add_child(mid)
+			_put(ctx, g["bone"], n, _xf(g["pos"], g["axis"], g["fingers"], k))
+		"chawan":
+			var g := _grip(ctx, "l", 0.0)
+			var m := _mi(_lathe([Vector2(0, 0), Vector2(0.025, 0), Vector2(0.03, 0.008), Vector2(0.055, 0.03), Vector2(0.062, 0.065), Vector2(0.055, 0.066), Vector2(0.048, 0.035), Vector2(0, 0.025)], 18), _mat(ctx, c1 if c1 != "" else "kuro"), "Chawan")
+			var fingers: Vector3 = g["fingers"]
+			_put(ctx, g["bone"], m, _xf(g["pos"] + Vector3(0, -0.02, 0.02) * k, -fingers, Vector3(0, 0, 1), k))
+		"suzu":
+			var g := _grip(ctx, "l", 0.2)
+			var n := Node3D.new()
+			n.name = NODE_PREFIX + "Suzu"
+			for i in 3:
+				var b := _mi(_sphere(0.017, 10), _mat(ctx, "kin"), "Bell")
+				b.position = Vector3(0.025 * (i - 1), -0.06 - 0.01 * (i % 2), 0)
+				n.add_child(b)
+			n.add_child(_mi(_tube(PackedVector3Array([Vector3(-0.025, -0.05, 0), Vector3(0, 0.02, 0), Vector3(0.025, -0.05, 0)]), PackedFloat32Array([1, 1, 1]), 0.003, 0.003, 6), _mat(ctx, "shu", false), "Cord"))
+			var fingers: Vector3 = g["fingers"]
+			_put(ctx, g["bone"], n, _xf(g["pos"], -fingers, Vector3(0, 0, 1), k))
+		"chisel", "hammer":
+			var g := _grip(ctx, "l" if id == "chisel" else "r", 0.5)
+			var n := Node3D.new()
+			n.name = NODE_PREFIX + id
+			if id == "chisel":
+				var h := _mi(_cyl(0.011, 0.12, 10), _mat(ctx, "shiraki"), "Handle")
+				h.position = Vector3(0, 0.03, 0)
+				n.add_child(h)
+				var b := _mi(_box(Vector3(0.016, 0.07, 0.004)), _mat(ctx, "gin"), "Blade")
+				b.position = Vector3(0, 0.12, 0)
+				n.add_child(b)
+			else:
+				var h := _mi(_cyl(0.012, 0.3, 10), _mat(ctx, "shiraki"), "Handle")
+				h.position = Vector3(0, 0.08, 0)
+				n.add_child(h)
+				var b := _mi(_box(Vector3(0.1, 0.04, 0.04)), _mat(ctx, "tetsu"), "Head")
+				b.position = Vector3(0, 0.22, 0)
+				n.add_child(b)
+			_put(ctx, g["bone"], n, _xf(g["pos"], g["axis"], g["fingers"], k))
+		"teppo", "yari":
+			var g := _grip(ctx, "r", 0.0)
+			var up := -(g["fingers"] as Vector3)
+			var n := Node3D.new()
+			n.name = NODE_PREFIX + id
+			if id == "teppo":
+				var barrel := _mi(_cyl(0.012, 1.0, 10, 0.01), _mat(ctx, "tetsu"), "Barrel")
+				barrel.position = Vector3(0, 0.3, 0.012)
+				n.add_child(barrel)
+				var stock := _mi(_extrude(PackedVector2Array([Vector2(-0.02, 0.75), Vector2(0.024, 0.75), Vector2(0.026, -0.1), Vector2(0.03, -0.22), Vector2(0.05, -0.36), Vector2(-0.01, -0.36), Vector2(-0.024, -0.1)]), 0.035), _mat(ctx, "kogecha"), "Stock")
+				stock.rotation = Vector3(0, PI / 2, 0)
+				n.add_child(stock)
+				var lock := _mi(_box(Vector3(0.012, 0.05, 0.01)), _mat(ctx, "kin"), "Lock")
+				lock.position = Vector3(0.02, -0.08, 0.0)
+				n.add_child(lock)
+				_put(ctx, g["bone"], n, _xf(g["pos"] + up * 0.05 * k, up, Vector3(0, 0, 1), k))
+			else:
+				var shaft := _mi(_cyl(0.014, 2.4, 10), _mat(ctx, "urushi"), "Shaft")
+				shaft.position = Vector3(0, 0.25, 0)
+				n.add_child(shaft)
+				var blade := _mi(_lathe([Vector2(0, 0), Vector2(0.018, 0.02), Vector2(0.012, 0.15), Vector2(0, 0.24)], 4, 1.0, 0.35), _mat(ctx, "gin"), "Blade")
+				blade.position = Vector3(0, 1.45, 0)
+				n.add_child(blade)
+				_put(ctx, g["bone"], n, _xf(g["pos"], up, Vector3(0, 0, 1), k))
+		"yumi":
+			var g := _grip(ctx, "l", 0.0)
+			var up := -(g["fingers"] as Vector3)
+			var pts := PackedVector3Array()
+			var rad := PackedFloat32Array()
+			for i in 15:
+				var t := float(i) / 14.0
+				var y := lerpf(-0.75, 1.35, t)
+				var s := (y - 0.3) / 1.05
+				pts.append(Vector3(0, y, -0.13 * (1.0 - s * s) + 0.03 * pow(absf(s), 6.0)))
+				rad.append(lerpf(1.0, 0.55, absf(s)))
+			var n := Node3D.new()
+			n.name = NODE_PREFIX + "Yumi"
+			n.add_child(_mi(_tube(pts, rad, 0.012, 0.016, 8), _mat(ctx, c1 if c1 != "" else "urushi"), "Bow"))
+			n.add_child(_mi(_tube(PackedVector3Array([pts[0], pts[pts.size() - 1]]), PackedFloat32Array([1, 1]), 0.0025, 0.0025, 5, Vector3.RIGHT, false), _mat(ctx, "kinari", false), "String"))
+			var grip_wrap := _mi(_cyl(0.019, 0.1, 10), _mat(ctx, "enji"), "GripWrap")
+			grip_wrap.position = Vector3(0, 0, -0.13 * (1.0 - pow(-0.3 / 1.05, 2)))
+			n.add_child(grip_wrap)
+			_put(ctx, g["bone"], n, _xf(g["pos"], up, Vector3(0, 0, -1), k))
+		"pistol":
+			var n := Node3D.new()
+			n.name = NODE_PREFIX + "Pistol"
+			var steel := _mat(ctx, "tetsu")
+			var barrel := _mi(_cyl(0.0085, 0.13, 10), steel, "Barrel")
+			barrel.position = Vector3(0, -0.07, 0)
+			n.add_child(barrel)
+			var cylm := _mi(_cyl(0.019, 0.038, 12), steel, "Cylinder")
+			cylm.position = Vector3(0, 0.0, 0)
+			n.add_child(cylm)
+			var frame := _mi(_box(Vector3(0.014, 0.05, 0.03)), steel, "Frame")
+			frame.position = Vector3(0, 0.03, -0.012)
+			n.add_child(frame)
+			var gripm := _mi(_box(Vector3(0.022, 0.075, 0.016)), _mat(ctx, "cha"), "Grip")
+			gripm.position = Vector3(0, 0.075, -0.035)
+			gripm.rotation = Vector3(-0.45, 0, 0)
+			n.add_child(gripm)
+			_put(ctx, "Hips", n, Transform3D(Basis().scaled(Vector3.ONE * k), Vector3(-0.07 * k, L["waist_y"] + 0.0 * k, L["waist_hd"] + 0.012 * k)))
+		"hyotan":
+			var n := Node3D.new()
+			n.name = NODE_PREFIX + "Hyotan"
+			n.add_child(_mi(_lathe([Vector2(0, -0.11), Vector2(0.04, -0.1), Vector2(0.056, -0.07), Vector2(0.05, -0.035), Vector2(0.024, -0.01), Vector2(0.036, 0.02), Vector2(0.036, 0.045), Vector2(0.016, 0.065), Vector2(0.01, 0.08), Vector2(0, 0.082)], 16), _mat(ctx, "kin"), "Gourd"))
+			var cord := _mi(_tube(PackedVector3Array([Vector3(0, 0.07, 0), Vector3(0.0, 0.12, 0.0), Vector3(0, 0.16, -0.01)]), PackedFloat32Array([1, 1, 1]), 0.004, 0.004, 6), _mat(ctx, "shu", false), "Cord")
+			n.add_child(cord)
+			_put(ctx, "Hips", n, Transform3D(Basis().scaled(Vector3.ONE * k), Vector3(-L["waist_hw"] * 0.8, L["waist_y"] - 0.18 * k, L["waist_hd"] * 0.55)))
+		"magatama":
+			var n := Node3D.new()
+			n.name = NODE_PREFIX + "Magatama"
+			var neck: Vector3 = L["neck"]
+			var items: Array = []
+			var bead := _sphere(0.0085, 8)
+			var cnt := 22
+			for i in cnt:
+				var a := TAU * i / cnt
+				var front := (cos(a) + 1.0) * 0.5
+				items.append([bead, Transform3D(Basis(), Vector3(sin(a) * 0.088, -0.05 * front, cos(a) * 0.09 + 0.01))])
+			n.add_child(_mi(_merge(items), _mat(ctx, "midori"), "Beads"))
+			var mpoly := PackedVector2Array()
+			for i in 20:
+				var a := TAU * i / 20.0
+				mpoly.append(Vector2(cos(a) * 0.012, sin(a) * 0.012 + 0.008))
+			var tail := PackedVector2Array([Vector2(0.012, 0.004), Vector2(0.01, -0.012), Vector2(0.0, -0.024), Vector2(-0.008, -0.02), Vector2(-0.006, -0.008), Vector2(-0.012, 0.004)])
+			var merged := Geometry2D.merge_polygons(mpoly, tail)
+			var shape: PackedVector2Array = merged[0] if merged.size() > 0 else mpoly
+			for i in 3:
+				var mg := _mi(_extrude(shape, 0.008), _mat(ctx, "hisui"), "Jewel")
+				mg.position = Vector3((i - 1) * 0.03, -0.05 - 0.008 * (1 - absi(i - 1)), 0.1)
+				mg.rotation = Vector3(0, 0, (i - 1) * -0.3)
+				n.add_child(mg)
+			_put(ctx, "UpperChest", n, Transform3D(Basis().scaled(Vector3.ONE * k), Vector3(0, neck.y - 0.02 * k, neck.z)))
+		"mirror":
+			var chest: Vector3 = L["chest"]
+			var n := Node3D.new()
+			n.name = NODE_PREFIX + "Mirror"
+			var disc := _mi(_lathe([Vector2(0, -0.006), Vector2(0.062, -0.006), Vector2(0.066, 0.0), Vector2(0.062, 0.006), Vector2(0.05, 0.007), Vector2(0.02, 0.006), Vector2(0.012, 0.014), Vector2(0, 0.015)], 24), _mat(ctx, "seidou"), "Disc")
+			disc.rotation = Vector3(PI / 2, 0, 0)
+			n.add_child(disc)
+			for sx: float in [-1.0, 1.0]:
+				n.add_child(_mi(_tube(PackedVector3Array([Vector3(sx * 0.01, 0.03, -0.004), Vector3(sx * 0.05, 0.13, -0.03), Vector3(sx * 0.07, 0.2, -0.08)]), PackedFloat32Array([1, 1, 1]), 0.003, 0.003, 5), _mat(ctx, "shu", false), "Cord"))
+			_put(ctx, "UpperChest", n, Transform3D(Basis().scaled(Vector3.ONE * k), Vector3(0, chest.y - 0.02 * k, L["waist_hd"] + 0.035 * k)))
+		"crucifix":
+			var chest: Vector3 = L["chest"]
+			var n := Node3D.new()
+			n.name = NODE_PREFIX + "Cross"
+			var gold := _mat(ctx, c1 if c1 != "" else "kin")
+			var v := _mi(_box(Vector3(0.014, 0.075, 0.008)), gold, "V")
+			n.add_child(v)
+			var h := _mi(_box(Vector3(0.05, 0.014, 0.008)), gold, "H")
+			h.position = Vector3(0, 0.015, 0)
+			n.add_child(h)
+			var chain := PackedVector3Array()
+			for i in 13:
+				var a := -PI * 0.5 + TAU * i / 12.0
+				chain.append(Vector3(cos(a) * 0.075, 0.13 + sin(a) * 0.1 + 0.0, 0.0))
+			n.add_child(_mi(_tube(PackedVector3Array([Vector3(0, 0.04, 0), Vector3(-0.05, 0.12, -0.03), Vector3(-0.08, 0.22, -0.1)]), PackedFloat32Array([1, 1, 1]), 0.002, 0.002, 5), gold, "Chain"))
+			n.add_child(_mi(_tube(PackedVector3Array([Vector3(0, 0.04, 0), Vector3(0.05, 0.12, -0.03), Vector3(0.08, 0.22, -0.1)]), PackedFloat32Array([1, 1, 1]), 0.002, 0.002, 5), gold, "Chain"))
+			_put(ctx, "UpperChest", n, Transform3D(Basis().scaled(Vector3.ONE * k), Vector3(0, chest.y - 0.04 * k, L["waist_hd"] + 0.02 * k)))
+		"white_collar":
+			var neck: Vector3 = L["neck"]
+			var m := _mi(_lathe([Vector2(0.058, -0.02), Vector2(0.062, -0.02), Vector2(0.06, 0.012), Vector2(0.056, 0.012)], 20, 1.0, 1.05), _mat(ctx, "shiro"), "Collar")
+			_put(ctx, "Neck", m, Transform3D(Basis().scaled(Vector3.ONE * k), neck + Vector3(0, 0.01 * k, 0.005 * k)))
+		"ruff":
+			var neck: Vector3 = L["neck"]
+			var fn := func(u: float, v: float) -> Vector3:
+				var a := u * TAU
+				var r := lerpf(0.06, 0.13, v)
+				return Vector3(sin(a) * r, 0.022 * sin(a * 22.0) * v, cos(a) * r * 1.05)
+			var m := _mi(_surf(fn, 88, 3, true, 0.008), _mat(ctx, "shiro"), "Ruff")
+			_put(ctx, "Neck", m, Transform3D(Basis().scaled(Vector3.ONE * k), neck + Vector3(0, -0.005 * k, 0.005 * k)))
+		"medals":
+			var chest: Vector3 = L["chest"]
+			var n := Node3D.new()
+			n.name = NODE_PREFIX + "Medals"
+			var cols := ["enji", "kin", "ai", "moegi", "shiro", "murasaki"]
+			for i in 6:
+				var b := _mi(_box(Vector3(0.022, 0.008, 0.006)), _mat(ctx, cols[i], false), "Ribbon")
+				b.position = Vector3(0.023 * (i % 3), -0.011 * (i / 3), 0)
+				n.add_child(b)
+			_put(ctx, "UpperChest", n, Transform3D(Basis().scaled(Vector3.ONE * k), Vector3(0.055 * k, chest.y + 0.035 * k, 0.118 * k)))
+		"aiguillette":
+			var chest: Vector3 = L["chest"]
+			var n := Node3D.new()
+			n.name = NODE_PREFIX + "Aiguillette"
+			var gold := _mat(ctx, "kin", false)
+			for i in 2:
+				var dy := 0.035 * i
+				var pts := PackedVector3Array([Vector3(-0.15, chest.y + 0.13, 0.01), Vector3(-0.15, chest.y + 0.06 - dy, 0.1), Vector3(-0.11, chest.y - 0.02 - dy, 0.13), Vector3(-0.06, chest.y + 0.02 - dy * 0.3, 0.135), Vector3(-0.035, chest.y + 0.07, 0.13)])
+				n.add_child(_mi(_tube(pts, PackedFloat32Array([1, 1, 1, 1, 1]), 0.0045, 0.0045, 6), gold, "Cord"))
+			_put(ctx, "UpperChest", n, Transform3D(Basis().scaled(Vector3.ONE * k), Vector3.ZERO).translated(Vector3.ZERO))
+		"kesa":
+			_kesa(ctx, c1 if c1 != "" else "kuchiba", c2 if c2 != "" else "kin")
+		"kataginu":
+			_kataginu(ctx, c1 if c1 != "" else "nezumi")
+		"cape":
+			_cape(ctx, c1 if c1 != "" else "biro", c2 if c2 != "" else "kin")
+		"hire":
+			_hire(ctx, c1 if c1 != "" else "shiro")
+		"kasane":
+			_kasane(ctx, parts.slice(1))
+		"mo", "kyo":
+			_train(ctx, id, c1 if c1 != "" else "shiro")
+		"hachimaki", "kofun_crown", "kofun_crown_band", "hokan", "hokan_m", "boku", "kanmuri", "kanmuri_ryuei", "eboshi", "ori_eboshi", "zukin", "fur_hat", "top_hat":
+			_headwear(ctx, id, c1)
+		"shokaku_kabuto", "nanban_kabuto", "nagaeboshi", "ichinotani", "bariki", "shida_maedate":
+			_helmet(ctx, id)
+		"glasses":
+			_glasses(ctx, c1 if c1 != "" else "kin")
+		_:
+			push_warning("Figures: unknown accessory " + id)
+
+
+## 刀：鞘の口（鯉口）の位置と向きを決めて、柄・鍔・鞘を組む
+static func _sword(ctx: Dictionary, id: String, col: String) -> void:
+	var L: Dictionary = ctx["L"]
+	var k: float = L["k"]
+	var wy: float = L["waist_y"]
+	var wd: float = L["waist_hd"]
+	var blade := 0.72
+	var hilt := 0.25
+	var sori := 0.018
+	var edge_up := true
+	var saya_c := "urushi"
+	var tsuka_c := "kuro"
+	var fit_c := "kin"
+	var koi := Vector3(0.11, wy + 0.005, wd * 0.88)
+	var dir := Vector3(0.5, -0.42, -1.0)
+	var bone := "Hips"
+	match id:
+		"wakizashi":
+			blade = 0.45; hilt = 0.18
+			koi = Vector3(0.065, wy + 0.025 * k, wd * 0.98)
+			dir = Vector3(0.42, -0.28, -1.0)
+		"tachi":
+			blade = 0.78; hilt = 0.24; sori = 0.03; edge_up = false
+			koi = Vector3(0.17 * k, wy - 0.06 * k, wd * 0.55)
+			dir = Vector3(0.2, -0.55, -1.0)
+			saya_c = "urushi"; tsuka_c = "shiro"
+		"chokuto", "kanto_tachi":
+			blade = 0.7; hilt = 0.2; sori = 0.0; edge_up = false
+			koi = Vector3(0.17 * k, wy - 0.06 * k, wd * 0.5)
+			dir = Vector3(0.2, -0.45, -1.0)
+			saya_c = "urushi" if id == "chokuto" else "kogecha"; tsuka_c = "kogecha"
+		"gunto":
+			blade = 0.68; hilt = 0.24; sori = 0.016; edge_up = false
+			koi = Vector3(0.175 * k, wy - 0.1 * k, 0.04 * k)
+			dir = Vector3(0.06, -1.0, -0.42)
+			saya_c = "kaki_g"; tsuka_c = "cha"
+		"tanken":
+			blade = 0.3; hilt = 0.13; sori = 0.0; edge_up = false
+			koi = Vector3(0.17 * k, wy - 0.12 * k, 0.05 * k)
+			dir = Vector3(0.05, -1.0, -0.2)
+			saya_c = "urushi"; tsuka_c = "shiro"
+	if col != "":
+		saya_c = col
+	blade *= k; hilt *= k; sori *= k
+	var d := dir.normalized()
+	var start := koi - d * hilt    # 柄頭
+	# 局所座標：-Z が切先、+Y が刃の向き（反りは +Y と逆へふくらむ）
+	var total := hilt + blade
+	var cpt := func(t: float) -> Vector3:
+		return Vector3(0, -sori * sin(PI * t), -total * t)
+	var n := Node3D.new()
+	n.name = NODE_PREFIX + "Sword_" + id
+	# 柄
+	var tp := PackedVector3Array()
+	var tr := PackedFloat32Array()
+	for i in 5:
+		var t := float(i) / 4.0 * hilt / total
+		tp.append(cpt.call(t))
+		tr.append(1.0 - 0.08 * sin(PI * float(i) / 4.0))
+	var tsuka := _mi(_tube(tp, tr, 0.0125 * k, 0.016 * k, 10, Vector3.UP), _mat(ctx, tsuka_c, true, "kasuri" if tsuka_c in ["kuro", "cha", "shiro"] else "", "shiro" if tsuka_c != "shiro" else "kuro", Vector2(1, 4)), "Tsuka")
+	n.add_child(tsuka)
+	if id == "kanto_tachi":
+		var ring := _mi(_tube(_ring_path(0.028 * k, 14, Vector3(0, -0.0, 0.026 * k)), PackedFloat32Array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]), 0.005 * k, 0.005 * k, 6, Vector3.RIGHT, false), _mat(ctx, "kin"), "Ring")
+		n.add_child(ring)
+	else:
+		var kash := _mi(_sphere(0.016 * k, 8), _mat(ctx, fit_c), "Kashira")
+		kash.scale = Vector3(0.85, 1.0, 0.6)
+		n.add_child(kash)
+	# 鍔
+	var tsuba_p: Vector3 = cpt.call(hilt / total)
+	var tsuba := _mi(_lathe([Vector2(0, -0.003 * k), Vector2(0.04 * k, -0.003 * k), Vector2(0.04 * k, 0.003 * k), Vector2(0, 0.003 * k)], 18, 0.9, 1.0), _mat(ctx, "tetsu" if id != "tanken" else "kin"), "Tsuba")
+	tsuba.transform = Transform3D(Basis(Vector3.RIGHT, PI / 2), tsuba_p)
+	if id in ["katana", "wakizashi", "tachi", "gunto"]:
+		n.add_child(tsuba)
+	# 鞘
+	var sp := PackedVector3Array()
+	var sr := PackedFloat32Array()
+	for i in 9:
+		var t := lerpf(hilt / total + 0.006, 1.0, float(i) / 8.0)
+		sp.append(cpt.call(t))
+		sr.append(lerpf(1.0, 0.78, float(i) / 8.0))
+	n.add_child(_mi(_tube(sp, sr, 0.0115 * k, 0.019 * k, 10, Vector3.UP), _mat(ctx, saya_c), "Saya"))
+	var kojiri := _mi(_sphere(0.012 * k, 8), _mat(ctx, fit_c if id != "gunto" else "kin"), "Kojiri")
+	kojiri.position = cpt.call(1.0)
+	kojiri.scale = Vector3(0.75, 1.15, 1.2)
+	n.add_child(kojiri)
+	if id in ["katana", "wakizashi"]:
+		# 下緒（鞘の栗形から垂れる紐）
+		var a: Vector3 = cpt.call(hilt / total + 0.08)
+		var cord := _mi(_tube(PackedVector3Array([a, a + Vector3(0, -0.04, 0.02) * k, a + Vector3(0, -0.1, 0.05) * k, a + Vector3(0, -0.15, 0.04) * k]), PackedFloat32Array([1, 1, 1, 1]), 0.004 * k, 0.004 * k, 5), _mat(ctx, "murasaki" if id == "katana" else "enji", false), "Sageo")
+		n.add_child(cord)
+	if id in ["tachi", "gunto", "chokuto", "kanto_tachi", "tanken"]:
+		# 帯取（吊り紐）
+		for tt: float in [0.33, 0.45]:
+			var a: Vector3 = cpt.call(tt * (hilt + 0.3 * k) / total)
+			var hang := _mi(_tube(PackedVector3Array([a, a + Vector3(0, -0.08, 0) * k]), PackedFloat32Array([1, 1]), 0.004 * k, 0.004 * k, 5), _mat(ctx, "kin" if id != "gunto" else "cha", false), "Hanger")
+			n.add_child(hang)
+	# 置く：局所 -Z を d へ、局所 +Y を刃の向き（帯に差すなら上、太刀なら下）へ
+	var up_w := Vector3.UP if edge_up else Vector3.DOWN
+	var zax := -d
+	var xax := up_w.cross(zax).normalized()
+	var yax := zax.cross(xax).normalized()
+	_put(ctx, bone, n, Transform3D(Basis(xax, yax, zax), start))
+
+
+static func _ring_path(r: float, n: int, c := Vector3.ZERO) -> PackedVector3Array:
+	var p := PackedVector3Array()
+	for i in n + 1:
+		var a := TAU * i / n
+		p.append(c + Vector3(0, sin(a) * r, cos(a) * r))
+	return p
+
+
+## 袈裟：左肩から右脇へ斜めに掛ける帯（福田衣の格子柄）
+static func _kesa(ctx: Dictionary, c1: String, c2: String) -> void:
+	var L: Dictionary = ctx["L"]
+	var k: float = L["k"]
+	var chest: Vector3 = L["chest"]
+	var cen := Vector3(0, chest.y - 0.1 * k, 0.0)
+	var D := Vector3(0.5, 0.86, 0).normalized()
+	var R1 := 0.36 * k
+	var R2: float = L["waist_hd"] + 0.025 * k
+	var path := PackedVector3Array()
+	var nrm := PackedVector3Array()
+	for i in 33:
+		var a := TAU * i / 32.0
+		var w := 1.0 + 0.18 * cos(a) * cos(a)
+		var p := cen + D * cos(a) * R1 + Vector3(0, 0, 1) * sin(a) * R2 * w
+		# 肩の上では胴の芯から外へ
+		path.append(p)
+		var nn := (p - cen)
+		nn = nn - D.cross(Vector3(0, 0, 1)).normalized() * nn.dot(D.cross(Vector3(0, 0, 1)).normalized())
+		nrm.append(nn.normalized())
+	var m := _mi(_ribbon(path, nrm, 0.12 * k, 0.006 * k, 2), _mat(ctx, c1, true, "ichimatsu", c2, Vector2(1, 10)), "Kesa")
+	_put(ctx, "UpperChest", m, Transform3D.IDENTITY)
+	# 袈裟の環
+	var ring := _mi(TorusMesh.new(), _mat(ctx, "kin"), "KesaRing")
+	(ring.mesh as TorusMesh).inner_radius = 0.016 * k
+	(ring.mesh as TorusMesh).outer_radius = 0.024 * k
+	var rp := cen + D * cos(0.75) * R1 + Vector3(0, 0, 1) * sin(0.75) * R2 * 1.12
+	_put(ctx, "UpperChest", ring, Transform3D(Basis(Vector3.RIGHT, PI / 2), rp + Vector3(0, 0, 0.008 * k)))
+
+
+## 裃の肩衣：張った両肩の羽と、胸へ V 字に下りる前身頃、背
+static func _kataginu(ctx: Dictionary, col: String) -> void:
+	var L: Dictionary = ctx["L"]
+	var k: float = L["k"]
+	var sh: Vector3 = L["shoulder_l"]
+	var wy: float = L["waist_y"]
+	var wd: float = L["waist_hd"]
+	var sy := sh.y + 0.05 * k
+	var mat := _mat(ctx, col)
+	for sx: float in [1.0, -1.0]:
+		# 羽（肩から外へ張り出す板）
+		var wing := func(u: float, v: float) -> Vector3:
+			var x := lerpf(0.06, 0.3, u) * k
+			var z := lerpf(-0.12, 0.12, v) * k * (1.0 - 0.15 * u)
+			return Vector3(sx * x, sy + 0.012 * k * u - 0.02 * k * (1.0 - u) * (1.0 - u) + 0.01 * k * absf(v - 0.5), z)
+		_put(ctx, "UpperChest", _mi(_surf(wing, 6, 4, false, 0.008 * k), mat, "Wing"), Transform3D.IDENTITY)
+		# 前身頃：肩の前縁から帯の中央へ細くなる
+		var front := func(u: float, v: float) -> Vector3:
+			var top_in := Vector3(sx * 0.065 * k, sy - 0.01 * k, 0.1 * k)
+			var top_out := Vector3(sx * 0.22 * k, sy - 0.005 * k, 0.11 * k)
+			var bot_in := Vector3(sx * 0.012 * k, wy, wd + 0.012 * k)
+			var bot_out := Vector3(sx * 0.07 * k, wy, wd + 0.012 * k)
+			var top := top_in.lerp(top_out, u)
+			var bot := bot_in.lerp(bot_out, u)
+			var p := top.lerp(bot, v)
+			p.z += 0.04 * k * sin(PI * v) * (1.0 - 0.3 * u)
+			return p
+		_put(ctx, "UpperChest", _mi(_surf(front, 3, 8, false, 0.007 * k), mat, "Front"), Transform3D.IDENTITY)
+	# 背
+	var back := func(u: float, v: float) -> Vector3:
+		var xw := lerpf(0.27, 0.15, v) * k
+		var x := lerpf(-xw, xw, u)
+		var y := lerpf(sy - 0.005 * k, wy, v)
+		var z := -(lerpf(0.115 * k, wd + 0.015 * k, v) + 0.03 * k * sin(PI * v)) - 0.012 * k * (1.0 - pow(2.0 * u - 1.0, 2.0))
+		return Vector3(x, y, z)
+	_put(ctx, "UpperChest", _mi(_surf(back, 6, 8, false, 0.007 * k), mat, "Back"), Transform3D.IDENTITY)
+
+
+## 南蛮の外套（天鵞絨のマント）：肩から膝下まで、前は開く。裾に金の縁
+static func _cape(ctx: Dictionary, c1: String, c2: String) -> void:
+	var L: Dictionary = ctx["L"]
+	var k: float = L["k"]
+	var neck: Vector3 = L["neck"]
+	var sh: Vector3 = L["shoulder_l"]
+	var top := neck.y - 0.01 * k
+	var bot := 0.42 * k
+	var fn := func(u: float, v: float) -> Vector3:
+		var a := lerpf(-2.0, 2.0, u)     # 0 が背中
+		var y := lerpf(top, bot, v)
+		var shoulder := clampf(v * 4.0, 0.0, 1.0)
+		var r := lerpf(0.09 * k, 0.32 * k, shoulder) + 0.1 * k * v
+		var rx := r * lerpf(0.8, 1.0, shoulder) * (sh.x / 0.147 if v > 0.1 else 1.0)
+		var rz := r * 0.72
+		var p := Vector3(sin(a) * rx, y - 0.04 * k * absf(sin(a)) * shoulder, -cos(a) * rz - 0.02 * k)
+		# ひだ
+		p += Vector3(sin(a), 0, -cos(a)) * 0.012 * k * sin(a * 9.0) * v
+		return p
+	var m := _mi(_surf(fn, 36, 14, false, 0.012 * k), _mat(ctx, c1), "Cape")
+	_put(ctx, "UpperChest", m, Transform3D.IDENTITY)
+	# 裾と前端の金の縁
+	var hem := func(u: float, v: float) -> Vector3:
+		var p: Vector3 = fn.call(u, 1.0 - v * 0.04)
+		var o := Vector3(p.x, 0, p.z + 0.02 * k).normalized()
+		return p + o * 0.008 * k
+	_put(ctx, "UpperChest", _mi(_surf(hem, 36, 1, false, 0.016 * k), _mat(ctx, c2), "CapeHem"), Transform3D.IDENTITY)
+	# 立ち襟
+	var collar := func(u: float, v: float) -> Vector3:
+		var a := lerpf(-2.2, 2.2, u)
+		var r := lerpf(0.085, 0.1, v) * k
+		return Vector3(sin(a) * r, top + v * 0.06 * k, -cos(a) * r * 0.85)
+	_put(ctx, "UpperChest", _mi(_surf(collar, 16, 2, false, 0.01 * k), _mat(ctx, c2), "CapeCollar"), Transform3D.IDENTITY)
+
+
+## 領巾（ひれ）：肩に掛けて前へ垂らす薄布
+static func _hire(ctx: Dictionary, col: String) -> void:
+	var L: Dictionary = ctx["L"]
+	var k: float = L["k"]
+	var neck: Vector3 = L["neck"]
+	var sh: Vector3 = L["shoulder_l"]
+	var wy: float = L["waist_y"]
+	var wd: float = L["waist_hd"]
+	var path := PackedVector3Array()
+	var nrm := PackedVector3Array()
+	var pts := [Vector3(0.16, wy - 0.3 * k, wd + 0.06 * k), Vector3(0.15, wy - 0.05 * k, wd + 0.05 * k), Vector3(0.14, sh.y - 0.06 * k, 0.11 * k),
+		Vector3(sh.x * 0.95, sh.y + 0.035 * k, 0.0), Vector3(0.09, neck.y - 0.02 * k, -0.1 * k), Vector3(0.0, neck.y - 0.05 * k, -0.125 * k)]
+	for i in pts.size():
+		path.append(pts[i])
+	for i in range(pts.size() - 2, -1, -1):
+		var p: Vector3 = pts[i]
+		path.append(Vector3(-p.x, p.y, p.z))
+	for p in path:
+		var o := Vector3(p.x, 0, p.z)
+		if p.y > sh.y - 0.02 * k:
+			o += Vector3(0, 1.2, 0) * 0.1
+		nrm.append(o.normalized())
+	var m := _mi(_ribbon(path, nrm, 0.07 * k, 0.004 * k, 2), _mat(ctx, col), "Hire")
+	_put(ctx, "UpperChest", m, Transform3D.IDENTITY)
+
+
+## 重ねの衿（十二単ふう）：衿元に色の層を V 字に重ねる
+static func _kasane(ctx: Dictionary, cols: Array) -> void:
+	var L: Dictionary = ctx["L"]
+	var k: float = L["k"]
+	var neck: Vector3 = L["neck"]
+	var chest: Vector3 = L["chest"]
+	var wd: float = L["waist_hd"]
+	var n := cols.size()
+	for i in n:
+		var off := 0.011 * (i + 1) * k
+		for sx: float in [1.0, -1.0]:
+			var pts := [Vector3(0, neck.y - 0.005 * k, -0.075 * k - off * 0.6), Vector3(sx * (0.07 * k + off), neck.y - 0.02 * k, -0.01 * k),
+				Vector3(sx * (0.06 * k + off * 0.8), neck.y - 0.075 * k - off * 0.8, 0.085 * k + off * 0.3), Vector3(-sx * 0.012 * k, chest.y - 0.08 * k - off * 2.2, wd + 0.008 * k + off * 0.25)]
+			var path := PackedVector3Array()
+			var nrm := PackedVector3Array()
+			for p: Vector3 in pts:
+				path.append(p)
+				nrm.append((Vector3(p.x, (p.y - neck.y) * 0.0 + 0.35, p.z)).normalized())
+			var m := _mi(_ribbon(path, nrm, 0.016 * k, 0.004 * k, 1), _mat(ctx, cols[n - 1 - i]), "Kasane")
+			_put(ctx, "UpperChest", m, Transform3D.IDENTITY)
+
+
+## 裳・裾（きょ）：腰から後ろへ長く引く
+static func _train(ctx: Dictionary, id: String, col: String) -> void:
+	var L: Dictionary = ctx["L"]
+	var k: float = L["k"]
+	var wy: float = L["waist_y"]
+	var wd: float = L["waist_hd"]
+	var length := 0.95 if id == "mo" else 1.1
+	var w0 := 0.3 if id == "mo" else 0.2
+	var w1 := 0.46 if id == "mo" else 0.22
+	var pts := [Vector3(0, wy, -wd - 0.03 * k), Vector3(0, wy - 0.35 * k, -wd - 0.09 * k), Vector3(0, wy * 0.35, -0.24 * k),
+		Vector3(0, 0.05 * k, -0.42 * k), Vector3(0, 0.015 * k, -length * 0.62 * k), Vector3(0, 0.012 * k, -length * k)]
+	var nrm := PackedVector3Array([Vector3(0, 0.1, -1), Vector3(0, 0.1, -1), Vector3(0, 0.3, -1), Vector3(0, 1, -0.6), Vector3(0, 1, 0), Vector3(0, 1, 0)])
+	var path := PackedVector3Array()
+	for p: Vector3 in pts:
+		path.append(p)
+	var m := _mi(_ribbon(path, nrm, Vector2(w0 * k, w1 * k), 0.006 * k, 4), _mat(ctx, col, true, "asanoha" if id == "mo" else "", "kinari", Vector2(2, 6)), "Train")
+	_put(ctx, "Hips", m, Transform3D.IDENTITY)
+
+
+## かぶりもの（Head の骨に付ける）
+static func _headwear(ctx: Dictionary, id: String, col: String) -> void:
+	var L: Dictionary = ctx["L"]
+	var k: float = L["k"]
+	var hc: Vector3 = L["head_c"]
+	var top: float = L["top"]
+	var fz: float = L["face_z"]
+	var n := Node3D.new()
+	n.name = NODE_PREFIX + id
+	var base := Vector3(0, top, hc.z)    # 頭頂の高さ・頭の中心
+	match id:
+		"hachimaki":
+			var band := _lathe([Vector2(0.106, -0.016), Vector2(0.114, -0.014), Vector2(0.115, 0.014), Vector2(0.107, 0.016)], 28, 1.0, 1.15)
+			var m := _mi(band, _mat(ctx, col if col != "" else "shiro"), "Band")
+			m.position = Vector3(0, -0.085, 0.0)
+			n.add_child(m)
+			var knot := _mi(_sphere(0.018, 8), _mat(ctx, col if col != "" else "shiro"), "Knot")
+			knot.position = Vector3(0, -0.085, -0.128)
+			n.add_child(knot)
+			for sx: float in [1.0, -1.0]:
+				n.add_child(_mi(_tube(PackedVector3Array([Vector3(0, -0.085, -0.13), Vector3(sx * 0.03, -0.13, -0.15), Vector3(sx * 0.05, -0.2, -0.15)]), PackedFloat32Array([1, 1, 0.8]), 0.012, 0.003, 6, Vector3.BACK), _mat(ctx, col if col != "" else "shiro"), "Tail"))
+		"kofun_crown", "kofun_crown_band", "hokan", "hokan_m":
+			var gold := _mat(ctx, "kin")
+			var band := _lathe([Vector2(0.108, -0.02), Vector2(0.116, -0.02), Vector2(0.117, 0.02), Vector2(0.109, 0.02)], 28, 1.0, 1.15)
+			var m := _mi(band, gold, "Band")
+			m.position = Vector3(0, -0.07, 0)
+			n.add_child(m)
+			var spikes: Array = []
+			if id == "kofun_crown":
+				spikes = [0.0, 0.7, -0.7, 1.5, -1.5]
+			elif id == "hokan" or id == "kofun_crown_band":
+				spikes = [0.0]
+			else:
+				spikes = [0.55, -0.55]
+			for a: float in spikes:
+				var sp := Node3D.new()
+				var trunk := _mi(_box(Vector3(0.014, 0.12, 0.003)), gold, "Trunk")
+				trunk.position = Vector3(0, 0.06, 0)
+				sp.add_child(trunk)
+				for lv in 3:
+					for sx: float in [1.0, -1.0]:
+						var br := _mi(_box(Vector3(0.012, 0.045, 0.003)), gold, "Branch")
+						br.position = Vector3(sx * 0.02, 0.035 + lv * 0.032, 0)
+						br.rotation = Vector3(0, 0, -sx * 0.5)
+						sp.add_child(br)
+				if id == "hokan" or id == "kofun_crown_band":
+					sp.scale = Vector3(1.2, 0.6, 1.0)
+				var r := 0.118
+				sp.position = Vector3(sin(a) * r, -0.06, cos(a) * r * 1.15)
+				sp.rotation = Vector3(-0.15, a, 0)
+				n.add_child(sp)
+		"boku":
+			var cap := _lathe([Vector2(0.112, -0.075), Vector2(0.118, -0.03), Vector2(0.11, 0.015), Vector2(0.075, 0.045), Vector2(0, 0.055)], 24, 1.0, 1.17)
+			n.add_child(_mi(cap, _mat(ctx, "urushi"), "Cap"))
+			var bun := _mi(_sphere(0.05, 12), _mat(ctx, "urushi"), "Bun")
+			bun.position = Vector3(0, 0.055, -0.05)
+			bun.scale = Vector3(0.9, 1.0, 1.1)
+			n.add_child(bun)
+			for sx: float in [1.0, -1.0]:
+				n.add_child(_mi(_tube(PackedVector3Array([Vector3(sx * 0.03, 0.0, -0.12), Vector3(sx * 0.045, -0.08, -0.14), Vector3(sx * 0.05, -0.18, -0.13)]), PackedFloat32Array([1, 1, 0.9]), 0.02, 0.003, 6, Vector3.BACK), _mat(ctx, "urushi"), "Tail"))
+		"kanmuri", "kanmuri_ryuei":
+			var black := _mat(ctx, "urushi")
+			var cap := _lathe([Vector2(0.098, -0.035), Vector2(0.104, 0.0), Vector2(0.098, 0.03), Vector2(0.06, 0.045), Vector2(0, 0.048)], 24, 1.0, 1.18)
+			n.add_child(_mi(cap, black, "Cap"))
+			var koji := _mi(_lathe([Vector2(0, 0), Vector2(0.038, 0.0), Vector2(0.036, 0.08), Vector2(0.025, 0.095), Vector2(0, 0.098)], 16, 0.9, 1.0), black, "Koji")
+			koji.position = Vector3(0, 0.03, -0.055)
+			n.add_child(koji)
+			var pin := _mi(_cyl(0.004, 0.13, 6), _mat(ctx, "kin"), "Pin")
+			pin.position = Vector3(0, 0.07, -0.055)
+			pin.rotation = Vector3(0, 0, PI / 2)
+			n.add_child(pin)
+			var ei: PackedVector3Array
+			if id == "kanmuri_ryuei":
+				ei = PackedVector3Array([Vector3(0, 0.1, -0.085), Vector3(0, 0.17, -0.1), Vector3(0, 0.25, -0.13), Vector3(0, 0.3, -0.18)])
+			else:
+				ei = PackedVector3Array([Vector3(0, 0.08, -0.09), Vector3(0, 0.02, -0.14), Vector3(0, -0.1, -0.16), Vector3(0, -0.24, -0.17)])
+			var enrm := PackedVector3Array([Vector3(0, 0, -1), Vector3(0, 0.2, -1), Vector3(0, 0.3, -1), Vector3(0, 0.4, -1)])
+			n.add_child(_mi(_ribbon(ei, enrm, 0.034, 0.003, 1), black, "Ei"))
+			n.position.y = -0.03
+		"eboshi":
+			var prof := [Vector2(0, -0.06), Vector2(0.104, -0.06), Vector2(0.108, 0.02), Vector2(0.1, 0.11), Vector2(0.085, 0.18), Vector2(0.06, 0.22), Vector2(0.02, 0.235), Vector2(0, 0.236)]
+			var m := _mi(_lathe(prof, 24, 0.95, 1.2), _mat(ctx, "urushi"), "Eboshi")
+			m.rotation = Vector3(-0.18, 0, 0)
+			n.add_child(m)
+			var crease := _mi(_box(Vector3(0.006, 0.12, 0.05)), _mat(ctx, "urushi"), "Maneki")
+			crease.position = Vector3(0, 0.1, 0.1)
+			crease.rotation = Vector3(-0.35, 0, 0)
+			n.add_child(crease)
+			n.position.y = -0.035
+		"ori_eboshi":
+			var prof := [Vector2(0, -0.055), Vector2(0.104, -0.055), Vector2(0.108, 0.0), Vector2(0.095, 0.05), Vector2(0.05, 0.07), Vector2(0, 0.072)]
+			n.add_child(_mi(_lathe(prof, 24, 0.95, 1.2), _mat(ctx, "urushi"), "Cap"))
+			var fold := _mi(_extrude(PackedVector2Array([Vector2(-0.07, 0), Vector2(0.07, 0), Vector2(0.05, 0.05), Vector2(-0.08, 0.08)]), 0.018), _mat(ctx, "urushi"), "Fold")
+			fold.position = Vector3(0, 0.055, -0.02)
+			fold.rotation = Vector3(-1.1, 0.2, 0)
+			n.add_child(fold)
+			n.position.y = -0.03
+		"zukin":
+			var prof := [Vector2(0.17, -0.33), Vector2(0.14, -0.22), Vector2(0.125, -0.12), Vector2(0.128, -0.03), Vector2(0.12, 0.03), Vector2(0.085, 0.07), Vector2(0.0, 0.085)]
+			var m := _mi(_lathe(prof, 20, 1.0, 1.15, 0.9, TAU - 0.9, 0.01), _mat(ctx, col if col != "" else "shiro"), "Hood")
+			m.position = Vector3(0, -0.04, -0.005)
+			n.add_child(m)
+			# 顔の下を覆う布
+			var chin := _mi(_lathe([Vector2(0.135, -0.26), Vector2(0.12, -0.17), Vector2(0.11, -0.12)], 14, 1.0, 1.15, -0.95, 0.95, 0.01), _mat(ctx, col if col != "" else "shiro"), "Chin")
+			chin.position = Vector3(0, -0.04, -0.0)
+			n.add_child(chin)
+		"fur_hat":
+			var prof := [Vector2(0, -0.065), Vector2(0.125, -0.065), Vector2(0.135, -0.02), Vector2(0.13, 0.06), Vector2(0.11, 0.1), Vector2(0, 0.105)]
+			n.add_child(_mi(_lathe(prof, 24, 1.0, 1.12), _mat(ctx, "kogecha", true, "kasuri", "cha", Vector2(3, 2)), "Fur"))
+		"top_hat":
+			var prof := [Vector2(0, -0.04), Vector2(0.16, -0.045), Vector2(0.165, -0.035), Vector2(0.1, -0.03), Vector2(0.097, 0.1), Vector2(0.1, 0.14), Vector2(0, 0.142)]
+			n.add_child(_mi(_lathe(prof, 24, 1.0, 1.15), _mat(ctx, "kuro"), "Hat"))
+			var band := _mi(_lathe([Vector2(0.099, -0.028), Vector2(0.101, -0.028), Vector2(0.1, 0.0), Vector2(0.098, 0.0)], 24, 1.0, 1.15), _mat(ctx, "sumi"), "Band")
+			n.add_child(band)
+			n.position.y = 0.0
+	_put(ctx, "Head", n, Transform3D(Basis().scaled(Vector3.ONE * k), base + n.position * k))
+	n.position = n.position   # (位置は _put で確定)
+
+
+## 兜の差し替え・飾り
+static func _helmet(ctx: Dictionary, id: String) -> void:
+	var L: Dictionary = ctx["L"]
+	var k: float = L["k"]
+	var hc: Vector3 = L["head_c"]
+	var top: float = L["top"]
+	var fz: float = L["face_z"]
+	var n := Node3D.new()
+	n.name = NODE_PREFIX + id
+	var base := Vector3(0, top, hc.z)
+	match id:
+		"shokaku_kabuto":
+			var iron := _mat(ctx, "tetsu", true, "ita", "kin", Vector2(6, 2))
+			var fn := func(u: float, v: float) -> Vector3:
+				var a := u * TAU
+				var r := 0.128 * cos(v * PI * 0.5)
+				var y := -0.06 + 0.13 * sin(v * PI * 0.5)
+				var fwd := maxf(0.0, cos(a))
+				var z := cos(a) * r * 1.12 + 0.07 * pow(fwd, 6.0) * (1.0 - v) * (0.4 + v)
+				return Vector3(sin(a) * r, y + 0.03 * pow(fwd, 6.0) * v, z)
+			n.add_child(_mi(_surf(fn, 32, 8, true, 0.0, func(u: float, v: float) -> Vector3: return (fn.call(u, v) as Vector3) - Vector3(0, -0.06, 0)), iron, "Bowl"))
+			var brim := _mi(_lathe([Vector2(0.125, -0.062), Vector2(0.16, -0.07), Vector2(0.16, -0.062), Vector2(0.125, -0.054)], 28, 1.0, 1.12, -1.4, 1.4), _mat(ctx, "kin"), "Brim")
+			n.add_child(brim)
+			var neckg := _mi(_lathe([Vector2(0.13, -0.06), Vector2(0.15, -0.12), Vector2(0.17, -0.19)], 20, 1.0, 1.1, 1.3, TAU - 1.3, 0.008), _mat(ctx, "tetsu", true, "ita", "kin", Vector2(6, 2)), "NeckGuard")
+			n.add_child(neckg)
+			n.position.y = -0.02
+		"nanban_kabuto":
+			var black := _mat(ctx, "urushi")
+			n.add_child(_mi(_lathe([Vector2(0.122, -0.055), Vector2(0.126, 0.0), Vector2(0.11, 0.06), Vector2(0.07, 0.1), Vector2(0, 0.112)], 24, 1.0, 1.18), black, "Bowl"))
+			var comb := PackedVector2Array()
+			for i in 13:
+				var a := PI * i / 12.0
+				comb.append(Vector2(cos(a) * 0.12, 0.07 + sin(a) * 0.08))
+			var cm := _mi(_extrude(comb, 0.01), _mat(ctx, "kin"), "Comb")
+			cm.rotation = Vector3(0, PI / 2, 0)
+			n.add_child(cm)
+			var brim := func(u: float, v: float) -> Vector3:
+				var a := u * TAU
+				var r := lerpf(0.12, 0.2, v)
+				var lift := 0.06 * v * v * pow(absf(cos(a)), 2.0)
+				return Vector3(sin(a) * r, -0.05 + lift - 0.01 * v, cos(a) * r * 1.2)
+			n.add_child(_mi(_surf(brim, 32, 3, true, 0.008), _mat(ctx, "kin"), "Brim"))
+		"nagaeboshi":
+			var silver := _mat(ctx, "gin")
+			var prof := [Vector2(0, -0.06), Vector2(0.125, -0.06), Vector2(0.125, 0.0), Vector2(0.11, 0.1), Vector2(0.09, 0.22), Vector2(0.065, 0.33), Vector2(0.035, 0.4), Vector2(0, 0.41)]
+			var m := _mi(_lathe(prof, 24, 0.82, 1.25), silver, "Tall")
+			m.rotation = Vector3(-0.2, 0, 0)
+			n.add_child(m)
+			for sx: float in [1.0, -1.0]:
+				var disc := _mi(_cyl(0.045, 0.006, 20), _mat(ctx, "shu", false), "Sun")
+				disc.position = Vector3(sx * 0.098, 0.13, -0.02)
+				disc.rotation = Vector3(0, 0, PI / 2 + sx * 0.12)
+				n.add_child(disc)
+			var visor := _mi(_lathe([Vector2(0.12, -0.06), Vector2(0.16, -0.075), Vector2(0.16, -0.065), Vector2(0.12, -0.05)], 20, 1.0, 1.2, -1.2, 1.2), _mat(ctx, "urushi"), "Visor")
+			n.add_child(visor)
+			n.position.y = -0.02
+		"ichinotani":
+			var plate := _mi(_extrude(PackedVector2Array([Vector2(0.06, 0.0), Vector2(-0.12, 0.0), Vector2(-0.2, 0.3), Vector2(-0.02, 0.32)]), 0.012), _mat(ctx, "gin"), "Cliff")
+			plate.rotation = Vector3(0, PI / 2, 0)
+			plate.position = Vector3(0, 0.0, 0.0)
+			n.add_child(plate)
+		"bariki":
+			var gold := _mat(ctx, "kin")
+			var spike := _cyl(0.007, 0.36, 6, 0.0015)
+			var items: Array = []
+			var cnt := 29
+			for i in cnt:
+				var a := lerpf(-1.75, 1.75, float(i) / (cnt - 1))
+				var dirv := Vector3(sin(a), cos(a), 0)
+				var xf := Transform3D(Basis(Vector3(0, 0, 1), -a), dirv * 0.2)
+				items.append([spike, xf])
+			var halo := _mi(_merge(items), gold, "Halo")
+			halo.position = Vector3(0, -0.08, -0.16)
+			n.add_child(halo)
+			var hub := _mi(_cyl(0.05, 0.02, 16), gold, "Hub")
+			hub.rotation = Vector3(PI / 2, 0, 0)
+			hub.position = Vector3(0, -0.08, -0.15)
+			n.add_child(hub)
+		"shida_maedate":
+			var poly := PackedVector2Array()
+			var cnt := 15
+			for i in cnt:
+				var a := lerpf(0.25, PI - 0.25, float(i) / (cnt - 1))
+				var rr := 0.1 if i % 2 == 0 else 0.078
+				poly.append(Vector2(cos(a) * rr, sin(a) * rr))
+			poly.append(Vector2(-0.012, -0.01))
+			poly.append(Vector2(0.012, -0.01))
+			var m := _mi(_extrude(poly, 0.006), _mat(ctx, "kin"), "Fern")
+			m.position = Vector3(0, -0.04, fz - hc.z + 0.03)
+			m.rotation = Vector3(-0.25, 0, 0)
+			n.add_child(m)
+	_put(ctx, "Head", n, Transform3D(Basis().scaled(Vector3.ONE * k), base + n.position * k))
+
+
+## 丸眼鏡
+static func _glasses(ctx: Dictionary, col: String) -> void:
+	var L: Dictionary = ctx["L"]
+	var k: float = L["k"]
+	var eye: Vector3 = L["eye"]
+	var fw: float = L["face_w"]
+	var n := Node3D.new()
+	n.name = NODE_PREFIX + "Glasses"
+	var m := _mat(ctx, col, false)
+	for sx: float in [1.0, -1.0]:
+		var t := TorusMesh.new()
+		t.inner_radius = 0.026
+		t.outer_radius = 0.0295
+		t.rings = 20
+		t.ring_segments = 6
+		var rim := _mi(t, m, "Rim")
+		rim.position = Vector3(sx * 0.045, 0, 0)
+		rim.rotation = Vector3(PI / 2, 0, 0)
+		n.add_child(rim)
+		var temple := _mi(_tube(PackedVector3Array([Vector3(sx * 0.074, 0.004, -0.004), Vector3(sx * (fw / k + 0.004), 0.008, -0.04), Vector3(sx * (fw / k + 0.006), 0.0, -0.11)]), PackedFloat32Array([1, 1, 1]), 0.0022, 0.0022, 5, Vector3.UP, false), m, "Temple")
+		n.add_child(temple)
+	var bridge := _mi(_tube(PackedVector3Array([Vector3(-0.017, 0.006, 0.0), Vector3(0, 0.012, 0.004), Vector3(0.017, 0.006, 0.0)]), PackedFloat32Array([1, 1, 1]), 0.0022, 0.0022, 5, Vector3.UP, false), m, "Bridge")
+	n.add_child(bridge)
+	_put(ctx, "Head", n, Transform3D(Basis().scaled(Vector3.ONE * k), eye + Vector3(0, 0, 0.018 * k)))
+
+
+# ===========================================================================
+# 顔：AnimeFace が無いときの簡易な髭（顔メッシュの形を測って沿わせる）
+# ===========================================================================
+
+static func _face_profile(ctx: Dictionary) -> Dictionary:
+	## 顔の中心軸（頭の中心を通る鉛直線）から見た、角度×高さごとの顔の表面までの距離
+	var model: Node3D = ctx["model"]
+	var L: Dictionary = ctx["L"]
+	var face: MeshInstance3D = null
+	for mi: MeshInstance3D in model.find_children("Face", "MeshInstance3D", true, false):
+		face = mi
+	var hc: Vector3 = L["head_c"]
+	var NA := 36
+	var NY := 20
+	var y0: float = L["face_y0"] - 0.03 * float(L["k"])
+	var y1: float = L["eye"].y
+	var grid := PackedFloat32Array()
+	grid.resize(NA * NY)
+	grid.fill(0.0)
+	if face and face.mesh:
+		for si in face.mesh.get_surface_count():
+			var arr := face.mesh.surface_get_arrays(si)
+			var vs: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			for v in vs:
+				if v.y < y0 or v.y > y1:
+					continue
+				var dx := v.x
+				var dz := v.z - hc.z
+				var a := atan2(dx, dz)
+				var ia := clampi(int((a + PI) / TAU * NA), 0, NA - 1)
+				var iy := clampi(int((v.y - y0) / (y1 - y0) * NY), 0, NY - 1)
+				var r := sqrt(dx * dx + dz * dz)
+				if r > grid[iy * NA + ia]:
+					grid[iy * NA + ia] = r
+	# 空きを近傍で埋める
+	for _pass in 4:
+		for iy in NY:
+			for ia in NA:
+				if grid[iy * NA + ia] > 0.0:
+					continue
+				var s := 0.0
+				var c := 0
+				for d: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+					var ja := (ia + d.x + NA) % NA
+					var jy := iy + d.y
+					if jy < 0 or jy >= NY:
+						continue
+					var g := grid[jy * NA + ja]
+					if g > 0.0:
+						s += g
+						c += 1
+				if c > 0:
+					grid[iy * NA + ia] = s / c
+	return {"grid": grid, "NA": NA, "NY": NY, "y0": y0, "y1": y1, "c": hc}
+
+
+static func _face_r(fp: Dictionary, a: float, y: float) -> float:
+	var NA: int = fp["NA"]
+	var NY: int = fp["NY"]
+	var fa := (a + PI) / TAU * NA - 0.5
+	var fy := (y - float(fp["y0"])) / (float(fp["y1"]) - float(fp["y0"])) * NY - 0.5
+	var ia := int(floor(fa))
+	var iy := clampi(int(floor(fy)), 0, NY - 2)
+	var ta := fa - ia
+	var ty := clampf(fy - iy, 0.0, 1.0)
+	var g: PackedFloat32Array = fp["grid"]
+	var r00 := g[iy * NA + (ia + NA) % NA]
+	var r10 := g[iy * NA + (ia + 1 + NA) % NA]
+	var r01 := g[(iy + 1) * NA + (ia + NA) % NA]
+	var r11 := g[(iy + 1) * NA + (ia + 1 + NA) % NA]
+	return lerpf(lerpf(r00, r10, ta), lerpf(r01, r11, ta), ty)
+
+
+static func _fallback_facial_hair(ctx: Dictionary, face: Dictionary) -> void:
+	var beard: String = face.get("beard", "none")
+	var must: String = face.get("mustache", "none")
+	var side: bool = face.get("sideburns", false)
+	if beard == "none" and must == "none" and not side:
+		return
+	var L: Dictionary = ctx["L"]
+	var k: float = L["k"]
+	var fp := _face_profile(ctx)
+	var hc: Vector3 = fp["c"]
+	var col: Color = BEARD_COL.get(face.get("hair_color", "black"), BEARD_COL["black"])
+	var mat := AnimeChar._cloth_mat(ctx["tmpl"], col, col * Color(0.55, 0.52, 0.6), true, null)
+	if mat is ShaderMaterial and mat.next_pass is ShaderMaterial:
+		(mat.next_pass as ShaderMaterial).set_shader_parameter("_OutlineWidth", 0.1)
+	var mouth: Vector3 = L["mouth"]
+	var chin_y: float = L["face_y0"]
+	var surf_pt := func(a: float, y: float, off: float) -> Vector3:
+		var r := _face_r(fp, a, y) + off
+		return Vector3(hc.x + sin(a) * r, y, hc.z + cos(a) * r)
+	if beard != "none":
+		var spread := 1.25 if beard in ["full", "long", "short"] else 0.42
+		var drop: float = {"goatee": 0.025, "short": 0.02, "full": 0.035, "long": 0.09}.get(beard, 0.02) * k
+		var thick: float = {"goatee": 0.008, "short": 0.006, "full": 0.012, "long": 0.012}.get(beard, 0.008) * k
+		var fn := func(u: float, v: float) -> Vector3:
+			var a := lerpf(-spread, spread, u)
+			var side_t := absf(a) / maxf(spread, 0.01)
+			# 上端：中央は口の下、横へ行くほど頬骨（もみあげ）へ上がる
+			var top_y: float = mouth.y - 0.014 * k + (0.06 * k * side_t * side_t if spread > 1.0 else 0.0)
+			var bot_y: float = chin_y + 0.004 * k
+			var y := lerpf(top_y, bot_y, v)
+			var p: Vector3 = surf_pt.call(a, maxf(y, float(fp["y0"]) + 0.002), thick * (0.4 + 0.6 * v))
+			if v > 0.75:
+				# 顎の下へ回り込み、長い髭は垂らす
+				var t := (v - 0.75) / 0.25
+				p.y -= drop * t * (1.0 - side_t * 0.7)
+				p.z += 0.006 * k * t
+			return p
+		var m := _mi(_surf(fn, 14, 8, false, 0.008 * k), mat, "Beard")
+		_put(ctx, "Head", m, Transform3D.IDENTITY)
+	if side and beard == "none":
+		for sx: float in [1.0, -1.0]:
+			var fn2 := func(u: float, v: float) -> Vector3:
+				var a := sx * lerpf(1.05, 1.35, u)
+				var y := lerpf(L["eye"].y, mouth.y - 0.01 * k, v)
+				return surf_pt.call(a, y, 0.004 * k)
+			_put(ctx, "Head", _mi(_surf(fn2, 2, 5, false, 0.006 * k), mat, "Sideburn"), Transform3D.IDENTITY)
+	if must != "none":
+		var my := mouth.y + 0.014 * k
+		var w := {"thin": 0.32, "toothbrush": 0.16, "full": 0.42, "kaiser": 0.5, "walrus": 0.5, "handlebar": 0.62}.get(must, 0.35) as float
+		var th := {"thin": 0.0035, "toothbrush": 0.007, "full": 0.0065, "kaiser": 0.005, "walrus": 0.008, "handlebar": 0.005}.get(must, 0.005) as float
+		if must == "toothbrush":
+			var fn3 := func(u: float, v: float) -> Vector3:
+				var a := lerpf(-w, w, u)
+				var y := lerpf(my + 0.006 * k, my - 0.006 * k, v)
+				return surf_pt.call(a, y, 0.005 * k)
+			_put(ctx, "Head", _mi(_surf(fn3, 4, 2, false, 0.007 * k), mat, "Mustache"), Transform3D.IDENTITY)
+		else:
+			for sx: float in [1.0, -1.0]:
+				var pts := PackedVector3Array()
+				var rr := PackedFloat32Array()
+				for i in 7:
+					var t := float(i) / 6.0
+					var a := sx * lerpf(0.03, w, t)
+					var y := my - 0.004 * k * t
+					match must:
+						"kaiser", "handlebar":
+							y += (0.03 if must == "handlebar" else 0.02) * k * pow(t, 3.0) - 0.006 * k * sin(PI * t)
+						"walrus":
+							y -= 0.022 * k * t * t
+						"full":
+							y -= 0.01 * k * t * t
+						_:
+							y -= 0.006 * k * t
+					pts.append(surf_pt.call(a, y, 0.0045 * k))
+					rr.append(lerpf(1.0, 0.35, t) if must != "walrus" else lerpf(1.0, 0.7, t))
+				_put(ctx, "Head", _mi(_tube(pts, rr, th * k * 1.5, th * k, 6, Vector3.UP), mat, "Mustache"), Transform3D.IDENTITY)

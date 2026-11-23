@@ -41,6 +41,8 @@ func model(id: String, xf: Transform3D, collide := Vector3.ZERO) -> bool:
 		mi.mesh = e[0]
 		mi.transform = xf * (e[1] as Transform3D)
 		w.add_child(mi)
+		if not _ustack.is_empty():
+			_ustack.back()["models"].append(mi)
 	if collide != Vector3.ZERO:
 		cols.append([xf * Transform3D(Basis(), Vector3(0, collide.y * 0.5, 0)), collide])
 	return true
@@ -51,6 +53,8 @@ func flush(name: String) -> void:
 		var mi := kit.commit(name)
 		w.add_child(mi)
 	kit = MeshKit.new()
+	cols.append_array(base_cols)
+	base_cols.clear()
 	for c in cols:
 		var cs := CollisionShape3D.new()
 		var bs := BoxShape3D.new()
@@ -59,6 +63,78 @@ func flush(name: String) -> void:
 		cs.transform = c[0]
 		w.static_body.add_child(cs)
 	cols.clear()
+
+
+# ================================================================ 破壊ユニット
+## 1 つの建物（や塀の 1 区画）をひとまとまりの「破壊ユニット」として記録する。
+## ユニットのジオメトリは結合メッシュの中に残り（描画コール数は増えない）、UV2 に焼いた ID で
+## シェーダが隠す/焦がす/切断する。コリジョンはユニット専用の StaticBody（Destructible）に移される。
+var landmark := ""            # いま建てているランドマーク（layouts が設定）
+var base_cols: Array = []     # 土台など、壊れない静的コリジョン
+var _ustack: Array = []
+
+
+func begin_unit(kind: String, xf := Transform3D.IDENTITY, opts := {}) -> void:
+	w.next_unit_id += 1
+	var id: int = w.next_unit_id
+	var starts := {}
+	for k in kit.surf:
+		var sa: Array = kit.surf[k]
+		starts[k] = [sa[0].size(), sa[4].size()]
+	_ustack.append({"id": id, "kind": kind, "xf": xf, "landmark": landmark, "cols0": cols.size(), "starts": starts,
+		"models": [], "base_top": -INF, "opts": opts})
+	kit.set_unit(id)
+
+
+func end_unit() -> void:
+	if _ustack.is_empty():
+		return
+	var rec: Dictionary = _ustack.pop_back()
+	kit.set_unit(int(_ustack.back()["id"]) if not _ustack.is_empty() else 0)
+	var id: int = rec["id"]
+	var ranges := {}
+	var own := 0
+	for k in kit.surf:
+		var sa: Array = kit.surf[k]
+		var st: Array = rec["starts"].get(k, [0, 0])
+		var nv: int = sa[0].size()
+		if nv <= int(st[0]):
+			continue
+		var u: PackedVector2Array = sa[5]
+		var cnt := 0
+		for i in range(int(st[0]), nv):
+			if int(u[i].x) == id:
+				cnt += 1
+		if cnt == 0:
+			continue
+		own += cnt
+		ranges[k] = [int(st[0]), nv, int(st[1]), (sa[4] as PackedInt32Array).size()]
+	var c0: int = rec["cols0"]
+	var shapes: Array = cols.slice(c0)
+	cols.resize(c0)
+	var models: Array = rec["models"]
+	if own == 0 and models.is_empty():
+		cols.append_array(shapes)   # 中身が無い（入れ子の子ユニットだけ）: 静的に戻す
+		return
+	w.unit_defs.append({"id": id, "kind": rec["kind"], "xf": rec["xf"], "landmark": rec["landmark"], "surf": kit.surf,
+		"ranges": ranges, "shapes": shapes, "models": models, "base_top": rec["base_top"], "opts": rec["opts"], "verts": own})
+
+
+## 長い塀を 7m 以内の区画に分ける
+func _split_seg(a: Vector3, b: Vector3, max_len := 7.0) -> Array:
+	var L := Vector2(b.x - a.x, b.z - a.z).length()
+	var n := maxi(1, int(ceil(L / max_len)))
+	var out: Array = []
+	for i in n:
+		out.append([a.lerp(b, float(i) / n), a.lerp(b, float(i + 1) / n)])
+	return out
+
+
+func _seg_xf(a: Vector3, b: Vector3) -> Transform3D:
+	var d := b - a
+	var mid := (a + b) * 0.5
+	mid.y = ground(mid)
+	return Transform3D(Basis(Vector3.UP, atan2(d.x, d.z)), mid)
 
 
 # ================================================================ 基本ユーティリティ
@@ -99,8 +175,14 @@ func cyl(mat: String, xf: Transform3D, base: Vector3, r0: float, r1: float, h: f
 
 ## 土台（地面の起伏を隠す）
 func foundation(xf: Transform3D, wd: float, dp: float, h: float, mat := "stonewall", colr := STONE) -> void:
+	# 土台は壊れない（廃墟の基壇として残る）
+	var prev := kit.cur_unit
+	kit.set_unit(0)
 	bx(mat, xf, Vector3(0, (h - 2.0) * 0.5, 0), Vector3(wd, h + 2.0, dp), colr)
-	col(xf, Vector3(0, (h - 2.0) * 0.5, 0), Vector3(wd, h + 2.0, dp))
+	kit.set_unit(prev)
+	base_cols.append([xf * Transform3D(Basis(), Vector3(0, (h - 2.0) * 0.5, 0)), Vector3(wd, h + 2.0, dp)])
+	if not _ustack.is_empty():
+		_ustack.back()["base_top"] = maxf(float(_ustack.back()["base_top"]), xf.origin.y + h)
 
 
 func roof(xf: Transform3D, y: float, hw: float, hd: float, rise: float, style: String, mat := "rooftile", colr := TILE, lift := 0.5, under_col := Color(0.55, 0.42, 0.34), curve := 1.35) -> void:
@@ -134,7 +216,7 @@ func roof(xf: Transform3D, y: float, hw: float, hd: float, rise: float, style: S
 
 # ================================================================ 日本建築
 ## 基壇の上に柱・壁・組物・屋根を持つ堂（宮殿・寺院の金堂・拝殿など）
-func jp_hall(xf: Transform3D, wd: float, dp: float, o := {}) -> void:
+func _u_jp_hall(xf: Transform3D, wd: float, dp: float, o := {}) -> void:
 	var base_h: float = o.get("base_h", 1.0)
 	var wall_h: float = o.get("wall_h", 4.0)
 	var pillar_col: Color = o.get("pillar", VERMILION)
@@ -220,7 +302,7 @@ func jp_hall(xf: Transform3D, wd: float, dp: float, o := {}) -> void:
 
 
 ## 五重塔／三重塔
-func pagoda(xf: Transform3D, tiers := 5, base_w := 7.0, tier_h := 3.0, colr := VERMILION) -> void:
+func _u_pagoda(xf: Transform3D, tiers := 5, base_w := 7.0, tier_h := 3.0, colr := VERMILION) -> void:
 	foundation(xf, base_w + 3.0, base_w + 3.0, 1.0)
 	var y := 1.0
 	for i in tiers:
@@ -249,7 +331,7 @@ func pagoda(xf: Transform3D, tiers := 5, base_w := 7.0, tier_h := 3.0, colr := V
 
 
 ## 鳥居（明神鳥居）
-func torii(xf: Transform3D, wd := 6.0, h := 6.0, colr := VERMILION, mat := "plaster") -> void:
+func _u_torii(xf: Transform3D, wd := 6.0, h := 6.0, colr := VERMILION, mat := "plaster") -> void:
 	var r := wd * 0.055
 	for sgn in [-1.0, 1.0]:
 		var base := Vector3(sgn * wd * 0.5, 0, 0)
@@ -278,7 +360,7 @@ func torii(xf: Transform3D, wd := 6.0, h := 6.0, colr := VERMILION, mat := "plas
 
 
 ## 竪穴住居
-func pit_dwelling(xf: Transform3D, r := 3.6) -> void:
+func _u_pit_dwelling(xf: Transform3D, r := 3.6) -> void:
 	cyl("earth", xf, Vector3(0, -0.6, 0), r + 0.9, r + 0.5, 1.0, 14, Color(0.8, 0.72, 0.6))
 	cyl("thatch", xf, Vector3(0, 0.2, 0), r + 0.35, 0.55, 4.4, 14, THATCH)
 	# 煙出しの小屋根
@@ -292,7 +374,7 @@ func pit_dwelling(xf: Transform3D, r := 3.6) -> void:
 
 
 ## 高床倉庫
-func raised_storehouse(xf: Transform3D, wd := 4.2, dp := 3.4, h := 1.9) -> void:
+func _u_raised_storehouse(xf: Transform3D, wd := 4.2, dp := 3.4, h := 1.9) -> void:
 	for i in 3:
 		for j in 2:
 			var p := Vector3(-wd * 0.5 + wd * i / 2.0, 0, -dp * 0.5 + dp * j)
@@ -314,7 +396,7 @@ func raised_storehouse(xf: Transform3D, wd := 4.2, dp := 3.4, h := 1.9) -> void:
 
 
 ## 物見櫓
-func watchtower(xf: Transform3D, h := 10.0, s := 3.4, roof_mat := "thatch") -> void:
+func _u_watchtower(xf: Transform3D, h := 10.0, s := 3.4, roof_mat := "thatch") -> void:
 	for cx in [-1.0, 1.0]:
 		for cz in [-1.0, 1.0]:
 			kit.rod("wood", xf * Vector3(cx * s * 0.62, -0.5, cz * s * 0.62), xf * Vector3(cx * s * 0.5, h + 2.4, cz * s * 0.5), 0.17, 6, DARK)
@@ -337,7 +419,7 @@ func watchtower(xf: Transform3D, h := 10.0, s := 3.4, roof_mat := "thatch") -> v
 
 
 ## 柵（逆茂木風の丸太柵）
-func palisade(a: Vector3, b: Vector3, h := 2.6, gap := 0.42) -> void:
+func _u_palisade(a: Vector3, b: Vector3, h := 2.6, gap := 0.42) -> void:
 	var d := b - a
 	var L := Vector2(d.x, d.z).length()
 	var n := int(L / gap)
@@ -360,7 +442,7 @@ func palisade(a: Vector3, b: Vector3, h := 2.6, gap := 0.42) -> void:
 
 
 ## 築地塀（瓦屋根付き土塀）。lines=筋（白線）
-func tsuiji(a: Vector3, b: Vector3, h := 2.8, colr := OCHRE, lines := false) -> void:
+func _u_tsuiji(a: Vector3, b: Vector3, h := 2.8, colr := OCHRE, lines := false) -> void:
 	var d := b - a
 	var L := Vector2(d.x, d.z).length()
 	if L < 0.5:
@@ -403,7 +485,7 @@ func _wall_seg(a: Vector3, b: Vector3, h: float, colr: Color, kind: String) -> v
 		_: tsuiji(a, b, h, colr)
 
 
-func wood_fence(a: Vector3, b: Vector3, h := 1.8) -> void:
+func _u_wood_fence(a: Vector3, b: Vector3, h := 1.8) -> void:
 	var d := b - a
 	var L := Vector2(d.x, d.z).length()
 	if L < 0.3:
@@ -419,7 +501,7 @@ func wood_fence(a: Vector3, b: Vector3, h := 1.8) -> void:
 	col(xf, Vector3(0, h * 0.5, 0), Vector3(0.2, h, L))
 
 
-func stone_wall(a: Vector3, b: Vector3, h := 2.0) -> void:
+func _u_stone_wall(a: Vector3, b: Vector3, h := 2.0) -> void:
 	var d := b - a
 	var L := Vector2(d.x, d.z).length()
 	if L < 0.3:
@@ -433,7 +515,7 @@ func stone_wall(a: Vector3, b: Vector3, h := 2.0) -> void:
 	t.occupy_rect(Vector2(mid.x, mid.z), -ang + PI * 0.5, L * 0.5, 0.9)
 
 
-func brick_wall(a: Vector3, b: Vector3, h := 1.6) -> void:
+func _u_brick_wall(a: Vector3, b: Vector3, h := 1.6) -> void:
 	var d := b - a
 	var L := Vector2(d.x, d.z).length()
 	if L < 0.3:
@@ -448,7 +530,7 @@ func brick_wall(a: Vector3, b: Vector3, h := 1.6) -> void:
 
 
 ## 門（楼門=two_story / 四脚門 / 長屋門 / 冠木門）
-func gate(xf: Transform3D, wd := 8.0, kind := "romon", colr := VERMILION) -> void:
+func _u_gate(xf: Transform3D, wd := 8.0, kind := "romon", colr := VERMILION) -> void:
 	var dp := 4.0 if kind == "romon" else 3.0
 	var h := 5.0 if kind == "romon" else 3.8
 	var pmat := "plaster" if colr == VERMILION else "wood"
@@ -522,7 +604,7 @@ func shinden(lm_xf: Transform3D, lx: float, lz: float, size := 46.0) -> void:
 
 
 ## 町家（ローカル +Z が通り側）
-func machiya(xf: Transform3D, wd := 6.0, dp := 11.0, stories := 2, o := {}) -> void:
+func _u_machiya(xf: Transform3D, wd := 6.0, dp := 11.0, stories := 2, o := {}) -> void:
 	var wall: Color = o.get("wall", PLASTER.lerp(OCHRE, rng.randf() * 0.4))
 	var h1 := 3.0
 	foundation(xf, wd, dp, 0.3)
@@ -562,7 +644,7 @@ func shed(xf: Transform3D, c: Vector3, wd: float, depth: float, drop: float, mat
 
 
 ## 民家（切妻・板葺/茅葺/瓦）
-func minka(xf: Transform3D, wd := 8.0, dp := 6.0, roof_mat := "thatch") -> void:
+func _u_minka(xf: Transform3D, wd := 8.0, dp := 6.0, roof_mat := "thatch") -> void:
 	foundation(xf, wd + 0.4, dp + 0.4, 0.3, "stonewall", STONE)
 	var wall := Color(0.82, 0.72, 0.58) if roof_mat != "rooftile" else Color(0.9, 0.86, 0.78)
 	bx("plaster", xf, Vector3(0, 0.3 + 1.3, 0), Vector3(wd, 2.6, dp), wall)
@@ -582,7 +664,7 @@ func minka(xf: Transform3D, wd := 8.0, dp := 6.0, roof_mat := "thatch") -> void:
 
 
 ## 農家（茅葺き入母屋）
-func farmhouse(xf: Transform3D, wd := 10.0, dp := 7.0) -> void:
+func _u_farmhouse(xf: Transform3D, wd := 10.0, dp := 7.0) -> void:
 	foundation(xf, wd + 0.6, dp + 0.6, 0.35, "stonewall", STONE)
 	bx("plaster", xf, Vector3(0, 0.35 + 1.4, 0), Vector3(wd, 2.8, dp), Color(0.86, 0.76, 0.6))
 	bx("darkwood", xf, Vector3(0, 0.35 + 0.6, dp * 0.5 + 0.02), Vector3(wd, 1.2, 0.06), Color(0.85, 0.75, 0.65))
@@ -597,7 +679,7 @@ func farmhouse(xf: Transform3D, wd := 10.0, dp := 7.0) -> void:
 
 
 ## 土蔵
-func kura(xf: Transform3D, wd := 5.0, dp := 6.5, h := 5.0) -> void:
+func _u_kura(xf: Transform3D, wd := 5.0, dp := 6.5, h := 5.0) -> void:
 	foundation(xf, wd + 0.4, dp + 0.4, 0.5)
 	bx("plaster", xf, Vector3(0, 0.5 + h * 0.5, 0), Vector3(wd, h, dp), PLASTER)
 	bx("stonewall", xf, Vector3(0, 0.5 + 0.7, 0), Vector3(wd + 0.06, 1.4, dp + 0.06), Color(0.45, 0.45, 0.48))
@@ -638,6 +720,7 @@ func castle(xf: Transform3D, base_w := 40.0, base_h := 11.0, tiers := 5, wall_co
 	var lower_col := BLACK if accent else wall_col
 	_ishigaki(xf * Transform3D(Basis(), Vector3(0, y, 0)), tw + 2.0, td + 2.0, tw + 1.0, td + 1.0, 1.2)
 	y += 1.2
+	begin_unit("castle_keep", xf * Transform3D(Basis(), Vector3(0, y, 0)), {"kind_detail": "tenshu", "tiers": tiers})
 	for i in tiers:
 		var k := 1.0 - i * 0.14
 		var ww := tw * k
@@ -680,24 +763,34 @@ func castle(xf: Transform3D, base_w := 40.0, base_h := 11.0, tiers := 5, wall_co
 		for sgn in [-1.0, 1.0]:
 			kit.box("gold", xf * Transform3D(Basis(), Vector3(sgn * hx, y + 2.4 + 0.9, 0)), Vector3(0.45, 1.1, 0.3), GOLD)
 	col(xf, Vector3(0, (y + base_h) * 0.5, 0), Vector3(tw, y - base_h + 2.0, td).max(Vector3.ONE) + Vector3(0, 0, 0))
+	end_unit()
 	# 隅櫓と塀
 	for cx in [-1.0, 1.0]:
 		for cz in [-1.0, 1.0]:
 			var p := Vector3(cx * (top_w * 0.5 - 3.5), base_h, cz * (top_w * 0.5 - 3.5))
 			var yx := xf * Transform3D(Basis(), p)
+			begin_unit("yagura", yx, {"kind_detail": "sumi_yagura"})
 			bx("plaster", yx, Vector3(0, 2.0, 0), Vector3(6, 4, 6), wall_col)
 			bx("darkwood", yx, Vector3(0, 1.0, 0), Vector3(6.05, 2.0, 6.05), BLACK if accent else Color(0.35, 0.33, 0.32))
 			roof(yx, 4.0, 4.2, 4.2, 1.8, "irimoya", "rooftile", TILE_DARK, 0.4, PLASTER)
 			col(yx, Vector3(0, 2.0, 0), Vector3(6, 4, 6))
+			end_unit()
 	var hs := top_w * 0.5 - 0.6
 	for side in 4:
 		var a := Vector3(-hs, base_h, hs).rotated(Vector3.UP, side * PI * 0.5)
 		var b := Vector3(hs, base_h, hs).rotated(Vector3.UP, side * PI * 0.5)
 		var mid := (a + b) * 0.5
 		var sx := xf * Transform3D(Basis(Vector3.UP, side * PI * 0.5), mid)
-		bx("plaster", sx, Vector3(0, 1.1, 0), Vector3(top_w - 8.0, 2.2, 0.5), wall_col)
-		kit.roof(sx * Transform3D(Basis(), Vector3(0, 2.2, 0)), (top_w - 8.0) * 0.5, 0.65, 0.4, 1.0, "rooftile", "darkwood", TILE_DARK, 1.0, 0.0, 0.15)
-		col(sx, Vector3(0, 1.1, 0), Vector3(top_w - 8.0, 2.2, 0.5))
+		# 塀は 3 区画に分けて壊れる
+		var nseg := 3
+		var seg_w := (top_w - 8.0) / nseg
+		for k in nseg:
+			var kx := sx * Transform3D(Basis(), Vector3(-(top_w - 8.0) * 0.5 + seg_w * (k + 0.5), 0, 0))
+			begin_unit("wall", kx, {"kind_detail": "castle_wall"})
+			bx("plaster", kx, Vector3(0, 1.1, 0), Vector3(seg_w + 0.02, 2.2, 0.5), wall_col)
+			kit.roof(kx * Transform3D(Basis(), Vector3(0, 2.2, 0)), seg_w * 0.5, 0.65, 0.4, 1.0, "rooftile", "darkwood", TILE_DARK, 1.0, 0.0, 0.15)
+			col(kx, Vector3(0, 1.1, 0), Vector3(seg_w, 2.2, 0.5))
+			end_unit()
 	# 正面の登り坂（大手道）
 	var rx := xf * Transform3D(Basis(), Vector3(0, 0, base_w * 0.5 + 7.0))
 	var ramp_len := 16.0
@@ -732,7 +825,7 @@ func _ishigaki(xf: Transform3D, bw: float, bd: float, tw: float, td: float, h: f
 
 
 ## 石灯籠
-func stone_lantern(p: Vector3, s := 1.0) -> void:
+func _u_stone_lantern(p: Vector3, s := 1.0) -> void:
 	var xf := Transform3D(Basis().scaled(Vector3.ONE * s), Vector3(p.x, ground(p), p.z))
 	bx("stonewall", xf, Vector3(0, 0.15, 0), Vector3(0.7, 0.3, 0.7), STONE)
 	kit.cylinder("stonewall", xf * Transform3D(Basis(), Vector3(0, 0.3, 0)), 0.16 * s, 0.14 * s, 1.0 * s, 8, STONE)
@@ -745,7 +838,7 @@ func stone_lantern(p: Vector3, s := 1.0) -> void:
 
 
 ## 提灯・ガス灯・電灯
-func lamp(p: Vector3, kind: String) -> void:
+func _u_lamp(p: Vector3, kind: String) -> void:
 	var y := ground(p)
 	var xf := Transform3D(Basis(), Vector3(p.x, y, p.z))
 	match kind:
@@ -769,7 +862,7 @@ func lamp(p: Vector3, kind: String) -> void:
 
 
 ## のぼり旗
-func nobori(p: Vector3, colr: Color) -> void:
+func _u_nobori(p: Vector3, colr: Color) -> void:
 	var y := ground(p)
 	var xf := Transform3D(Basis(Vector3.UP, rng.randf() * TAU), Vector3(p.x, y, p.z))
 	kit.cylinder("wood", xf, 0.04, 0.03, 4.4, 5, DARK, false)
@@ -778,7 +871,7 @@ func nobori(p: Vector3, colr: Color) -> void:
 
 
 ## 陣幕
-func jinmaku(a: Vector3, b: Vector3, colr := Color(0.92, 0.9, 0.86)) -> void:
+func _u_jinmaku(a: Vector3, b: Vector3, colr := Color(0.92, 0.9, 0.86)) -> void:
 	var d := b - a
 	var L := Vector2(d.x, d.z).length()
 	var ang := atan2(d.x, d.z)
@@ -793,7 +886,7 @@ func jinmaku(a: Vector3, b: Vector3, colr := Color(0.92, 0.9, 0.86)) -> void:
 
 
 ## 馬防柵
-func baboosaku(a: Vector3, b: Vector3) -> void:
+func _u_baboosaku(a: Vector3, b: Vector3) -> void:
 	var d := b - a
 	var L := Vector2(d.x, d.z).length()
 	var ang := atan2(d.x, d.z)
@@ -810,14 +903,14 @@ func baboosaku(a: Vector3, b: Vector3) -> void:
 
 
 ## 埴輪
-func haniwa(p: Vector3) -> void:
+func _u_haniwa(p: Vector3) -> void:
 	var xf := Transform3D(Basis(), Vector3(p.x, ground(p), p.z))
 	kit.cylinder("earth", xf, 0.28, 0.22, 1.0, 8, Color(1.0, 0.62, 0.42))
 	kit.sphere("earth", xf * Transform3D(Basis(), Vector3(0, 1.15, 0)), 0.2, 8, 5, Color(1.0, 0.62, 0.42))
 
 
 ## 市の屋台
-func stall(xf: Transform3D, colr: Color) -> void:
+func _u_stall(xf: Transform3D, colr: Color) -> void:
 	for cx in [-1.0, 1.0]:
 		for cz in [-1.0, 1.0]:
 			cyl("wood", xf, Vector3(cx * 1.3, 0, cz * 0.9), 0.06, 0.06, 2.2 + (0.3 if cz < 0 else 0.0), 5, DARK)
@@ -832,7 +925,7 @@ func stall(xf: Transform3D, colr: Color) -> void:
 
 # ================================================================ 近代建築
 ## 煉瓦造の洋館（明治）。clock=時計塔
-func brick_building(xf: Transform3D, wd := 24.0, dp := 14.0, floors := 3, o := {}) -> void:
+func _u_brick_building(xf: Transform3D, wd := 24.0, dp := 14.0, floors := 3, o := {}) -> void:
 	var fh := 4.2
 	var wall_mat: String = o.get("mat", "brick")
 	var wall_col: Color = o.get("col", Color(1.0, 0.68, 0.58) if wall_mat == "brick" else Color.WHITE)
@@ -910,7 +1003,7 @@ func _clock_tower(xf: Transform3D, s: float, y0: float, mat: String, colr: Color
 
 
 ## 擬洋風の木造校舎
-func wooden_school(xf: Transform3D, wd := 34.0, dp := 10.0) -> void:
+func _u_wooden_school(xf: Transform3D, wd := 34.0, dp := 10.0) -> void:
 	var h := 7.6
 	var siding := Color(0.98, 0.95, 0.85)
 	foundation(xf, wd + 0.4, dp + 0.4, 0.6)
@@ -941,7 +1034,7 @@ func wooden_school(xf: Transform3D, wd := 34.0, dp := 10.0) -> void:
 
 
 ## 鉄筋コンクリートのビル（昭和）
-func concrete_building(xf: Transform3D, wd := 18.0, dp := 14.0, floors := 5, o := {}) -> void:
+func _u_concrete_building(xf: Transform3D, wd := 18.0, dp := 14.0, floors := 5, o := {}) -> void:
 	var fh := 3.4
 	var h := floors * fh
 	var colr: Color = o.get("col", Color(0.9, 0.88, 0.84).lerp(Color(0.75, 0.72, 0.66), rng.randf()))
@@ -980,7 +1073,7 @@ func concrete_building(xf: Transform3D, wd := 18.0, dp := 14.0, floors := 5, o :
 
 
 ## 団地（板状アパート）
-func apartment(xf: Transform3D, wd := 48.0, dp := 10.0, floors := 5) -> void:
+func _u_apartment(xf: Transform3D, wd := 48.0, dp := 10.0, floors := 5) -> void:
 	var fh := 2.8
 	var h := floors * fh
 	var colr := Color(0.92, 0.9, 0.85)
@@ -1009,7 +1102,7 @@ func apartment(xf: Transform3D, wd := 48.0, dp := 10.0, floors := 5) -> void:
 
 
 ## 昭和の木造家屋・商店（看板建築＋日よけ）
-func showa_shop(xf: Transform3D, wd := 6.0, dp := 9.0) -> void:
+func _u_showa_shop(xf: Transform3D, wd := 6.0, dp := 9.0) -> void:
 	var colr: Color = [Color(0.85, 0.82, 0.74), Color(0.7, 0.75, 0.72), Color(0.8, 0.7, 0.6), Color(0.9, 0.88, 0.82)][rng.randi() % 4]
 	foundation(xf, wd, dp, 0.25, "concrete", Color(0.7, 0.7, 0.68))
 	bx("plaster", xf, Vector3(0, 0.25 + 3.3, -0.2), Vector3(wd - 0.1, 6.6, dp - 0.4), colr)
@@ -1075,7 +1168,7 @@ func pier(xf: Transform3D, length: float, width: float, kind := "wood") -> void:
 
 
 ## 和船・帆船・汽船（静的な飾り）
-func boat(xf: Transform3D, kind := "small") -> void:
+func _u_boat(xf: Transform3D, kind := "small") -> void:
 	var y := w.water_level - xf.origin.y
 	if kind == "dutch":
 		# 南蛮船（写真ベースのモデル）
@@ -1134,7 +1227,7 @@ func boat(xf: Transform3D, kind := "small") -> void:
 
 
 ## 倉庫
-func warehouse(xf: Transform3D, wd := 20.0, dp := 12.0, kind := "brick") -> void:
+func _u_warehouse(xf: Transform3D, wd := 20.0, dp := 12.0, kind := "brick") -> void:
 	match kind:
 		"brick":
 			var h := 9.0
@@ -1170,6 +1263,7 @@ func bridge(pos: Vector2, dir: Vector2, length: float, width: float, deck_h: flo
 	var ang := atan2(dir.x, dir.y)
 	var xf := Transform3D(Basis(Vector3.UP, ang), Vector3(pos.x, deck_h, pos.y))
 	t.occupy_rect(pos, -ang, width * 0.5 + 0.5, length * 0.5 + 6.0)
+	var bridge_group := "bridge_%d_%d" % [int(pos.x), int(pos.y)]
 	var segs := 10
 	var mat := "wood" if kind == "wood" else ("stonewall" if kind == "stone" else "concrete")
 	var colr := Color(0.8, 0.72, 0.62) if kind == "wood" else Color(0.85, 0.83, 0.8)
@@ -1193,12 +1287,18 @@ func bridge(pos: Vector2, dir: Vector2, length: float, width: float, deck_h: flo
 		var sl := atan2(y1 - y0, z1 - z0)
 		var seg_xf := xf * Transform3D(Basis(Vector3.RIGHT, -sl), mid)
 		var L := Vector2(z1 - z0, y1 - y0).length() + 0.05
+		# 中央寄りの区画は壊れて落ちる（両端のすり付け部は残す）
+		var breakable := absf((z0 + z1) * 0.5) < length * 0.5
+		if breakable:
+			begin_unit("bridge", seg_xf, {"kind_detail": "bridge_" + kind, "group": bridge_group})
 		kit.box(mat, seg_xf, Vector3(width, 0.45, L), colr)
 		cols.append([seg_xf, Vector3(width, 0.5, L)])
 		for sgn in [-1.0, 1.0]:
 			kit.box("plaster" if kind == "vermilion" else mat, seg_xf * Transform3D(Basis(), Vector3(sgn * (width * 0.5 - 0.1), 0.75, 0)), Vector3(0.14, 0.12, L), rail_col)
 			kit.box("plaster" if kind == "vermilion" else mat, seg_xf * Transform3D(Basis(), Vector3(sgn * (width * 0.5 - 0.1), 0.45, 0)), Vector3(0.1, 0.6, 0.12), rail_col)
 			cols.append([seg_xf * Transform3D(Basis(), Vector3(sgn * (width * 0.5 - 0.1), 0.6, 0)), Vector3(0.2, 1.0, L)])
+		if breakable:
+			end_unit()
 	# 橋脚
 	var np := maxi(1, int(length / 9.0))
 	for k in np:
@@ -1220,7 +1320,7 @@ func bridge(pos: Vector2, dir: Vector2, length: float, width: float, deck_h: flo
 
 
 # ================================================================ 昭和の飛行場
-func hangar(xf: Transform3D, wd := 30.0, dp := 26.0) -> void:
+func _u_hangar(xf: Transform3D, wd := 30.0, dp := 26.0) -> void:
 	foundation(xf, wd, dp, 0.2, "concrete", Color(0.7, 0.7, 0.68))
 	var segs := 10
 	var r := wd * 0.5
@@ -1243,7 +1343,7 @@ func hangar(xf: Transform3D, wd := 30.0, dp := 26.0) -> void:
 	occupy(xf, wd + 1, dp + 1, 2.0)
 
 
-func control_tower(xf: Transform3D) -> void:
+func _u_control_tower(xf: Transform3D) -> void:
 	foundation(xf, 6, 6, 0.3, "concrete", Color(0.7, 0.7, 0.68))
 	bx("concrete", xf, Vector3(0, 0.3 + 5.0, 0), Vector3(5, 10, 5), Color(0.88, 0.86, 0.8))
 	bx("glass", xf, Vector3(0, 0.3 + 11.2, 0), Vector3(6.2, 2.4, 6.2), Color(0.4, 0.5, 0.55))
@@ -1254,7 +1354,7 @@ func control_tower(xf: Transform3D) -> void:
 
 
 ## 国会議事堂（中央塔＋左右の翼）
-func diet_building(xf: Transform3D, wd := 110.0) -> void:
+func _u_diet_building(xf: Transform3D, wd := 110.0) -> void:
 	var granite := Color(0.86, 0.82, 0.74)
 	var dp := 30.0
 	var h := 16.0
@@ -1290,3 +1390,207 @@ func diet_building(xf: Transform3D, wd := 110.0) -> void:
 	col(xf, Vector3(0, 1.2 + h * 0.5, 0), Vector3(wd, h + 4.0, dp + 4.0))
 	col(cx, Vector3(0, (y) * 0.5, 2.0), Vector3(20, y, 20))
 	occupy(xf, wd + 4, dp + 12, 4.0)
+
+
+# ================================================================ 破壊ユニットのラッパ（自動生成: 各建物を 1 ユニットに）
+func jp_hall(xf: Transform3D, wd: float, dp: float, o := {}) -> void:
+	begin_unit("hall", xf, {"kind_detail": "jp_hall"})
+	_u_jp_hall(xf, wd, dp, o)
+	end_unit()
+
+
+func pagoda(xf: Transform3D, tiers := 5, base_w := 7.0, tier_h := 3.0, colr := VERMILION) -> void:
+	begin_unit("pagoda", xf, {"kind_detail": "pagoda"})
+	_u_pagoda(xf, tiers, base_w, tier_h, colr)
+	end_unit()
+
+
+func torii(xf: Transform3D, wd := 6.0, h := 6.0, colr := VERMILION, mat := "plaster") -> void:
+	begin_unit("torii", xf, {"kind_detail": "torii"})
+	_u_torii(xf, wd, h, colr, mat)
+	end_unit()
+
+
+func pit_dwelling(xf: Transform3D, r := 3.6) -> void:
+	begin_unit("house", xf, {"kind_detail": "pit_dwelling"})
+	_u_pit_dwelling(xf, r)
+	end_unit()
+
+
+func raised_storehouse(xf: Transform3D, wd := 4.2, dp := 3.4, h := 1.9) -> void:
+	begin_unit("house", xf, {"kind_detail": "raised_storehouse"})
+	_u_raised_storehouse(xf, wd, dp, h)
+	end_unit()
+
+
+func watchtower(xf: Transform3D, h := 10.0, s := 3.4, roof_mat := "thatch") -> void:
+	begin_unit("tower", xf, {"kind_detail": "watchtower"})
+	_u_watchtower(xf, h, s, roof_mat)
+	end_unit()
+
+
+func gate(xf: Transform3D, wd := 8.0, kind := "romon", colr := VERMILION) -> void:
+	begin_unit("gate", xf, {"kind_detail": "gate"})
+	_u_gate(xf, wd, kind, colr)
+	end_unit()
+
+
+func machiya(xf: Transform3D, wd := 6.0, dp := 11.0, stories := 2, o := {}) -> void:
+	begin_unit("house", xf, {"kind_detail": "machiya"})
+	_u_machiya(xf, wd, dp, stories, o)
+	end_unit()
+
+
+func minka(xf: Transform3D, wd := 8.0, dp := 6.0, roof_mat := "thatch") -> void:
+	begin_unit("house", xf, {"kind_detail": "minka"})
+	_u_minka(xf, wd, dp, roof_mat)
+	end_unit()
+
+
+func farmhouse(xf: Transform3D, wd := 10.0, dp := 7.0) -> void:
+	begin_unit("house", xf, {"kind_detail": "farmhouse"})
+	_u_farmhouse(xf, wd, dp)
+	end_unit()
+
+
+func kura(xf: Transform3D, wd := 5.0, dp := 6.5, h := 5.0) -> void:
+	begin_unit("kura", xf, {"kind_detail": "kura"})
+	_u_kura(xf, wd, dp, h)
+	end_unit()
+
+
+func stone_lantern(p: Vector3, s := 1.0) -> void:
+	begin_unit("lantern", Transform3D(Basis(), p), {"kind_detail": "stone_lantern"})
+	_u_stone_lantern(p, s)
+	end_unit()
+
+
+func lamp(p: Vector3, kind: String) -> void:
+	begin_unit("lamp", Transform3D(Basis(), p), {"kind_detail": "lamp"})
+	_u_lamp(p, kind)
+	end_unit()
+
+
+func nobori(p: Vector3, colr: Color) -> void:
+	begin_unit("prop", Transform3D(Basis(), p), {"kind_detail": "nobori"})
+	_u_nobori(p, colr)
+	end_unit()
+
+
+func haniwa(p: Vector3) -> void:
+	begin_unit("prop", Transform3D(Basis(), p), {"kind_detail": "haniwa"})
+	_u_haniwa(p)
+	end_unit()
+
+
+func stall(xf: Transform3D, colr: Color) -> void:
+	begin_unit("stall", xf, {"kind_detail": "stall"})
+	_u_stall(xf, colr)
+	end_unit()
+
+
+func brick_building(xf: Transform3D, wd := 24.0, dp := 14.0, floors := 3, o := {}) -> void:
+	begin_unit("brick", xf, {"kind_detail": "brick_building"})
+	_u_brick_building(xf, wd, dp, floors, o)
+	end_unit()
+
+
+func wooden_school(xf: Transform3D, wd := 34.0, dp := 10.0) -> void:
+	begin_unit("school", xf, {"kind_detail": "wooden_school"})
+	_u_wooden_school(xf, wd, dp)
+	end_unit()
+
+
+func concrete_building(xf: Transform3D, wd := 18.0, dp := 14.0, floors := 5, o := {}) -> void:
+	begin_unit("concrete", xf, {"kind_detail": "concrete_building"})
+	_u_concrete_building(xf, wd, dp, floors, o)
+	end_unit()
+
+
+func apartment(xf: Transform3D, wd := 48.0, dp := 10.0, floors := 5) -> void:
+	begin_unit("concrete", xf, {"kind_detail": "apartment"})
+	_u_apartment(xf, wd, dp, floors)
+	end_unit()
+
+
+func showa_shop(xf: Transform3D, wd := 6.0, dp := 9.0) -> void:
+	begin_unit("house", xf, {"kind_detail": "showa_shop"})
+	_u_showa_shop(xf, wd, dp)
+	end_unit()
+
+
+func boat(xf: Transform3D, kind := "small") -> void:
+	begin_unit("boat", xf, {"kind_detail": "boat", "ship": kind, "big": kind in ["big", "dutch", "steam", "liner", "sail"]})
+	_u_boat(xf, kind)
+	end_unit()
+
+
+func warehouse(xf: Transform3D, wd := 20.0, dp := 12.0, kind := "brick") -> void:
+	begin_unit("warehouse", xf, {"kind_detail": "warehouse"})
+	_u_warehouse(xf, wd, dp, kind)
+	end_unit()
+
+
+func hangar(xf: Transform3D, wd := 30.0, dp := 26.0) -> void:
+	begin_unit("hangar", xf, {"kind_detail": "hangar"})
+	_u_hangar(xf, wd, dp)
+	end_unit()
+
+
+func control_tower(xf: Transform3D) -> void:
+	begin_unit("concrete", xf, {"kind_detail": "control_tower"})
+	_u_control_tower(xf)
+	end_unit()
+
+
+func diet_building(xf: Transform3D, wd := 110.0) -> void:
+	begin_unit("monument", xf, {"kind_detail": "diet_building"})
+	_u_diet_building(xf, wd)
+	end_unit()
+
+
+func jinmaku(a: Vector3, b: Vector3, colr := Color(0.92, 0.9, 0.86)) -> void:
+	begin_unit("fence", _seg_xf(a, b), {"kind_detail": "jinmaku"})
+	_u_jinmaku(a, b, colr)
+	end_unit()
+
+
+func baboosaku(a: Vector3, b: Vector3) -> void:
+	begin_unit("fence", _seg_xf(a, b), {"kind_detail": "baboosaku"})
+	_u_baboosaku(a, b)
+	end_unit()
+
+
+func palisade(a: Vector3, b: Vector3, h := 2.6, gap := 0.42) -> void:
+	for seg in _split_seg(a, b):
+		begin_unit("fence", _seg_xf(seg[0], seg[1]), {"kind_detail": "palisade"})
+		_u_palisade(seg[0], seg[1], h, gap)
+		end_unit()
+
+
+func tsuiji(a: Vector3, b: Vector3, h := 2.8, colr := OCHRE, lines := false) -> void:
+	for seg in _split_seg(a, b):
+		begin_unit("wall", _seg_xf(seg[0], seg[1]), {"kind_detail": "tsuiji"})
+		_u_tsuiji(seg[0], seg[1], h, colr, lines)
+		end_unit()
+
+
+func wood_fence(a: Vector3, b: Vector3, h := 1.8) -> void:
+	for seg in _split_seg(a, b):
+		begin_unit("fence", _seg_xf(seg[0], seg[1]), {"kind_detail": "wood_fence"})
+		_u_wood_fence(seg[0], seg[1], h)
+		end_unit()
+
+
+func stone_wall(a: Vector3, b: Vector3, h := 2.0) -> void:
+	for seg in _split_seg(a, b):
+		begin_unit("stonewall", _seg_xf(seg[0], seg[1]), {"kind_detail": "stone_wall"})
+		_u_stone_wall(seg[0], seg[1], h)
+		end_unit()
+
+
+func brick_wall(a: Vector3, b: Vector3, h := 1.6) -> void:
+	for seg in _split_seg(a, b):
+		begin_unit("brickwall", _seg_xf(seg[0], seg[1]), {"kind_detail": "brick_wall"})
+		_u_brick_wall(seg[0], seg[1], h)
+		end_unit()

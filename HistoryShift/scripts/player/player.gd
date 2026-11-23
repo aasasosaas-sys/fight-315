@@ -25,6 +25,7 @@ var _last_hit := -99.0
 var _vehicle_cd := 0.0
 
 var rig: Humanoid
+var tools: DestructionTools     # 破壊ツール（scripts/player/destruction_tools.gd）
 var _chute: Node3D
 var _shape: CollisionShape3D
 
@@ -50,6 +51,9 @@ func _ready() -> void:
 	add_child(_chute)
 	Humanoid.part(_chute, "sphere", Humanoid.mat(Color(0.9, 0.3, 0.2), 0.8), Vector3.ZERO, Vector3(5, 1.4, 5))
 	_chute.visible = false
+	# 破壊ツール（1-5 で切替、G で焙烙玉）
+	tools = DestructionTools.new()
+	add_child(tools)
 	Game.player = self
 
 
@@ -167,6 +171,8 @@ func _physics_process(dt: float) -> void:
 
 
 func _gun(_dt: float) -> void:
+	if tools != null and tools.blocks_gun():
+		return
 	var t := _now()
 	if reloading and t >= _reload_end:
 		reloading = false
@@ -220,7 +226,7 @@ static func apply_hit(tree: SceneTree, hit: Dictionary, dir: Vector3, dmg: float
 	elif target and target.has_method("take_hit"):
 		target.take_hit(dmg, team, pos, dir)
 		var guard: bool = target.get("is_guardian") == true
-		if target is Explosive or target.is_in_group("vehicle"):
+		if target is Explosive or target.is_in_group("vehicle") or target.is_in_group("destructible") or target.is_in_group("physics_prop"):
 			Effects.spark(tree, pos, nrm)
 		else:
 			Effects.blood(tree, pos, nrm, guard)

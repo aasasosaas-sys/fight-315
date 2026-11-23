@@ -1,0 +1,239 @@
+{
+ "eraId": "edo",
+ "figures": [
+  {
+   "name": "徳川家光",
+   "at": "capital",
+   "guards": 5,
+   "guard": "旗本",
+   "lines": [
+    "余は生まれながらの将軍である。"
+   ]
+  },
+  {
+   "name": "徳川吉宗",
+   "at": "capital",
+   "guards": 4,
+   "guard": "御庭番",
+   "lines": [
+    "米の値をどうにかせねば、旗本が食えぬ。"
+   ]
+  },
+  {
+   "name": "老中 田沼意次",
+   "at": "castle",
+   "guards": 3,
+   "guard": "田沼家の家臣",
+   "lines": [
+    "蝦夷地を開発し、長崎の貿易で金銀を稼ぐのだ。"
+   ]
+  },
+  {
+   "name": "岩瀬忠震",
+   "at": "port",
+   "guards": 2,
+   "guard": "浦賀奉行所の役人",
+   "lines": [
+    "ハリス殿との交渉、一歩も譲りませぬぞ。"
+   ]
+  },
+  {
+   "name": "松平定信",
+   "at": "temple",
+   "guards": 3,
+   "guard": "白河藩士",
+   "lines": [
+    "学問は朱子学に限る。"
+   ]
+  }
+ ],
+ "rules": [
+  {
+   "id": "ed_kill_iemitsu",
+   "title": "参勤交代、制度化されず",
+   "trigger": {
+    "kind": "kill",
+    "id": "徳川家光"
+   },
+   "force": {
+    "q": "edo_01",
+    "choice": 0
+   },
+   "text": "徳川家光が倒れ、武家諸法度の寛永令は出されなかった。大名を江戸に通わせる参勤交代は制度にならず、教科書に残ったのは一国一城令のほうだった。"
+  },
+  {
+   "id": "ed_kill_yoshimune",
+   "title": "享保の改革、幻に",
+   "trigger": {
+    "kind": "kill",
+    "id": "徳川吉宗"
+   },
+   "force": {
+    "q": "edo_02",
+    "choice": 2
+   },
+   "text": "徳川吉宗が倒れ、上げ米の制は行われなかった。大名に米を出させる政策は、半世紀以上のちに松平定信が飢饉に備えて命じた囲米の形で歴史に登場することになった。"
+  },
+  {
+   "id": "ed_kill_tanuma",
+   "title": "田沼時代、終わる前に終わる",
+   "trigger": {
+    "kind": "kill",
+    "id": "老中 田沼意次"
+   },
+   "vars": {
+    "open_west": -30,
+    "commerce": -15
+   },
+   "year": 1770,
+   "text": "蘭学にも長崎貿易にも寛容だった田沼意次が倒れ、幕府は一気に保守化。オランダの書物は危険視され、学者たちは日本の古典の研究へと向かった。"
+  },
+  {
+   "id": "ed_kill_iwase",
+   "title": "通商条約、骨抜き",
+   "trigger": {
+    "kind": "kill",
+    "id": "岩瀬忠震"
+   },
+   "force": {
+    "q": "edo_04",
+    "choice": 0
+   },
+   "text": "条約交渉の実務を担う岩瀬忠震が倒れた。ハリスと渡り合える者がおらず、結ばれたのは下田・箱館を開くだけの、和親条約に毛が生えたような約束だった。"
+  },
+  {
+   "id": "ed_kill_sadanobu",
+   "title": "寛政の改革、遅れる",
+   "trigger": {
+    "kind": "kill",
+    "id": "松平定信"
+   },
+   "vars": {
+    "open_west": 30
+   },
+   "year": 1788,
+   "text": "松平定信が老中になる前に倒れ、寛政異学の禁はずっと後回しに。その間にロシア使節ラクスマンが根室に来航し、異国の学問への関心はかえって高まった。"
+  },
+  {
+   "id": "ed_great_fire",
+   "title": "江戸大火、幕府は大坂へ",
+   "trigger": {
+    "kind": "fire",
+    "min": 24
+   },
+   "vars": {
+    "set": {
+     "capital": "大坂"
+    },
+    "economy": -15,
+    "centralization": -15
+   },
+   "year": 1657,
+   "text": "あなたの起こした火は明暦の大火をも上回る大火となり、江戸の町は灰になった。幕府は政治の中心を大坂城へ移し、「天下の台所」がそのまま「天下の都」になった。"
+  },
+  {
+   "id": "ed_destroy_tenshu",
+   "title": "江戸城天守、崩落",
+   "trigger": {
+    "kind": "destroy",
+    "id": "capital",
+    "type": "castle_keep"
+   },
+   "vars": {
+    "centralization": -15,
+    "unity": -10
+   },
+   "year": 1657,
+   "text": "江戸城の天守が崩れ落ちた。史実でも明暦の大火（1657年）で焼けた天守は二度と再建されなかったが、今回はあなたの仕業だ。将軍の威光に傷がつき、諸大名はひそかにほくそ笑んだ。"
+  },
+  {
+   "id": "ed_destroy_uraga",
+   "title": "浦賀、壊滅",
+   "trigger": {
+    "kind": "destroy",
+    "id": "port",
+    "value": 300
+   },
+   "vars": {
+    "open_west": -20,
+    "militarism": 15
+   },
+   "year": 1850,
+   "text": "浦賀の港が壊され、異国船を見張る奉行所も砲台もなくなった。幕府は海防に神経をとがらせ、異国船への警戒をいっそう強めた。"
+  },
+  {
+   "id": "ed_sink_kurofune",
+   "title": "黒船、沈む",
+   "trigger": {
+    "kind": "sink",
+    "min": 2
+   },
+   "vars": {
+    "open_west": -30,
+    "militarism": 20
+   },
+   "year": 1853,
+   "text": "浦賀沖の黒船が沈められた。「日本は鉄の船も沈める国」と恐れられた結果、欧米は開国の要求をしばらく見送り、鎖国はさらに長引いた。"
+  },
+  {
+   "id": "ed_destroy_yushima",
+   "title": "湯島聖堂、倒壊",
+   "trigger": {
+    "kind": "destroy",
+    "id": "temple",
+    "type": "hall",
+    "value": 200
+   },
+   "vars": {
+    "education": -20
+   },
+   "year": 1790,
+   "text": "湯島聖堂と昌平坂学問所が崩れた。幕府公認の学問の拠点が失われ、武士の教育は大きく停滞した。"
+  },
+  {
+   "id": "ed_destroy_yashiki",
+   "title": "大名屋敷街、壊滅",
+   "trigger": {
+    "kind": "destroy",
+    "id": "castle",
+    "value": 600
+   },
+   "vars": {
+    "centralization": -30,
+    "unity": -10
+   },
+   "year": 1700,
+   "text": "大手町の大名屋敷が軒並み壊された。住む場所を失った大名たちは「これでは江戸に詰められぬ」と国元へ帰り、幕府の大名統制はガタガタになった。"
+  },
+  {
+   "id": "ed_destroy_hakone",
+   "title": "箱根の関所、突破",
+   "trigger": {
+    "kind": "destroy",
+    "id": "mountain",
+    "value": 150
+   },
+   "vars": {
+    "centralization": -15,
+    "commoners": 15
+   },
+   "year": 1700,
+   "text": "箱根の関所が壊され、「入り鉄砲に出女」の取り締まりは骨抜きに。人も物も自由に行き来するようになり、町人の力が強まった。"
+  },
+  {
+   "id": "ed_massacre",
+   "title": "打ちこわし、全国へ",
+   "trigger": {
+    "kind": "kill",
+    "type": "soldier",
+    "min": 30
+   },
+   "vars": {
+    "commoners": 30,
+    "unity": -20
+   },
+   "year": 1780,
+   "text": "町奉行所の捕り方が謎の人物に蹴散らされたと聞き、江戸の町人は「お上も恐るるに足らず」と勢いづいた。打ちこわしと百姓一揆が全国に広がった。"
+  }
+ ]
+}

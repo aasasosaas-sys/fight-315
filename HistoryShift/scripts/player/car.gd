@@ -148,7 +148,7 @@ func _explode() -> void:
 	if driver != null and driver.has_method("exit_vehicle"):
 		driver.exit_vehicle()
 		driver.take_hit(45.0, -1)
-	Effects.explosion(get_tree(), global_position + Vector3.UP, 9.0, 120.0, -1)
+	Effects.explosion(get_tree(), global_position + Vector3.UP, 9.0, 120.0, -1, 0.5)
 	apply_central_impulse(Vector3.UP * mass * 7.0)
 	apply_torque_impulse(Vector3(randf_range(-1, 1), 0, randf_range(-1, 1)) * mass * 3.0)
 	for c in get_children():
@@ -166,6 +166,8 @@ func _on_body_entered(b: Node) -> void:
 	var v := linear_velocity.length()
 	if v < 6.0:
 		return
+	if b.has_method("ram"):
+		b.ram(v, linear_velocity, 1.0)   # 建物・塀・屋台に体当たり
 	if b.has_method("is_enemy") and b.has_method("take_hit"):
 		b.take_hit(v * 5.0, 0, b.global_position, linear_velocity.normalized())
 	elif b.has_method("panic"):

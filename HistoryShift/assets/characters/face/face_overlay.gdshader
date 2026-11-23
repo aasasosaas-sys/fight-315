@@ -27,6 +27,11 @@ uniform float freckles = 0.0;
 uniform vec4 mole = vec4(0.0, 0.0, 0.0, 0.0);  // x (signed), y, radius, on
 uniform vec4 scar = vec4(0.0);                  // x0, y0, x1, y1 (signed x) – active if scar_on
 uniform float scar_on = 0.0;
+uniform float lid = 0.0;                        // double-eyelid crease line (futae) 0..1
+uniform float lid_h = 0.75;                     // crease height above the eye centre (in eye_r)
+uniform vec4 lid_col : source_color = vec4(0.45, 0.25, 0.22, 1.0);
+uniform float beni = 0.0;                       // 紅: red on the lower lip 0..1
+uniform vec4 beni_col : source_color = vec4(0.85, 0.12, 0.2, 1.0);
 
 varying vec3 rp;
 
@@ -148,51 +153,71 @@ void fragment() {
 	}
 
 	// ---- facial hair ----
-	float lipm = length((q - vec2(0.0, my)) / vec2(F * 0.5, F * 0.1)) - 1.0;   // lips (keep clear)
-	if (stubble > 0.0 || beard == 1 || beard == 4) {
-		// beard area: under the nose, around the mouth, along the jaw up to the sideburns
-		float top = mix(nose_y - F * 0.12, eye.y - F * 0.55, smoothstep(F * 0.35, face_w * 0.95, ax));
-		float reg = (1.0 - smoothstep(top - F * 0.05, top + F * 0.05, p.y));
-		reg *= smoothstep(-0.035, -0.015, p.z);
-		reg *= smoothstep(-0.2, 0.25, lipm);
+	float lipm = length((q - vec2(0.0, my)) / vec2(F * 0.5, F * 0.11)) - 1.0;   // lips (keep clear)
+	float lipk = smoothstep(-0.1, 0.35, lipm);
+	if (stubble > 0.0 || beard == 1) {
+		// 青ひげ: upper lip + chin + lower jaw, soft edges, bluish-grey
+		float top = mix(nose_y - F * 0.14, my - F * 0.3, smoothstep(F * 0.2, F * 0.65, ax));
+		top = mix(top, my - F * 0.2, smoothstep(F * 0.8, face_w, ax));
+		float reg = 1.0 - smoothstep(top - F * 0.22, top + F * 0.04, p.y);
+		reg *= smoothstep(-0.03, -0.005, p.z) * lipk;
 		float st = max(stubble, beard == 1 ? 1.0 : 0.0);
-		if (st > 0.0) {
-			float n = hash(floor(vec2(p.x, p.y) / (F * 0.035)));
-			vec3 sc = mix(vec3(0.42, 0.5, 0.62), beard_col.rgb, 0.35);
-			over(acc, sc, reg * st * (0.22 + 0.12 * n));
-		}
-		if (beard == 4) {
-			// full beard: solid with a jagged lower-cheek edge
-			float jag = sin(ax / (F * 0.09) * 3.14159) * F * 0.04;
-			float top2 = mix(my - F * 0.06, eye.y - F * 0.7, smoothstep(F * 0.3, face_w * 0.9, ax)) + jag;
-			float reg2 = (1.0 - smoothstep(top2 - F * 0.02, top2 + F * 0.02, p.y)) * smoothstep(-0.04, -0.02, p.z);
-			reg2 *= smoothstep(-0.05, 0.1, lipm);
-			over(acc, beard_col.rgb, reg2 * 0.95);
-		}
+		float n = hash(floor(vec2(p.x, p.y) / (F * 0.03)));
+		over(acc, mix(vec3(0.42, 0.5, 0.64), beard_col.rgb, 0.25), reg * st * (0.17 + 0.07 * n));
+	}
+	if (beard == 4) {
+		// full beard: lower cheeks, jaw and chin, jagged upper edge, up to the sideburns
+		float jag = abs(fract(ax / (F * 0.16)) - 0.5) * F * 0.12;
+		float top2 = mix(my - F * 0.02, eye.y - F * 0.75, smoothstep(F * 0.45, face_w * 0.98, ax)) - jag;
+		float d = p.y - top2;
+		float reg2 = fill(d) * smoothstep(-0.04, -0.02, p.z) * smoothstep(-0.05, 0.12, lipm);
+		over(acc, beard_col.rgb, reg2 * 0.96);
+		over(acc, beard_col.rgb * 0.55, (fill(abs(d) - F * 0.012)) * smoothstep(-0.04, -0.02, p.z) * smoothstep(-0.05, 0.12, lipm) * 0.5);
 	}
 	if (beard == 2 || beard == 4 || beard == 5 || beard == 6) {
 		// mustache: an arch above the upper lip, thick in the middle, thin at the ends
-		float lx = F * (beard == 5 ? 0.62 : 0.55);
+		float lx = F * (beard == 5 ? 0.6 : 0.52);
 		float t = clamp(ax / lx, 0.0, 1.0);
-		float cy = my + F * 0.16 - F * 0.1 * t * t;
-		float th = F * 0.075 * (1.0 - 0.75 * t * t) + F * 0.012;
+		float cy = my + F * 0.15 - F * 0.1 * t * t;
+		float th = F * 0.07 * (1.0 - 0.7 * t * t) + F * 0.01;
 		float d = abs(p.y - cy) - th;
 		d = max(d, ax - lx);
-		d = max(d, -(ax - F * 0.03) * 0.6 - (p.y - (my + F * 0.22)) * 0.2);   // little philtrum notch
+		d = max(d, F * 0.035 - ax + (p.y - cy - th * 0.2) * 0.0);   // parting under the nose
 		float a = fill(d) * front;
 		over(acc, beard_col.rgb, a * 0.97);
 		if (beard == 5) {
 			// drooping ends (dojo / sage): continue down past the mouth corners
-			over(acc, beard_col.rgb, stroke(q, vec2(lx * 0.95, my + F * 0.08), vec2(lx * 1.05, my - F * 0.55), F * 0.045, 0.35) * front);
+			over(acc, beard_col.rgb, stroke(q, vec2(lx * 0.92, my + F * 0.07), vec2(lx * 1.02, my - F * 0.6), F * 0.04, 0.3) * front);
 		}
 	}
-	if (beard == 3 || beard == 4 || beard == 6 || beard == 5) {
-		// goatee on the chin + small patch under the lower lip
-		vec2 gc = vec2(0.0, chin_y + F * 0.3);
-		float g = length((q - gc) / vec2(F * (beard == 5 ? 0.22 : 0.3), F * 0.32)) - 1.0;
-		float soul = length((q - vec2(0.0, my - F * 0.17)) / vec2(F * 0.1, F * 0.06)) - 1.0;
-		float a = max(fill(g * F * 0.3), fill(soul * F * 0.06));
-		over(acc, beard_col.rgb, a * smoothstep(-0.03, -0.01, p.z) * 0.97);
+	if (beard == 3 || beard == 4 || beard == 5 || beard == 6) {
+		// goatee: soul patch under the lower lip + a tapering tuft on the chin
+		float yt = my - F * 0.16;
+		float yb = chin_y + F * 0.02;
+		float tt = clamp((yt - p.y) / (yt - yb), 0.0, 1.0);
+		float hw = mix(F * (beard == 5 ? 0.16 : 0.22), F * 0.07, tt * tt) + sin(p.y / (F * 0.05)) * F * 0.012;
+		float d = max(ax - hw, max(p.y - yt, yb - F * 0.06 - p.y));
+		float soul = length((q - vec2(0.0, my - F * 0.15)) / vec2(F * 0.09, F * 0.05)) - 1.0;
+		float z = smoothstep(-0.03, -0.01, p.z);
+		float a = fill(min(d, soul * F * 0.05));
+		over(acc, beard_col.rgb, a * z * 0.97);
+	}
+
+	// ---- double eyelid crease ----
+	if (lid > 0.0) {
+		vec2 le = q - vec2(eye.x + eye_r * 0.08, eye.y);
+		float t = clamp(le.x / (eye_r * 0.95), -1.0, 1.0);
+		float cyy = eye_r * lid_h * (1.0 - 0.55 * t * t) - eye_r * 0.12 * t;
+		float d = abs(le.y - cyy);
+		float m = (1.0 - smoothstep(0.55, 1.0, abs(t))) * (1.0 - step(eye_r * 1.0, abs(le.x)));
+		float aa = fwidth(d) + 1e-6;
+		over(acc, lid_col.rgb, (1.0 - smoothstep(F * 0.016 - aa, F * 0.016 + aa, d)) * m * lid * front);
+	}
+	// ---- beni (lip colour) ----
+	if (beni > 0.0) {
+		vec2 lc = (q - vec2(0.0, my - F * 0.045)) / vec2(F * 0.2, F * 0.05);
+		float g = 1.0 - smoothstep(0.6, 1.0, length(lc));
+		over(acc, beni_col.rgb, g * beni * 0.75 * front);
 	}
 
 	// ---- mole ----

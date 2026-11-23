@@ -292,6 +292,12 @@ func _construct_anime(outfit: int, rng: RandomNumberGenerator, armed: bool) -> b
 	if pal.get("robe", null) == "":
 		pal["robe"] = pal.get("kosode", "ai")
 	var model: Node3D = AnimeChar.build(base, spec.outfit, pal, spec.hair)
+	# 顔・年齢・体格の個人差（武装した者・兵には子どもを出さない）
+	var combat := armed or outfit in [Outfit.SAMURAI, Outfit.ASHIGARU, Outfit.SOLDIER, Outfit.POLICE, Outfit.GUARDIAN, Outfit.AGENT]
+	var fopts := {"female": female, "modern": outfit in MODERN}
+	if combat:
+		fopts["age"] = "young" if rng.randf() < 0.5 else "adult"
+	set_meta("face", AnimeFace.apply(model, rng.randi(), fopts))
 	if outfit == Outfit.GUARDIAN:
 		_shadowify(model)
 	# アニメ素体は自前のアニメーションプレイヤーを持つので、木（AnimationTree）だけで動かす

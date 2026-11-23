@@ -118,7 +118,8 @@ func _crash() -> void:
 		var d = driver
 		d.exit_vehicle()
 		d.take_hit(60.0, -1)
-	Effects.explosion(get_tree(), global_position + Vector3.UP, 12.0, 150.0, -1)
+	Effects.explosion(get_tree(), global_position + Vector3.UP, 12.0, 150.0, -1, 0.7)
+	Destruction.blast_at(get_tree(), global_position, 14.0, 700.0, -1, 0.8)   # 墜落の衝撃は建物に大きく効く
 	remove_from_group("vehicle")
 	_sound.stop()
 	visible = false
@@ -167,6 +168,9 @@ func _physics_process(dt: float) -> void:
 		move_and_slide()
 		if speed > 18.0 and get_slide_collision_count() > 0:
 			for i in get_slide_collision_count():
+				var hit_o = get_slide_collision(i).get_collider()
+				if hit_o and hit_o.has_method("ram"):
+					hit_o.ram(speed, velocity, 4.0)
 				var n := get_slide_collision(i).get_normal()
 				if n.y < 0.5:
 					_crash()
@@ -198,6 +202,9 @@ func _physics_process(dt: float) -> void:
 		velocity = fwd * speed + Vector3.DOWN * (1.0 - lift) * 12.0
 		var col := move_and_collide(velocity * dt)
 		if col:
+			var hit_o = col.get_collider()
+			if hit_o and hit_o.has_method("ram"):
+				hit_o.ram(speed, velocity, 4.0)   # 墜落機は建物を突き崩す
 			var n := col.get_normal()
 			var level := absf(fwd.dot(Vector3.UP)) < 0.2 and global_basis.y.dot(Vector3.UP) > 0.85
 			if n.y > 0.8 and level and speed < 40.0 and velocity.y > -8.0:

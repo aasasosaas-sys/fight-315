@@ -268,6 +268,8 @@ func start_free_roam(era_id: String, return_to := "hub") -> void:
 	_mission_q = {}
 	_free_era = era_id
 	_return_to = return_to
+	_score_before = Game.state.score()
+	_correct_before = Game.state.correct_count()
 	var era := Game.db.get_era(era_id)
 	_warp_into(era.get("eraName", era_id), "自由探索　" + JSUI.era_years(era_id), func(): return _session_make("start_free_roam", [era_id]))
 
@@ -374,6 +376,12 @@ func _on_session_failed(reason: String) -> void:
 func _on_session_aborted() -> void:
 	var back_to := "hub" if not _mission_q.is_empty() else _return_to
 	var qid: String = _mission_q.get("id", "")
+	# 自由探索で歴史が揺らいでいたら、その後の歴史を見せてから戻る
+	if _mission_q.is_empty() and Game.chaos and not Game.chaos.session_hits.is_empty():
+		var hits: Array = Game.chaos.session_hits.duplicate()
+		var era_id := _free_era
+		call_deferred("_warp_out", "令和八年", "2026年 ― 揺らいだ現代へ", func(): show_chaos_aftermath(hits, era_id, back_to))
+		return
 	call_deferred("_warp_out", "令和八年", "2026年 ― 現代へ帰還", func():
 		if back_to == "title":
 			show_title()
@@ -390,6 +398,24 @@ func show_aftermath(q: Dictionary, changes: Array) -> void:
 	a.score_before = _score_before
 	a.correct_before = _correct_before
 	a.to_hub.connect(func(): show_hub(q.get("id", "")))
+	_show(a, "aftermath")
+
+
+## 自由探索の混乱で変わった歴史（aftermath_screen の混乱版）
+func show_chaos_aftermath(hits: Array, era_id: String, back_to := "hub") -> void:
+	var a := AftermathScreen.new()
+	a.success = true
+	a.chaos_hits = hits
+	a.chaos_era = era_id
+	a.changes = Game.chaos.session_changes() if Game.chaos else []
+	a.score_before = _score_before
+	a.correct_before = _correct_before
+	a.to_hub.connect(func():
+		if back_to == "title" or not Game.state.exam_submitted:
+			show_title()
+		else:
+			var broken: Array = Game.state.chaos_broken()
+			show_hub(broken[0]["id"] if not broken.is_empty() else ""))
 	_show(a, "aftermath")
 
 
