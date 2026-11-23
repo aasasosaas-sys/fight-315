@@ -55,7 +55,7 @@ def a_pose(arm):
             pb = arm.pose.bones[nm]
             h = pb.head.copy()
             # 体の向き（正面 -Y、左 +X）基準：上腕は前後軸まわりに下へ、前腕は上下軸まわりに前へ
-            a = -math.radians(ang) * (sgn if prof == "UpperArm" else -sgn)
+            a = math.radians(ang) * (sgn if prof == "UpperArm" else -sgn)
             r = Matrix.Rotation(a, 4, axis)
             # アーマチュア空間で回す（オブジェクトの回転を打ち消して世界の軸で回す）
             rw = mw.inverted() @ r @ mw
@@ -124,6 +124,8 @@ def main():
     bm.to_mesh(body.data)
     bm.free()
     # kimono.py は「正面が -Y」前提。VRM0 は +Y を向いて読み込まれるので一時的に回す
+    # glTF から読み込んだアーマチュアは回転がクォータニオン指定なので、オイラーに切り替えてから回す
+    arm.rotation_mode = "XYZ"
     if vrm0:
         arm.rotation_euler.z = math.pi
         bpy.context.view_layer.update()
@@ -171,23 +173,6 @@ def main():
                 m.object = arm
     arm.rotation_euler.z = 0.0
     bpy.context.view_layer.update()
-    # 書き出される服の頂点は「回したままの向き」になる（スキン付きメッシュのノード変換は使われない）。
-    # 体（BodyW）と同じ元の向きにそろえる
-    from mathutils import Matrix
-    if vrm0:
-        rz = Matrix.Rotation(math.pi, 4, "Z")
-        for o in garments.values():
-            o.data.transform(rz)
-            # 回転で左右の位置が入れ替わるので、左右の骨のウェイトも入れ替える
-            for vg in o.vertex_groups:
-                if "_L_" in vg.name:
-                    vg.name = vg.name.replace("_L_", "_TMP_")
-            for vg in o.vertex_groups:
-                if "_R_" in vg.name:
-                    vg.name = vg.name.replace("_R_", "_L_")
-            for vg in o.vertex_groups:
-                if "_TMP_" in vg.name:
-                    vg.name = vg.name.replace("_TMP_", "_R_")
     bpy.context.view_layer.update()
     # 骨（と頂点グループ）を人型プロファイル名に
     for b in arm.data.bones:

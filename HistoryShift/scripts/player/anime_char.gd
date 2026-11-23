@@ -36,8 +36,8 @@ const DYES := {
 
 ## 服装 → パーツごとの色
 const PALETTES := {
-	"samurai": {"kosode": "kon", "eri": "kon", "haneri": "shiro", "hakama": "nezumi", "obi": "kuro", "armor": "enji"},
-	"hakama": {"kosode": "ai", "eri": "ai", "haneri": "shiro", "hakama": "kuchiba", "obi": "kuro"},
+	"samurai": {"kosode": "kon", "eri": "kuro", "haneri": "shiro", "hakama": "nezumi", "obi": "kuro", "armor": "enji"},
+	"hakama": {"kosode": "ai", "eri": "kon", "haneri": "shiro", "hakama": "kuchiba", "obi": "kuro"},
 	"kimono": {"kosode": "sakura", "eri": "enji", "haneri": "shiro", "robe": "sakura", "obi": "kin"},
 }
 

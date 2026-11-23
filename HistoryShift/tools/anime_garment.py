@@ -198,6 +198,12 @@ def tamoto(body, L, side, drop, width=0.2, depth=0.022):
     me = bpy.data.meshes.new("tamoto_" + side)
     me.from_pydata([tuple(p) for p in verts], [], faces)
     me.update()
+    # 左右で面の向きが逆になるので、外向きにそろえる
+    bm_ = bmesh.new()
+    bm_.from_mesh(me)
+    bmesh.ops.recalc_face_normals(bm_, faces=bm_.faces)
+    bm_.to_mesh(me)
+    bm_.free()
     o = bpy.data.objects.new("tamoto_" + side, me)
     bpy.context.collection.objects.link(o)
     for p in me.polygons:
@@ -244,11 +250,12 @@ def collar(kosode, L, width=0.034, han_w=0.012):
                             neck.z - 0.02 - (t / 0.3) * 0.03))
             else:            # 首の横から前へ下り、反対側の脇腹へ交差
                 u = (t - 0.3) / 0.7
-                x0 = neck.x + sign * 0.065
-                x1 = neck.x - sign * (0.09 if cross else -0.0)
-                z0 = neck.z - 0.05
+                x0 = neck.x + sign * 0.06
+                x1 = neck.x - sign * (0.1 if cross else -0.0)
+                z0 = neck.z - 0.045
                 z1 = waist_z - 0.02
-                x = x0 + (x1 - x0) * (u ** 1.15)
+                # 首元から急に下り、胸の中ほどで中央を越える（V の深さ）
+                x = x0 + (x1 - x0) * (u ** 0.85)
                 z = z0 + (z1 - z0) * u
                 p = Vector((x, neck.y - 0.2, z))
             pts.append(p)
@@ -283,11 +290,13 @@ def collar(kosode, L, width=0.034, han_w=0.012):
         print("NECK", tuple(round(x, 3) for x in neck), "waist_z", round(waist_z, 3))
     objs = []
     # 下前（着る人の右の衿）を先に、少しだけ低く
-    objs.append(ribbon("eri_under", path(-1.0), width, 0.006, toward_neck))
+    # 下前の衿は胸の中央（上前と交わる所）で上前の下に隠れるので、そこまで
+    under = [p for p in path(-1.0) if p.y > neck.y - 0.1 or p.x < neck.x + 0.015]
+    objs.append(ribbon("eri_under", under, width, 0.006, toward_neck))
     objs.append(ribbon("eri_top", path(1.0), width, 0.011, toward_neck))
     # 半衿（白）：衿の内側（首側）に細く見える
     han = []
-    han.append(ribbon("haneri_u", path(-1.0, cross=True)[:24], han_w, 0.008, lambda q: -toward_neck(q)))
+    han.append(ribbon("haneri_u", [p for p in path(-1.0)[:24] if p.y > neck.y - 0.1 or p.x < neck.x + 0.015], han_w, 0.008, lambda q: -toward_neck(q)))
     han.append(ribbon("haneri_t", path(1.0)[:24], han_w, 0.013, lambda q: -toward_neck(q)))
     return objs, han
 
@@ -486,6 +495,11 @@ def make(body_p, L, female, rest_body):
     K.drape([hk_main, rb], cb, frames=40, stiff=14.0, bend=0.8)
     K.drape([tl, tr], body_p, frames=40, stiff=14.0, bend=0.8)
     bpy.data.objects.remove(cb, do_unlink=True)
+    import os
+    if os.environ.get("DBG_TAMOTO"):
+        for t in (tl, tr):
+            ps = [t.matrix_world @ v.co for v in t.data.vertices]
+            print("TAMOTO", t.name, "x", round(min(p.x for p in ps), 3), round(max(p.x for p in ps), 3), "y", round(min(p.y for p in ps), 3), round(max(p.y for p in ps), 3), "z", round(min(p.z for p in ps), 3), round(max(p.z for p in ps), 3), "nf", len(t.data.polygons))
     bone_weights(ks, L)
     for t, s in ((tl, "l"), (tr, "r")):
         K.arm_weights(t, L, s)
