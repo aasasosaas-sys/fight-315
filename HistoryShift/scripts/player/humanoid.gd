@@ -123,6 +123,7 @@ const REAL_FEMALE := ["f01", "f02", "f03", "f04", "f05", "f06"]
 const FEMALE_NAMES := ["卑弥呼", "推古", "持統", "光明", "紫式部", "清少納言", "北条政子", "日野富子", "お市", "ねね", "淀", "春日局",
 	"和宮", "津田梅子", "与謝野晶子", "樋口一葉", "平塚らいてう", "市川房枝", "女", "娘", "姫", "妻", "母", "尼"]
 static var _real_ok := -1
+static var force_variant := ""   # デバッグ用：人物モデルを固定
 static var _lib: AnimationLibrary
 static var _skinned_ok := -1
 
@@ -366,6 +367,8 @@ func _pick_realistic(outfit: int, rng: RandomNumberGenerator) -> String:
 	elif outfit == Outfit.AGENT:
 		pool = ["m04"]
 	var vname: String = pool[rng.randi() % pool.size()]
+	if force_variant != "":
+		vname = force_variant.get_slice(",", 1 if female and force_variant.contains(",") else 0)
 	var path := REAL_DIR + vname + ".gltf"
 	return path if ResourceLoader.exists(path) else REAL_DIR + "m01.gltf"
 
@@ -456,53 +459,132 @@ func _strands(mi: MeshInstance3D, c: Color, hair: bool) -> void:
 
 
 const MODERN := [Outfit.WESTERN, Outfit.SOLDIER, Outfit.POLICE, Outfit.AGENT, Outfit.GUARDIAN]
-## 和装の組み合わせ（Blender で体型から作った衣服メッシュ: kosode / hakama / robe / armor）
+## 和装の組み合わせ（tools/kimono.py で布シミュレーションして作った衣服: kosode / eri / hakama / robe / obi / armor）
 const WASOU := {
-	Outfit.SAMURAI: ["juban", "kosode", "hakama", "armor"], Outfit.ASHIGARU: ["kosode", "hakama", "armor"],
-	Outfit.NOBLE: ["juban", "kosode", "robe"], Outfit.KIMONO: ["juban", "kosode", "robe"], Outfit.MONK: ["juban", "kosode", "robe"],
-	Outfit.ANCIENT: ["kosode", "hakama"], Outfit.COMMONER: ["juban", "kosode", "hakama"],
+	Outfit.SAMURAI: ["kosode", "eri", "hakama", "obi", "armor"], Outfit.ASHIGARU: ["kosode", "hakama", "obi", "armor"],
+	Outfit.NOBLE: ["kosode", "eri", "hakama"], Outfit.KIMONO: ["kosode", "eri", "robe", "obi"],
+	Outfit.MONK: ["kosode", "eri", "robe"], Outfit.ANCIENT: ["kosode", "hakama"], Outfit.COMMONER: ["kosode", "eri", "hakama", "obi"],
+}
+## 自然染料の色（藍・紺・茶・墨・生成り・柿渋・鼠・萌黄・臙脂・浅葱）
+const DYES := {
+	"ai": Color(0.13, 0.2, 0.34), "kon": Color(0.08, 0.1, 0.18), "cha": Color(0.33, 0.23, 0.15), "sumi": Color(0.09, 0.09, 0.09),
+	"kinari": Color(0.82, 0.77, 0.66), "kakishibu": Color(0.5, 0.3, 0.17), "nezumi": Color(0.42, 0.41, 0.39),
+	"moegi": Color(0.42, 0.47, 0.25), "enji": Color(0.42, 0.11, 0.14), "asagi": Color(0.28, 0.48, 0.52), "shiro": Color(0.92, 0.9, 0.85),
 }
 static var _fabric_tex := {}
 
 
-## 布地：織り目の凹凸と柄（無地・縞・格子・麻の葉風）
-static func fabric(c: Color, pattern: String, rough := 0.88) -> StandardMaterial3D:
+static func _gray_tex(path: String) -> Texture2D:
+	if _fabric_tex.has(path):
+		return _fabric_tex[path]
+	var t: Texture2D = null
+	if ResourceLoader.exists(path):
+		var img: Image = (load(path) as Texture2D).get_image()
+		if img:
+			if img.is_compressed():
+				img.decompress()
+			img.convert(Image.FORMAT_RGB8)
+			var lum := Image.create(img.get_width(), img.get_height(), false, Image.FORMAT_RGB8)
+			var avg := 0.0
+			for y in range(0, img.get_height(), 8):
+				for x in range(0, img.get_width(), 8):
+					avg += img.get_pixel(x, y).get_luminance()
+			avg /= float((img.get_height() / 8) * (img.get_width() / 8))
+			for y in img.get_height():
+				for x in img.get_width():
+					var v := clampf(img.get_pixel(x, y).get_luminance() / maxf(avg, 0.05) * 0.85, 0.0, 1.2)
+					lum.set_pixel(x, y, Color(v, v, v))
+			lum.generate_mipmaps()
+			t = ImageTexture.create_from_image(lum)
+	_fabric_tex[path] = t
+	return t
+
+
+static func _lamellar_tex(lace: Color) -> Texture2D:
+	var key := "lam" + lace.to_html()
+	if _fabric_tex.has(key):
+		return _fabric_tex[key]
+	var n := 128
+	var img := Image.create(n, n, false, Image.FORMAT_RGB8)
+	var lacquer := Color(0.07, 0.06, 0.06)
+	for y in n:
+		for x in n:
+			var band := y % 16
+			var c := lacquer.lerp(Color(0.16, 0.13, 0.11), float(band) / 16.0 * 0.6)
+			if band < 2:
+				c = Color(0.03, 0.03, 0.03)                      # 段の継ぎ目
+			if (x % 8) < 2 and band >= 4 and band <= 12:
+				c = lace                                          # 縅の糸
+			img.set_pixel(x, y, c)
+	img.generate_mipmaps()
+	var t := ImageTexture.create_from_image(img)
+	_fabric_tex[key] = t
+	return t
+
+
+## 布地：スキャン素材（Poly Haven, CC0）の織り目・凹凸・粗さに、染料の色を掛ける
+static func fabric(c: Color, kind: String, scale := 4.0) -> StandardMaterial3D:
+	var base := "res://assets/polyhaven/textures/fab_%s_" % kind
 	var m := StandardMaterial3D.new()
 	m.albedo_color = c
-	m.roughness = rough
+	m.albedo_texture = _gray_tex(base + "diff.jpg")
+	if ResourceLoader.exists(base + "nor_gl.jpg"):
+		m.normal_enabled = true
+		m.normal_texture = load(base + "nor_gl.jpg")
+		m.normal_scale = 1.0
+	if ResourceLoader.exists(base + "rough.jpg"):
+		m.roughness_texture = load(base + "rough.jpg")
+	m.roughness = 1.0
 	m.uv1_triplanar = true
-	m.uv1_world_triplanar = false
-	m.uv1_scale = Vector3(6, 6, 6)
-	if pattern != "plain":
-		m.albedo_texture = _pattern_tex(pattern)
-	m.normal_enabled = true
-	m.normal_texture = _pattern_tex("weave_n")
-	m.normal_scale = 0.4
+	m.uv1_triplanar_sharpness = 2.0
+	m.uv1_scale = Vector3(scale, scale, scale)
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
 	return m
 
 
-static func _pattern_tex(kind: String) -> Texture2D:
-	if _fabric_tex.has(kind):
-		return _fabric_tex[kind]
-	var n := 64
-	var img := Image.create(n, n, false, Image.FORMAT_RGBA8)
-	for y in n:
-		for x in n:
-			var v := 1.0
-			match kind:
-				"stripe": v = 1.0 if (x / 6) % 2 == 0 else 0.72
-				"check": v = 1.0 if ((x / 8) + (y / 8)) % 2 == 0 else 0.78
-				"asanoha":
-					var d := absf(fmod(float(x + y), 16.0) - 8.0) + absf(fmod(float(x - y + 64), 16.0) - 8.0)
-					v = 0.75 if d < 1.6 or x % 16 == 0 else 1.0
-				"weave_n":
-					var h := 0.5 + 0.5 * sin(x * PI / 2.0) * (1.0 if (y / 2) % 2 == 0 else -1.0)
-					img.set_pixel(x, y, Color(0.5 + 0.12 * h, 0.5, 1.0))
-					continue
-			img.set_pixel(x, y, Color(v, v, v))
-	var t := ImageTexture.create_from_image(img)
-	_fabric_tex[kind] = t
-	return t
+## 時代・身分ごとの布と染め
+func _garment_mat(outfit: int, kind: String, rng: RandomNumberGenerator) -> StandardMaterial3D:
+	var pick := func(keys: Array) -> Color: return DYES[keys[rng.randi() % keys.size()]]
+	match kind:
+		"eri":
+			return fabric(DYES["shiro"], "cotton", 8.0)
+		"obi":
+			if outfit == Outfit.KIMONO:
+				return fabric(pick.call(["enji", "kinari", "moegi", "asagi"]), "brocade", 6.0)
+			return fabric(pick.call(["cha", "sumi", "kon"]), "cotton", 8.0)
+		"armor":
+			# 漆塗りの小札（横の段）と色糸の縅（おどし）
+			var lace: Color = pick.call(["enji", "kon", "moegi", "shiro"])
+			var am := StandardMaterial3D.new()
+			am.albedo_texture = _lamellar_tex(lace)
+			am.albedo_color = Color(1, 1, 1)
+			am.roughness = 0.35
+			am.metallic = 0.1
+			am.clearcoat_enabled = true
+			am.clearcoat = 0.8
+			am.clearcoat_roughness = 0.2
+			am.uv1_triplanar = true
+			am.uv1_scale = Vector3(3.5, 3.5, 3.5)
+			am.cull_mode = BaseMaterial3D.CULL_DISABLED
+			return am
+		"hakama":
+			match outfit:
+				Outfit.NOBLE: return fabric(pick.call(["asagi", "moegi", "kinari"]), "silk", 5.0)
+				Outfit.ANCIENT: return fabric(DYES["kinari"], "hemp", 4.0)
+				Outfit.SAMURAI: return fabric(pick.call(["nezumi", "cha", "kon", "sumi"]), "linen", 5.0)
+			return fabric(pick.call(["ai", "cha", "nezumi", "kakishibu"]), "hemp", 4.0)
+		"robe":
+			if outfit == Outfit.MONK:
+				return fabric(DYES["sumi"], "linen", 5.0)
+			return fabric(pick.call(["ai", "enji", "asagi", "moegi", "nezumi", "kakishibu"]), "cotton", 5.0)
+		_:  # kosode
+			match outfit:
+				Outfit.NOBLE: return fabric(pick.call(["enji", "asagi", "moegi", "kinari"]), "brocade", 4.0)
+				Outfit.MONK: return fabric(DYES["sumi"], "linen", 5.0)
+				Outfit.ANCIENT: return fabric(DYES["kinari"], "hemp", 4.0)
+				Outfit.SAMURAI: return fabric(pick.call(["kon", "ai", "kinari", "cha"]), "silk", 5.0)
+				Outfit.KIMONO: return fabric(pick.call(["ai", "enji", "asagi", "moegi", "nezumi"]), "cotton", 5.0)
+			return fabric(pick.call(["ai", "kon", "cha", "nezumi", "kakishibu", "kinari"]), "hemp", 4.0)
 
 
 func _dress_realistic(model: Node3D, outfit: int, rng: RandomNumberGenerator, armed: bool) -> void:
@@ -519,22 +601,14 @@ func _dress_realistic(model: Node3D, outfit: int, rng: RandomNumberGenerator, ar
 			var kind := n.get_slice("_garment_", 1)
 			mi.visible = kind in wear
 			if mi.visible:
-				var c: Color = pal[0]
-				match kind:
-					"juban":
-						c = Color(0.93, 0.92, 0.88)
-					"hakama", "robe":
-						c = pal[1] if outfit != Outfit.KIMONO else pal[0]
-					"armor":
-						c = pal[2] if outfit == Outfit.SAMURAI else pal[2].darkened(0.2)
-				var fm := fabric(c, "plain" if kind in ["juban", "hakama"] else (pattern if kind != "armor" else "check"), 0.6 if kind == "armor" else 0.88)
-				if kind == "armor":
-					fm.metallic = 0.25
-					fm.uv1_scale = Vector3(14, 14, 14)
-				mi.material_override = fm
+				mi.material_override = _garment_mat(outfit, kind, rng)
 			continue
-		if n.ends_with("_body"):
-			_skin(mi, Color(0.25, 0.22, 0.3) if outfit == Outfit.GUARDIAN else Color.WHITE)
+		if n.ends_with("_body") or n.ends_with("_bodyw"):
+			# 和装では服の下を消した体（_bodyw）を使い、突き抜けを防ぐ
+			var is_w := n.ends_with("_bodyw")
+			mi.visible = is_w == (not wear.is_empty())
+			if mi.visible:
+				_skin(mi, Color(0.25, 0.22, 0.3) if outfit == Outfit.GUARDIAN else Color.WHITE)
 			continue
 		if n.contains("low-poly"):
 			_eyes(mi)
@@ -568,8 +642,8 @@ func _dress_realistic(model: Node3D, outfit: int, rng: RandomNumberGenerator, ar
 	var male: bool = not get_meta("female", false)
 	match outfit:
 		Outfit.SAMURAI:
-			part(head, "sphere", m_lacquer, Vector3(0, 0.12, -0.01), Vector3(0.235, 0.16, 0.25))     # 兜の鉢
-			part(head, "skirt", m_lacquer, Vector3(0, 0.03, -0.03), Vector3(0.34, 0.1, 0.34))         # 錣（後ろへ垂れる）
+			part(head, "sphere", m_lacquer, Vector3(0, 0.1, -0.005), Vector3(0.245, 0.15, 0.265))    # 兜の鉢
+			part(head, "skirt", m_lacquer, Vector3(0, -0.01, -0.035), Vector3(0.44, 0.13, 0.44))       # 錣（裾広がりに垂れる）
 			part(head, "box", m_acc, Vector3(-0.05, 0.2, 0.11), Vector3(0.012, 0.13, 0.006), Vector3(-10, 0, 22))  # 鍬形
 			part(head, "box", m_acc, Vector3(0.05, 0.2, 0.11), Vector3(0.012, 0.13, 0.006), Vector3(-10, 0, -22))
 		Outfit.ASHIGARU:
@@ -577,8 +651,7 @@ func _dress_realistic(model: Node3D, outfit: int, rng: RandomNumberGenerator, ar
 		Outfit.NOBLE:
 			part(head, "cyl", m_black, Vector3(0, 0.22, -0.02), Vector3(0.12, 0.24, 0.14), Vector3(-12, 0, 0))  # 烏帽子
 		Outfit.KIMONO:
-			part(chest, "cyl", m_acc, Vector3(0, -0.2, 0.0), Vector3(0.3, 0.11, 0.22))                 # 帯
-			part(chest, "box", m_acc, Vector3(0, -0.2, -0.12), Vector3(0.16, 0.1, 0.05))               # 帯の結び
+			pass
 		Outfit.MONK:
 			part(chest, "box", m_acc, Vector3(0.04, 0.0, 0.02), Vector3(0.4, 0.05, 0.27), Vector3(0, 0, -35))  # 袈裟
 		Outfit.ANCIENT:

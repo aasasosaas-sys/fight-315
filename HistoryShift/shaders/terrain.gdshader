@@ -155,7 +155,7 @@ void fragment() {
 		n2 = ny;
 		r2 = rx * bw.x + ry * bw.y + rz * bw.z;
 		float lum = dot(a2, vec3(0.33));
-		a2 = mix(vec3(lum), a2, 0.35) * rock_tint * 1.6;
+		a2 = mix(vec3(lum), a2, 0.55) * rock_tint * 2.3;
 		float w = hblend(rock_w, lum, 2.0);
 		alb = mix(alb, a2, w); nrm = mix(nrm, n2, w); rgh = mix(rgh, r2, w);
 	}

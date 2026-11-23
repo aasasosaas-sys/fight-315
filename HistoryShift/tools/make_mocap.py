@@ -18,6 +18,7 @@ import bpy
 # (出力名, ファイル, 種別, パラメータ)
 CLIPS = [
     ("Mocap_Idle", "140/140_06.bvh", "window", {"start": 2.0, "len": 6.0}),
+    ("Mocap_Stand", "007/07_01.bvh", "window", {"start": 0.0, "len": 0.6}),
     ("Mocap_Walk", "007/07_01.bvh", "loop", {"min": 0.9, "max": 1.4}),
     ("Mocap_SlowWalk", "007/07_04.bvh", "loop", {"min": 1.1, "max": 1.8}),
     ("Mocap_Jog", "002/02_03.bvh", "loop", {"min": 0.55, "max": 0.95}),

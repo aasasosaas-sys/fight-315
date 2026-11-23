@@ -49,7 +49,7 @@ func terrain_features() -> void:
 		"asuka_nara":
 			# 瀬田の唐橋: 戦場を横切る川
 			lm = w.landmarks["battlefield"]
-			_channel(lm, Vector2(0, -45), Vector2(0, 45), 7.0)
+			_channel(lm, Vector2(0, -24), Vector2(0, 24), 6.0)
 			# 水城: 大宰府の前の長い土塁（地形として盛る）
 			var cl: Dictionary = w.landmarks["castle"]
 			var p0: Vector3 = cl["xf"] * Vector3(-46, 0, 40)
@@ -78,7 +78,7 @@ func terrain_features() -> void:
 		"meiji_taisho":
 			# 宮城前の濠
 			lm = w.landmarks["capital"]
-			_channel(lm, Vector2(-64, -46), Vector2(64, -46), 7.0)
+			_channel(lm, Vector2(-48, -46), Vector2(48, -46), 6.0)
 
 
 func _channel(lm: Dictionary, la: Vector2, lb: Vector2, half_w: float) -> void:

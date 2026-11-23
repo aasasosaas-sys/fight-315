@@ -23,6 +23,9 @@ TEXTURES = {
     "darkwood": "wood_plank_wall", "rooftile": "grey_roof_tiles", "thatch": "thatch_roof_angled",
     "stonewall": "japanese_stone_wall", "brick": "brick_wall_02", "concrete": "concrete_floor_02",
     "tatami": "tatami_mat", "bamboo": "bamboo_wall",
+    # 和装の布地
+    "fab_linen": "rough_linen", "fab_hemp": "hessian_230", "fab_silk": "crepe_satin",
+    "fab_cotton": "stretch_poplin", "fab_brocade": "floral_jacquard",
 }
 HDRIS = {"day": "autumn_field_puresky", "clear": "farm_field_puresky",
          "hazy": "hilly_terrain_01_puresky", "evening": "evening_road_01_puresky"}

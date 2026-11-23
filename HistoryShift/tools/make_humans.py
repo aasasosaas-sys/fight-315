@@ -167,12 +167,64 @@ import bmesh
 GARMENTS = {
     # 名前: (骨, 基本の膨らみ[m], 下へ行くほどの広がり[m], 脚を中央へ寄せる率, 平滑化回数, 衿の V の深さ[m], 袖の垂れ[m])
     "kosode": (["spine_01", "spine_02", "spine_03", "clavicle_l", "clavicle_r", "upperarm_l", "upperarm_r",
-                "lowerarm_l", "lowerarm_r", "pelvis"], 0.02, 0.0, 0.0, 8, 0.17, 0.11),
+                "lowerarm_l", "lowerarm_r", "pelvis"], 0.024, 0.0, 0.0, 18, 0.17, 0.11),
     "juban": (["spine_02", "spine_03", "clavicle_l", "clavicle_r"], 0.012, 0.0, 0.0, 6, 0.1, 0.0),
     "hakama": (["pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r"], 0.03, 0.045, 0.0, 6, 0.0, 0.0),
-    "robe": (["pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r"], 0.035, 0.04, 0.5, 10, 0.0, 0.0),
     "armor": (["spine_01", "spine_02", "spine_03", "pelvis"], 0.06, 0.02, 0.0, 4, 0.0, 0.0),
 }
+
+
+def make_robe_tube(body, variant, name, top_z, bottom_z, flare, key):
+    """腰から足首まで筒状に落ちる着物の裾（体のウェイトを転写して骨格で動く）。"""
+    import math
+    from mathutils import Vector
+    xs = [v.co.x for v in body.data.vertices if abs(v.co.z - top_z) < 0.04]
+    ys = [v.co.y for v in body.data.vertices if abs(v.co.z - top_z) < 0.04]
+    cx, cy = (sum(xs) / len(xs), sum(ys) / len(ys)) if xs else (0.0, 0.0)
+    rx = (max(xs) - min(xs)) / 2 + 0.035 if xs else 0.18
+    ry = (max(ys) - min(ys)) / 2 + 0.035 if ys else 0.13
+    seg, rings = 32, 16
+    verts, faces = [], []
+    for r in range(rings + 1):
+        t = r / rings
+        z = top_z + (bottom_z - top_z) * t
+        k = 1.0 + flare * t
+        for i in range(seg):
+            a = 2 * math.pi * i / seg
+            verts.append((cx + math.cos(a) * rx * k, cy + math.sin(a) * ry * k, z))
+    for r in range(rings):
+        for i in range(seg):
+            a, b = r * seg + i, r * seg + (i + 1) % seg
+            faces.append((a, b, b + seg, a + seg))
+    me = bpy.data.meshes.new(name)
+    me.from_pydata(verts, [], faces)
+    me.update()
+    g = bpy.data.objects.new("%s_garment_%s" % (variant, key), me)
+    bpy.context.collection.objects.link(g)
+    g.parent = body.parent
+    for vg in body.vertex_groups:
+        g.vertex_groups.new(name=vg.name)
+    dt = g.modifiers.new("wt", "DATA_TRANSFER")
+    dt.object = body
+    dt.use_vert_data = True
+    dt.data_types_verts = {"VGROUP_WEIGHTS"}
+    dt.vert_mapping = "POLYINTERP_NEAREST"
+    dt.layers_vgroup_select_src = "ALL"
+    dt.layers_vgroup_select_dst = "NAME"
+    bpy.context.view_layer.objects.active = g
+    with bpy.context.temp_override(object=g):
+        bpy.ops.object.datalayer_transfer = None if False else None
+        bpy.ops.object.modifier_apply(modifier="wt")
+    arm = body.find_armature()
+    if arm:
+        am = g.modifiers.new("Armature", "ARMATURE")
+        am.object = arm
+    m = bpy.data.materials.new("garment_" + key)
+    m.use_nodes = True
+    g.data.materials.append(m)
+    for poly in g.data.polygons:
+        poly.use_smooth = True
+    return g
 
 
 def find_body():
@@ -250,6 +302,11 @@ def make_garments(variant):
         g.data.materials.append(m)
         for poly in g.data.polygons:
             poly.use_smooth = True
+    # 着物の裾（筒）
+    zs_all = [v.co.z for v in body.data.vertices]
+    top, bottom = max(zs_all), min(zs_all)
+    hz = bottom + (top - bottom) * 0.53
+    make_robe_tube(body, variant, "robe_mesh", hz, bottom + 0.06, 0.18, "robe")
 
 
 def shrink_textures(max_size=2048):
@@ -277,7 +334,11 @@ def main():
         clear_scene()
         build(name, VARIANTS[name])
         bake_for_export()
-        make_garments(name)
+        body = find_body()
+        if body is not None:
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            import kimono
+            kimono.make_wasou(body, name, VARIANTS[name]["gender"] < 0.5)
         path = os.path.join(out, name + ".gltf")
         export(path)
         print("EXPORTED", path, os.path.getsize(path))
