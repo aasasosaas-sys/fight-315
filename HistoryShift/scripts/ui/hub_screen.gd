@@ -459,6 +459,10 @@ func _footer() -> Control:
 	var log_b := JSUI.button("改変ログ", "normal", 23, 170)
 	log_b.pressed.connect(_show_log)
 	h.add_child(log_b)
+	if not Game.state.actions.is_empty() or Game.state.chaos_count > 0:
+		var act_b := JSUI.button("自由行動の記録", "normal", 23, 220)
+		act_b.pressed.connect(_show_actions)
+		h.add_child(act_b)
 	var free_b := JSUI.button("自由探索", "cyan", 23, 170)
 	free_b.pressed.connect(func(): EraPicker.open(self, func(id): free_roam.emit(id)))
 	h.add_child(free_b)
@@ -473,6 +477,56 @@ func _footer() -> Control:
 		JSUI.confirm(self, "すべてリセット", "答案・歴史改変・ログをすべて消去し、世界を本来の史実に戻します。この操作は取り消せません。", "リセットする", "やめる", func(): reset_all.emit(), true))
 	h.add_child(reset_b)
 	return h
+
+
+## 自由探索での行動（わざとでも、うっかりでも）と、その結果の年表
+func _show_actions() -> void:
+	var r := JSUI.modal(self, 1300, "自由行動の記録 ― あなたが動かした歴史")
+	var overlay: Control = r[0]
+	var v: VBoxContainer = r[1]
+	var sc := ScrollContainer.new()
+	sc.custom_minimum_size = Vector2(0, 560)
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	v.add_child(sc)
+	var lv := JSUI.vbox(8)
+	lv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sc.add_child(lv)
+	var number := {}
+	for i in Game.db.questions.size():
+		number[Game.db.questions[i]["id"]] = i + 1
+	var acts: Array = Game.state.actions.duplicate()
+	acts.sort_custom(func(a, b): return int(a.get("seq", 0)) < int(b.get("seq", 0)))
+	if acts.is_empty():
+		lv.add_child(JSUI.label("自由探索での行動はまだない（揺らぎのルールによる変化は改変ログを参照）。", 22, JSUI.MUTED, null, true))
+	for a in acts:
+		var era := Game.db.get_era(str(a.get("era", "")))
+		var p := JSUI.panel(JSUI.sb(Color(1, 1, 1, 0.03), 8, 0, Color.TRANSPARENT, 0, 12))
+		var st: StyleBoxFlat = p.get_theme_stylebox("panel")
+		st.border_width_left = 4; st.border_color = JSUI.SHU
+		var pv := JSUI.vbox(4)
+		p.add_child(pv)
+		var hh := JSUI.hbox(10)
+		hh.add_child(JSUI.pill(String(era.get("eraName", "")).split("（")[0], JSUI.era_color(str(a.get("era", ""))).darkened(0.3), Color.WHITE, 16))
+		var t := JSUI.label(HistoryActors.headline(Game.db, a), 22, Color.WHITE, JSUI.sans_bold(), true)
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		hh.add_child(t)
+		pv.add_child(hh)
+		if str(a.get("text", "")) != "":
+			pv.add_child(JSUI.label(str(a["text"]), 19, JSUI.TEXT, null, true))
+		var qs: PackedStringArray = []
+		for qid in a.get("changed", []):
+			var q: Dictionary = Game.db.by_id.get(qid, {})
+			if not q.is_empty():
+				qs.append("第%d問%s" % [number[qid], "○" if Game.state.is_correct(q) else "×"])
+		pv.add_child(JSUI.label(("→ 書き換わった設問：" + "、".join(qs)) if not qs.is_empty() else "→ 設問の史実は変わらず（その後の歴史だけが動いた）", 18, JSUI.MUTED, null, true))
+		lv.add_child(p)
+	var row := JSUI.hbox()
+	row.alignment = BoxContainer.ALIGNMENT_END
+	var close := JSUI.button("閉じる", "ghost", 24, 200)
+	close.pressed.connect(func(): UISfx.play("back"); JSUI.close_modal(overlay))
+	row.add_child(close)
+	v.add_child(row)
+	close.call_deferred("grab_focus")
 
 
 func _show_log() -> void:

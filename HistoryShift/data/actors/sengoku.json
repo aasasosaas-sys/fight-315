@@ -202,7 +202,8 @@
    "traits": {
     "war": 2,
     "loyal": 2
-   }
+   },
+   "spawn": "castle"
   },
   {
    "name": "北政所",
@@ -315,7 +316,8 @@
    "traits": {
     "loyal": -1,
     "faith": 1
-   }
+   },
+   "spawn": "battlefield"
   },
   {
    "name": "後藤又兵衛",
@@ -349,6 +351,7 @@
     "faith": 2,
     "open": 2
    },
+   "spawn": "temple",
    "aka": [
     "ザビエル"
    ]
@@ -368,7 +371,8 @@
    "traits": {
     "faith": 2,
     "war": 1
-   }
+   },
+   "spawn": "port"
   },
   {
    "name": "種子島時堯",
@@ -392,6 +396,20 @@
      "q": "sengoku_01",
      "choice": 3,
      "note": "鉄砲を買う者がおらず、国産は始まらなかった"
+    }
+   ],
+   "schedule": [
+    {
+     "event": "南蛮人との鉄砲の取引",
+     "at": "port",
+     "year": 1543,
+     "missed": {
+      "force": {
+       "q": "sengoku_01",
+       "choice": 2
+      }
+     },
+     "text": "時堯が取引に間に合わず、ポルトガル商人は鉄砲を売らずに去った。日本に鉄砲を持ち込んだのは、6年後に来たザビエルだった。"
     }
    ]
   },
@@ -432,7 +450,8 @@
    "traits": {
     "faith": 2,
     "war": 1
-   }
+   },
+   "spawn": "temple"
   },
   {
    "name": "吉田兼見",

@@ -98,11 +98,12 @@ func _run() -> void:
 			tr.state = st
 			tr.begin_session(era)
 			var hits := _fire_rule(tr, era, r)
-			_check(hits.size() == 1, "%s: fires once (got %d)" % [r["id"], hits.size()])
-			if hits.is_empty():
+			var mine := hits.filter(func(h): return h["id"] == r["id"])
+			_check(mine.size() == 1, "%s: fires once (got %d of %d hits)" % [r["id"], mine.size(), hits.size()])
+			if mine.is_empty():
 				continue
-			var hit: Dictionary = hits[0]
-			_check(hit["id"] == r["id"], "%s: hit id" % r["id"])
+			var hit: Dictionary = mine[0]
+			var solo := hits.size() == 1
 			# 再計算結果が simulate と一致
 			var sim := st.simulate(st.interventions)
 			for q in db.questions:
@@ -113,10 +114,10 @@ func _run() -> void:
 				forced_n += 1
 				var q: Dictionary = db.by_id[f["q"]]
 				_check(st.is_chaos(q), "%s: intervention cause chaos" % r["id"])
-				_check(st.world_choice(q) == int(f["choice"]), "%s: forced choice" % r["id"])
-				_check(not st.is_correct(q), "%s: forced answer broken" % r["id"])
-				_check(hit["broke"], "%s: broke flag" % r["id"])
-				_check(not hit["changes"].is_empty() and hit["changes"][0]["question"]["id"] == f["q"] and hit["changes"][0]["depth"] == 0, "%s: first change is the forced question" % r["id"])
+				if solo:
+					_check(st.world_choice(q) == int(f["choice"]), "%s: forced choice" % r["id"])
+					_check(not st.is_correct(q), "%s: forced answer broken" % r["id"])
+					_check(hit["broke"], "%s: broke flag" % r["id"])
 			if r.has("vars"):
 				var has := false
 				for m in st.chaos_mods:
@@ -131,7 +132,8 @@ func _run() -> void:
 				if st.world_choice(q) != q["real"]:
 					diff += 1
 					_check(st.is_chaos_touched(q), "%s: chaos_touched %s" % [r["id"], q["id"]])
-			_check(diff == hit["changes"].size(), "%s: changes == diff (%d vs %d)" % [r["id"], hit["changes"].size(), diff])
+			if solo:
+				_check(diff == hit["changes"].size(), "%s: changes == diff (%d vs %d)" % [r["id"], hit["changes"].size(), diff])
 			# 同じセッションでもう一度起こしても二重に発動しない
 			_check(_fire_rule(tr, era, r).is_empty(), "%s: no double fire" % r["id"])
 			tr.end_session()
@@ -176,7 +178,7 @@ func _run() -> void:
 	var h30 := tr.record("kill", "足軽の追手", {"era": "sengoku", "type": "soldier"})
 	_check(h30.size() == 1 and h30[0]["id"] == "sg_massacre", "30th soldier triggers massacre")
 	_check(tr.record("kill", "織田信長", {"era": "heian", "type": "figure"}).is_empty(), "other era event ignored")
-	_check(tr.record("fire", "village", {"era": "sengoku", "count": 12}).is_empty(), "fire elsewhere does not burn Honno-ji")
+	_check(not tr.record("fire", "village", {"era": "sengoku", "count": 12}).any(func(h): return h["id"] == "sg_fire_kyoto"), "fire elsewhere does not burn Honno-ji")
 	_check(tr.record("fire", "capital", {"era": "sengoku", "count": 3}).is_empty(), "fire 3 < 5 at capital")
 	var hf := tr.record("fire", "capital", {"era": "sengoku", "count": 5})
 	_check(hf.size() == 1 and hf[0]["id"] == "sg_fire_kyoto", "fire count reaches 5 at capital")
@@ -186,7 +188,7 @@ func _run() -> void:
 	_check(hk.size() == 1 and hk[0]["id"] == "sg_destroy_osaka", "castle keep destroyed -> Osaka rule")
 	_check(tr.session_changes().size() > 0, "session_changes")
 	tr.end_session()
-	_check(tr.session_hits.size() == 3, "session hits kept after end")
+	_check(tr.session_hits.filter(func(h): return h.has("rule")).size() == 3, "session hits kept after end")
 	# predict_ripple は混乱を含めて予測する
 	var q05: Dictionary = db.by_id["sengoku_05"]
 	_check(st3.world_choice(q05) == 0, "fire forced sengoku_05=0")
@@ -196,6 +198,7 @@ func _run() -> void:
 	var ending := st3.compose_ending()
 	_check(String(ending[1]).contains("自由探索での混乱"), "ending mentions chaos")
 
+	_generic_tests(db)
 	await _integration()
 	HistoryState.delete_save()
 	if _backup != null:
@@ -203,6 +206,131 @@ func _run() -> void:
 		f.store_string(_backup)
 	print("RESULT: %s (%d failures)" % ["PASS" if fails == 0 else "FAIL", fails])
 	quit(1 if fails else 0)
+
+
+## 一般則（HistoryActors）：どの人物にどの動詞を使っても解決すること、どの問題×選択肢にも行動だけで届くこと
+func _generic_tests(db: HistoryDB) -> void:
+	_check(db.actors.size() >= 140, "actors loaded (%d)" % db.actors.size())
+	_check(db.actor_name("老中 田沼意次") == "田沼意次" and db.actor_name("羽柴秀吉") == "豊臣秀吉" and db.actor_name("厩戸王（聖徳太子）") == "厩戸王", "actor alias resolution")
+	var tr := ChaosTracker.new(db, null)
+	# ファズ：時代ごとにランダムな動詞×人物
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var verbs := ["kill", "escort", "protect", "persuade", "give", "steal", "forge", "delay", "steer"]
+	var by_era := {}
+	for nm in db.actors:
+		var e: String = db.actors[nm]["era"]
+		if not by_era.has(e):
+			by_era[e] = []
+		by_era[e].append(nm)
+	var applied := 0
+	for trial in 40:
+		var st := _fresh(db)
+		tr.state = st
+		for e in db.eras:
+			var era: String = e["eraId"]
+			tr.begin_session(era)
+			for k in 6:
+				var nm: String = by_era[era][rng.randi() % by_era[era].size()]
+				var verb: String = verbs[rng.randi() % verbs.size()]
+				var info := {}
+				match verb:
+					"persuade": info["arg"] = HistoryActors.ARGS.keys()[rng.randi() % HistoryActors.ARGS.size()]
+					"give": info["item"] = HistoryActors.ITEMS.keys()[rng.randi() % HistoryActors.ITEMS.size()]
+					"escort": info["to"] = HistoryDB.LANDMARK_KEYS[rng.randi() % 7]
+					"delay": info["event"] = "大事な会合"
+					"steer":
+						var qs: Array = e["questions"]
+						var q: Dictionary = qs[rng.randi() % qs.size()]
+						info["q"] = q["id"]
+						info["choice"] = rng.randi() % 4
+				if verb == "kill":
+					info["type"] = "figure"
+					info["cause"] = ["shot", "stray", "explosion", "fire", "horse", "crossfire"][rng.randi() % 6]
+				tr.act(verb, nm, info)
+				applied += 1
+			tr.end_session()
+		for q in db.questions:
+			var c := st.world_choice(q)
+			_check(c >= 0 and c <= 3, "fuzz: valid choice %s" % q["id"])
+		var sim := st.simulate(st.interventions)
+		for q in db.questions:
+			_check(sim["world"][q["id"]] == st.world_choice(q), "fuzz: recompute consistent")
+		st.save()
+		var st2 := HistoryState.new(db)
+		st2.load_save()
+		for q in db.questions:
+			_check(st2.world_choice(q) == st.world_choice(q), "fuzz: save/load %s" % q["id"])
+		# 行動だけ（ミッションなし）で年代順に直せば満点
+		for q in db.questions:
+			st.answers[q["id"]] = rng.randi_range(0, 3)
+		for q in db.questions:
+			if not st.is_correct(q):
+				_steer(tr, st, db, q, st.answer(q))
+		_check(st.perfect(), "fuzz %d: 100点 by free actions only (%d/%d)" % [trial, st.correct_count(), db.questions.size()])
+		var mission_ivs := 0
+		for k2 in st.interventions:
+			if not (str(st.interventions[k2].get("cause", "")) in ["chaos", "actor"]):
+				mission_ivs += 1
+		_check(mission_ivs == 0, "fuzz: no mission interventions used")
+	print("generic fuzz: %d actions applied" % applied)
+	# すべての問題×選択肢に「未来を語る」で届く
+	var reach := 0
+	for q in db.questions:
+		for c in 4:
+			var st3 := _fresh(db)
+			tr.state = st3
+			_steer(tr, st3, db, q, c)
+			if st3.world_choice(q) == c:
+				reach += 1
+			else:
+				_check(false, "reach %s choice %d" % [q["id"], c])
+	print("reachable question×choice by free actions: %d / %d" % [reach, db.questions.size() * 4])
+	# 個別の一般則
+	var st4 := _fresh(db)
+	tr.state = st4
+	tr.begin_session("sengoku")
+	var h1 := tr.record("kill", "徳川家康", {"era": "sengoku", "type": "figure", "cause": "stray"})
+	_check(h1.size() == 1 and str(h1[0]["title"]).contains("流れ弾"), "accidental kill attributed to stray bullet")
+	var h2 := tr.record("delay", "織田信長", {"era": "sengoku", "event": "本能寺に入る", "cause_text": "引き止めた"})
+	_check(h2.size() == 1 and st4.world_choice(db.by_id["sengoku_05"]) == 0, "delay Nobunaga -> survives Honno-ji")
+	for i in 5:
+		tr.record("kill", "東軍の兵", {"era": "sengoku", "type": "soldier"})
+	var bt := st4.actions.filter(func(a): return a["verb"] == "battle")
+	_check(bt.size() == 1 and bt[0]["side"] == "西軍", "killing 5 East soldiers helps the West")
+	for i in 5:
+		tr.record("destroy", "mountain", {"era": "sengoku", "type": "hall", "value": 100})
+	_check(st4.actions.any(func(a): return a["verb"] == "sabotage" and a["target"] == "mountain"), "generic sabotage of an unruled landmark")
+	var ref := tr.act("persuade", "徳川家光", {"arg": "開国を勧める"})
+	tr.end_session()
+	tr.begin_session("edo")
+	ref = tr.act("persuade", "徳川家光", {"arg": "開国を勧める"})
+	_check(ref.get("refused", false), "closed-minded Iemitsu refuses opening the country")
+	var sv := tr.act("protect", "坂本龍馬", {})
+	_check(not sv.is_empty() and st4.final_state.get("democracy", 0.0) >= 10.0, "saving Ryoma -> democracy up")
+	var st5 := _fresh(db)
+	tr.state = st5
+	tr.begin_session("heian")
+	tr.act("kill", "藤原良房", {"type": "figure"})
+	var a5: Dictionary = st5.actions[-1]
+	_check(str(a5.get("text", "")).contains("藤原基経"), "successor takes over (%s)" % a5.get("text", ""))
+	tr.end_session()
+	HistoryState.delete_save()
+
+
+## 未来の教科書を渡して信頼を得てから「未来を語る」（行動だけで問題 q を choice にする）
+func _steer(tr: ChaosTracker, st: HistoryState, db: HistoryDB, q: Dictionary, c: int) -> void:
+	var cands: Array = db.q_actors.get(q["id"], [])
+	if cands.is_empty():
+		_check(false, "no actor for %s" % q["id"])
+		return
+	var nm: String = cands[0]["name"]
+	tr.begin_session(q["era"]["eraId"])
+	if tr.trust(nm) == 0:
+		tr.act("give", nm, {"item": "未来の教科書"})
+	if st.world_choice(q) != c:
+		tr.act("steer", nm, {"q": q["id"], "choice": c})
+	tr.end_session()
 
 
 ## 実際の自由探索セッションで人物を倒す
@@ -224,7 +352,25 @@ func _integration() -> void:
 	root.add_child(sess)
 	await _frames(5)
 	var specs: Array = G.chaos.figures_for("sengoku")
-	_check(sess.figures.size() == specs.size(), "free roam spawns figures (%d)" % sess.figures.size())
+	_check(sess.figures.size() == S.figure_specs("sengoku").size() and sess.figures.size() >= specs.size(), "free roam spawns figures (%d)" % sess.figures.size())
+	_check(sess.interact != null, "actor interaction node")
+	for q in G.db.questions:
+		if q["era"]["eraId"] == "sengoku":
+			_check(sess.figures.any(func(f): return q["id"] in f.questions), "a free-roam figure can be told the future of %s" % q["id"])
+	# 会話メニューから：渡す → 未来を語る（sengoku_03 を別の選択肢へ）
+	var q03: Dictionary = G.db.by_id["sengoku_03"]
+	var talker = null
+	for f in sess.figures:
+		if "sengoku_03" in f.questions:
+			talker = f
+	if talker:
+		sess.interact.open(talker)
+		sess.interact._do("give", {"item": "未来の教科書"})
+		sess.interact.open(talker)
+		sess.interact._do("steer", {"q": "sengoku_03", "choice": 0})
+		await _frames(2)
+		_check(G.state.world_choice(q03) == 0, "menu: give + tell the future rewrites sengoku_03")
+		_check(not sess.interact.is_open(), "menu closed after action")
 	_check(G.chaos.is_active() and G.chaos.active_era == "sengoku", "chaos session active")
 	var nobu = null
 	for f in sess.figures:

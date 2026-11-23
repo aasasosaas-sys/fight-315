@@ -144,11 +144,13 @@ func record(kind: String, id: String, info: Dictionary = {}) -> Array:
 	events.append(ev)
 	tally[kind] = int(tally.get(kind, 0)) + (1 if kind != "fire" else 0)
 	var hits: Array = []
+	var matched := false   # 手作りルールの条件に当てはまる出来事は、一般則では扱わない（ルールが発動済みでも）
 	for r in rules_for(active_era):
 		var rid := str(r.get("id", ""))
-		if rid == "" or fired.has(rid):
+		if rid == "" or not _trigger_hit(r.get("trigger", {}), ev):
 			continue
-		if not _trigger_hit(r.get("trigger", {}), ev):
+		matched = true
+		if fired.has(rid):
 			continue
 		if not _satisfied(r.get("trigger", {})):
 			continue
@@ -158,8 +160,10 @@ func record(kind: String, id: String, info: Dictionary = {}) -> Array:
 		var hit := _apply(r)
 		if not hit.is_empty():
 			hits.append(hit)
-	if hits.is_empty():
+	if hits.is_empty() and not matched:
 		hits.append_array(_generic(kind, id, info, ev))
+	if kind == "kill" and str(info.get("type", "")) == "soldier":
+		hits.append_array(_battle_kill(id))
 	return hits
 
 
@@ -171,8 +175,6 @@ func _generic(kind: String, id: String, info: Dictionary, ev: Dictionary) -> Arr
 		"kill":
 			if str(info.get("type", "")) == "figure" and nm != "" and not _actor_gone(nm):
 				out.append(_act({"verb": "kill", "target": nm, "cause": ev.get("cause", "player")}))
-			elif str(info.get("type", "")) == "soldier":
-				out.append_array(_battle_kill(id))
 		"destroy", "fire", "bridge", "sink":
 			var key: String = ev["at"] if ev["at"] != "" else (id if id != "" else "town")
 			if _sabotaged.has(key):

@@ -22,6 +22,13 @@
     "war": -1
    },
    "spawn": "temple",
+   "aka": [
+    "聖徳太子"
+   ],
+   "q": [
+    "asuka_nara_01",
+    "asuka_nara_05"
+   ],
    "contrib": [
     {
      "q": "asuka_nara_01",
@@ -31,15 +38,119 @@
    ],
    "saved": {
     "year": 622,
-    "text": "病に倒れるはずの厩戸王が回復し、天皇中心の国づくりは20年早まった。蘇我氏の専横も抑えられた。",
+    "text": "病に倒れるはずの厩戸王が特効薬で回復し、天皇中心の国づくりを20年長く指揮した。公地公民の理想は根強く残り、律令の土地制度は8世紀末までほとんど崩れなかった。",
     "vars": {
-     "centralization": 15,
+     "centralization": 30,
      "education": 10
     }
    },
-   "aka": [
-    "聖徳太子"
+   "doc": {
+    "name": "十七条の草案（木簡）",
+    "q": "asuka_nara_01",
+    "choice": 3,
+    "text": "草案の木簡が盗まれ、厩戸王は一から書き直す気力を失った。役人の心構えを説く成文の訓戒は、乙巳の変の後に中大兄皇子が出すまで現れなかった。"
+   },
+   "persuade": {
+    "改革を勧める": {
+     "force": {
+      "q": "asuka_nara_01",
+      "choice": 1
+     },
+     "text": "「心構えだけでは豪族は従いませぬ」と説かれた厩戸王は、条文ごとに罰則を書き足した。十七条は道徳の訓戒ではなく、刑罰つきの法典になってしまった。"
+    },
+    "開国を勧める": {
+     "vars": {
+      "open_asia": 45
+     },
+     "year": 605,
+     "text": "大陸に学べと説かれた厩戸王は、隋の礼法に通じた渡来人を総動員した。倭は東アジアの外交儀礼に慣れきり、隋にも当然のように臣従する道を選んだ。"
+    }
+   },
+   "give": {
+    "未来の教科書": {
+     "force": {
+      "q": "asuka_nara_01",
+      "choice": 1
+     },
+     "text": "教科書で701年の大宝律令を読んだ厩戸王は「律と令、両方そろってこそ国家」と目を輝かせ、十七条に刑罰の条文を加えた。100年早い律令の誕生である。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "十七条の起草",
+     "at": "temple",
+     "year": 604,
+     "missed": {
+      "force": {
+       "q": "asuka_nara_01",
+       "choice": 3
+      }
+     },
+     "text": "あなたに引き止められて厩戸王は起草の場に現れず、十七条は日の目を見なかった。成文の訓戒は、半世紀のちに中大兄皇子の改新の方針として出された。"
+    }
    ]
+  },
+  {
+   "name": "推古天皇",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": 554,
+   "died": 628,
+   "death": "natural",
+   "active": 593,
+   "tags": [
+    "ruler",
+    "sacred",
+    "woman"
+   ],
+   "traits": {
+    "faith": 1,
+    "loyal": 1,
+    "reform": 1
+   },
+   "spawn": "capital",
+   "aka": [
+    "額田部皇女"
+   ],
+   "q": [
+    "asuka_nara_01",
+    "asuka_nara_05"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "centralization": -30
+     },
+     "year": 605,
+     "note": "日本初の女帝がいなくなり、大王の権威は地に落ちた。豪族連合の筆頭・蘇我氏が外交まで取り仕切った"
+    }
+   ],
+   "persuade": {
+    "改革を勧める": {
+     "vars": {
+      "centralization": 30
+     },
+     "year": 603,
+     "text": "推古天皇は冠位十二階（603年）をさらに推し進め、豪族を官僚として厳しく序列化した。大王の権力が突出し、十七条も刑罰つきの法典として定められた。"
+    },
+    "鎖国を勧める": {
+     "vars": {
+      "open_asia": -30,
+      "education": -25
+     },
+     "year": 600,
+     "text": "「海の向こうに学ぶことなどない」と聞き入れた女帝は、600年の遣隋使の失敗にも懲りて大陸との行き来を絞った。漢字と儒教が根付かず、十七条を起草できる者がいなかった。"
+    }
+   },
+   "give": {
+    "世界地図": {
+     "force": {
+      "q": "asuka_nara_05",
+      "choice": 1
+     },
+     "text": "地図で隋の途方もない大きさを知った推古天皇は青ざめ、「対等など思いもよらぬ」と臣従の国書に改めさせた。倭王は冊封を受け、将軍号まで授かってしまった。"
+    }
+   }
   },
   {
    "name": "蘇我馬子",
@@ -60,6 +171,10 @@
     "loyal": -1
    },
    "spawn": "temple",
+   "q": [
+    "asuka_nara_01",
+    "asuka_nara_05"
+   ],
    "contrib": [
     {
      "vars": {
@@ -68,6 +183,786 @@
      },
      "year": 600,
      "note": "仏教の後ろ盾を失い、飛鳥寺の造営が止まった"
+    }
+   ],
+   "persuade": {
+    "裏切りを促す": {
+     "force": {
+      "q": "asuka_nara_05",
+      "choice": 3
+     },
+     "text": "大王を差し置けとそそのかされた馬子は、遣隋使を自分の名で送り出した。帰国した留学生たちも蘇我氏の家臣として召し抱えられた。"
+    },
+    "信仰を勧める": {
+     "vars": {
+      "religion": 35
+     },
+     "year": 605,
+     "text": "馬子は飛鳥寺に続いて寺を次々と建て、仏教の大檀越として大王をしのぐ権威を得た。隋への使いも「仏法の国・蘇我」の名で送られた。"
+    },
+    "倹約を勧める": {
+     "vars": {
+      "religion": -30
+     },
+     "year": 600,
+     "text": "瓦・仏師・金銅の費用の山に青ざめた馬子は、飛鳥寺の造営を打ち切った。仏教熱は冷め、在来の神々の祭祀が国の中心に戻った。"
+    }
+   },
+   "give": {
+    "千両箱": {
+     "force": {
+      "q": "asuka_nara_05",
+      "choice": 3
+     },
+     "text": "千両箱で財力に箔がついた馬子は、隋への贈り物も使節の人選も自前で用意した。国書には蘇我の名が記され、外交は一豪族の私物になった。"
+    }
+   }
+  },
+  {
+   "name": "物部守屋",
+   "era": "asuka_nara",
+   "faction": "物部",
+   "born": null,
+   "died": 587,
+   "death": "killed",
+   "active": 572,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "war": 2,
+    "faith": -1,
+    "open": -2,
+    "loyal": 1
+   },
+   "spawn": "mountain",
+   "q": [
+    "asuka_nara_01"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "religion": 35
+     },
+     "year": 590,
+     "note": "排仏派の物部守屋がいなくなり、崇仏派の蘇我氏に逆らう者は消えた。蘇我の権威は大王をしのいだ"
+    }
+   ],
+   "saved": {
+    "year": 587,
+    "text": "丁未の乱で射落とされるはずの守屋が生き延び、物部氏が朝廷の主導権を握った。軍事氏族の物部は、道徳の訓戒ではなく刑罰で豪族を従わせる法を求めた。",
+    "vars": {
+     "set": {
+      "ruler": "物部"
+     },
+     "religion": -10
+    }
+   },
+   "persuade": {
+    "信仰を勧める": {
+     "vars": {
+      "religion": -30
+     },
+     "year": 586,
+     "text": "古来の神々への信仰を説かれた守屋は、仏像を難波の堀江に流した父・尾輿に倣って排仏を徹底した。疫病は仏のたたりという声が勝ち、仏教は朝廷から遠ざけられた。"
+    }
+   },
+   "give": {
+    "鉄砲": {
+     "vars": {
+      "set": {
+       "ruler": "物部"
+      },
+      "militarism": 15
+     },
+     "year": 587,
+     "text": "鉄砲を手にした守屋は稲城に立てこもり、厩戸王の四天王への祈りもむなしく蘇我軍を撃退した。物部政権のもと、十七条は刑罰つきの法典になった。"
+    }
+   }
+  },
+  {
+   "name": "鞍作止利",
+   "era": "asuka_nara",
+   "faction": "鞍作",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 605,
+   "tags": [
+    "artist"
+   ],
+   "traits": {
+    "faith": 2,
+    "reform": 1
+   },
+   "spawn": "temple",
+   "aka": [
+    "止利仏師"
+   ],
+   "q": [
+    "asuka_nara_01"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "religion": -25
+     },
+     "year": 600,
+     "note": "飛鳥大仏も法隆寺の釈迦三尊像も造る仏師がいなくなり、人々は仏の姿を目にできなかった。仏教はただの異国の呪いと見なされた"
+    }
+   ]
+  },
+  {
+   "name": "恵慈",
+   "era": "asuka_nara",
+   "faction": "高句麗",
+   "born": null,
+   "died": 623,
+   "death": "natural",
+   "active": 595,
+   "tags": [
+    "religious",
+    "foreigner",
+    "scholar"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": 2,
+    "war": 1
+   },
+   "spawn": "temple",
+   "q": [
+    "asuka_nara_01",
+    "asuka_nara_05"
+   ],
+   "contrib": [
+    {
+     "q": "asuka_nara_01",
+     "choice": 2,
+     "note": "厩戸王の仏教の師・恵慈がいなくなり、若き皇子は仏の教えに触れなかった。十七条は神祇を重んじる内容になった"
+    }
+   ],
+   "give": {
+    "世界地図": {
+     "vars": {
+      "open_asia": 45
+     },
+     "year": 605,
+     "text": "地図を広げた恵慈は、祖国高句麗と隋の国境を指して東アジアの情勢を説いた。倭は大陸に通じた国となり、隋の冊封体制にすんなり加わった。"
+    }
+   }
+  },
+  {
+   "name": "観勒",
+   "era": "asuka_nara",
+   "faction": "百済",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 602,
+   "tags": [
+    "religious",
+    "foreigner",
+    "scholar"
+   ],
+   "traits": {
+    "faith": 1,
+    "open": 2,
+    "reform": 1
+   },
+   "spawn": "temple",
+   "q": [
+    "asuka_nara_01"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "education": -25
+     },
+     "year": 602,
+     "note": "暦法・天文地理・遁甲方術の書を伝える百済僧が来ず、書物を読みこなせる者が育たなかった"
+    }
+   ]
+  },
+  {
+   "name": "秦河勝",
+   "era": "asuka_nara",
+   "faction": "秦",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 603,
+   "tags": [
+    "official",
+    "merchant"
+   ],
+   "traits": {
+    "open": 2,
+    "faith": 1,
+    "loyal": 2
+   },
+   "spawn": "village",
+   "q": [
+    "asuka_nara_01",
+    "asuka_nara_05"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "education": -25,
+      "tech": -10
+     },
+     "year": 603,
+     "note": "厩戸王を支えた渡来系の秦氏が去り、文筆と技術を担う人材がごっそり抜けた"
+    }
+   ],
+   "give": {
+    "千両箱": {
+     "vars": {
+      "religion": 35
+     },
+     "year": 603,
+     "text": "千両箱を得た秦河勝は広隆寺を壮麗に建て、弥勒菩薩像を何体も迎えた。仏教は国家の宗教となり、崇仏派の蘇我氏の権威は大王をしのいだ。"
+    }
+   }
+  },
+  {
+   "name": "中臣御食子",
+   "era": "asuka_nara",
+   "faction": "中臣",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 600,
+   "tags": [
+    "official",
+    "religious"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": -1
+   },
+   "spawn": "temple",
+   "q": [
+    "asuka_nara_01"
+   ],
+   "persuade": {
+    "信仰を勧める": {
+     "force": {
+      "q": "asuka_nara_01",
+      "choice": 2
+     },
+     "text": "神祇をつかさどる中臣氏の御食子が「わが国の神々こそ」と厩戸王に説いた。十七条の第二条は「篤く三宝を敬え」から「篤く神祇を敬え」に書き換えられた。"
+    },
+    "鎖国を勧める": {
+     "vars": {
+      "open_asia": -30,
+      "education": -10
+     },
+     "year": 600,
+     "text": "御食子は「海の向こうの教えは国を乱す」と朝廷に説いて回った。600年の遣隋使は二度と送られず、倭は隋の礼法を知らないまま強気の国書を書いた。"
+    }
+   }
+  },
+  {
+   "name": "小野妹子",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 607,
+   "tags": [
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2,
+    "loyal": 2
+   },
+   "spawn": "port",
+   "q": [
+    "asuka_nara_05"
+   ],
+   "contrib": [
+    {
+     "q": "asuka_nara_05",
+     "choice": 2,
+     "note": "国書を取り繕える使者がおらず、隋との国交は断絶した"
+    }
+   ],
+   "doc": {
+    "name": "「日出づる処の天子」の国書",
+    "q": "asuka_nara_05",
+    "choice": 2,
+    "text": "国書が盗まれ、妹子は手ぶらで煬帝の前に出る羽目に。国交は開かれず、留学生も送れなかった。"
+   },
+   "persuade": {
+    "開国を勧める": {
+     "force": {
+      "q": "asuka_nara_05",
+      "choice": 1
+     },
+     "text": "「大国には頭を下げてこそ」と説かれた妹子は、国書を臣従の文面に書き直して差し出した。倭王は冊封を受け、5世紀の倭の五王のような将軍号を授かった。"
+    }
+   },
+   "give": {
+    "世界地図": {
+     "vars": {
+      "open_asia": 50
+     },
+     "year": 606,
+     "text": "地図で大陸の広さを知った妹子は、隋の礼法を徹底的に学んでから海を渡った。倭は東アジアの外交の作法に通じた国となり、冊封もためらわなかった。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "遣隋使の船出",
+     "at": "port",
+     "year": 607,
+     "missed": {
+      "vars": {
+       "open_asia": -30,
+       "education": -10
+      }
+     },
+     "text": "妹子が船出に間に合わず、遣隋使は取りやめに。倭は隋の礼法を知らないまま次の国書を送り、煬帝の怒りを買って国交は断たれた。"
+    }
+   ]
+  },
+  {
+   "name": "鞍作福利",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 607,
+   "tags": [
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2,
+    "loyal": 1
+   },
+   "spawn": "port",
+   "q": [
+    "asuka_nara_05"
+   ],
+   "persuade": {
+    "開国を勧める": {
+     "force": {
+      "q": "asuka_nara_05",
+      "choice": 1
+     },
+     "text": "遣隋使の通事（通訳）・鞍作福利は、「日出づる処の天子」をわざと「東夷の臣」と訳して煬帝に伝えた。煬帝は大喜びで倭王に将軍号を与えた。"
+    }
+   }
+  },
+  {
+   "name": "裴世清",
+   "era": "asuka_nara",
+   "faction": "隋",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 608,
+   "tags": [
+    "diplomat",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 2,
+    "loyal": 2
+   },
+   "spawn": "port",
+   "q": [
+    "asuka_nara_05"
+   ],
+   "contrib": [
+    {
+     "q": "asuka_nara_05",
+     "choice": 2,
+     "note": "答礼使の裴世清が来なければ、隋は倭を見限ったまま。国交は開かれず、留学生も送れなかった"
+    }
+   ],
+   "doc": {
+    "name": "煬帝の返書",
+    "q": "asuka_nara_05",
+    "choice": 2,
+    "text": "裴世清の携えた煬帝の返書が消え、倭は「隋に見捨てられた」と受け取った。国交は途絶え、高向玄理らの留学も取りやめになった。"
+   },
+   "persuade": {
+    "開国を勧める": {
+     "force": {
+      "q": "asuka_nara_05",
+      "choice": 1
+     },
+     "text": "裴世清は「倭は隋に臣従を誓った」と煬帝に報告した。答礼の使いは冊封の使いに変わり、倭王は隋の将軍号を受けることになった。"
+    }
+   }
+  },
+  {
+   "name": "高向玄理",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": null,
+   "died": 654,
+   "death": "illness",
+   "active": 608,
+   "tags": [
+    "scholar",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 2
+   },
+   "spawn": "port",
+   "q": [
+    "asuka_nara_05",
+    "asuka_nara_02"
+   ],
+   "persuade": {
+    "鎖国を勧める": {
+     "force": {
+      "q": "asuka_nara_05",
+      "choice": 2
+     },
+     "text": "渡航を思いとどまった玄理に続き、留学生も留学僧も誰も海を渡らなかった。隋に学ぶ道は閉ざされ、『隋書』には国交断絶とだけ記された。"
+    },
+    "改革を勧める": {
+     "force": {
+      "q": "asuka_nara_02",
+      "choice": 3
+     },
+     "text": "国博士となった玄理は、改新の初めから唐の長安にならった碁盤目の都を設計した。藤原京の造営が半世紀早まり、女帝の治世が前倒しになった。"
+    }
+   },
+   "give": {
+    "未来の教科書": {
+     "vars": {
+      "open_asia": 45,
+      "education": 10
+     },
+     "year": 640,
+     "text": "教科書の「遣唐使」の章を読んだ玄理は、唐との往来を倍に増やすよう建議した。唐の都城制や律令がいち早く伝わり、平城京どころか飛鳥の時代から唐風の国づくりが始まった。"
+    }
+   }
+  },
+  {
+   "name": "僧旻",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": null,
+   "died": 653,
+   "death": "illness",
+   "active": 608,
+   "tags": [
+    "religious",
+    "scholar"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 2,
+    "faith": 1
+   },
+   "spawn": "temple",
+   "q": [
+    "asuka_nara_05",
+    "asuka_nara_02"
+   ],
+   "persuade": {
+    "開国を勧める": {
+     "vars": {
+      "open_asia": 45
+     },
+     "year": 632,
+     "text": "632年に唐から帰った旻は、塾で若い貴族に唐の制度を説き、遣唐使を毎年のように送らせた。大陸の文物がとめどなく流れこみ、鑑真の来日すら早まった。"
+    }
+   }
+  },
+  {
+   "name": "南淵請安",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 608,
+   "tags": [
+    "scholar"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 2
+   },
+   "spawn": "village",
+   "q": [
+    "asuka_nara_05",
+    "asuka_nara_02"
+   ],
+   "persuade": {
+    "学問を勧める": {
+     "vars": {
+      "open_asia": 45,
+      "education": 10
+     },
+     "year": 640,
+     "text": "請安の塾に通う中大兄皇子と中臣鎌足は、唐の都城制まで詳しく学んだ。乙巳の変の直後から碁盤目の都・藤原京の造営が始まった。"
+    }
+   },
+   "give": {
+    "千両箱": {
+     "force": {
+      "q": "asuka_nara_05",
+      "choice": 3
+     },
+     "text": "千両箱を受け取った請安は、留学の費用を出した蘇我氏に忠誠を誓った。遣隋使は蘇我の事業となり、留学生は蘇我氏の家臣として仕えた。"
+    }
+   }
+  },
+  {
+   "name": "犬上御田鍬",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 614,
+   "tags": [
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2,
+    "loyal": 1
+   },
+   "spawn": "port",
+   "q": [
+    "asuka_nara_02",
+    "asuka_nara_06"
+   ],
+   "persuade": {
+    "開国を勧める": {
+     "vars": {
+      "open_asia": 45
+     },
+     "year": 632,
+     "text": "最後の遣隋使にして最初の遣唐使・御田鍬は、唐との往来を年中行事にした。唐の都城制はすぐ伝わり、鑑真も一度目の渡航であっさり来日した。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "第1回遣唐使の船出",
+     "at": "port",
+     "year": 630,
+     "missed": {
+      "vars": {
+       "open_asia": -30
+      }
+     },
+     "text": "630年の第1回遣唐使は御田鍬の遅刻で取りやめに。唐との往来は細り、百済滅亡の知らせも救援要請もなかなか届かず、白村江への出兵は大きく遅れた。"
+    }
+   ]
+  },
+  {
+   "name": "山背大兄王",
+   "era": "asuka_nara",
+   "faction": "上宮王家",
+   "born": null,
+   "died": 643,
+   "death": "suicide",
+   "active": 628,
+   "tags": [
+    "sacred",
+    "ruler"
+   ],
+   "traits": {
+    "war": -2,
+    "faith": 2,
+    "loyal": 1
+   },
+   "spawn": "temple",
+   "q": [
+    "asuka_nara_02"
+   ],
+   "saved": {
+    "year": 643,
+    "text": "斑鳩で入鹿の軍に攻められて自害するはずの山背大兄王が逃げ延びた。王家は蘇我派と上宮王家派に割れ、豪族の反発が渦巻く飛鳥を嫌った中大兄皇子はその場で即位して近江へ移った。",
+    "vars": {
+     "centralization": 20,
+     "unity": -25
+    }
+   },
+   "persuade": {
+    "戦を勧める": {
+     "vars": {
+      "warrior": 30,
+      "militarism": 15
+     },
+     "year": 643,
+     "text": "史実では「民を苦しめたくない」と戦わずに自害した山背大兄王が、東国へ逃れて挙兵した。武人の力が強まり、乙巳の変後は武勇の大海人皇子を推す声が圧倒した。"
+    }
+   }
+  },
+  {
+   "name": "蘇我蝦夷",
+   "era": "asuka_nara",
+   "faction": "蘇我",
+   "born": null,
+   "died": 645,
+   "death": "suicide",
+   "active": 626,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "faith": 1,
+    "loyal": -1,
+    "war": -1
+   },
+   "spawn": "capital",
+   "q": [
+    "asuka_nara_02",
+    "asuka_nara_03"
+   ],
+   "saved": {
+    "year": 645,
+    "text": "甘樫丘の邸で自害するはずの蝦夷が生き延び、蘇我の勢力は飛鳥に根強く残った。身の危険を感じた中大兄皇子は自ら即位し、ただちに近江へ都を移した。",
+    "vars": {
+     "set": {
+      "ruler": "蘇我"
+     },
+     "unity": -10
+    }
+   }
+  },
+  {
+   "name": "蘇我入鹿",
+   "era": "asuka_nara",
+   "faction": "蘇我",
+   "born": null,
+   "died": 645,
+   "death": "killed",
+   "active": 643,
+   "tags": [
+    "ruler",
+    "official",
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": -2,
+    "open": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "asuka_nara_02"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "centralization": 20,
+      "unity": -25
+     },
+     "year": 643,
+     "note": "入鹿が倒れて蘇我本宗家の後継が割れ、豪族の反発が渦巻いた。勢いづいた中大兄皇子が自ら即位して近江へ移った"
+    }
+   ],
+   "saved": {
+    "year": 645,
+    "text": "飛鳥板蓋宮で斬られるはずの入鹿が逃げ延び、蘇我氏は大臣として朝廷を握り続けた。飛鳥にいられなくなった中大兄皇子は自ら即位して近江大津宮へ移った。",
+    "vars": {
+     "set": {
+      "ruler": "蘇我"
+     }
+    }
+   },
+   "persuade": {
+    "戦を勧める": {
+     "vars": {
+      "warrior": 30,
+      "militarism": 10
+     },
+     "year": 644,
+     "text": "入鹿は東漢氏の兵に加え東国の武人まで飛鳥に呼び集めた。宮廷の空気は武一色となり、乙巳の変の後は武勇で知られる大海人皇子が即位した。"
+    }
+   }
+  },
+  {
+   "name": "船恵尺",
+   "era": "asuka_nara",
+   "faction": "船",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 645,
+   "tags": [
+    "scholar",
+    "official"
+   ],
+   "traits": {
+    "loyal": 1,
+    "reform": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "asuka_nara_03"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "education": -30
+     },
+     "year": 645,
+     "note": "燃える蝦夷の邸から『国記』を救い出す船恵尺がいなかった。歴史書も記録の技も灰になり、戸籍づくりに必要な文書行政が育たなかった"
+    }
+   ]
+  },
+  {
+   "name": "軽皇子",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": 596,
+   "died": 654,
+   "death": "illness",
+   "active": 645,
+   "tags": [
+    "ruler",
+    "sacred"
+   ],
+   "traits": {
+    "reform": 1,
+    "open": 1,
+    "war": -1
+   },
+   "spawn": "capital",
+   "aka": [
+    "孝徳天皇"
+   ],
+   "q": [
+    "asuka_nara_02"
+   ],
+   "contrib": [
+    {
+     "q": "asuka_nara_02",
+     "choice": 0,
+     "note": "皇極天皇の弟・軽皇子がいなければ、譲位を受ける者は中大兄皇子しかいなかった。皇子はその場で即位し、近江へ都を移した"
+    }
+   ],
+   "schedule": [
+    {
+     "event": "即位の儀",
+     "at": "capital",
+     "year": 645,
+     "missed": {
+      "force": {
+       "q": "asuka_nara_02",
+       "choice": 0
+      }
+     },
+     "text": "軽皇子が即位の儀に間に合わず、待ちきれない中大兄皇子が自ら位についた。孝徳天皇の難波宮は生まれず、都はのちに近江大津宮へ移された。"
     }
    ]
   },
@@ -89,8 +984,67 @@
     "war": 1,
     "open": 1
    },
+   "spawn": "capital",
    "aka": [
     "天智天皇"
+   ],
+   "successor": "大友皇子",
+   "q": [
+    "asuka_nara_02",
+    "asuka_nara_03"
+   ],
+   "contrib": [
+    {
+     "q": "asuka_nara_02",
+     "choice": 1,
+     "note": "入鹿を斬る皇子がいなければ、乙巳の変の主役は武勇の弟・大海人皇子になり、そのまま即位した"
+    }
+   ],
+   "saved": {
+    "year": 671,
+    "text": "671年に病没するはずの天智天皇が特効薬で回復し、大友皇子への譲位を見届けた。壬申の乱は起きず、都は近江大津宮に置かれ続けた。",
+    "vars": {
+     "set": {
+      "capital": "近江"
+     }
+    }
+   },
+   "doc": {
+    "name": "庚午年籍の台帳",
+    "q": "asuka_nara_03",
+    "choice": 0,
+    "text": "全国から集めた戸籍の台帳が盗まれ、庚午年籍は作り直しに。全国的な戸籍の完成は壬申の乱の後までずれ込んだ。"
+   },
+   "persuade": {
+    "改革を勧める": {
+     "force": {
+      "q": "asuka_nara_02",
+      "choice": 0
+     },
+     "text": "「改革は自ら位についてこそ」と説かれた中大兄皇子は、鎌足の諫めも聞かずに即位した。蘇我の残党が残る飛鳥を嫌い、都は近江大津宮へ。"
+    },
+    "戦を勧める": {
+     "vars": {
+      "militarism": 25,
+      "warrior": 20
+     },
+     "year": 662,
+     "text": "中大兄皇子は百済救援より先に国内の豪族を武力で締めつけた。武の気風が高まり、弟の大海人皇子との皇位争いが白村江より前に噴き出した。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "庚午年籍の作成",
+     "at": "capital",
+     "year": 670,
+     "missed": {
+      "force": {
+       "q": "asuka_nara_03",
+       "choice": 0
+      }
+     },
+     "text": "近江大津宮での戸籍づくりの会議に天智天皇が遅れ、庚午年籍は翌年以降に持ち越し。全国的な戸籍は壬申の乱の後にようやく作られた。"
+    }
    ]
   },
   {
@@ -111,6 +1065,13 @@
     "open": 1
    },
    "spawn": "capital",
+   "aka": [
+    "藤原鎌足"
+   ],
+   "q": [
+    "asuka_nara_02",
+    "asuka_nara_04"
+   ],
    "contrib": [
     {
      "q": "asuka_nara_02",
@@ -118,6 +1079,31 @@
      "note": "即位を急ぐなと諫める者がおらず、中大兄皇子がその場で即位した"
     }
    ],
+   "saved": {
+    "year": 669,
+    "text": "669年に病没するはずの鎌足が特効薬で回復し、藤原の姓を賜った一族は天武・持統朝でも権勢をふるった。貴族の力が早く強まり、開墾地の私有は一代限りしか認められなかった。",
+    "vars": {
+     "court": 30
+    }
+   },
+   "persuade": {
+    "開国を勧める": {
+     "force": {
+      "q": "asuka_nara_02",
+      "choice": 3
+     },
+     "text": "唐の長安の都城図を見せられた鎌足は、乙巳の変の直後から碁盤目の都づくりを進言した。女帝の後見のもとで藤原京の造営が前倒しになった。"
+    }
+   },
+   "give": {
+    "世界地図": {
+     "vars": {
+      "open_asia": 45
+     },
+     "year": 640,
+     "text": "地図を手にした鎌足は唐の国力を説き、遣唐使を次々と送らせた。唐の都城制がいち早く伝わり、乙巳の変の直後に藤原京の造営が始まった。"
+    }
+   },
    "schedule": [
     {
      "event": "乙巳の変の密議",
@@ -134,20 +1120,178 @@
    ]
   },
   {
-   "name": "中臣御食子",
+   "name": "皇極天皇",
    "era": "asuka_nara",
-   "faction": "中臣",
+   "faction": "朝廷",
+   "born": 594,
+   "died": 661,
+   "death": "illness",
+   "active": 642,
+   "tags": [
+    "ruler",
+    "sacred",
+    "woman"
+   ],
+   "traits": {
+    "faith": 1,
+    "reform": 1
+   },
+   "spawn": "capital",
+   "aka": [
+    "斉明天皇",
+    "宝皇女"
+   ],
+   "q": [
+    "asuka_nara_02",
+    "asuka_nara_03"
+   ],
+   "persuade": {
+    "戦を勧める": {
+     "force": {
+      "q": "asuka_nara_02",
+      "choice": 1
+     },
+     "text": "女帝は「乱れた世には武勇の皇子を」と譲位の相手に大海人皇子を指名した。のちの天武天皇の飛鳥浄御原宮が645年に始まった。"
+    },
+    "改革を勧める": {
+     "force": {
+      "q": "asuka_nara_02",
+      "choice": 3
+     },
+     "text": "皇極天皇は譲位を拒んで後見を続け、孫娘の世代のために唐風の都づくりを命じた。藤原京の造営と女帝の治世が前倒しになった。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "斉明天皇の筑紫出陣",
+     "at": "castle",
+     "year": 661,
+     "missed": {
+      "force": {
+       "q": "asuka_nara_03",
+       "choice": 3
+      }
+     },
+     "text": "重祚した斉明天皇の西征の出発が遅れ、百済救援軍は待機したまま。白村江への出兵は壬申の乱の後までずれ込んだ。"
+    }
+   ]
+  },
+  {
+   "name": "持統天皇",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": 645,
+   "died": 702,
+   "death": "illness",
+   "active": 686,
+   "tags": [
+    "ruler",
+    "sacred",
+    "woman"
+   ],
+   "traits": {
+    "reform": 2,
+    "loyal": 1
+   },
+   "spawn": "capital",
+   "aka": [
+    "鸕野讃良皇女"
+   ],
+   "q": [
+    "asuka_nara_02"
+   ],
+   "persuade": {
+    "改革を勧める": {
+     "force": {
+      "q": "asuka_nara_02",
+      "choice": 3
+     },
+     "text": "持統天皇は藤原京の造営を半世紀さかのぼらせ、乙巳の変の直後に祖母の皇極天皇の後見のもとで政務をとった。日本初の本格的な都城・藤原京が645年に誕生した。"
+    }
+   }
+  },
+  {
+   "name": "豊璋",
+   "era": "asuka_nara",
+   "faction": "百済",
    "born": null,
    "died": null,
    "death": "unknown",
-   "active": 600,
+   "active": 631,
    "tags": [
-    "official",
-    "religious"
+    "foreigner",
+    "diplomat"
    ],
    "traits": {
-    "faith": 2,
-    "open": -1
+    "war": 1,
+    "open": 2
+   },
+   "spawn": "port",
+   "q": [
+    "asuka_nara_03"
+   ],
+   "contrib": [
+    {
+     "q": "asuka_nara_03",
+     "choice": 3,
+     "note": "倭にいた百済の王子・豊璋がいなければ、百済復興の旗印がなく救援軍の名分も立たなかった。出兵は壬申の乱の後までずれ込んだ"
+    }
+   ],
+   "persuade": {
+    "鎖国を勧める": {
+     "vars": {
+      "open_asia": -30
+     },
+     "year": 655,
+     "text": "豊璋は「もう海の向こうに帰る気はない」と倭で暮らし続け、百済との連絡も途絶えた。百済滅亡の知らせが届いたのは壬申の乱の後だった。"
+    }
+   },
+   "give": {
+    "千両箱": {
+     "force": {
+      "q": "asuka_nara_03",
+      "choice": 3
+     },
+     "text": "千両箱で倭の都での贅沢な暮らしを覚えた豊璋は、帰国して王になるのを先延ばしにし続けた。白村江の戦いは壬申の乱の後までお預けになった。"
+    }
+   }
+  },
+  {
+   "name": "阿倍比羅夫",
+   "era": "asuka_nara",
+   "faction": "阿倍",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 658,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": 2
+   },
+   "spawn": "castle",
+   "q": [
+    "asuka_nara_03"
+   ],
+   "contrib": [
+    {
+     "q": "asuka_nara_03",
+     "choice": 3,
+     "note": "蝦夷・粛慎を討った水軍の将・比羅夫がいなければ、百済救援の船団を率いる者がいなかった。白村江への出兵は壬申の乱の後になった"
+    }
+   ],
+   "persuade": {
+    "戦を勧める": {
+     "vars": {
+      "militarism": 25,
+      "warrior": 20
+     },
+     "year": 660,
+     "text": "比羅夫は日本海沿いの遠征をさらに広げ、各地の豪族に兵を出させた。武の気風が高まって兄弟の皇位争いが前倒しで噴き出し、壬申の乱は白村江より前に起きた。"
+    }
    }
   },
   {
@@ -165,47 +1309,194 @@
    ],
    "traits": {
     "war": 2,
-    "reform": 1
+    "reform": 1,
+    "loyal": -1
    },
+   "spawn": "mountain",
    "aka": [
     "天武天皇"
+   ],
+   "q": [
+    "asuka_nara_02",
+    "asuka_nara_03"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "set": {
+       "capital": "近江"
+      }
+     },
+     "year": 672,
+     "note": "吉野で挙兵する大海人皇子がいなければ壬申の乱は起きず、大友皇子の近江朝廷がそのまま続いた"
+    }
+   ],
+   "persuade": {
+    "戦を勧める": {
+     "force": {
+      "q": "asuka_nara_02",
+      "choice": 1
+     },
+     "text": "大海人皇子は乙巳の変の現場に兄より先に駆けつけ、武勇で宮廷を圧倒した。皇極天皇の譲位を受けたのは弟のほうで、飛鳥浄御原宮が645年に始まった。"
+    },
+    "裏切りを促す": {
+     "force": {
+      "q": "asuka_nara_03",
+      "choice": 2
+     },
+     "text": "兄への反旗をそそのかされた大海人皇子は、百済救援の出兵前に吉野で挙兵した。壬申の乱は白村江の戦いより前に起きてしまった。"
+    }
+   },
+   "give": {
+    "鉄砲": {
+     "vars": {
+      "warrior": 35,
+      "militarism": 10
+     },
+     "year": 644,
+     "text": "鉄砲を手にした若き大海人皇子の武勇は飛鳥に鳴り響いた。乙巳の変の後、宮廷では大海人皇子を推す声が圧倒し、天武天皇が645年に即位した。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "吉野入り",
+     "at": "mountain",
+     "year": 671,
+     "missed": {
+      "vars": {
+       "set": {
+        "capital": "近江"
+       }
+      }
+     },
+     "text": "大海人皇子が吉野へ退くのに遅れ、近江にとどまったまま出家した。挙兵の機会は失われ、大友皇子の近江朝廷が続いて都は近江に置かれた。"
+    }
    ]
   },
   {
-   "name": "皇極天皇",
+   "name": "大友皇子",
    "era": "asuka_nara",
-   "faction": "朝廷",
-   "born": 594,
-   "died": 661,
-   "death": "illness",
-   "active": 642,
+   "faction": "近江朝廷",
+   "born": 648,
+   "died": 672,
+   "death": "suicide",
+   "active": 671,
    "tags": [
     "ruler",
-    "sacred",
-    "woman"
-   ],
-   "traits": {
-    "faith": 1
-   },
-   "aka": [
-    "斉明天皇"
-   ]
-  },
-  {
-   "name": "豊璋",
-   "era": "asuka_nara",
-   "faction": "百済",
-   "born": null,
-   "died": null,
-   "death": "unknown",
-   "active": 631,
-   "tags": [
-    "foreigner",
-    "diplomat"
+    "warrior",
+    "sacred"
    ],
    "traits": {
     "war": 1,
-    "open": 2
+    "open": 1,
+    "loyal": 1
+   },
+   "spawn": "battlefield",
+   "aka": [
+    "弘文天皇"
+   ],
+   "q": [
+    "asuka_nara_03",
+    "asuka_nara_04"
+   ],
+   "saved": {
+    "year": 672,
+    "text": "瀬田の敗戦後に自害するはずの大友皇子が逃げ延び、近江朝廷を立て直した。都は近江に置かれ続け、のちに山背への遷都論も早く熟した。",
+    "vars": {
+     "set": {
+      "capital": "近江"
+     }
+    }
+   },
+   "persuade": {
+    "戦を勧める": {
+     "force": {
+      "q": "asuka_nara_03",
+      "choice": 2
+     },
+     "text": "大友皇子は父の存命中から吉野の叔父を討つ兵を集めた。兄弟・叔父甥の皇位争いが前倒しになり、壬申の乱は白村江の戦いより前に起きた。"
+    }
+   },
+   "give": {
+    "鉄砲": {
+     "vars": {
+      "set": {
+       "capital": "近江"
+      },
+      "militarism": 10
+     },
+     "year": 672,
+     "text": "鉄砲隊で瀬田の唐橋を守り抜いた大友皇子は、大海人皇子の軍を退けた。近江朝廷が続き、平城京は造られなかった。"
+    }
+   }
+  },
+  {
+   "name": "道昭",
+   "era": "asuka_nara",
+   "faction": "法興寺",
+   "born": 629,
+   "died": 700,
+   "death": "natural",
+   "active": 661,
+   "tags": [
+    "religious",
+    "scholar"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": 2,
+    "reform": 1
+   },
+   "spawn": "temple",
+   "q": [
+    "asuka_nara_03"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "education": -30
+     },
+     "year": 661,
+     "note": "玄奘三蔵に学んだ道昭が帰国せず、経典と学問を伝える者がいなかった。文字を扱える役人が育たず、戸籍づくりは手に負えなかった"
+    }
+   ]
+  },
+  {
+   "name": "藤原不比等",
+   "era": "asuka_nara",
+   "faction": "藤原",
+   "born": 659,
+   "died": 720,
+   "death": "illness",
+   "active": 701,
+   "tags": [
+    "official",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2,
+    "loyal": 1,
+    "open": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "asuka_nara_04"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "centralization": -25
+     },
+     "year": 701,
+     "note": "大宝律令をまとめる不比等がいなくなり、律令は形だけのものに。班田収授の土台は最初からぐらついていた"
+    }
+   ],
+   "saved": {
+    "year": 720,
+    "text": "720年に病没するはずの不比等が特効薬で回復し、藤原氏の権勢は早くも頂点へ。貴族は開墾地を農民に長く持たせることを嫌い、三世一身法は一代限りの私有にとどまった。",
+    "vars": {
+     "court": 30
+    }
    }
   },
   {
@@ -224,12 +1515,182 @@
     "reform": 1,
     "loyal": 2
    },
+   "spawn": "capital",
+   "q": [
+    "asuka_nara_04"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "centralization": -25
+     },
+     "year": 725,
+     "note": "百万町歩の開墾計画と三世一身法を進めた長屋王がいなくなり、律令の土地制度は手入れされないまま崩れていった"
+    }
+   ],
    "saved": {
     "year": 729,
-    "text": "長屋王の変が防がれ、皇族の左大臣が藤原氏を抑え続けた。藤原四子の台頭は遅れた。",
+    "text": "長屋王の変が防がれ、皇族の左大臣が藤原四子を抑え続けた。公地公民の原則は8世紀末まで守られ、土地の私有を認める法は奈良時代には出されなかった。",
     "vars": {
-     "court": 10,
-     "centralization": 10
+     "centralization": 30
+    }
+   },
+   "doc": {
+    "name": "三世一身法の草案",
+    "q": "asuka_nara_04",
+    "choice": 0,
+    "text": "長屋王の邸から草案が消え、書き直された三世一身法は、灌漑施設を新しく造って開墾しても本人一代しか私有を認めない内容になった。"
+   },
+   "persuade": {
+    "忠義を説く": {
+     "force": {
+      "q": "asuka_nara_04",
+      "choice": 0
+     },
+     "text": "「公地公民こそ律令の根本」と説かれた長屋王は、三世一身法の私有を本人一代に縮めた。開墾の意欲はしぼみ、百万町歩の計画は絵に描いた餅になった。"
+    }
+   }
+  },
+  {
+   "name": "藤原武智麻呂",
+   "era": "asuka_nara",
+   "faction": "藤原",
+   "born": 680,
+   "died": 737,
+   "death": "illness",
+   "active": 729,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "loyal": 1,
+    "reform": 1
+   },
+   "spawn": "capital",
+   "successor": "藤原仲麻呂",
+   "q": [
+    "asuka_nara_04"
+   ],
+   "saved": {
+    "year": 737,
+    "text": "737年に天然痘で倒れるはずの藤原四子の長兄・武智麻呂が特効薬で回復した。藤原氏の権勢は衰えず、貴族は743年の法令にも位階による厳しい制限どころか一代限りの私有しか許さなかった。",
+    "vars": {
+     "court": 35
+    }
+   }
+  },
+  {
+   "name": "光明皇后",
+   "era": "asuka_nara",
+   "faction": "藤原",
+   "born": 701,
+   "died": 760,
+   "death": "natural",
+   "active": 729,
+   "tags": [
+    "woman",
+    "religious"
+   ],
+   "traits": {
+    "faith": 2,
+    "reform": 1,
+    "loyal": 1
+   },
+   "spawn": "village",
+   "aka": [
+    "光明子"
+   ],
+   "q": [
+    "asuka_nara_04",
+    "asuka_nara_06"
+   ],
+   "give": {
+    "千両箱": {
+     "vars": {
+      "court": 30
+     },
+     "year": 730,
+     "text": "千両箱で悲田院・施薬院を広げた光明皇后の実家・藤原氏は、朝廷の財布まで握った。貴族の力が強まりすぎ、開墾地の私有は一代限りしか認められなかった。"
+    },
+    "特効薬": {
+     "force": {
+      "q": "asuka_nara_06",
+      "choice": 2
+     },
+     "text": "735年から猛威をふるった天然痘が特効薬で治まり、聖武天皇は仏にすがる理由を失った。寺院の新たな建立は禁じられ、神祇の祭祀が国家の祈りの中心となった。"
+    }
+   }
+  },
+  {
+   "name": "山上憶良",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": 660,
+   "died": 733,
+   "death": "illness",
+   "active": 726,
+   "tags": [
+    "official",
+    "scholar",
+    "artist"
+   ],
+   "traits": {
+    "reform": 1,
+    "loyal": 1
+   },
+   "spawn": "village",
+   "q": [
+    "asuka_nara_04"
+   ],
+   "persuade": {
+    "民を大切に": {
+     "vars": {
+      "centralization": -25,
+      "commoners": 10
+     },
+     "year": 733,
+     "text": "『貧窮問答歌』を朝廷に献じた憶良の訴えで、重い租・庸・調と口分田の割り当ては次々と免除された。律令の土地制度はなし崩しになり、743年の法令で班田はすぐ打ち切られた。"
+    }
+   }
+  },
+  {
+   "name": "行基",
+   "era": "asuka_nara",
+   "faction": "民間仏教",
+   "born": 668,
+   "died": 749,
+   "death": "natural",
+   "active": 717,
+   "tags": [
+    "religious"
+   ],
+   "traits": {
+    "faith": 2,
+    "reform": 1,
+    "loyal": -1
+   },
+   "spawn": "village",
+   "q": [
+    "asuka_nara_04",
+    "asuka_nara_06"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "religion": -30
+     },
+     "year": 745,
+     "note": "大仏造立の勧進を担う行基がいなくなり、民衆の協力は得られなかった。聖武天皇は寺ではなく神々を頼った"
+    }
+   ],
+   "persuade": {
+    "民を大切に": {
+     "vars": {
+      "centralization": -30,
+      "commoners": 10
+     },
+     "year": 730,
+     "text": "行基の集団は池や橋を造りながら各地で開墾を進め、口分田を捨てて逃げた農民を次々と受け入れた。戸籍と班田は空洞化し、743年の法令で班田はただちに廃止された。"
     }
    }
   },
@@ -249,6 +1710,10 @@
     "loyal": 1
    },
    "spawn": "capital",
+   "q": [
+    "asuka_nara_04",
+    "asuka_nara_06"
+   ],
    "contrib": [
     {
      "vars": {
@@ -257,6 +1722,29 @@
      },
      "year": 740,
      "note": "政権が崩れ、班田収授はなし崩しになった"
+    }
+   ],
+   "persuade": {
+    "民を大切に": {
+     "force": {
+      "q": "asuka_nara_04",
+      "choice": 1
+     },
+     "text": "「開墾した田を永く持てれば農民は喜ぶ」と説かれた諸兄は、743年の法令と同時に班田収授を打ち切った。口分田の割り当ては二度と行われなかった。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "平城還都の上奏",
+     "at": "capital",
+     "year": 745,
+     "missed": {
+      "force": {
+       "q": "asuka_nara_06",
+       "choice": 3
+      }
+     },
+     "text": "諸兄の平城還都の上奏が遅れ、聖武天皇は紫香楽宮で大仏を完成させた。都は平城京に戻されず、近江の紫香楽に置かれ続けた。"
     }
    ]
   },
@@ -274,9 +1762,31 @@
    "traits": {
     "reform": 2
    },
+   "spawn": "capital",
    "aka": [
     "桓武天皇（山部王）"
-   ]
+   ],
+   "q": [
+    "asuka_nara_04"
+   ],
+   "persuade": {
+    "改革を勧める": {
+     "force": {
+      "q": "asuka_nara_04",
+      "choice": 2
+     },
+     "text": "6歳の山部王が「わたしが詔を出す」と言い張り、聖武天皇も面白がって読ませた。墾田永年私財法は、のちに平安京を開く桓武天皇の名で出されたことになった。"
+    }
+   },
+   "give": {
+    "未来の教科書": {
+     "force": {
+      "q": "asuka_nara_04",
+      "choice": 2
+     },
+     "text": "教科書で自分が平安京を開くと知った山部王は、743年の詔も自分の手柄にしてしまった。墾田永年私財法の発令者は桓武天皇と記録された。"
+    }
+   }
   },
   {
    "name": "聖武天皇",
@@ -293,101 +1803,152 @@
    "traits": {
     "faith": 2,
     "war": -1
-   }
-  },
-  {
-   "name": "小野妹子",
-   "era": "asuka_nara",
-   "faction": "朝廷",
-   "born": null,
-   "died": null,
-   "death": "unknown",
-   "active": 607,
-   "tags": [
-    "diplomat"
-   ],
-   "traits": {
-    "open": 2,
-    "loyal": 2
    },
-   "spawn": "port",
-   "contrib": [
-    {
-     "q": "asuka_nara_05",
-     "choice": 2,
-     "note": "国書を取り繕える使者がおらず、隋との国交は断絶した"
-    }
+   "spawn": "capital",
+   "q": [
+    "asuka_nara_06"
    ],
-   "doc": {
-    "name": "「日出づる処の天子」の国書",
-    "q": "asuka_nara_05",
-    "choice": 2,
-    "text": "国書が盗まれ、妹子は手ぶらで煬帝の前に出る羽目に。国交は開かれず、留学生も送れなかった。"
+   "saved": {
+    "year": 756,
+    "text": "756年に崩御するはずの聖武太上天皇が特効薬で長らえ、大仏殿の完成後も寺院の造営を続けた。仏教勢力は膨れ上がり、のちの桓武天皇は南都と縁を切ることになった。",
+    "vars": {
+     "religion": 35
+    }
+   },
+   "persuade": {
+    "倹約を勧める": {
+     "force": {
+      "q": "asuka_nara_06",
+      "choice": 2
+     },
+     "text": "大仏一体に銅500トン、金も大量に要ると聞いた聖武天皇は青ざめた。寺院の新たな建立を禁じ、神祇の祭祀を国家の中心に据えた。"
+    }
+   },
+   "give": {
+    "世界地図": {
+     "vars": {
+      "open_asia": 40
+     },
+     "year": 745,
+     "text": "地図で唐への安全な航路を知った聖武天皇は遣唐使船を増やした。唐との往来が活発になり、鑑真は失敗を重ねることなく早々に来日した。"
+    }
    },
    "schedule": [
     {
-     "event": "遣隋使の船出",
-     "at": "port",
-     "year": 607,
+     "event": "平城京への還都",
+     "at": "mountain",
+     "year": 745,
      "missed": {
-      "vars": {
-       "open_asia": -20,
-       "education": -10
+      "force": {
+       "q": "asuka_nara_06",
+       "choice": 3
       }
      },
-     "text": "妹子が船出に間に合わず、遣隋使は一年遅れた。留学生の派遣も先送りになった。"
+     "text": "紫香楽宮を発つ日を聖武天皇が逃し、大仏の造立は紫香楽でそのまま完成した。都は平城京に戻されず、紫香楽に置かれ続けた。"
     }
    ]
   },
   {
-   "name": "高向玄理",
+   "name": "玄昉",
    "era": "asuka_nara",
-   "faction": "朝廷",
+   "faction": "興福寺",
    "born": null,
-   "died": 654,
-   "death": "illness",
-   "active": 608,
-   "tags": [
-    "scholar",
-    "diplomat"
-   ],
-   "traits": {
-    "open": 2,
-    "reform": 2
-   }
-  },
-  {
-   "name": "僧旻",
-   "era": "asuka_nara",
-   "faction": "朝廷",
-   "born": null,
-   "died": 653,
-   "death": "illness",
-   "active": 608,
+   "died": 746,
+   "death": "natural",
+   "active": 735,
    "tags": [
     "religious",
     "scholar"
    ],
    "traits": {
+    "faith": 2,
     "open": 2,
-    "reform": 2,
-    "faith": 1
+    "loyal": -1
+   },
+   "spawn": "temple",
+   "q": [
+    "asuka_nara_06"
+   ],
+   "doc": {
+    "name": "唐から持ち帰った一切経五千余巻",
+    "q": "asuka_nara_06",
+    "choice": 2,
+    "text": "玄昉が唐から持ち帰った経典が盗まれ、仏の教えで国を守るという鎮護国家の思想は根付かなかった。聖武天皇は神祇の祭祀を国家の中心に据えた。"
    }
   },
   {
-   "name": "南淵請安",
+   "name": "藤原広嗣",
    "era": "asuka_nara",
-   "faction": "朝廷",
+   "faction": "藤原",
    "born": null,
-   "died": null,
-   "death": "unknown",
-   "active": 608,
+   "died": 740,
+   "death": "executed",
+   "active": 738,
    "tags": [
-    "scholar"
+    "rebel",
+    "official",
+    "warrior"
    ],
    "traits": {
-    "open": 2,
-    "reform": 2
+    "war": 2,
+    "loyal": -2
+   },
+   "spawn": "castle",
+   "q": [
+    "asuka_nara_06"
+   ],
+   "saved": {
+    "year": 740,
+    "text": "肥前で捕らえられ処刑されるはずの広嗣が新羅へ逃れ、九州で反乱の火種がくすぶり続けた。平城京の貴族勢力と距離を置きたい聖武天皇は、紫香楽にとどまって大仏を完成させた。",
+    "vars": {
+     "unity": -30
+    }
+   },
+   "persuade": {
+    "戦をやめさせる": {
+     "force": {
+      "q": "asuka_nara_06",
+      "choice": 2
+     },
+     "text": "挙兵をやめた広嗣の上表文――玄昉と吉備真備を除け――がそのまま受け入れられた。僧の政治関与を嫌った聖武天皇は寺院の新たな建立を禁じ、神祇の祭祀を重んじた。"
+    }
+   }
+  },
+  {
+   "name": "栄叡",
+   "era": "asuka_nara",
+   "faction": "興福寺",
+   "born": null,
+   "died": 749,
+   "death": "illness",
+   "active": 733,
+   "tags": [
+    "religious"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": 2
+   },
+   "spawn": "port",
+   "q": [
+    "asuka_nara_06"
+   ],
+   "saved": {
+    "year": 749,
+    "text": "鑑真を招いた留学僧・栄叡が端州で病に倒れず、師を励まして渡航を急がせた。鑑真は国分寺建立の詔より前に来日していたことになり、東大寺の戒壇も詔と同時に命じられた。",
+    "force": {
+     "q": "asuka_nara_06",
+     "choice": 1
+    }
+   },
+   "give": {
+    "世界地図": {
+     "force": {
+      "q": "asuka_nara_06",
+      "choice": 1
+     },
+     "text": "季節風と海流まで描かれた地図を手にした栄叡は、鑑真の一行を743年の最初の渡航で日本に送り届けた。5度の失敗も失明もなく、戒壇は国分寺と同時に設けられた。"
+    }
    }
   },
   {
@@ -405,6 +1966,162 @@
    "traits": {
     "faith": 2,
     "open": 2
+   },
+   "spawn": "port",
+   "q": [
+    "asuka_nara_06"
+   ],
+   "persuade": {
+    "開国を勧める": {
+     "force": {
+      "q": "asuka_nara_06",
+      "choice": 1
+     },
+     "text": "「日本は仏法興隆の国」と説かれた鑑真は、唐の役人の目を盗むのをやめ玄宗の許しを得て堂々と渡った。来日は10年早まり、国分寺建立と同時に戒壇が設けられた。"
+    }
+   },
+   "give": {
+    "世界地図": {
+     "force": {
+      "q": "asuka_nara_06",
+      "choice": 1
+     },
+     "text": "地図で東シナ海の安全な航路を知った鑑真は、一度目の渡航であっさり来日した。国分寺建立の詔と同時に、東大寺に戒壇を設けることが命じられた。"
+    }
+   }
+  },
+  {
+   "name": "阿倍仲麻呂",
+   "era": "asuka_nara",
+   "faction": "朝廷",
+   "born": 698,
+   "died": 770,
+   "death": "natural",
+   "active": 717,
+   "tags": [
+    "scholar",
+    "diplomat",
+    "official"
+   ],
+   "traits": {
+    "open": 2,
+    "loyal": 2
+   },
+   "spawn": "port",
+   "q": [
+    "asuka_nara_06"
+   ],
+   "persuade": {
+    "開国を勧める": {
+     "force": {
+      "q": "asuka_nara_06",
+      "choice": 1
+     },
+     "text": "唐の高官となった仲麻呂が玄宗に働きかけ、鑑真の渡航を公式に許させた。鑑真は早々に来日し、国分寺建立の詔と同時に戒壇が設けられた。"
+    }
+   },
+   "give": {
+    "世界地図": {
+     "vars": {
+      "open_asia": 35,
+      "education": 25
+     },
+     "year": 770,
+     "text": "地図を頼りに仲麻呂の船は753年の帰国の途で難破せず日本に着いた。「天の原ふりさけ見れば」の望郷の歌は詠まれず、唐を知る大学者が朝廷で重んじられ続けた。"
+    }
+   }
+  },
+  {
+   "name": "藤原仲麻呂",
+   "era": "asuka_nara",
+   "faction": "藤原",
+   "born": 706,
+   "died": 764,
+   "death": "killed",
+   "active": 749,
+   "tags": [
+    "official",
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "reform": 2,
+    "loyal": -1
+   },
+   "spawn": "battlefield",
+   "aka": [
+    "恵美押勝"
+   ],
+   "q": [
+    "asuka_nara_04"
+   ],
+   "saved": {
+    "year": 764,
+    "text": "琵琶湖のほとりで討たれるはずの恵美押勝が逃げ延び、藤原南家の権勢が続いた。貴族は豊かになったが中央の統制は緩み、勅旨田や私的な大土地所有が8世紀のうちに広がった。",
+    "vars": {
+     "court": 30,
+     "centralization": -25
+    }
+   }
+  },
+  {
+   "name": "橘奈良麻呂",
+   "era": "asuka_nara",
+   "faction": "橘",
+   "born": 721,
+   "died": 757,
+   "death": "executed",
+   "active": 757,
+   "tags": [
+    "rebel",
+    "official"
+   ],
+   "traits": {
+    "loyal": -1,
+    "war": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "asuka_nara_04"
+   ],
+   "persuade": {
+    "裏切りを促す": {
+     "vars": {
+      "warrior": 30,
+      "centralization": -25
+     },
+     "year": 757,
+     "text": "奈良麻呂の変が露見せずに決行され、仲麻呂政権と反仲麻呂派の内戦になった。地方の豪族は私兵を蓄え、のちの東国の武士団の自立が早まった。"
+    }
+   }
+  },
+  {
+   "name": "道鏡",
+   "era": "asuka_nara",
+   "faction": "弓削",
+   "born": null,
+   "died": 772,
+   "death": "natural",
+   "active": 764,
+   "tags": [
+    "religious"
+   ],
+   "traits": {
+    "faith": 2,
+    "loyal": -1
+   },
+   "spawn": "temple",
+   "q": [
+    "asuka_nara_06"
+   ],
+   "persuade": {
+    "信仰を勧める": {
+     "vars": {
+      "religion": 35
+     },
+     "year": 769,
+     "text": "宇佐八幡の「道鏡を皇位に」という神託がそのまま通り、和気清麻呂の帰還も間に合わなかった。僧が政権を握る時代が続き、南都の大寺院は政治に深く口を出した。"
+    }
    }
   }
  ],
@@ -426,11 +2143,91 @@
      "label": "近江朝廷の兵",
      "wins": {
       "vars": {
+       "set": {
+        "capital": "近江"
+       },
        "centralization": -15,
        "militarism": -5
       }
      },
-     "text": "あなたが大海人方の兵を蹴散らしたので、瀬田の決戦は近江朝廷の勝利に。天武天皇の強力な政治は生まれなかった。"
+     "text": "あなたが大海人方の兵を蹴散らしたので、瀬田の決戦は近江朝廷の勝利に。天武天皇の強力な政治は生まれず、都は近江大津宮に置かれ続けた。"
+    }
+   ]
+  },
+  {
+   "era": "asuka_nara",
+   "id": "teibi",
+   "name": "丁未の乱（稲城の戦い）",
+   "at": "mountain",
+   "year": 587,
+   "sides": [
+    {
+     "name": "蘇我・厩戸方",
+     "label": "蘇我方の兵",
+     "historical": true
+    },
+    {
+     "name": "物部守屋方",
+     "label": "物部の兵",
+     "wins": {
+      "vars": {
+       "set": {
+        "ruler": "物部"
+       },
+       "religion": -10,
+       "militarism": 10
+      }
+     },
+     "text": "あなたが蘇我方の兵を押し返したので、稲城に立てこもった物部守屋が勝った。軍事氏族が朝廷を握り、十七条は道徳の訓戒ではなく刑罰つきの法典になった。"
+    }
+   ]
+  },
+  {
+   "era": "asuka_nara",
+   "id": "hakusonko",
+   "name": "白村江の戦い",
+   "at": "port",
+   "year": 663,
+   "sides": [
+    {
+     "name": "唐・新羅軍",
+     "label": "唐・新羅の水軍",
+     "historical": true
+    },
+    {
+     "name": "倭・百済軍",
+     "label": "倭の水軍",
+     "wins": {
+      "vars": {
+       "open_asia": 40
+      }
+     },
+     "text": "あなたが唐の軍船を蹴散らし、白村江は倭・百済軍の勝利に。百済が復興して大陸との往来が盛んになり、のちに鑑真も早々に来日した。"
+    }
+   ]
+  },
+  {
+   "era": "asuka_nara",
+   "id": "hirotsugu",
+   "name": "藤原広嗣の乱（大宰府）",
+   "at": "castle",
+   "year": 740,
+   "sides": [
+    {
+     "name": "朝廷軍",
+     "label": "大野東人の官軍",
+     "historical": true
+    },
+    {
+     "name": "藤原広嗣軍",
+     "label": "広嗣方の兵",
+     "wins": {
+      "force": {
+       "q": "asuka_nara_06",
+       "choice": 3
+      }
+     },
+     "text": "あなたが官軍を退けたので、大宰府の広嗣が九州を押さえた。おびえた聖武天皇は恭仁・難波・紫香楽と都を転々とし、ついに平城京へは戻らなかった。"
     }
    ]
   }

@@ -233,6 +233,10 @@ static func resolve(db: HistoryDB, actions: Array) -> Dictionary:
 							continue
 						out.append(_contrib_effect(db, c, ad))
 						any = true
+					var sc0 := str(ad.get("successor", ""))
+					if not any and sc0 != "" and db.actors.has(sc0) and not (st.has(sc0) and st[sc0]["gone"] >= 0):
+						out.append({"note": "%sに代わって%sがその役目を引き継いだ" % [nm, sc0]})
+						any = true
 					if not any:
 						out.append({"vars": _tags_vars(ad, TAG_ABSENT, 1.0), "year": yr, "era": aera,
 							"note": "%sがいなくなり、その役目を担う者が欠けた" % nm})

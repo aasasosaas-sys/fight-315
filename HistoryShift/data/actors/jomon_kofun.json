@@ -2,6 +2,471 @@
  "eraId": "jomon_kofun",
  "actors": [
   {
+   "name": "ムラの長老",
+   "era": "jomon_kofun",
+   "faction": "三内丸山のムラ",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": -3000,
+   "tags": [
+    "commoner"
+   ],
+   "traits": {
+    "open": 1,
+    "war": -1
+   },
+   "spawn": "village",
+   "q": [
+    "jomon_kofun_01"
+   ],
+   "doc": {
+    "name": "粘土の配合を伝える結び縄",
+    "q": "jomon_kofun_01",
+    "choice": 2,
+    "text": "長老が代々伝えてきた「粘土と砂の混ぜ方」の結び縄が盗まれ、ムラでは土器が焼くたびに割れるようになった。人々は土器づくりをあきらめ、旧石器時代と同じ打製石器だけの暮らしに戻ってしまった。"
+   },
+   "persuade": {
+    "信仰を勧める": {
+     "force": {
+      "q": "jomon_kofun_01",
+      "choice": 0
+     },
+     "text": "長老は「もっと立派な祭りを」と言い出し、海の向こうから光る祭器を取り寄せた。弥生時代の銅鐸の祭りが、縄文のムラで二千年以上早く始まった。土偶の出番は激減した。"
+    }
+   },
+   "give": {
+    "世界地図": {
+     "vars": {
+      "open_asia": 25,
+      "tech": 30
+     },
+     "year": -3200,
+     "text": "世界地図を見た長老は丸木舟で大陸を目指し、青銅を鋳る技を持ち帰った。縄文のムラに大陸の金属器が並び、温暖化で増えた獲物を追う弓矢より先に銅鐸が話題になった。"
+    }
+   }
+  },
+  {
+   "name": "漂着した大陸の工人",
+   "era": "jomon_kofun",
+   "faction": "大陸の工人",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": -3000,
+   "tags": [
+    "foreigner",
+    "commoner"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 2
+   },
+   "spawn": "port",
+   "q": [
+    "jomon_kofun_01"
+   ],
+   "persuade": {
+    "未来の技術を教える": {
+     "force": {
+      "q": "jomon_kofun_01",
+      "choice": 0
+     },
+     "text": "工人は未来の冶金術を聞いて大喜びし、浜辺に炉を築いて銅を溶かした。本来は弥生時代に朝鮮半島から伝わる青銅器が、縄文のムラの祭りに使われるようになった。"
+    }
+   },
+   "give": {
+    "未来の教科書": {
+     "force": {
+      "q": "jomon_kofun_01",
+      "choice": 0
+     },
+     "text": "教科書の「弥生時代」のページを読んだ工人は、銅鐸の図をまねて鋳型を彫った。縄文のムラに青銅の祭器が出現し、教科書の時代区分はページごと入れ替わった。"
+    },
+    "蒸気機関の図面": {
+     "vars": {
+      "tech": 30
+     },
+     "year": -3200,
+     "text": "蒸気機関は造れなかったが、図面の金属加工の知識だけは伝わった。北部九州では青銅器づくりが早くから根付き、のちの吉野ヶ里が青銅器生産の一大拠点に育った。"
+    }
+   }
+  },
+  {
+   "name": "土器づくりの名人",
+   "era": "jomon_kofun",
+   "faction": "三内丸山のムラ",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": -3000,
+   "tags": [
+    "commoner",
+    "artist"
+   ],
+   "traits": {
+    "reform": 1,
+    "open": 1
+   },
+   "spawn": "village",
+   "q": [
+    "jomon_kofun_01"
+   ],
+   "contrib": [
+    {
+     "q": "jomon_kofun_01",
+     "choice": 2,
+     "note": "土器を焼ける名人がいなくなり、ムラは土器も磨製石器もない旧石器時代のような暮らしに戻った"
+    }
+   ],
+   "persuade": {
+    "未来の技術を教える": {
+     "force": {
+      "q": "jomon_kofun_01",
+      "choice": 0
+     },
+     "text": "名人は野焼きの火をもっと熱くする工夫を覚え、ついには銅を溶かしてしまった。土器づくりの延長で青銅器が生まれ、縄文のムラで銅鐸の祭りが始まった。"
+    },
+    "倹約を勧める": {
+     "force": {
+      "q": "jomon_kofun_01",
+      "choice": 2
+     },
+     "text": "「縄目の文様は贅沢だ」と説かれた名人は、土器づくりそのものをやめてしまった。煮炊きのできなくなったムラは、打製石器で獲物を追う旧石器時代の暮らしに逆戻りした。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "土器の野焼き",
+     "at": "village",
+     "year": -3000,
+     "missed": {
+      "force": {
+       "q": "jomon_kofun_01",
+       "choice": 2
+      }
+     },
+     "text": "名人が野焼きに間に合わず、その年の土器は一つも焼き上がらなかった。土器づくりの技は途絶え、ムラは石を打ち欠いただけの石器で暮らすことになった。"
+    }
+   ]
+  },
+  {
+   "name": "ムラのリーダー",
+   "era": "jomon_kofun",
+   "faction": "三内丸山のムラ",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": -3000,
+   "tags": [
+    "commoner"
+   ],
+   "traits": {
+    "war": 1,
+    "open": -1
+   },
+   "spawn": "village",
+   "q": [
+    "jomon_kofun_01"
+   ],
+   "persuade": {
+    "戦を勧める": {
+     "force": {
+      "q": "jomon_kofun_01",
+      "choice": 3
+     },
+     "text": "リーダーは隣のムラを警戒し、集落のまわりに深い堀をめぐらせた。弥生時代の吉野ヶ里のような環濠集落が、争いの少なかったはずの縄文時代に出現した。"
+    }
+   },
+   "give": {
+    "千両箱": {
+     "force": {
+      "q": "jomon_kofun_01",
+      "choice": 3
+     },
+     "text": "千両箱という「貯え」を手にしたとたん、ムラは奪われる心配を始めて堀を掘った。蓄えができると争いが始まる――稲作が広まった弥生時代に起きる変化が、縄文で先取りされた。"
+    }
+   }
+  },
+  {
+   "name": "ムラの見張り番",
+   "era": "jomon_kofun",
+   "faction": "三内丸山のムラ",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": -3000,
+   "tags": [
+    "commoner"
+   ],
+   "traits": {
+    "loyal": 1,
+    "war": 1
+   },
+   "spawn": "village",
+   "q": [
+    "jomon_kofun_01"
+   ],
+   "give": {
+    "鉄砲": {
+     "force": {
+      "q": "jomon_kofun_01",
+      "choice": 3
+     },
+     "text": "鉄砲の轟音に驚いた見張り番は「これからは戦の世だ」と触れ回り、ムラは堀と柵で囲まれた。縄文時代のムラに、弥生時代の環濠と物見櫓がそろってしまった。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "狼煙を上げる",
+     "at": "village",
+     "year": -3000,
+     "missed": {
+      "force": {
+       "q": "jomon_kofun_01",
+       "choice": 3
+      }
+     },
+     "text": "見張り番が狼煙を上げ損ね、ムラはよそ者に不意を突かれた。懲りた人々はムラのまわりに深い堀をめぐらせ、縄文時代に環濠集落が生まれてしまった。"
+    }
+   ]
+  },
+  {
+   "name": "奴国の使者",
+   "era": "jomon_kofun",
+   "faction": "奴国",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 57,
+   "tags": [
+    "diplomat",
+    "official"
+   ],
+   "traits": {
+    "open": 2,
+    "loyal": 2
+   },
+   "spawn": "port",
+   "q": [
+    "jomon_kofun_02"
+   ],
+   "contrib": [
+    {
+     "q": "jomon_kofun_02",
+     "choice": 2,
+     "note": "代わりに吉野ヶ里の首長が後漢へ朝貢し、金印は吉野ヶ里に渡った"
+    }
+   ]
+  },
+  {
+   "name": "金印を預かる奴国の役人",
+   "era": "jomon_kofun",
+   "faction": "奴国",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 57,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "loyal": 1,
+    "open": 1
+   },
+   "spawn": "port",
+   "q": [
+    "jomon_kofun_02"
+   ],
+   "doc": {
+    "name": "「漢委奴国王」の金印",
+    "q": "jomon_kofun_02",
+    "choice": 2,
+    "text": "盗まれた金印は人の手から手へ渡り、最後は吉野ヶ里の首長の宝物になった。1784年に百姓甚兵衛が志賀島の田で掘り当てるはずの金印は、佐賀の環濠の中から見つかることになった。"
+   }
+  },
+  {
+   "name": "奴国の船頭",
+   "era": "jomon_kofun",
+   "faction": "奴国",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 57,
+   "tags": [
+    "commoner"
+   ],
+   "traits": {
+    "open": 1
+   },
+   "spawn": "port",
+   "q": [
+    "jomon_kofun_02"
+   ],
+   "give": {
+    "世界地図": {
+     "force": {
+      "q": "jomon_kofun_02",
+      "choice": 1
+     },
+     "text": "船頭が地図帳の「三国時代」のページを見て、魏の都・洛陽を目指してしまった。後漢がとっくに滅んだ時代に着いた使者は魏から印を授かり、それが志賀島に埋められた。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "那の津を船出する",
+     "at": "port",
+     "year": 57,
+     "missed": {
+      "force": {
+       "q": "jomon_kofun_02",
+       "choice": 0
+      }
+     },
+     "text": "船出に遅れた使者は陸路で吉野ヶ里へ向かい、そこで北部九州の戦乱に巻き込まれた。大陸へ使いが出せたのは戦乱が収まった3世紀の魏の時代で、印も吉野ヶ里に納められた。"
+    }
+   ]
+  },
+  {
+   "name": "天候を読む巫女",
+   "era": "jomon_kofun",
+   "faction": "奴国",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 57,
+   "tags": [
+    "religious",
+    "woman"
+   ],
+   "traits": {
+    "faith": 2
+   },
+   "spawn": "temple",
+   "q": [
+    "jomon_kofun_02"
+   ],
+   "schedule": [
+    {
+     "event": "嵐を鎮める祈り",
+     "at": "temple",
+     "year": 57,
+     "missed": {
+      "force": {
+       "q": "jomon_kofun_02",
+       "choice": 1
+      }
+     },
+     "text": "巫女が祈りに遅れ、使者の船は玄界灘の嵐に呑まれて時の彼方へ流された。たどり着いたのは後漢ではなく三国時代の魏。授かった印は帰国後、志賀島に埋められた。"
+    }
+   ]
+  },
+  {
+   "name": "吉野ヶ里の首長",
+   "era": "jomon_kofun",
+   "faction": "吉野ヶ里",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 57,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "open": 1
+   },
+   "q": [
+    "jomon_kofun_02"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "militarism": 20,
+      "unity": -20
+     },
+     "year": 55,
+     "note": "首長を失った吉野ヶ里で跡目争いが起き、北部九州は戦乱に。大陸へ使いが出せたのは魏の時代だった"
+    }
+   ],
+   "persuade": {
+    "開国を勧める": {
+     "force": {
+      "q": "jomon_kofun_02",
+      "choice": 2
+     },
+     "text": "首長は奴国を出し抜いて自ら後漢の光武帝に朝貢した。印綬を授かったのは吉野ヶ里の首長で、金印は環濠と物見櫓に守られた吉野ヶ里の倉に納められた。"
+    },
+    "戦を勧める": {
+     "vars": {
+      "militarism": 25,
+      "unity": -20
+     },
+     "year": 50,
+     "text": "首長は周りのクニに次々と攻めかかり、北部九州は戦乱のるつぼに。奴国が大陸へ使いを出せたのは3世紀の魏の時代で、印も守りの堅い吉野ヶ里に納められた。"
+    }
+   },
+   "give": {
+    "千両箱": {
+     "force": {
+      "q": "jomon_kofun_02",
+      "choice": 2
+     },
+     "text": "千両箱で豪華な貢ぎ物をそろえた首長は、奴国より先に洛陽へ使いを送った。光武帝の印綬は吉野ヶ里へ。志賀島の金印公園はできなかった。"
+    },
+    "鉄砲": {
+     "vars": {
+      "militarism": 30,
+      "unity": -20,
+      "warrior": 10
+     },
+     "year": 50,
+     "text": "鉄砲を手にした首長は周りのクニを攻め立て、北部九州は戦乱に明け暮れた。大陸への使いは戦が収まる3世紀まで出せず、相手は魏、印は吉野ヶ里に納められた。"
+    }
+   }
+  },
+  {
+   "name": "光武帝",
+   "era": "jomon_kofun",
+   "faction": "後漢",
+   "born": -6,
+   "died": 57,
+   "death": "illness",
+   "active": 25,
+   "tags": [
+    "ruler",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 1,
+    "reform": 1
+   },
+   "spawn": "port",
+   "q": [
+    "jomon_kofun_02"
+   ],
+   "aka": [
+    "劉秀"
+   ],
+   "saved": {
+    "year": 57,
+    "text": "57年に亡くなるはずの光武帝が特効薬で長生きし、後漢と倭の通交は太く長く続いた。大陸の事情に通じた倭の王たちは自信をつけ、卑弥呼はのちに対等な国書を送るまでになった。",
+    "vars": {
+     "open_asia": 20
+    }
+   },
+   "persuade": {
+    "鎖国を勧める": {
+     "force": {
+      "q": "jomon_kofun_02",
+      "choice": 1
+     },
+     "text": "光武帝は東の果ての朝貢を受けつけなかった。奴国は使いを出し直す機会を失い、印を授かったのは3世紀の魏の時代。その印が志賀島に埋められた。"
+    }
+   }
+  },
+  {
    "name": "卑弥呼",
    "era": "jomon_kofun",
    "faction": "邪馬台国",
@@ -19,7 +484,39 @@
     "faith": 2,
     "war": -1
    },
-   "spawn": "capital"
+   "spawn": "capital",
+   "q": [
+    "jomon_kofun_03"
+   ],
+   "successor": "壱与",
+   "aka": [
+    "親魏倭王"
+   ],
+   "persuade": {
+    "戦を勧める": {
+     "force": {
+      "q": "jomon_kofun_03",
+      "choice": 0
+     },
+     "text": "卑弥呼は鬼道より武威で国を束ねると決め、軍事的な支配権を認める将軍号を求めて上表した。のちに倭の五王がやる外交を、女王が200年以上前倒しで始めてしまった。"
+    },
+    "改革を勧める": {
+     "force": {
+      "q": "jomon_kofun_03",
+      "choice": 2
+     },
+     "text": "卑弥呼は「男弟が国を治むるを佐く」体制を制度にし、政治の実務を男弟に譲った。女王の死後に男王が立っても国中が従い、壱与を立てる必要はなくなった。"
+    }
+   },
+   "give": {
+    "世界地図": {
+     "vars": {
+      "open_asia": 25
+     },
+     "year": 230,
+     "text": "世界地図を見た卑弥呼は、魏が世界の中心ではないと悟った。女王は朝貢ではなく対等な外交を求め、「日出づる処の天子」の国書が400年近く早く書かれた。"
+    }
+   }
   },
   {
    "name": "壱与",
@@ -37,7 +534,14 @@
    "traits": {
     "faith": 2,
     "war": -1
-   }
+   },
+   "spawn": "capital",
+   "q": [
+    "jomon_kofun_03"
+   ],
+   "aka": [
+    "台与"
+   ]
   },
   {
    "name": "難升米",
@@ -56,9 +560,11 @@
     "loyal": 2
    },
    "spawn": "capital",
+   "q": [
+    "jomon_kofun_03"
+   ],
    "contrib": [
     {
-     "q": "jomon_kofun_03",
      "vars": {
       "open_asia": -25,
       "religion": -10
@@ -71,7 +577,54 @@
     "name": "魏の皇帝への上表文",
     "q": "jomon_kofun_03",
     "choice": 2,
-    "text": "上表文が奪われ、魏との外交は宙に浮いた。国内では卑弥呼の死後、男王がすんなり立つことになった。"
+    "text": "上表文が奪われ、女王の権威を魏に認めてもらう機会が失われた。鬼道の権威に頼らない政治が進み、卑弥呼の死後に男王が立っても国中がすんなり従った。"
+   },
+   "persuade": {
+    "開国を勧める": {
+     "force": {
+      "q": "jomon_kofun_03",
+      "choice": 3
+     },
+     "text": "難升米は「倭は魏の家来ではない」と言い張り、対等な国書を洛陽に差し出した。のちの遣隋使・小野妹子と同じ騒ぎが、3世紀の洛陽で先に起きた。"
+    }
+   },
+   "give": {
+    "鉄砲": {
+     "force": {
+      "q": "jomon_kofun_03",
+      "choice": 0
+     },
+     "text": "鉄砲を携えた難升米は「女王に将軍の位を」と強気の上表を行った。魏から授かるはずの「親魏倭王」の称号は、半島南部の軍事的支配権を認める将軍号に化けた。"
+    }
+   }
+  },
+  {
+   "name": "都市牛利",
+   "era": "jomon_kofun",
+   "faction": "邪馬台国",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 238,
+   "tags": [
+    "diplomat"
+   ],
+   "traits": {
+    "open": 1,
+    "loyal": 1
+   },
+   "spawn": "port",
+   "q": [
+    "jomon_kofun_03"
+   ],
+   "give": {
+    "世界地図": {
+     "vars": {
+      "open_asia": 25
+     },
+     "year": 236,
+     "text": "難升米の副使・都市牛利が世界地図を持ち帰り、邪馬台国は大陸の広さと自国の位置を知った。倭は朝貢国の立場を嫌い、対等な国書を送る国になった。"
+    }
    }
   },
   {
@@ -90,6 +643,160 @@
    "traits": {
     "war": 2,
     "open": -1
+   },
+   "q": [
+    "jomon_kofun_03"
+   ],
+   "aka": [
+    "狗奴国王"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "militarism": 25,
+      "unity": -10
+     },
+     "year": 235,
+     "note": "王が消えた狗奴国は「邪馬台国にさらわれた」と怒って攻め寄せ、卑弥呼は軍事的な称号を求めた"
+    }
+   ],
+   "persuade": {
+    "戦を勧める": {
+     "vars": {
+      "militarism": 25
+     },
+     "year": 235,
+     "text": "卑弥弓呼は邪馬台国への攻撃を強め、倭は戦の色に染まった。卑弥呼は王の権威を武の称号で示そうと、軍事的支配権を認める将軍号を求めて上表した。"
+    },
+    "戦をやめさせる": {
+     "force": {
+      "q": "jomon_kofun_03",
+      "choice": 2
+     },
+     "text": "卑弥弓呼は銅鏡を受け取って邪馬台国と和睦した。外に敵がいなくなった倭では、卑弥呼の死後に男王が立っても争いは起きず、壱与の出番はなかった。"
+    }
+   },
+   "give": {
+    "鉄砲": {
+     "force": {
+      "q": "jomon_kofun_03",
+      "choice": 2
+     },
+     "text": "鉄砲を手にした狗奴国が邪馬台国を圧倒し、卑弥弓呼が倭の王となった。女王なき後の男王に逆らえる者はおらず、国内はただちに静まった。"
+    }
+   }
+  },
+  {
+   "name": "新たな男王",
+   "era": "jomon_kofun",
+   "faction": "邪馬台国",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 248,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "reform": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "jomon_kofun_03"
+   ],
+   "persuade": {
+    "民を大切に": {
+     "force": {
+      "q": "jomon_kofun_03",
+      "choice": 2
+     },
+     "text": "男王は貢ぎ物を軽くして民の暮らしを守った。「更々相誅殺し千余人」と記されるはずの争乱は起きず、壱与が立つこともなく国内は安定した。"
+    }
+   },
+   "give": {
+    "千両箱": {
+     "force": {
+      "q": "jomon_kofun_03",
+      "choice": 2
+     },
+     "text": "男王は千両箱の中身を国々の首長に配り、反対派をまるごと味方につけた。卑弥呼の死後の争乱は起こらず、魏志倭人伝の結末が書き換わった。"
+    }
+   }
+  },
+  {
+   "name": "卑弥呼の通訳",
+   "era": "jomon_kofun",
+   "faction": "邪馬台国",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 239,
+   "tags": [
+    "official",
+    "scholar"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "jomon_kofun_03"
+   ],
+   "give": {
+    "未来の教科書": {
+     "force": {
+      "q": "jomon_kofun_03",
+      "choice": 3
+     },
+     "text": "通訳は教科書の遣隋使のページを書き写し、「日出づる処の天子、書を日没する処の天子に致す」と上表文に記した。魏の皇帝は目を丸くした。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "上表文の清書",
+     "at": "capital",
+     "year": 239,
+     "missed": {
+      "force": {
+       "q": "jomon_kofun_03",
+       "choice": 3
+      }
+     },
+     "text": "通訳が清書に遅れ、代わりにあなたが未来の知識で国書を書いた。届いたのは「天子」を名乗る対等な国書。607年の遣隋使の出来事が3世紀に起きてしまった。"
+    }
+   ]
+  },
+  {
+   "name": "張政",
+   "era": "jomon_kofun",
+   "faction": "魏",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 247,
+   "tags": [
+    "official",
+    "foreigner"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": 1
+   },
+   "spawn": "castle",
+   "q": [
+    "jomon_kofun_03"
+   ],
+   "persuade": {
+    "戦を勧める": {
+     "force": {
+      "q": "jomon_kofun_03",
+      "choice": 0
+     },
+     "text": "狗奴国との戦の仲裁に来た帯方郡の張政は、和平どころか黄幢（軍旗）を振って戦を勧めた。卑弥呼は軍事的支配権を認める将軍号を求める上表を送った。"
+    }
    }
   },
   {
@@ -109,10 +816,250 @@
     "war": 2,
     "open": 1
    },
+   "spawn": "battlefield",
    "aka": [
     "ワカタケル大王",
-    "雄略天皇"
+    "雄略天皇",
+    "獲加多支鹵大王"
+   ],
+   "q": [
+    "jomon_kofun_04"
+   ],
+   "doc": {
+    "name": "宋の順帝への上表文",
+    "q": "jomon_kofun_04",
+    "choice": 1,
+    "text": "「昔より祖禰躬ら甲冑を擐き」で始まる上表文が盗まれ、478年の上表は幻に。武の書き直しは延びに延び、宋が滅んだ後、磐井の乱の後になってようやく南朝へ使いが出た。"
+   },
+   "persuade": {
+    "開国を勧める": {
+     "force": {
+      "q": "jomon_kofun_04",
+      "choice": 0
+     },
+     "text": "武は祖父の代より早く南朝へ上表を送り、まず宋の将軍号を手に入れた。高句麗との大きな戦は称号を得た後に持ち越され、好太王碑の戦いは5世紀末にずれた。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "上表文を宋へ送る",
+     "at": "port",
+     "year": 478,
+     "missed": {
+      "force": {
+       "q": "jomon_kofun_04",
+       "choice": 1
+      }
+     },
+     "text": "武の使いが船出に遅れているうちに宋は滅亡寸前に。上表は見送られ、南朝への使いは磐井の乱の後になった。倭の五王の外交は、年表の一番後ろに回された。"
+    }
    ]
+  },
+  {
+   "name": "葛城襲津彦",
+   "era": "jomon_kofun",
+   "faction": "葛城",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 382,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": 1
+   },
+   "q": [
+    "jomon_kofun_04"
+   ],
+   "contrib": [
+    {
+     "q": "jomon_kofun_04",
+     "choice": 3,
+     "note": "半島に渡る軍の大将がいなくなり、倭軍の渡海は磐井の乱の後の6世紀にずれ込んだ"
+    }
+   ],
+   "persuade": {
+    "戦をやめさせる": {
+     "force": {
+      "q": "jomon_kofun_04",
+      "choice": 3
+     },
+     "text": "襲津彦は半島への出兵を取りやめ、葛城の地で田を開いた。倭軍が高句麗と戦う日は来ないまま6世紀を迎え、好太王碑に刻まれる戦いは磐井の乱の後になった。"
+    }
+   }
+  },
+  {
+   "name": "好太王",
+   "era": "jomon_kofun",
+   "faction": "高句麗",
+   "born": 374,
+   "died": 412,
+   "death": "natural",
+   "active": 391,
+   "tags": [
+    "ruler",
+    "foreigner"
+   ],
+   "traits": {
+    "war": 2,
+    "open": 1
+   },
+   "spawn": "battlefield",
+   "aka": [
+    "広開土王"
+   ],
+   "q": [
+    "jomon_kofun_04"
+   ],
+   "persuade": {
+    "戦をやめさせる": {
+     "force": {
+      "q": "jomon_kofun_04",
+      "choice": 0
+     },
+     "text": "好太王は南下をやめ、百済・倭との戦を控えた。倭軍と高句麗が刃を交えたのは5世紀末で、碑文に刻まれた出来事は倭王武の上表より後になった。"
+    }
+   }
+  },
+  {
+   "name": "近肖古王",
+   "era": "jomon_kofun",
+   "faction": "百済",
+   "born": null,
+   "died": 375,
+   "death": "natural",
+   "active": 346,
+   "tags": [
+    "ruler",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 1,
+    "war": 1
+   },
+   "spawn": "port",
+   "q": [
+    "jomon_kofun_04"
+   ],
+   "persuade": {
+    "鎖国を勧める": {
+     "force": {
+      "q": "jomon_kofun_04",
+      "choice": 3
+     },
+     "text": "近肖古王は七支刀を倭に贈らず、同盟も結ばなかった。百済から援軍を頼まれない倭が半島へ兵を出したのは6世紀になってから。磐井の乱も武の上表もその前に起きた。"
+    }
+   }
+  },
+  {
+   "name": "船大工の棟梁",
+   "era": "jomon_kofun",
+   "faction": "ヤマト",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 390,
+   "tags": [
+    "commoner"
+   ],
+   "traits": {
+    "reform": 1
+   },
+   "spawn": "port",
+   "q": [
+    "jomon_kofun_04"
+   ],
+   "contrib": [
+    {
+     "q": "jomon_kofun_04",
+     "choice": 3,
+     "note": "大型の準構造船を造れる棟梁がいなくなり、倭軍の渡海は6世紀以降にずれ込んだ"
+    }
+   ],
+   "persuade": {
+    "倹約を勧める": {
+     "force": {
+      "q": "jomon_kofun_04",
+      "choice": 3
+     },
+     "text": "「大きな船は贅沢」と説かれた棟梁は丸木舟しか造らなくなった。玄界灘を大軍で渡る船がなく、倭軍が高句麗と戦うのは磐井の乱の後になった。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "大型船の進水",
+     "at": "port",
+     "year": 390,
+     "missed": {
+      "force": {
+       "q": "jomon_kofun_04",
+       "choice": 0
+      }
+     },
+     "text": "進水式に棟梁が遅れ、船団の完成は何十年も遅れた。倭軍が半島に渡ったのは倭王武が宋に上表した後で、碑文の出来事と上表の順序が入れ替わった。"
+    }
+   ]
+  },
+  {
+   "name": "新羅の密使",
+   "era": "jomon_kofun",
+   "faction": "新羅",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 520,
+   "tags": [
+    "diplomat",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 1,
+    "loyal": -1
+   },
+   "spawn": "mountain",
+   "q": [
+    "jomon_kofun_04"
+   ],
+   "give": {
+    "千両箱": {
+     "force": {
+      "q": "jomon_kofun_04",
+      "choice": 1
+     },
+     "text": "千両箱を手にした密使は、磐井への贈り物を半世紀も早く届けた。新羅と結んだ筑紫の豪族は5世紀のうちに挙兵し、磐井の乱が倭王武の上表より先に起きた。"
+    }
+   }
+  },
+  {
+   "name": "三輪山の祭祀者",
+   "era": "jomon_kofun",
+   "faction": "ヤマト",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 400,
+   "tags": [
+    "religious"
+   ],
+   "traits": {
+    "faith": 2
+   },
+   "spawn": "temple",
+   "q": [
+    "jomon_kofun_04"
+   ],
+   "persuade": {
+    "信仰を勧める": {
+     "force": {
+      "q": "jomon_kofun_04",
+      "choice": 3
+     },
+     "text": "祭祀者が三輪山で嵐を呼ぶ祈りを続けると、玄界灘は何十年も荒れた。倭軍は半島へ渡れず、渡海は6世紀以降にずれ込んだ。神頼みの外交はやはり危うい。"
+    }
+   }
   },
   {
    "name": "筑紫君磐井",
@@ -132,6 +1079,12 @@
     "loyal": -2
    },
    "spawn": "mountain",
+   "q": [
+    "jomon_kofun_04"
+   ],
+   "aka": [
+    "磐井"
+   ],
    "contrib": [
     {
      "vars": {
@@ -144,11 +1097,409 @@
    ],
    "saved": {
     "year": 528,
-    "text": "討たれるはずの磐井が生き延び、筑紫には新羅と結ぶ独立の王国が残った。ヤマト政権の統一は大きく遅れた。",
-    "vars": {
-     "unity": -20,
-     "centralization": -15,
-     "open_asia": 10
+    "text": "討たれるはずの磐井が生き延び、筑紫には新羅と結ぶ王国が残った。ちょうど新羅が仏教を公認した頃で、倭に届く仏は新羅経由に。新羅と和を結んだ物部氏が仏を担ぎ、百済派の蘇我氏が反対に回った。",
+    "force": {
+     "q": "jomon_kofun_06",
+     "choice": 1
+    }
+   },
+   "persuade": {
+    "裏切りを促す": {
+     "force": {
+      "q": "jomon_kofun_04",
+      "choice": 1
+     },
+     "text": "磐井は半世紀も早くヤマトに背き、新羅と結んで海峡を押さえた。磐井の乱が倭王武の上表より先に起き、年表のⅢがⅠを追い越した。"
+    }
+   }
+  },
+  {
+   "name": "宋の順帝",
+   "era": "jomon_kofun",
+   "faction": "宋",
+   "born": 467,
+   "died": 479,
+   "death": "killed",
+   "active": 477,
+   "tags": [
+    "ruler",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 1,
+    "war": -1
+   },
+   "spawn": "port",
+   "q": [
+    "jomon_kofun_04"
+   ],
+   "saved": {
+    "year": 479,
+    "text": "南斉の蕭道成に位を奪われて殺されるはずの順帝が生き延び、南朝・宋が続いた。倭は宋との通交を重ねて学問を蓄え、6世紀初めには倭の学者が百済で儒教を講義するまでになった。",
+    "force": {
+     "q": "jomon_kofun_05",
+     "choice": 2
+    }
+   },
+   "persuade": {
+    "鎖国を勧める": {
+     "force": {
+      "q": "jomon_kofun_04",
+      "choice": 1
+     },
+     "text": "順帝は倭の使いを門前払いした。武は上表をあきらめ、倭が再び南朝に使いを送ったのは磐井の乱の後。倭の五王の外交は6世紀にずれ込んだ。"
+    }
+   }
+  },
+  {
+   "name": "渡来系の史部",
+   "era": "jomon_kofun",
+   "faction": "ヤマト",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 500,
+   "tags": [
+    "official",
+    "scholar",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "jomon_kofun_05"
+   ],
+   "aka": [
+    "史部"
+   ],
+   "contrib": [
+    {
+     "q": "jomon_kofun_05",
+     "choice": 1,
+     "note": "記録と外交文書を担う史部がいなくなり、ヤマト政権は文字を使わないまま6世紀を過ごした"
+    }
+   ],
+   "doc": {
+    "name": "大王の宮の記録簿（木簡と帳簿）",
+    "q": "jomon_kofun_05",
+    "choice": 1,
+    "text": "史部の記録簿が盗まれ、ヤマト政権は「文字は災いを呼ぶ」と記録をやめた。稲荷山古墳の鉄剣銘のような文字資料は生まれず、6世紀の政治は口伝えだけで動いた。"
+   },
+   "give": {
+    "未来の教科書": {
+     "force": {
+      "q": "jomon_kofun_05",
+      "choice": 2
+     },
+     "text": "史部が教科書で儒教を学び直し、倭の学問は一気に百済を追い越した。513年、百済から五経博士が来るどころか、倭の学者が百済の王族に経典を講義することになった。"
+    }
+   }
+  },
+  {
+   "name": "倭の学者",
+   "era": "jomon_kofun",
+   "faction": "ヤマト",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 510,
+   "tags": [
+    "scholar"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "jomon_kofun_05"
+   ],
+   "persuade": {
+    "学問を勧める": {
+     "force": {
+      "q": "jomon_kofun_05",
+      "choice": 2
+     },
+     "text": "学者は寝る間も惜しんで五経を読み込み、百済に招かれて王族に講義した。史実では百済から五経博士の段楊爾が来る年に、逆向きの留学が起きた。"
+    }
+   },
+   "give": {
+    "未来の教科書": {
+     "force": {
+      "q": "jomon_kofun_05",
+      "choice": 2
+     },
+     "text": "未来の教科書で儒教を学んだ学者は、百済の都で論語の講義を始めた。倭から百済へ学問が伝わるという、史実とは逆向きの文化交流が起きた。"
+    }
+   }
+  },
+  {
+   "name": "渡来人の鍛冶の長",
+   "era": "jomon_kofun",
+   "faction": "韓鍛冶部",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 500,
+   "tags": [
+    "foreigner",
+    "merchant"
+   ],
+   "traits": {
+    "open": 1,
+    "reform": 1,
+    "loyal": -1
+   },
+   "spawn": "port",
+   "q": [
+    "jomon_kofun_05"
+   ],
+   "persuade": {
+    "民を大切に": {
+     "force": {
+      "q": "jomon_kofun_05",
+      "choice": 3
+     },
+     "text": "鍛冶の長は「鉄の農具は東国の民にこそ必要だ」と工人ごと東へ移った。ヤマト政権は技術の独占に失敗し、畿内の鍛冶工房は空っぽになった。"
+    }
+   },
+   "give": {
+    "千両箱": {
+     "force": {
+      "q": "jomon_kofun_05",
+      "choice": 3
+     },
+     "text": "千両箱に目がくらんだ鍛冶の長は、高く雇ってくれる東国の豪族のもとへ移った。品部として畿内に置かれるはずの韓鍛冶部が、まるごと東国に引き抜かれた。"
+    }
+   }
+  },
+  {
+   "name": "上毛野君",
+   "era": "jomon_kofun",
+   "faction": "上毛野",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 500,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": 1
+   },
+   "q": [
+    "jomon_kofun_05"
+   ],
+   "persuade": {
+    "裏切りを促す": {
+     "force": {
+      "q": "jomon_kofun_05",
+      "choice": 3
+     },
+     "text": "上毛野君はヤマトの命令を無視し、渡来人の技術者を毛野の地へ迎え入れた。東国に鉄器と須恵器の工房が並び、ヤマト政権の技術独占は崩れた。"
+    }
+   },
+   "give": {
+    "鉄砲": {
+     "vars": {
+      "warrior": 30,
+      "militarism": 10
+     },
+     "year": 505,
+     "text": "鉄砲を手にした上毛野君の武名は東国に鳴り響き、鉄の武具を求める東国の豪族が渡来人の技術者を丸ごと迎え入れた。のちの東国武士の原型がここに芽生えた。"
+    }
+   }
+  },
+  {
+   "name": "段楊爾",
+   "era": "jomon_kofun",
+   "faction": "百済",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 513,
+   "tags": [
+    "scholar",
+    "foreigner"
+   ],
+   "traits": {
+    "reform": 1,
+    "open": 1
+   },
+   "spawn": "port",
+   "q": [
+    "jomon_kofun_05"
+   ],
+   "aka": [
+    "五経博士"
+   ],
+   "persuade": {
+    "鎖国を勧める": {
+     "force": {
+      "q": "jomon_kofun_05",
+      "choice": 1
+     },
+     "text": "五経博士の段楊爾は渡航を取りやめた。経典を読み書きできる者が育たず、ヤマト政権は6世紀を通じて文字の記録も外交文書も持たない国になった。"
+    }
+   }
+  },
+  {
+   "name": "王仁",
+   "era": "jomon_kofun",
+   "faction": "百済",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 405,
+   "tags": [
+    "scholar",
+    "foreigner"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "jomon_kofun_05"
+   ],
+   "aka": [
+    "和邇吉師"
+   ],
+   "persuade": {
+    "鎖国を勧める": {
+     "force": {
+      "q": "jomon_kofun_05",
+      "choice": 1
+     },
+     "text": "『論語』と『千字文』を携えて来るはずの王仁が百済にとどまった。漢字を学ぶ手本がない倭では文字が根付かず、外交文書も記録も作られないまま6世紀を迎えた。"
+    }
+   },
+   "give": {
+    "未来の教科書": {
+     "force": {
+      "q": "jomon_kofun_05",
+      "choice": 2
+     },
+     "text": "王仁は未来の教科書まで使って倭人に教えたので、倭の学問は急成長。6世紀初めには、倭の学者が百済へ渡って王族に経典を講義するほどになった。"
+    }
+   }
+  },
+  {
+   "name": "阿知使主",
+   "era": "jomon_kofun",
+   "faction": "東漢氏",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 409,
+   "tags": [
+    "official",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 1
+   },
+   "spawn": "port",
+   "q": [
+    "jomon_kofun_05"
+   ],
+   "persuade": {
+    "開国を勧める": {
+     "vars": {
+      "open_asia": 45
+     },
+     "year": 490,
+     "text": "東漢氏の祖・阿知使主が一族総出で大陸との往来を広げ、倭には中国の学問がどっさり蓄積された。6世紀には逆に倭の学者が百済で教えるほどになった。"
+    }
+   }
+  },
+  {
+   "name": "武寧王",
+   "era": "jomon_kofun",
+   "faction": "百済",
+   "born": 462,
+   "died": 523,
+   "death": "illness",
+   "active": 501,
+   "tags": [
+    "ruler",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 2,
+    "faith": 1
+   },
+   "spawn": "port",
+   "q": [
+    "jomon_kofun_05"
+   ],
+   "saved": {
+    "year": 523,
+    "text": "523年に亡くなるはずの武寧王が特効薬で長生きし、百済から仏像・経典に加えて寺工や造仏工が次々と送られた。朝廷は迷わず仏教を国家の宗教とした。",
+    "force": {
+     "q": "jomon_kofun_06",
+     "choice": 2
+    }
+   },
+   "persuade": {
+    "鎖国を勧める": {
+     "vars": {
+      "open_asia": -35
+     },
+     "year": 500,
+     "text": "武寧王は倭との通交を絶ち、海峡の往来はほぼ途絶えた。漢字を使いこなす渡来人も来なくなり、ヤマト政権は文字を持たないまま6世紀を迎えた。"
+    },
+    "学問を勧める": {
+     "force": {
+      "q": "jomon_kofun_05",
+      "choice": 2
+     },
+     "text": "学問好きになった武寧王は「倭の学者に来てもらおう」と言い出した。五経博士を送るはずの百済が、逆に倭の学者を招いて王族に講義させた。"
+    }
+   }
+  },
+  {
+   "name": "大伴金村",
+   "era": "jomon_kofun",
+   "faction": "大伴",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 507,
+   "tags": [
+    "official",
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": 1,
+    "open": 1
+   },
+   "q": [
+    "jomon_kofun_05"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "centralization": -25
+     },
+     "year": 507,
+     "note": "継体天皇を越前から迎える者がおらず、大王家は断絶の危機に。ヤマト政権の統制は大きく緩んだ"
+    }
+   ],
+   "persuade": {
+    "裏切りを促す": {
+     "vars": {
+      "centralization": -25
+     },
+     "year": 510,
+     "text": "大伴金村が大王に背いて豪族連合の頭目を気取り、ヤマト政権の統制は緩んだ。渡来人の技術者は鉄を求める東国の豪族に次々と引き抜かれた。"
     }
    }
   },
@@ -167,6 +1518,35 @@
    "traits": {
     "faith": 1,
     "open": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "jomon_kofun_06"
+   ],
+   "persuade": {
+    "鎖国を勧める": {
+     "force": {
+      "q": "jomon_kofun_06",
+      "choice": 3
+     },
+     "text": "欽明天皇は「西蕃の献れる仏の相貌端厳し」と感嘆する前に、異国の神を退けた。仏像は難波の堀江に流され、寺の建立も禁じられた。"
+    }
+   },
+   "give": {
+    "未来の教科書": {
+     "force": {
+      "q": "jomon_kofun_06",
+      "choice": 2
+     },
+     "text": "教科書の国分寺のページを見た欽明天皇は、200年後の聖武天皇の詔を先取りした。仏教はただちに国家の宗教となり、国ごとに国分寺・国分尼寺の建設が始まった。"
+    },
+    "鉄砲": {
+     "force": {
+      "q": "jomon_kofun_06",
+      "choice": 1
+     },
+     "text": "鉄砲の威力に魅せられた欽明天皇は、軍事を担う物部氏を重用した。物部氏は「戦に勝たせる神」として新羅の仏を取り込み、蘇我氏は在来の神を盾に反対した。"
+    }
    }
   },
   {
@@ -187,6 +1567,9 @@
     "war": 1
    },
    "spawn": "temple",
+   "q": [
+    "jomon_kofun_06"
+   ],
    "contrib": [
     {
      "q": "jomon_kofun_06",
@@ -200,7 +1583,23 @@
       "q": "jomon_kofun_06",
       "choice": 2
      },
-     "text": "尾輿は異国の神も受け入れると言い出し、崇仏論争は起こらなかった。"
+     "text": "尾輿は異国の神も受け入れると言い出し、崇仏論争は起こらなかった。朝廷は仏教をただちに国家の宗教とし、国ごとに寺を建てさせた。"
+    },
+    "戦を勧める": {
+     "force": {
+      "q": "jomon_kofun_06",
+      "choice": 1
+     },
+     "text": "「仏は戦の神なり」と吹き込まれた尾輿は、軍事氏族として仏教をいち早く取り込んだ。崇仏派は物部氏、排仏派は蘇我氏という、教科書と正反対の構図になった。"
+    }
+   },
+   "give": {
+    "鉄砲": {
+     "force": {
+      "q": "jomon_kofun_06",
+      "choice": 3
+     },
+     "text": "鉄砲を手にした尾輿は武力で崇仏派を黙らせ、仏像を難波の堀江に投げ込んだ。寺の建立は禁じられ、飛鳥寺も法隆寺も建たない7世紀になった。"
     }
    }
   },
@@ -221,72 +1620,344 @@
     "reform": 1
    },
    "spawn": "capital",
+   "q": [
+    "jomon_kofun_06"
+   ],
    "contrib": [
     {
      "q": "jomon_kofun_06",
      "choice": 3,
      "note": "崇仏派がいなくなり、仏像は難波の堀江に流された"
     }
-   ]
-  },
-  {
-   "name": "上毛野君",
-   "era": "jomon_kofun",
-   "faction": "上毛野",
-   "born": null,
-   "died": null,
-   "death": "unknown",
-   "active": 500,
-   "tags": [
-    "warrior"
    ],
-   "traits": {
-    "war": 1,
-    "loyal": 1
+   "persuade": {
+    "鎖国を勧める": {
+     "force": {
+      "q": "jomon_kofun_06",
+      "choice": 1
+     },
+     "text": "稲目は異国の神を疑い、在来の神々を重んじる側に回った。空いた崇仏派の席には物部氏が座り、新羅から贈られた仏を祀り始めた。"
+    },
+    "改革を勧める": {
+     "vars": {
+      "centralization": 30
+     },
+     "year": 530,
+     "text": "稲目は屯倉と部民の管理を整えて大王の力を一気に強めた。大王の一声で何でも決まる政権では、仏教も論争抜きで国家の宗教となった。"
+    }
    }
   },
   {
-   "name": "奴国の使者",
+   "name": "中臣鎌子",
    "era": "jomon_kofun",
-   "faction": "奴国",
+   "faction": "中臣",
    "born": null,
    "died": null,
    "death": "unknown",
-   "active": 57,
+   "active": 552,
    "tags": [
-    "diplomat",
-    "official"
+    "official",
+    "religious"
    ],
    "traits": {
+    "faith": 1,
+    "open": -1
+   },
+   "spawn": "temple",
+   "q": [
+    "jomon_kofun_06"
+   ],
+   "persuade": {
+    "信仰を勧める": {
+     "force": {
+      "q": "jomon_kofun_06",
+      "choice": 2
+     },
+     "text": "神祇を司る中臣鎌子が仏の教えにも心を開き、排仏派は尾輿ひとりに。孤立した物部氏は口をつぐみ、仏教はすぐに国家の宗教となった。"
+    },
+    "鎖国を勧める": {
+     "force": {
+      "q": "jomon_kofun_06",
+      "choice": 3
+     },
+     "text": "鎌子は「国つ神の怒りを招く」と強硬に説いた。疫病が流行ると仏像は難波の堀江に流され、寺院の建立は以後も許されなかった。"
+    }
+   }
+  },
+  {
+   "name": "聖明王",
+   "era": "jomon_kofun",
+   "faction": "百済",
+   "born": null,
+   "died": 554,
+   "death": "killed",
+   "active": 523,
+   "tags": [
+    "ruler",
+    "foreigner"
+   ],
+   "traits": {
+    "faith": 2,
     "open": 2,
-    "loyal": 2
+    "reform": 1
    },
    "spawn": "port",
-   "contrib": [
+   "q": [
+    "jomon_kofun_06"
+   ],
+   "aka": [
+    "聖王"
+   ],
+   "doc": {
+    "name": "仏像に添えた上表文",
+    "q": "jomon_kofun_06",
+    "choice": 1,
+    "text": "聖明王の上表文が盗まれ、百済の仏教公伝は宙に浮いた。代わりに仏像を贈ったのは528年に仏教を公認したばかりの新羅で、新羅と通じた物部氏が受け入れを主張した。"
+   },
+   "saved": {
+    "year": 554,
+    "text": "管山城の戦いで新羅に討たれるはずの聖明王が生き延び、百済は仏教を掲げて国力を保った。その後ろ盾を得た崇仏派の蘇我氏は、大王をしのぐほどの権威を持つようになった。",
+    "vars": {
+     "religion": 35,
+     "open_asia": 15
+    }
+   },
+   "persuade": {
+    "改革を勧める": {
+     "force": {
+      "q": "jomon_kofun_06",
+      "choice": 2
+     },
+     "text": "聖明王は仏像だけでなく寺工・瓦博士・画工まで丸ごと送り、仏教を国家の柱にするよう勧めた。朝廷はただちに国ごとの寺の建立を命じた。"
+    }
+   }
+  },
+  {
+   "name": "怒唎斯致契",
+   "era": "jomon_kofun",
+   "faction": "百済",
+   "born": null,
+   "died": null,
+   "death": "unknown",
+   "active": 552,
+   "tags": [
+    "diplomat",
+    "foreigner"
+   ],
+   "traits": {
+    "faith": 1,
+    "open": 1
+   },
+   "spawn": "port",
+   "q": [
+    "jomon_kofun_06"
+   ],
+   "aka": [
+    "百済の使者"
+   ],
+   "schedule": [
     {
-     "q": "jomon_kofun_02",
-     "choice": 2,
-     "note": "代わりに吉野ヶ里の首長が後漢へ朝貢し、金印は吉野ヶ里に渡った"
+     "event": "仏像と経論を献上する",
+     "at": "capital",
+     "year": 538,
+     "missed": {
+      "force": {
+       "q": "jomon_kofun_06",
+       "choice": 3
+      }
+     },
+     "text": "百済の使者が献上に遅れているうちに疫病が流行り、物部尾輿は「異国の神が来る前触れだ」と言い立てた。届いた仏像はそのまま難波の堀江に流された。"
     }
    ]
   },
   {
-   "name": "ムラの長老",
+   "name": "法興王",
    "era": "jomon_kofun",
-   "faction": "三内丸山のムラ",
+   "faction": "新羅",
+   "born": null,
+   "died": 540,
+   "death": "natural",
+   "active": 514,
+   "tags": [
+    "ruler",
+    "foreigner"
+   ],
+   "traits": {
+    "faith": 2,
+    "reform": 1
+   },
+   "spawn": "mountain",
+   "q": [
+    "jomon_kofun_06"
+   ],
+   "persuade": {
+    "信仰を勧める": {
+     "force": {
+      "q": "jomon_kofun_06",
+      "choice": 1
+     },
+     "text": "528年に仏教を公認した新羅の法興王が、百済に先んじて倭に仏像を贈った。新羅と結ぶ物部氏が受け入れを主張し、百済派の蘇我氏は在来の神々を盾に反対した。"
+    }
+   }
+  },
+  {
+   "name": "ムラの長",
+   "era": "jomon_kofun",
+   "faction": "飛鳥のムラ",
    "born": null,
    "died": null,
    "death": "natural",
-   "active": -3000,
+   "active": 538,
    "tags": [
     "commoner"
    ],
    "traits": {
-    "open": 1,
-    "war": -1
+    "faith": 1
    },
-   "spawn": "village"
+   "spawn": "village",
+   "q": [
+    "jomon_kofun_06"
+   ],
+   "give": {
+    "特効薬": {
+     "force": {
+      "q": "jomon_kofun_06",
+      "choice": 2
+     },
+     "text": "特効薬で疫病が収まり、物部氏は「仏を拝んだから疫病が起きた」と言えなくなった。仏教は反対なく国家の宗教となり、国ごとに寺が建ち始めた。"
+    }
+   }
+  },
+  {
+   "name": "物部守屋",
+   "era": "jomon_kofun",
+   "faction": "物部",
+   "born": null,
+   "died": 587,
+   "death": "killed",
+   "active": 572,
+   "tags": [
+    "official",
+    "warrior"
+   ],
+   "traits": {
+    "faith": -2,
+    "war": 2,
+    "open": -1
+   },
+   "spawn": "temple"
+  },
+  {
+   "name": "物部麁鹿火",
+   "era": "jomon_kofun",
+   "faction": "物部",
+   "born": null,
+   "died": 536,
+   "death": "natural",
+   "active": 527,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": 2
+   },
+   "q": [
+    "jomon_kofun_06"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "centralization": -25,
+      "unity": -20
+     },
+     "year": 527,
+     "note": "磐井の乱を鎮める大将軍がおらず、筑紫は独立を保った。ヤマト政権の統制は大きく揺らいだ"
+    }
+   ]
   }
  ],
- "battles": []
+ "battles": [
+  {
+   "era": "jomon_kofun",
+   "id": "kunakoku",
+   "name": "狗奴国との戦い",
+   "at": "castle",
+   "year": 247,
+   "sides": [
+    {
+     "name": "邪馬台国",
+     "label": "邪馬台国の兵",
+     "historical": true
+    },
+    {
+     "name": "狗奴国",
+     "label": "狗奴国の兵",
+     "wins": {
+      "force": {
+       "q": "jomon_kofun_03",
+       "choice": 2
+      }
+     },
+     "text": "あなたが邪馬台国の兵をなぎ倒したので、狗奴国の卑弥弓呼が倭の王に。男王に逆らえる者はおらず、卑弥呼の後の争乱も壱与の即位も起こらなかった。"
+    }
+   ]
+  },
+  {
+   "era": "jomon_kofun",
+   "id": "koguryo",
+   "name": "高句麗との戦い（好太王碑）",
+   "at": "battlefield",
+   "year": 404,
+   "sides": [
+    {
+     "name": "高句麗軍",
+     "label": "高句麗の兵",
+     "historical": true
+    },
+    {
+     "name": "倭軍",
+     "label": "倭の兵",
+     "wins": {
+      "vars": {
+       "militarism": 25,
+       "warrior": 15,
+       "open_asia": 15
+      }
+     },
+     "text": "碑に「倭寇潰敗」と刻まれるはずの戦いで倭軍が勝ってしまった。勢いづいたヤマトの大王は、半島で大戦を構える前にまず中国の将軍号を得ようと上表を急いだ。"
+    }
+   ]
+  },
+  {
+   "era": "jomon_kofun",
+   "id": "iwai",
+   "name": "磐井の乱",
+   "at": "mountain",
+   "year": 527,
+   "sides": [
+    {
+     "name": "ヤマト軍",
+     "label": "物部麁鹿火の兵",
+     "historical": true
+    },
+    {
+     "name": "磐井軍",
+     "label": "磐井の兵",
+     "wins": {
+      "force": {
+       "q": "jomon_kofun_06",
+       "choice": 3
+      },
+      "vars": {
+       "unity": -25,
+       "centralization": -25
+      }
+     },
+     "text": "あなたが物部麁鹿火の軍を蹴散らし、磐井が勝った。新羅と結ぶ筑紫王国が海峡を押さえたため百済との道が細り、百済の仏は退けられて堀江に流された。"
+    }
+   ]
+  }
+ ]
 }

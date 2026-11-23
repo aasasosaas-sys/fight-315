@@ -20,6 +20,8 @@ var runner: MissionRunner
 var wanted: Wanted
 var _ended := false
 var figures: Array = []    # 自由探索に現れる歴史上の人物（HistFigure）
+var interact: ActorInteract
+var _appt_announced: Dictionary = {}
 
 
 static func start_mission(q: Dictionary, p_choice: int, p_method := 0) -> Session:
@@ -122,7 +124,7 @@ func _ready() -> void:
 		runner.start()
 	else:
 		hud.banner(era["eraName"] + "　自由探索", Color(0.37, 0.91, 1.0), 2.5)
-		hud.set_objective("自由探索", "好きに暴れろ。乗り物は F で奪える。Esc でメニュー。\n※ 人物を倒したり名所を壊したりすると、歴史が変わってしまうかも……", "")
+		hud.set_objective("自由探索", "好きに暴れろ。乗り物は F で奪える。人物に近づいて E で話せる（T でヒント切替）。\n※ 何をしても歴史は変わりうる。わざとでも、うっかりでも。", "")
 		hud.toast("馬・車・飛行機を探して乗り回せ！", 4.0)
 		_begin_chaos()
 
@@ -137,24 +139,112 @@ func _begin_chaos() -> void:
 	_spawn_figures()
 
 
+## 自由探索に置く人物の一覧：揺らぎルールの figures ＋ その時代の人物（spawn のある人）＋ 各問題に「未来を語れる」人物を1人ずつ
+static func figure_specs(era_id: String) -> Array:
+	var out: Array = []
+	var seen := {}
+	for spec in Game.chaos.figures_for(era_id):
+		var nm: String = Game.db.actor_name(str(spec.get("name", "")))
+		var key := nm if nm != "" else str(spec.get("name", ""))
+		if seen.has(key):
+			continue
+		seen[key] = true
+		out.append(spec)
+	for nm in Game.db.actors:
+		var a: Dictionary = Game.db.actors[nm]
+		var se: Dictionary = a.get("spawn_eras", {})
+		if se.has(era_id) and not seen.has(nm):
+			seen[nm] = true
+			out.append({"name": nm, "at": se[era_id], "guards": 0 if HistoryActors.is_noncombatant(a) else 2, "lines": []})
+	for q in Game.db.questions:
+		if q["era"]["eraId"] != era_id:
+			continue
+		var cands: Array = Game.db.q_actors.get(q["id"], [])
+		var has := false
+		for c in cands:
+			if seen.has(c["name"]):
+				has = true
+		if has or cands.is_empty():
+			continue
+		var pick: Dictionary = cands[0]
+		for c in cands:
+			if str(Game.db.actors[c["name"]].get("era", "")) == era_id:
+				pick = c
+				break
+		seen[pick["name"]] = true
+		out.append({"name": pick["name"], "at": pick["at"], "guards": 0, "lines": []})
+	return out
+
+
 func _spawn_figures() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(era.get("eraId", "")) + 31
-	for spec in Game.chaos.figures_for(era["eraId"]):
+	var i := 0
+	for spec in figure_specs(era["eraId"]):
 		var key: String = spec.get("at", "capital")
+		if not (key in HistoryDB.LANDMARK_KEYS):
+			key = "capital"
 		var center: Vector3 = world.landmark_pos(key)
 		var pos: Vector3 = world.random_ground_point_near(center, 9.0, rng)
-		var f := HistFigure.spawn(self, pos + Vector3.UP * 0.5, str(spec.get("name", "人物")), era["eraId"], spec.get("lines", []))
+		var nm: String = str(spec.get("name", "人物"))
+		var ad: Dictionary = Game.db.actor(nm)
+		var f := HistFigure.spawn(self, pos + Vector3.UP * 0.5, nm, era["eraId"], spec.get("lines", []), ad)
+		var an := Game.db.actor_name(nm)
+		for qid in Game.db.q_actors:
+			for c in Game.db.q_actors[qid]:
+				if c["name"] == an and not (qid in f.questions):
+					f.questions.append(qid)
+		f.refresh_hint()
 		figures.append(f)
 		var label: String = spec.get("guard", Wanted.GUARDS.get(era["eraId"], "護衛"))
-		for i in int(spec.get("guards", 0)):
-			var ang := TAU * i / maxf(1.0, float(spec.get("guards", 1)))
+		var ng := int(spec.get("guards", 0)) if f.killable else 0
+		for gi in ng:
+			var ang := TAU * gi / maxf(1.0, float(ng))
 			var gp: Vector3 = world.random_ground_point_near(pos + Vector3(cos(ang), 0, sin(ang)) * 4.0, 1.5, rng)
-			var e := Enemy.spawn(self, gp + Vector3.UP * 0.5, label, era["eraId"], i == 0 and int(spec.get("guards", 0)) >= 4)
+			var e := Enemy.spawn(self, gp + Vector3.UP * 0.5, label, era["eraId"], gi == 0 and ng >= 4)
 			e.aggro_range = 16.0
 			f.guards.append(e)
+		# 予定（遅らせると歴史が揺らぐ）
+		for sc in ad.get("schedule", []):
+			if str(sc.get("at", "")) in HistoryDB.LANDMARK_KEYS:
+				var start := 70.0 + i * 25.0
+				f.set_appointment(sc, world.landmark_pos(str(sc["at"])), start, start + 120.0)
+				break
 		hud.compass_points["◆" + f.figure_name] = pos
+		i += 1
 	hud.extra_markers = figures.duplicate()
+	_spawn_battles(rng)
+	interact = ActorInteract.new()
+	interact.setup(self, hud, figures)
+	add_child(interact)
+	_appt_announced.clear()
+
+
+## 合戦：両軍の兵を名所に置く。片方を倒すと、もう片方に加勢したことになる
+func _spawn_battles(rng: RandomNumberGenerator) -> void:
+	for b in Game.db.battles:
+		if str(b.get("era", "")) != era["eraId"]:
+			continue
+		var center: Vector3 = world.landmark_pos(str(b.get("at", "battlefield")))
+		var sides: Array = b.get("sides", [])
+		for si in sides.size():
+			for k in 6:
+				var off := Vector3((si * 2 - 1) * 14.0, 0, (k - 2.5) * 4.0)
+				var gp: Vector3 = world.random_ground_point_near(center + off, 2.0, rng)
+				var e := Enemy.spawn(self, gp + Vector3.UP * 0.5, str(sides[si].get("label", "兵")), era["eraId"], k == 0)
+				e.aggro_range = 12.0
+		hud.compass_points["⚔" + str(b.get("name", ""))] = center
+
+
+func _process(_dt: float) -> void:
+	if mode != "free" or hud == null:
+		return
+	for f in figures:
+		if not is_instance_valid(f) or f.dead or f.appointment.is_empty() or _appt_announced.has(f):
+			continue
+		if f._t >= f.appt_start:
+			_appt_announced[f] = true
+			hud.toast("%sが「%s」のため%sへ向かい始めた" % [f.figure_name, f.appointment.get("event", ""), HistoryDB.landmark_name(era, str(f.appointment.get("at", "")))], 4.0)
 
 
 ## 自由探索中に混乱ルールが発動した：派手に知らせる
@@ -176,6 +266,12 @@ func _on_history_shift(hit: Dictionary) -> void:
 	if changes.is_empty():
 		lines.append("（試験の設問の史実は無事。だが、その後の歴史の流れが変わった）")
 	hud.history_shift("%s\n%s" % [hit.get("title", ""), hit.get("text", "")], bool(hit.get("broke", false)), "\n".join(lines))
+	for c in changes:
+		if c.get("now_correct", false) and not c.get("was_correct", true):
+			hud.toast("第%d問 ○ 正解に！" % number.get(c["question"]["id"], 0), 5.0)
+	for f in figures:
+		if is_instance_valid(f):
+			f.refresh_hint()
 	if player:
 		Effects.time_warp(get_tree(), player.global_position)
 

@@ -2,50 +2,10 @@
  "eraId": "showa",
  "actors": [
   {
-   "name": "井上準之助",
+   "name": "片岡直温",
    "era": "showa",
-   "faction": "民政党",
-   "born": 1869,
-   "died": 1932,
-   "death": "assassinated",
-   "active": 1927,
-   "tags": [
-    "official"
-   ],
-   "traits": {
-    "open": 2,
-    "war": -1
-   },
-   "saved": {
-    "year": 1932,
-    "text": "血盟団事件で殺されるはずの井上が助かり、財界と政党は軍部に対抗し続けた。",
-    "vars": {
-     "militarism": -10
-    }
-   }
-  },
-  {
-   "name": "田中義一",
-   "era": "showa",
-   "faction": "政友会",
-   "born": 1864,
-   "died": 1929,
-   "death": "illness",
-   "active": 1927,
-   "tags": [
-    "ruler",
-    "warrior"
-   ],
-   "traits": {
-    "war": 2,
-    "open": -1
-   }
-  },
-  {
-   "name": "伊東巳代治",
-   "era": "showa",
-   "faction": "枢密院",
-   "born": 1857,
+   "faction": "憲政会",
+   "born": 1859,
    "died": 1934,
    "death": "natural",
    "active": 1927,
@@ -53,31 +13,342 @@
     "official"
    ],
    "traits": {
-    "reform": -1
+    "reform": 1,
+    "open": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "showa_01"
+   ],
+   "aka": [
+    "片岡蔵相"
+   ],
+   "give": {
+    "未来の教科書": {
+     "text": "教科書で自分の「東京渡辺銀行がとうとう破綻を致しました」という失言を読んだ片岡は、議会で口を慎んだ。取付けは広がらず、台湾銀行の救済は緊急勅令だけで片づいた。",
+     "force": {
+      "q": "showa_01",
+      "choice": 2
+     }
+    },
+    "千両箱": {
+     "text": "片岡は千両箱を日銀の窓口に積み上げ「お金はあります」と見せつけた。預金者は落ち着き、経済の地力で混乱は小さく済んだ。",
+     "vars": {
+      "economy": 30
+     },
+     "year": 1927
+    }
    }
   },
   {
-   "name": "團琢磨",
+   "name": "浜口雄幸",
    "era": "showa",
-   "faction": "三井",
-   "born": 1858,
-   "died": 1932,
+   "faction": "民政党",
+   "born": 1870,
+   "died": 1931,
    "death": "assassinated",
-   "active": 1927,
+   "active": 1929,
    "tags": [
-    "merchant"
+    "ruler",
+    "official",
+    "reformer"
    ],
    "traits": {
+    "reform": 2,
+    "war": -1,
+    "open": 1
+   },
+   "aka": [
+    "浜口首相"
+   ],
+   "saved": {
+    "year": 1931,
+    "vars": {
+     "set": {
+      "ruler": "政党"
+     },
+     "open_west": 15,
+     "democracy": 10
+    },
+    "text": "東京駅で狙撃されるはずの「ライオン宰相」浜口が無事だった。政党内閣と英米協調の外交が続き、のちの日本は三国同盟を最後まで先送りした。"
+   },
+   "spawn": "capital"
+  },
+  {
+   "name": "金子直吉",
+   "era": "showa",
+   "faction": "鈴木商店",
+   "born": 1866,
+   "died": 1944,
+   "death": "natural",
+   "active": 1927,
+   "tags": [
+    "merchant",
+    "commoner"
+   ],
+   "traits": {
+    "reform": 1,
     "open": 2
    },
-   "saved": {
-    "year": 1932,
-    "text": "暗殺されるはずの團琢磨が助かり、財界は軍部の暴走に声を上げ続けた。",
-    "vars": {
-     "economy": 5,
-     "militarism": -5
+   "spawn": "port",
+   "give": {
+    "千両箱": {
+     "text": "鈴木商店の大番頭・金子直吉は千両箱で手形を落とし、破綻を免れた。最大の貸し手だった台湾銀行も持ちこたえ、片岡蔵相の救済策がそのまま通った。",
+     "force": {
+      "q": "showa_01",
+      "choice": 2
+     }
     }
    }
+  },
+  {
+   "name": "吉野信次",
+   "era": "showa",
+   "faction": "商工省",
+   "born": 1888,
+   "died": 1971,
+   "death": "natural",
+   "active": 1927,
+   "tags": [
+    "official",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2
+   },
+   "q": [
+    "showa_01"
+   ],
+   "persuade": {
+    "改革を勧める": {
+     "text": "商工官僚の吉野信次は「カルテルで不況を乗り切る」構想を4年早く高橋蔵相に持ち込んだ。モラトリアムと同時に重要産業統制法が作られた。",
+     "force": {
+      "q": "showa_01",
+      "choice": 3
+     }
+    }
+   },
+   "give": {
+    "未来の教科書": {
+     "text": "教科書で1931年の重要産業統制法を読んだ吉野は「自分が書く法律だ」と驚き、草案をすぐ高橋に渡した。統制経済の時代が早く始まった。",
+     "force": {
+      "q": "showa_01",
+      "choice": 3
+     }
+    }
+   },
+   "spawn": "castle"
+  },
+  {
+   "name": "石原莞爾",
+   "era": "showa",
+   "faction": "関東軍",
+   "born": 1889,
+   "died": 1949,
+   "death": "illness",
+   "active": 1931,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "reform": 1,
+    "loyal": -1
+   },
+   "spawn": "battlefield",
+   "q": [
+    "showa_02"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "militarism": -30,
+      "open_west": 20
+     },
+     "year": 1931,
+     "note": "満州事変の作戦を描いた参謀・石原がおらず、柳条湖の計画は立ち消えになった"
+    }
+   ],
+   "persuade": {
+    "戦を勧める": {
+     "text": "「世界最終戦論」の石原はますます強気になり、関東軍は錦州から上海まで戦線を広げた。欧米の世論は硬化し、リットン報告書は日本の権益を一切認めなかった。",
+     "vars": {
+      "militarism": 35,
+      "open_west": -20
+     },
+     "year": 1931
+    }
+   }
+  },
+  {
+   "name": "板垣征四郎",
+   "era": "showa",
+   "faction": "関東軍",
+   "born": 1885,
+   "died": 1948,
+   "death": "executed",
+   "active": 1931,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": 1
+   },
+   "spawn": "battlefield",
+   "q": [
+    "showa_02"
+   ],
+   "persuade": {
+    "戦をやめさせる": {
+     "text": "関東軍高級参謀の板垣は柳条湖の計画を中止した。満州事変は起こらず、日本は協調外交のまま連盟にとどまり、勧告案そのものが出されなかった。",
+     "force": {
+      "q": "showa_02",
+      "choice": 3
+     }
+    }
+   },
+   "give": {
+    "鉄砲": {
+     "text": "未来の鉄砲を手にした板垣は「これなら満州全土を押さえられる」と強硬策に走った。国際世論は一斉に日本を非難し、報告書は即時撤退を求める厳しい内容になった。",
+     "vars": {
+      "militarism": 35,
+      "open_west": -25
+     },
+     "year": 1931
+    }
+   }
+  },
+  {
+   "name": "河本大作",
+   "era": "showa",
+   "faction": "関東軍",
+   "born": 1883,
+   "died": 1955,
+   "death": "illness",
+   "active": 1928,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": -1
+   },
+   "spawn": "battlefield",
+   "contrib": [
+    {
+     "vars": {
+      "militarism": -25,
+      "open_west": 15
+     },
+     "year": 1928,
+     "note": "張作霖爆殺事件が起こらず、田中内閣は満州で現地軍に引きずられずに済んだ"
+    }
+   ]
+  },
+  {
+   "name": "本庄繁",
+   "era": "showa",
+   "faction": "関東軍",
+   "born": 1876,
+   "died": 1945,
+   "death": "suicide",
+   "active": 1931,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": 2
+   },
+   "persuade": {
+    "忠義を説く": {
+     "text": "関東軍司令官の本庄は「政府の不拡大方針に従うのが忠義」と考え直し、独断の出兵を止めた。満州問題は外交の場に戻り、連盟総会で勧告案は否決された。",
+     "force": {
+      "q": "showa_02",
+      "choice": 3
+     }
+    }
+   },
+   "spawn": "battlefield"
+  },
+  {
+   "name": "三上卓",
+   "era": "showa",
+   "faction": "海軍",
+   "born": 1905,
+   "died": 1971,
+   "death": "natural",
+   "active": 1932,
+   "tags": [
+    "warrior",
+    "rebel"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": -1
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "vars": {
+      "democracy": 40,
+      "unity": 15,
+      "militarism": -15
+     },
+     "year": 1932,
+     "note": "五・一五事件で首相官邸を襲う海軍青年将校の中心人物がおらず、犬養首相は無事だった"
+    }
+   ]
+  },
+  {
+   "name": "犬養毅",
+   "era": "showa",
+   "faction": "政友会",
+   "born": 1855,
+   "died": 1932,
+   "death": "assassinated",
+   "active": 1931,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "reform": 1,
+    "war": -1,
+    "open": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "showa_02"
+   ],
+   "aka": [
+    "犬養首相"
+   ],
+   "saved": {
+    "year": 1932,
+    "vars": {
+     "democracy": 40,
+     "unity": 15,
+     "militarism": -15
+    },
+    "text": "「話せばわかる」の犬養首相が五・一五事件を生き延びた。政党内閣は途切れず、議会が満州問題の主導権を握って、勧告案は連盟総会で否決された。"
+   },
+   "schedule": [
+    {
+     "event": "首相官邸での日曜の夕食",
+     "at": "capital",
+     "year": 1932,
+     "missed": {
+      "vars": {
+       "democracy": 40,
+       "unity": 15,
+       "militarism": -15
+      }
+     },
+     "text": "1932年5月15日の夕方、犬養は官邸に戻るのが遅れ、襲撃の時刻にそこにいなかった。政党内閣が続き、議会政治が軍を抑えた。"
+    }
+   ]
   },
   {
    "name": "リットン卿",
@@ -94,7 +365,37 @@
    "traits": {
     "open": 2,
     "war": -2
-   }
+   },
+   "spawn": "port",
+   "q": [
+    "showa_02"
+   ],
+   "aka": [
+    "リットン"
+   ],
+   "give": {
+    "未来の教科書": {
+     "text": "未来の教科書でその後の戦争を知ったリットン卿は、日本への配慮をすべて削った。報告書は満州における日本の権益を一切認めず、即時撤退だけを求めた。",
+     "force": {
+      "q": "showa_02",
+      "choice": 0
+     }
+    }
+   },
+   "schedule": [
+    {
+     "event": "日本訪問（横浜上陸）",
+     "at": "port",
+     "year": 1932,
+     "missed": {
+      "force": {
+       "q": "showa_02",
+       "choice": 0
+      }
+     },
+     "text": "調査団の日本訪問が遅れ、リットン卿は日本政府の言い分をほとんど聞けなかった。報告書は日本の権益を一切認めない内容になった。"
+    }
+   ]
   },
   {
    "name": "内田康哉",
@@ -111,167 +412,26 @@
    "traits": {
     "war": 1,
     "open": -1
-   }
-  },
-  {
-   "name": "犬養毅",
-   "era": "showa",
-   "faction": "政友会",
-   "born": 1855,
-   "died": 1932,
-   "death": "assassinated",
-   "active": 1931,
-   "tags": [
-    "ruler",
-    "official"
-   ],
-   "traits": {
-    "reform": 1,
-    "war": -1
-   },
-   "saved": {
-    "year": 1932,
-    "text": "五・一五事件で殺されるはずの犬養首相が助かり、政党内閣が続いた。",
-    "vars": {
-     "democracy": 20,
-     "militarism": -15
-    }
-   }
-  },
-  {
-   "name": "和田博雄",
-   "era": "showa",
-   "faction": "農林省",
-   "born": 1903,
-   "died": 1967,
-   "death": "natural",
-   "active": 1946,
-   "tags": [
-    "official",
-    "reformer"
-   ],
-   "traits": {
-    "reform": 2
-   },
-   "contrib": [
-    {
-     "q": "showa_03",
-     "choice": 2,
-     "note": "改革を進める大臣がおらず、第一次案がそのまま実施された"
-    }
-   ]
-  },
-  {
-   "name": "渋沢敬三",
-   "era": "showa",
-   "faction": "大蔵省",
-   "born": 1896,
-   "died": 1963,
-   "death": "natural",
-   "active": 1945,
-   "tags": [
-    "official",
-    "scholar",
-    "merchant"
-   ],
-   "traits": {
-    "reform": 1
-   }
-  },
-  {
-   "name": "十河信二",
-   "era": "showa",
-   "faction": "国鉄",
-   "born": 1884,
-   "died": 1981,
-   "death": "natural",
-   "active": 1955,
-   "tags": [
-    "official"
-   ],
-   "traits": {
-    "reform": 2,
-    "open": 1
-   },
-   "spawn": "port",
-   "contrib": [
-    {
-     "vars": {
-      "tech": -20,
-      "economy": -10
-     },
-     "year": 1958,
-     "note": "新幹線の計画は立ち消えになった"
-    }
-   ]
-  },
-  {
-   "name": "下村治",
-   "era": "showa",
-   "faction": "大蔵省",
-   "born": 1910,
-   "died": 1989,
-   "death": "natural",
-   "active": 1959,
-   "tags": [
-    "scholar",
-    "official"
-   ],
-   "traits": {
-    "reform": 1
    },
    "spawn": "castle",
-   "contrib": [
-    {
-     "vars": {
-      "economy": -30
-     },
-     "year": 1959,
-     "note": "所得倍増計画は作られなかった"
-    }
-   ]
-  },
-  {
-   "name": "米内光政",
-   "era": "showa",
-   "faction": "海軍",
-   "born": 1880,
-   "died": 1948,
-   "death": "illness",
-   "active": 1937,
-   "tags": [
-    "warrior",
-    "ruler"
+   "q": [
+    "showa_02"
    ],
-   "traits": {
-    "war": -2,
-    "open": 1
+   "successor": "広田弘毅",
+   "persuade": {
+    "鎖国を勧める": {
+     "text": "「国を焦土にしても満州国承認を貫く」――内田外相は焦土外交をさらに進め、脱退の時期もドイツと示し合わせた。両国は同じ日に連盟脱退を通告した。",
+     "force": {
+      "q": "showa_02",
+      "choice": 1
+     }
+    }
    },
-   "spawn": "castle",
-   "contrib": [
-    {
-     "vars": {
-      "militarism": 15
-     },
-     "year": 1939,
-     "note": "軍部の暴走に歯止めがかからなくなった"
-    }
-   ]
-  },
-  {
-   "name": "畑俊六",
-   "era": "showa",
-   "faction": "陸軍",
-   "born": 1879,
-   "died": 1962,
-   "death": "natural",
-   "active": 1939,
-   "tags": [
-    "warrior",
-    "sacred"
-   ],
-   "traits": {
-    "war": 1
+   "doc": {
+    "name": "連盟脱退通告の電文",
+    "q": "showa_02",
+    "choice": 1,
+    "text": "外務省から脱退通告の電文が消え、打ち直しに手間取るうちに半年が過ぎた。気づけば1933年10月、ドイツと同じ日の通告になっていた。"
    }
   },
   {
@@ -291,6 +451,10 @@
     "open": -2
    },
    "spawn": "capital",
+   "q": [
+    "showa_02",
+    "showa_05"
+   ],
    "contrib": [
     {
      "vars": {
@@ -300,7 +464,409 @@
      "year": 1932,
      "note": "強硬派の全権がおらず、日本は連盟にとどまった"
     }
+   ],
+   "give": {
+    "世界地図": {
+     "text": "1941年6月にドイツがソ連へ攻め込む未来の地図を見た松岡は「ヒトラーは信用できん」と三国同盟の調印を見送った。同盟が結ばれたのはハル=ノートの後だった。",
+     "force": {
+      "q": "showa_05",
+      "choice": 1
+     }
+    }
+   },
+   "schedule": [
+    {
+     "event": "脱退通告の打電",
+     "at": "capital",
+     "year": 1933,
+     "missed": {
+      "force": {
+       "q": "showa_02",
+       "choice": 1
+      }
+     },
+     "text": "帰国した松岡が外務省で脱退通告を打電するのが遅れに遅れ、気づけばドイツの脱退と同じ日になっていた。"
+    }
    ]
+  },
+  {
+   "name": "荒木貞夫",
+   "era": "showa",
+   "faction": "陸軍",
+   "born": 1877,
+   "died": 1966,
+   "death": "natural",
+   "active": 1932,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": 1,
+    "open": -1
+   },
+   "persuade": {
+    "戦を勧める": {
+     "text": "陸相の荒木は「皇道」を掲げて政党を押しのけ、軍部が政権を握った。孤立した日本はドイツと歩調を合わせ、同じ日に連盟脱退を通告した。",
+     "vars": {
+      "set": {
+       "ruler": "軍部"
+      },
+      "militarism": 15,
+      "open_west": -15
+     },
+     "year": 1932
+    }
+   },
+   "spawn": "castle"
+  },
+  {
+   "name": "広田弘毅",
+   "era": "showa",
+   "faction": "外務省",
+   "born": 1878,
+   "died": 1948,
+   "death": "executed",
+   "active": 1936,
+   "tags": [
+    "diplomat",
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "war": -1,
+    "loyal": 1
+   },
+   "persuade": {
+    "鎖国を勧める": {
+     "text": "広田は中国との交渉の窓口を閉ざし、日中関係は断絶に近くなった。連合国のなかでも中国の発言力は弱まり、ポツダム宣言は米英ソの名で出された。",
+     "vars": {
+      "open_asia": -35
+     },
+     "year": 1937
+    }
+   },
+   "spawn": "castle"
+  },
+  {
+   "name": "斎藤実",
+   "era": "showa",
+   "faction": "海軍",
+   "born": 1858,
+   "died": 1936,
+   "death": "assassinated",
+   "active": 1932,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "war": -1,
+    "loyal": 2
+   },
+   "saved": {
+    "year": 1936,
+    "vars": {
+     "democracy": 20,
+     "militarism": -20
+    },
+    "text": "二・二六事件で内大臣の斎藤実が助かり、宮中の穏健派が健在だった。軍の政治介入は押さえ込まれ、米内内閣は1940年の倒閣を乗り切った。"
+   },
+   "spawn": "capital"
+  },
+  {
+   "name": "安藤輝三",
+   "era": "showa",
+   "faction": "陸軍",
+   "born": 1905,
+   "died": 1936,
+   "death": "executed",
+   "active": 1936,
+   "tags": [
+    "warrior",
+    "rebel"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": 1
+   },
+   "spawn": "village",
+   "contrib": [
+    {
+     "vars": {
+      "militarism": -20,
+      "democracy": 20
+     },
+     "year": 1936,
+     "note": "二・二六事件で部隊を率いる青年将校がおらず、決起は小規模に終わった"
+    }
+   ]
+  },
+  {
+   "name": "近衛文麿",
+   "era": "showa",
+   "faction": "近衛内閣",
+   "born": 1891,
+   "died": 1945,
+   "death": "suicide",
+   "active": 1937,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "loyal": -1,
+    "war": 1,
+    "reform": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "showa_05",
+    "showa_06"
+   ],
+   "persuade": {
+    "戦をやめさせる": {
+     "text": "近衛首相は「バスに乗り遅れるな」の声に流されず、ドイツとの同盟を棚上げした。南部仏印進駐とハル=ノートの後になって、ようやく同盟が結ばれた。",
+     "force": {
+      "q": "showa_05",
+      "choice": 1
+     }
+    },
+    "戦を勧める": {
+     "text": "近衛は「国民政府を対手とせず」と声明し、和平の窓口を自ら閉ざした。日中関係は断絶し、のちの連合国の会議でも中国の声は小さくなった。",
+     "vars": {
+      "open_asia": -35,
+      "militarism": 10
+     },
+     "year": 1938
+    }
+   },
+   "doc": {
+    "name": "三国同盟の閣議決定書",
+    "q": "showa_05",
+    "choice": 1,
+    "text": "三国同盟の閣議決定書が消え、閣議はやり直しに。英米との関係を重んじる声が盛り返し、同盟はハル=ノートの後まで先送りされた。"
+   }
+  },
+  {
+   "name": "及川古志郎",
+   "era": "showa",
+   "faction": "海軍",
+   "born": 1883,
+   "died": 1958,
+   "death": "natural",
+   "active": 1940,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "loyal": 1,
+    "war": -1
+   },
+   "persuade": {
+    "戦をやめさせる": {
+     "text": "海相の及川は「同盟は英米との戦争を招く」と海軍の反対を貫いた。三国同盟は結ばれず、締結は南部仏印進駐とハル=ノートの後にずれこんだ。",
+     "force": {
+      "q": "showa_05",
+      "choice": 1
+     }
+    }
+   },
+   "spawn": "port"
+  },
+  {
+   "name": "スターマー",
+   "era": "showa",
+   "faction": "ドイツ",
+   "born": 1892,
+   "died": 1978,
+   "death": "natural",
+   "active": 1940,
+   "tags": [
+    "diplomat",
+    "foreigner"
+   ],
+   "traits": {
+    "war": 1
+   },
+   "aka": [
+    "スターマー特使"
+   ],
+   "schedule": [
+    {
+     "event": "東京到着",
+     "at": "port",
+     "year": 1940,
+     "missed": {
+      "force": {
+       "q": "showa_05",
+       "choice": 1
+      }
+     },
+     "text": "同盟交渉のための特使スターマーの来日が遅れ、1940年の交渉は流れた。英米協調派が勢いを盛り返し、同盟の締結はハル=ノートの後になった。"
+    }
+   ],
+   "spawn": "port"
+  },
+  {
+   "name": "米内光政",
+   "era": "showa",
+   "faction": "海軍",
+   "born": 1880,
+   "died": 1948,
+   "death": "illness",
+   "active": 1937,
+   "tags": [
+    "warrior",
+    "ruler"
+   ],
+   "traits": {
+    "war": -2,
+    "open": 1
+   },
+   "spawn": "castle",
+   "q": [
+    "showa_05",
+    "showa_06"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "militarism": 15
+     },
+     "year": 1939,
+     "note": "軍部の暴走に歯止めがかからなくなった"
+    }
+   ],
+   "give": {
+    "未来の教科書": {
+     "text": "未来の教科書で三国同盟の行く末を読んだ米内首相は、陸軍の倒閣工作に一歩も引かなかった。内閣は1940年を乗り切り、同盟は南部仏印進駐の後にずれこんだ。",
+     "force": {
+      "q": "showa_05",
+      "choice": 0
+     }
+    }
+   },
+   "persuade": {
+    "戦をやめさせる": {
+     "text": "海相に復帰した米内は「この戦は負けだ」と早くから和平工作を進めた。軍の発言力は弱まり、ポツダム宣言は発表直後に受諾された。",
+     "vars": {
+      "militarism": -30
+     },
+     "year": 1944
+    }
+   }
+  },
+  {
+   "name": "畑俊六",
+   "era": "showa",
+   "faction": "陸軍",
+   "born": 1879,
+   "died": 1962,
+   "death": "natural",
+   "active": 1939,
+   "tags": [
+    "warrior",
+    "sacred"
+   ],
+   "traits": {
+    "war": 1
+   },
+   "q": [
+    "showa_05"
+   ],
+   "persuade": {
+    "忠義を説く": {
+     "text": "「首相を支えるのが陸相の務め」と説かれた畑は、陸軍の求める辞表を出さなかった。米内内閣は続き、三国同盟は南部仏印進駐の後になった。",
+     "force": {
+      "q": "showa_05",
+      "choice": 0
+     }
+    }
+   },
+   "doc": {
+    "name": "陸相の辞表",
+    "q": "showa_05",
+    "choice": 0,
+    "text": "畑陸相の辞表が盗まれ、陸軍は米内内閣を倒すきっかけを失った。陸相が辞めなければ内閣は倒れない――軍部大臣現役武官制が逆に働いた。"
+   },
+   "schedule": [
+    {
+     "event": "陸相辞表の提出",
+     "at": "capital",
+     "year": 1940,
+     "missed": {
+      "force": {
+       "q": "showa_05",
+       "choice": 0
+      }
+     },
+     "text": "畑陸相が辞表を出しに行くのが遅れ、その間に米内内閣は世論を味方につけた。三国同盟は南部仏印進駐の後にずれこんだ。"
+    }
+   ],
+   "spawn": "castle"
+  },
+  {
+   "name": "山本五十六",
+   "era": "showa",
+   "faction": "海軍",
+   "born": 1884,
+   "died": 1943,
+   "death": "killed",
+   "active": 1939,
+   "tags": [
+    "warrior",
+    "sacred"
+   ],
+   "traits": {
+    "war": -1,
+    "open": 1
+   },
+   "q": [
+    "showa_05"
+   ],
+   "persuade": {
+    "戦をやめさせる": {
+     "text": "アメリカ駐在の経験から国力の差を知る山本は「やれと言われれば暴れてみせるが、その先は保証できない」と開戦に反対し続けた。日米は1940年のうちに条件を突き合わせた。",
+     "force": {
+      "q": "showa_05",
+      "choice": 3
+     }
+    }
+   },
+   "spawn": "port"
+  },
+  {
+   "name": "野村吉三郎",
+   "era": "showa",
+   "faction": "外務省",
+   "born": 1877,
+   "died": 1964,
+   "death": "natural",
+   "active": 1941,
+   "tags": [
+    "diplomat",
+    "warrior"
+   ],
+   "traits": {
+    "open": 2,
+    "war": -1
+   },
+   "q": [
+    "showa_05"
+   ],
+   "give": {
+    "世界地図": {
+     "text": "未来の世界地図を見た野村大使は日米交渉を1940年に前倒しした。アメリカは早々に条件を示し、三国同盟も南部仏印進駐もその後の話になった。",
+     "force": {
+      "q": "showa_05",
+      "choice": 3
+     }
+    }
+   },
+   "spawn": "port"
   },
   {
    "name": "コーデル・ハル",
@@ -318,8 +884,13 @@
     "open": 1
    },
    "aka": [
-    "コーデル＝ハル"
-   ]
+    "コーデル＝ハル",
+    "ハル"
+   ],
+   "q": [
+    "showa_05"
+   ],
+   "spawn": "port"
   },
   {
    "name": "グルー大使",
@@ -339,7 +910,62 @@
    },
    "aka": [
     "グルー"
-   ]
+   ],
+   "q": [
+    "showa_05"
+   ],
+   "persuade": {
+    "開国を勧める": {
+     "text": "知日派のグルー大使は東京とワシントンの間を奔走し、日米の対話の窓口は太くなった。軍部の強硬論は抑えられ、アメリカは1940年のうちに条件を示した。",
+     "vars": {
+      "open_west": 25,
+      "militarism": -35
+     },
+     "year": 1940
+    }
+   },
+   "spawn": "capital"
+  },
+  {
+   "name": "フランクリン・ローズヴェルト",
+   "era": "showa",
+   "faction": "アメリカ",
+   "born": 1882,
+   "died": 1945,
+   "death": "illness",
+   "active": 1940,
+   "tags": [
+    "ruler",
+    "foreigner"
+   ],
+   "traits": {
+    "war": 1,
+    "open": 1
+   },
+   "aka": [
+    "ローズヴェルト",
+    "ルーズベルト"
+   ],
+   "spawn": "port"
+  },
+  {
+   "name": "東條英機",
+   "era": "showa",
+   "faction": "陸軍",
+   "born": 1884,
+   "died": 1948,
+   "death": "executed",
+   "active": 1937,
+   "tags": [
+    "ruler",
+    "warrior",
+    "sacred"
+   ],
+   "traits": {
+    "war": 2,
+    "open": -2
+   },
+   "spawn": "castle"
   },
   {
    "name": "鈴木貫太郎",
@@ -358,43 +984,1280 @@
     "war": -2,
     "loyal": 2
    },
-   "spawn": "capital"
+   "spawn": "capital",
+   "q": [
+    "showa_06"
+   ],
+   "persuade": {
+    "戦をやめさせる": {
+     "text": "鈴木首相は「黙殺」とは言わず、7月のうちにポツダム宣言の受諾を決断した。原子爆弾が使われる前に戦争は終わった。",
+     "force": {
+      "q": "showa_06",
+      "choice": 1
+     }
+    },
+    "忠義を説く": {
+     "text": "「最後まで務めを果たせ」と説かれた鈴木は総辞職せず、老体をおして東京湾の米艦ミズーリ号に赴き、自ら降伏文書に署名した。",
+     "force": {
+      "q": "showa_06",
+      "choice": 3
+     }
+    }
+   },
+   "give": {
+    "未来の教科書": {
+     "text": "教科書で8月6日と9日の惨禍を知った鈴木は、すぐに受諾を閣議にかけた。宣言は発表直後に受諾され、広島・長崎の悲劇は起こらなかった。",
+     "force": {
+      "q": "showa_06",
+      "choice": 1
+     }
+    }
+   },
+   "doc": {
+    "name": "「黙殺」談話の原稿",
+    "q": "showa_06",
+    "choice": 1,
+    "text": "新聞に出るはずの「黙殺」談話の原稿が消えた。連合国に拒否と受け取られることもなく、外務省の受諾論がそのまま通った。"
+   },
+   "schedule": [
+    {
+     "event": "内閣総辞職の上奏",
+     "at": "capital",
+     "year": 1945,
+     "missed": {
+      "force": {
+       "q": "showa_06",
+       "choice": 3
+      }
+     },
+     "text": "8月15日の総辞職の上奏が遅れ、鈴木内閣はそのまま残った。降伏文書の調印も、受諾を決めた鈴木首相自身が行うことになった。"
+    }
+   ]
   },
   {
-   "name": "東條英機",
+   "name": "阿南惟幾",
    "era": "showa",
    "faction": "陸軍",
-   "born": 1884,
-   "died": 1948,
-   "death": "executed",
-   "active": 1937,
+   "born": 1887,
+   "died": 1945,
+   "death": "suicide",
+   "active": 1945,
    "tags": [
-    "ruler",
     "warrior",
-    "sacred"
+    "official"
    ],
    "traits": {
-    "war": 2,
-    "open": -2
+    "war": 1,
+    "loyal": 2
+   },
+   "spawn": "castle",
+   "q": [
+    "showa_06"
+   ],
+   "persuade": {
+    "戦をやめさせる": {
+     "text": "陸相の阿南は「本土決戦」の主張を取り下げ、陸軍をまとめて受諾に賛成した。ポツダム宣言は発表直後に受諾された。",
+     "force": {
+      "q": "showa_06",
+      "choice": 1
+     }
+    },
+    "忠義を説く": {
+     "text": "阿南は「聖断に従うのが真の忠義」と陸軍をまとめ上げた。国内は混乱なく一つにまとまり、政府の権威も保たれた。",
+     "vars": {
+      "unity": 30,
+      "centralization": 20
+     },
+     "year": 1945
+    }
    }
   },
   {
-   "name": "山本五十六",
+   "name": "東郷茂徳",
    "era": "showa",
-   "faction": "海軍",
-   "born": 1884,
-   "died": 1943,
-   "death": "killed",
-   "active": 1939,
+   "faction": "外務省",
+   "born": 1882,
+   "died": 1950,
+   "death": "illness",
+   "active": 1945,
+   "tags": [
+    "diplomat",
+    "official"
+   ],
+   "traits": {
+    "open": 2,
+    "war": -2
+   },
+   "q": [
+    "showa_06"
+   ],
+   "give": {
+    "世界地図": {
+     "text": "ソ連が8月8日に参戦する未来の地図を見た東郷外相は、ソ連の仲介に望みをかけるのをやめた。ポツダム宣言は発表直後に受諾された。",
+     "force": {
+      "q": "showa_06",
+      "choice": 1
+     }
+    }
+   },
+   "spawn": "castle"
+  },
+  {
+   "name": "迫水久常",
+   "era": "showa",
+   "faction": "内閣",
+   "born": 1902,
+   "died": 1977,
+   "death": "natural",
+   "active": 1945,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "reform": 1,
+    "loyal": 1
+   },
+   "persuade": {
+    "改革を勧める": {
+     "text": "内閣書記官長の迫水は首相談話から「黙殺」の二文字を削り、「検討中」と発表させた。連合国との窓口は閉じず、宣言は直後に受諾された。",
+     "force": {
+      "q": "showa_06",
+      "choice": 1
+     }
+    }
+   },
+   "spawn": "capital"
+  },
+  {
+   "name": "重光葵",
+   "era": "showa",
+   "faction": "外務省",
+   "born": 1887,
+   "died": 1957,
+   "death": "natural",
+   "active": 1945,
+   "tags": [
+    "diplomat",
+    "official"
+   ],
+   "traits": {
+    "open": 1,
+    "loyal": 2
+   },
+   "q": [
+    "showa_06"
+   ],
+   "contrib": [
+    {
+     "q": "showa_06",
+     "choice": 3,
+     "note": "全権の重光がおらず、受諾を決めた鈴木首相自身がミズーリ号で降伏文書に調印した"
+    }
+   ],
+   "schedule": [
+    {
+     "event": "ミズーリ号への乗艦",
+     "at": "port",
+     "year": 1945,
+     "missed": {
+      "force": {
+       "q": "showa_06",
+       "choice": 3
+      }
+     },
+     "text": "9月2日、重光がミズーリ号へ向かう艇に乗り遅れた。急遽、鈴木前首相が全権として呼び戻され、自ら降伏文書に署名した。"
+    }
+   ],
+   "spawn": "port"
+  },
+  {
+   "name": "梅津美治郎",
+   "era": "showa",
+   "faction": "陸軍",
+   "born": 1882,
+   "died": 1949,
+   "death": "illness",
+   "active": 1944,
    "tags": [
     "warrior",
+    "official"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": 2
+   },
+   "schedule": [
+    {
+     "event": "降伏文書への署名",
+     "at": "port",
+     "year": 1945,
+     "missed": {
+      "force": {
+       "q": "showa_06",
+       "choice": 3
+      }
+     },
+     "text": "参謀総長の梅津が署名の場に間に合わず、軍を代表する人がいないまま、政府の長である鈴木首相が軍の分も含めて降伏文書に調印した。"
+    }
+   ],
+   "spawn": "castle"
+  },
+  {
+   "name": "東久邇宮稔彦王",
+   "era": "showa",
+   "faction": "皇族",
+   "born": 1887,
+   "died": 1990,
+   "death": "natural",
+   "active": 1945,
+   "tags": [
+    "ruler",
     "sacred"
    ],
    "traits": {
     "war": -1,
+    "loyal": 2
+   },
+   "aka": [
+    "東久邇宮"
+   ],
+   "schedule": [
+    {
+     "event": "組閣の大命",
+     "at": "capital",
+     "year": 1945,
+     "missed": {
+      "force": {
+       "q": "showa_06",
+       "choice": 3
+      }
+     },
+     "text": "終戦後の組閣の大命を受けに参内するのが遅れ、鈴木内閣が続投した。降伏文書には受諾を決めた鈴木首相自身が署名した。"
+    }
+   ],
+   "spawn": "temple"
+  },
+  {
+   "name": "木戸幸一",
+   "era": "showa",
+   "faction": "宮中",
+   "born": 1889,
+   "died": 1977,
+   "death": "natural",
+   "active": 1940,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "loyal": 2,
+    "war": -1
+   },
+   "persuade": {
+    "忠義を説く": {
+     "text": "内大臣の木戸は「終戦を決めた内閣が最後まで責任を持つべきだ」と考え、皇族内閣を推さなかった。鈴木首相自身が降伏文書に調印した。",
+     "force": {
+      "q": "showa_06",
+      "choice": 3
+     }
+    }
+   },
+   "spawn": "temple"
+  },
+  {
+   "name": "蔣介石",
+   "era": "showa",
+   "faction": "国民政府",
+   "born": 1887,
+   "died": 1975,
+   "death": "natural",
+   "active": 1937,
+   "tags": [
+    "ruler",
+    "foreigner"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": 1
+   },
+   "q": [
+    "showa_06"
+   ],
+   "doc": {
+    "name": "ポツダム宣言への同意電報",
+    "q": "showa_06",
+    "choice": 0,
+    "text": "重慶から届くはずの蔣介石の同意電報が消えた。宣言は中国抜きで発表され、署名には参戦を控えたソ連の名が加えられた。"
+   },
+   "schedule": [
+    {
+     "event": "ポツダム宣言への同意",
+     "at": "port",
+     "year": 1945,
+     "missed": {
+      "force": {
+       "q": "showa_06",
+       "choice": 0
+      }
+     },
+     "text": "蔣介石が電報で宣言に同意するのが遅れ、宣言はアメリカ・イギリス・ソ連の3国の名で出された。中国は戦勝国の席で出遅れた。"
+    }
+   ],
+   "spawn": "mountain"
+  },
+  {
+   "name": "トルーマン",
+   "era": "showa",
+   "faction": "アメリカ",
+   "born": 1884,
+   "died": 1972,
+   "death": "natural",
+   "active": 1945,
+   "tags": [
+    "ruler",
+    "foreigner"
+   ],
+   "traits": {
+    "war": 1,
     "open": 1
+   },
+   "aka": [
+    "トルーマン大統領"
+   ],
+   "schedule": [
+    {
+     "event": "ポツダム会談",
+     "at": "mountain",
+     "year": 1945,
+     "missed": {
+      "force": {
+       "q": "showa_06",
+       "choice": 0
+      }
+     },
+     "text": "トルーマンのポツダム到着が遅れ、待ちくたびれたスターリンが宣言の文案作りを主導した。重慶への確認は後回しにされ、宣言は米英ソの名で出された。"
+    }
+   ],
+   "spawn": "mountain"
+  },
+  {
+   "name": "スターリン",
+   "era": "showa",
+   "faction": "ソ連",
+   "born": 1878,
+   "died": 1953,
+   "death": "illness",
+   "active": 1945,
+   "tags": [
+    "ruler",
+    "foreigner"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": -2
+   },
+   "persuade": {
+    "戦を勧める": {
+     "text": "スターリンは7月のうちに対日参戦を決め、ポツダム宣言に自ら名を連ねた。宣言はアメリカ・イギリス・ソ連の3国の名で出され、中国は加わらなかった。",
+     "force": {
+      "q": "showa_06",
+      "choice": 0
+     }
+    }
+   },
+   "spawn": "mountain"
+  },
+  {
+   "name": "和田博雄",
+   "era": "showa",
+   "faction": "農林省",
+   "born": 1903,
+   "died": 1967,
+   "death": "natural",
+   "active": 1946,
+   "tags": [
+    "official",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2
+   },
+   "spawn": "village",
+   "q": [
+    "showa_03"
+   ],
+   "contrib": [
+    {
+     "q": "showa_03",
+     "choice": 2,
+     "note": "改革を進める大臣がおらず、第一次案がそのまま実施された"
+    }
+   ],
+   "persuade": {
+    "民を大切に": {
+     "text": "和田農相は全国の農村を回り「土地は耕す人のもの」と説いた。農民組合は力を増し、村々で地主と小作人の話し合いが進んで、地主は自ら土地を売り渡した。",
+     "vars": {
+      "commoners": 40,
+      "unity": 20
+     },
+     "year": 1946
+    },
+    "倹約を勧める": {
+     "text": "「紙幣より米の方が確かだ」――インフレのさなか、和田は小作料の金納化を見送り、物納に統一した。地主の収入はかえって安定した。",
+     "force": {
+      "q": "showa_03",
+      "choice": 3
+     }
+    }
+   },
+   "doc": {
+    "name": "自作農創設特別措置法の草案",
+    "q": "showa_03",
+    "choice": 2,
+    "text": "第二次農地改革の草案が盗まれ、国会に出す法案がなくなった。GHQは日本政府の第一次案で妥協し、在村地主は5町歩まで小作地を持ち続けた。"
+   },
+   "schedule": [
+    {
+     "event": "第二次改革案の閣議",
+     "at": "capital",
+     "year": 1946,
+     "missed": {
+      "force": {
+       "q": "showa_03",
+       "choice": 2
+      }
+     },
+     "text": "和田が閣議に遅れて第二次案が先送りになり、そのまま第一次案が実施された。寄生地主制は半分残った。"
+    }
+   ]
+  },
+  {
+   "name": "松村謙三",
+   "era": "showa",
+   "faction": "農林省",
+   "born": 1883,
+   "died": 1971,
+   "death": "natural",
+   "active": 1945,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "reform": 1,
+    "loyal": 1
+   },
+   "q": [
+    "showa_03"
+   ],
+   "persuade": {
+    "民を大切に": {
+     "text": "第一次案を作った松村農相は「どうせ手放すなら村の中で」と地主たちを説いて回った。地主は政府の買収を待たずに土地を小作人へ売り渡した。",
+     "force": {
+      "q": "showa_03",
+      "choice": 0
+     }
+    }
+   },
+   "spawn": "village"
+  },
+  {
+   "name": "石黒忠篤",
+   "era": "showa",
+   "faction": "農林省",
+   "born": 1884,
+   "died": 1960,
+   "death": "natural",
+   "active": 1940,
+   "tags": [
+    "official",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2
+   },
+   "persuade": {
+    "改革を勧める": {
+     "text": "戦前から自作農の創設を唱えた「農政の神様」石黒は、改革の旗を早くから振った。農村の空気は変わり、地主は買収を待たずに土地を手放した。",
+     "force": {
+      "q": "showa_03",
+      "choice": 0
+     }
+    }
+   },
+   "spawn": "village"
+  },
+  {
+   "name": "賀川豊彦",
+   "era": "showa",
+   "faction": "日本農民組合",
+   "born": 1888,
+   "died": 1960,
+   "death": "illness",
+   "active": 1946,
+   "tags": [
+    "religious",
+    "reformer"
+   ],
+   "traits": {
+    "faith": 2,
+    "reform": 2,
+    "war": -2
+   },
+   "spawn": "village",
+   "q": [
+    "showa_03"
+   ],
+   "persuade": {
+    "民を大切に": {
+     "text": "農民組合の生みの親・賀川は「土地は神から託されたもの」と地主にも小作人にも語りかけた。村ごとに話し合いが進み、地主は自ら土地を売り渡した。",
+     "force": {
+      "q": "showa_03",
+      "choice": 0
+     }
+    }
+   },
+   "give": {
+    "千両箱": {
+     "text": "賀川は千両箱を元手に協同組合の金庫を作り、小作人が土地を買う資金を貸し出した。農民の力が強まり、村の土地は村の中で分けられた。",
+     "vars": {
+      "commoners": 40,
+      "unity": 20
+     },
+     "year": 1946
+    }
    }
+  },
+  {
+   "name": "ラデジンスキー",
+   "era": "showa",
+   "faction": "GHQ",
+   "born": 1899,
+   "died": 1975,
+   "death": "natural",
+   "active": 1946,
+   "tags": [
+    "scholar",
+    "foreigner"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 1
+   },
+   "contrib": [
+    {
+     "q": "showa_03",
+     "choice": 2,
+     "note": "改革の徹底を説いたGHQの農業専門家がおらず、日本政府の第一次案がそのまま通った"
+    }
+   ],
+   "schedule": [
+    {
+     "event": "対日理事会への出席",
+     "at": "capital",
+     "year": 1946,
+     "missed": {
+      "force": {
+       "q": "showa_03",
+       "choice": 2
+      }
+     },
+     "text": "GHQの農業専門家ラデジンスキーが対日理事会に遅れ、第一次案の不徹底さを指摘する人がいなかった。第一次案がそのまま実施された。"
+    }
+   ],
+   "spawn": "castle"
+  },
+  {
+   "name": "マッカーサー",
+   "era": "showa",
+   "faction": "GHQ",
+   "born": 1880,
+   "died": 1964,
+   "death": "natural",
+   "active": 1945,
+   "tags": [
+    "ruler",
+    "foreigner",
+    "warrior"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 1
+   },
+   "spawn": "castle",
+   "schedule": [
+    {
+     "event": "農地改革に関する覚書",
+     "at": "castle",
+     "year": 1945,
+     "missed": {
+      "force": {
+       "q": "showa_03",
+       "choice": 2
+      }
+     },
+     "text": "1945年12月の「農民解放指令」の発出が遅れ、GHQの後押しがないまま日本政府の第一次案が実施された。在村地主は5町歩まで小作地を持ち続けた。"
+    }
+   ]
+  },
+  {
+   "name": "渋沢敬三",
+   "era": "showa",
+   "faction": "大蔵省",
+   "born": 1896,
+   "died": 1963,
+   "death": "natural",
+   "active": 1945,
+   "tags": [
+    "official",
+    "scholar",
+    "merchant"
+   ],
+   "traits": {
+    "reform": 1
+   },
+   "q": [
+    "showa_03"
+   ],
+   "doc": {
+    "name": "新円切替の計画書",
+    "q": "showa_03",
+    "choice": 3,
+    "text": "預金封鎖と新円切替の計画書が盗まれ、戦後インフレは手がつけられなくなった。人々は紙幣を信用せず、小作料も米で納めるのが当たり前になった。"
+   },
+   "schedule": [
+    {
+     "event": "金融緊急措置令の発表",
+     "at": "castle",
+     "year": 1946,
+     "missed": {
+      "force": {
+       "q": "showa_03",
+       "choice": 3
+      }
+     },
+     "text": "渋沢蔵相が金融緊急措置令の発表に遅れ、物価は青天井に。お金への信用が地に落ち、農地改革でも小作料は物納に統一された。"
+    }
+   ],
+   "spawn": "castle"
+  },
+  {
+   "name": "石橋湛山",
+   "era": "showa",
+   "faction": "大蔵省",
+   "born": 1884,
+   "died": 1973,
+   "death": "natural",
+   "active": 1946,
+   "tags": [
+    "official",
+    "scholar"
+   ],
+   "traits": {
+    "reform": 1,
+    "open": 2,
+    "war": -2
+   },
+   "give": {
+    "千両箱": {
+     "text": "積極財政論者の石橋蔵相は千両箱の分まで復興資金をばらまいた。インフレはさらに加速し、紙幣は紙くず同然、取引は物々交換に戻った。",
+     "vars": {
+      "commerce": -30
+     },
+     "year": 1946
+    }
+   },
+   "spawn": "castle"
+  },
+  {
+   "name": "吉田茂",
+   "era": "showa",
+   "faction": "自由党",
+   "born": 1878,
+   "died": 1967,
+   "death": "natural",
+   "active": 1946,
+   "tags": [
+    "ruler",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2,
+    "war": -1,
+    "loyal": 1
+   },
+   "q": [
+    "showa_04"
+   ],
+   "persuade": {
+    "開国を勧める": {
+     "text": "吉田は講和を急ぎ、欧米との貿易と信用の回復に全力を注いだ。経済は早く立ち直り、1955年のIOC総会で東京は1960年大会の開催地に選ばれた。",
+     "vars": {
+      "open_west": 30,
+      "economy": 30
+     },
+     "year": 1952
+    }
+   },
+   "spawn": "capital"
+  },
+  {
+   "name": "十河信二",
+   "era": "showa",
+   "faction": "国鉄",
+   "born": 1884,
+   "died": 1981,
+   "death": "natural",
+   "active": 1955,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "reform": 2,
+    "open": 1
+   },
+   "spawn": "port",
+   "q": [
+    "showa_04"
+   ],
+   "contrib": [
+    {
+     "q": "showa_04",
+     "choice": 2,
+     "note": "「新幹線の父」がおらず、東海道新幹線もそれを前提にしたオリンピック招致も石油危機の後になった"
+    }
+   ],
+   "give": {
+    "蒸気機関の図面": {
+     "text": "図面を見た十河は「蒸気の時代はもう終わりだ、急げ」と工事を3年早めた。新幹線は1960年に開業し、その年の東京オリンピックに間に合った。",
+     "force": {
+      "q": "showa_04",
+      "choice": 0
+     }
+    }
+   }
+  },
+  {
+   "name": "島秀雄",
+   "era": "showa",
+   "faction": "国鉄",
+   "born": 1901,
+   "died": 1998,
+   "death": "natural",
+   "active": 1955,
+   "tags": [
+    "scholar",
+    "official"
+   ],
+   "traits": {
+    "reform": 2
+   },
+   "contrib": [
+    {
+     "q": "showa_04",
+     "choice": 2,
+     "note": "新幹線の技術を束ねる技師長がおらず、開業は石油危機の後になった"
+    }
+   ],
+   "give": {
+    "蒸気機関の図面": {
+     "text": "D51を設計した島は、未来の図面に夢中になって蒸気機関の研究に戻ってしまった。技術は磨かれたが資金は乏しく、石油の値上げに振り回されて、新幹線の開業も所得倍増計画も後回しになった。",
+     "force": {
+      "q": "showa_04",
+      "choice": 3
+     }
+    }
+   },
+   "spawn": "mountain"
+  },
+  {
+   "name": "下村治",
+   "era": "showa",
+   "faction": "大蔵省",
+   "born": 1910,
+   "died": 1989,
+   "death": "natural",
+   "active": 1959,
+   "tags": [
+    "scholar",
+    "official"
+   ],
+   "traits": {
+    "reform": 1
+   },
+   "spawn": "castle",
+   "q": [
+    "showa_04"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "economy": -30
+     },
+     "year": 1959,
+     "note": "所得倍増計画は作られなかった"
+    }
+   ],
+   "persuade": {
+    "倹約を勧める": {
+     "text": "「まだ早い、成長より安定を」と考え直した下村は、所得倍増計画の提案を見送った。計画が作られたのは新幹線とオリンピックの後だった。",
+     "force": {
+      "q": "showa_04",
+      "choice": 3
+     }
+    }
+   }
+  },
+  {
+   "name": "池田勇人",
+   "era": "showa",
+   "faction": "自民党",
+   "born": 1899,
+   "died": 1965,
+   "death": "illness",
+   "active": 1960,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "reform": 1,
+    "open": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "showa_04"
+   ],
+   "persuade": {
+    "倹約を勧める": {
+     "text": "池田は「寛容と忍耐」より「緊縮と我慢」を選び、所得倍増どころか予算を絞った。民間の投資は冷え込み、経済の立ち直りは大きく遅れた。",
+     "vars": {
+      "economy": -30
+     },
+     "year": 1960
+    }
+   },
+   "doc": {
+    "name": "国民所得倍増計画の原案",
+    "q": "showa_04",
+    "choice": 0,
+    "text": "所得倍増計画の原案が盗まれ、作り直しの間に新幹線が開業しオリンピックも開かれた。計画の閣議決定は東京大会の後、石油危機の前になった。"
+   },
+   "schedule": [
+    {
+     "event": "所得倍増計画の閣議決定",
+     "at": "capital",
+     "year": 1960,
+     "missed": {
+      "force": {
+       "q": "showa_04",
+       "choice": 0
+      }
+     },
+     "text": "池田が閣議に遅れて計画の決定が持ち越され、気づけば東京オリンピックの後に。順番は「新幹線・五輪→倍増計画→石油危機」になった。"
+    }
+   ]
+  },
+  {
+   "name": "嘉納治五郎",
+   "era": "showa",
+   "faction": "IOC",
+   "born": 1860,
+   "died": 1938,
+   "death": "illness",
+   "active": 1936,
+   "tags": [
+    "scholar"
+   ],
+   "traits": {
+    "open": 2,
+    "war": -1
+   },
+   "q": [
+    "showa_04"
+   ],
+   "saved": {
+    "year": 1938,
+    "force": {
+     "q": "showa_04",
+     "choice": 0
+    },
+    "text": "氷川丸の船上で肺炎に倒れるはずの嘉納が特効薬で回復した。「柔道の父」の信用はIOCで揺るがず、戦後1955年の総会で東京は1960年大会を勝ち取った。"
+   },
+   "spawn": "temple"
+  },
+  {
+   "name": "東龍太郎",
+   "era": "showa",
+   "faction": "IOC",
+   "born": 1893,
+   "died": 1983,
+   "death": "natural",
+   "active": 1955,
+   "tags": [
+    "official",
+    "scholar"
+   ],
+   "traits": {
+    "open": 2
+   },
+   "persuade": {
+    "開国を勧める": {
+     "text": "IOC委員の東は1955年の総会で「戦後の日本を見てほしい」と熱弁をふるった。東京は1960年大会の開催地に選ばれ、新幹線も大会に合わせて開業した。",
+     "force": {
+      "q": "showa_04",
+      "choice": 0
+     }
+    }
+   },
+   "spawn": "temple"
+  },
+  {
+   "name": "田畑政治",
+   "era": "showa",
+   "faction": "日本水泳連盟",
+   "born": 1898,
+   "died": 1984,
+   "death": "natural",
+   "active": 1955,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "open": 2
+   },
+   "give": {
+    "世界地図": {
+     "text": "未来の地図でローマ大会の予定を知った田畑は、招致を4年前倒しした。東京は1960年大会を勝ち取り、新幹線もそれに合わせて走り出した。",
+     "force": {
+      "q": "showa_04",
+      "choice": 0
+     }
+    }
+   },
+   "spawn": "temple"
+  },
+  {
+   "name": "ブランデージ",
+   "era": "showa",
+   "faction": "IOC",
+   "born": 1887,
+   "died": 1975,
+   "death": "natural",
+   "active": 1955,
+   "tags": [
+    "official",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 1
+   },
+   "persuade": {
+    "開国を勧める": {
+     "text": "IOC会長ブランデージは「アジア初の大会を」と委員たちに働きかけた。1960年大会は東京に決まり、日本は新幹線の開業を急いだ。",
+     "force": {
+      "q": "showa_04",
+      "choice": 0
+     }
+    }
+   },
+   "spawn": "temple"
+  },
+  {
+   "name": "ナセル",
+   "era": "showa",
+   "faction": "エジプト",
+   "born": 1918,
+   "died": 1970,
+   "death": "illness",
+   "active": 1956,
+   "tags": [
+    "ruler",
+    "foreigner"
+   ],
+   "traits": {
+    "war": 1,
+    "open": -1
+   },
+   "persuade": {
+    "戦を勧める": {
+     "text": "1956年のスエズ動乱でナセルは運河の封鎖を長引かせ、中東の石油は止まった。日本は早くも石油危機に見舞われ、新幹線もオリンピックも、所得倍増計画もその後になった。",
+     "force": {
+      "q": "showa_04",
+      "choice": 3
+     }
+    }
+   },
+   "spawn": "port"
+  },
+  {
+   "name": "ファイサル",
+   "era": "showa",
+   "faction": "サウジアラビア",
+   "born": 1906,
+   "died": 1975,
+   "death": "assassinated",
+   "active": 1956,
+   "tags": [
+    "ruler",
+    "foreigner"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": -1
+   },
+   "persuade": {
+    "鎖国を勧める": {
+     "text": "1956年、サウジアラビアの英仏への石油禁輸が日本にまで広げられた。石油を輸入に頼る日本は真っ先に打撃を受け、順番は「石油危機→新幹線・五輪→倍増計画」になった。",
+     "force": {
+      "q": "showa_04",
+      "choice": 3
+     }
+    }
+   },
+   "saved": {
+    "year": 1975,
+    "vars": {
+     "open_asia": 10,
+     "economy": 5
+    },
+    "text": "暗殺されるはずのファイサル国王が助かり、産油国と日本の関係はいち早く安定した。石油危機の教訓から、日本は中東との対話を外交の柱にした。"
+   },
+   "spawn": "port"
+  },
+  {
+   "name": "出光佐三",
+   "era": "showa",
+   "faction": "出光興産",
+   "born": 1885,
+   "died": 1981,
+   "death": "natural",
+   "active": 1953,
+   "tags": [
+    "merchant"
+   ],
+   "traits": {
+    "open": 1,
+    "reform": 1
+   },
+   "spawn": "port",
+   "schedule": [
+    {
+     "event": "日章丸のアバダン入港",
+     "at": "port",
+     "year": 1953,
+     "missed": {
+      "force": {
+       "q": "showa_04",
+       "choice": 3
+      }
+     },
+     "text": "日章丸がイランのアバダンに着くのが遅れ、日本は国際石油資本に頼りきりのまま。1956年のスエズ動乱で真っ先に石油不足に陥り、石油危機が新幹線より先に来た。"
+    }
+   ]
+  },
+  {
+   "name": "井上準之助",
+   "era": "showa",
+   "faction": "民政党",
+   "born": 1869,
+   "died": 1932,
+   "death": "assassinated",
+   "active": 1927,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "open": 2,
+    "war": -1
+   },
+   "spawn": "castle",
+   "q": [
+    "showa_01"
+   ],
+   "saved": {
+    "year": 1932,
+    "text": "血盟団事件で殺されるはずの井上が助かり、財界と政党は軍部に対抗し続けた。",
+    "vars": {
+     "militarism": -10
+    }
+   },
+   "persuade": {
+    "開国を勧める": {
+     "text": "井上は「イギリスは1925年に金本位制へ戻った。日本も今すぐだ」と田中首相を説き伏せ、1927年のうちに金輸出解禁を断行した。",
+     "force": {
+      "q": "showa_01",
+      "choice": 0
+     }
+    }
+   }
+  },
+  {
+   "name": "田中義一",
+   "era": "showa",
+   "faction": "政友会",
+   "born": 1864,
+   "died": 1929,
+   "death": "illness",
+   "active": 1927,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "open": -1
+   },
+   "q": [
+    "showa_01"
+   ],
+   "persuade": {
+    "倹約を勧める": {
+     "text": "「緊縮こそ恐慌の薬」と吹き込まれた田中首相は、蔵相に緊縮論者の井上準之助を起用した。井上はすぐさま金輸出解禁に踏み切った。",
+     "force": {
+      "q": "showa_01",
+      "choice": 0
+     }
+    },
+    "戦を勧める": {
+     "text": "田中首相は山東出兵を広げ、軍と官僚による統制を強めた。恐慌への対応も自由競争より統制が優先され、高橋はすぐに重要産業統制法を作らせた。",
+     "vars": {
+      "centralization": 30,
+      "militarism": 25
+     },
+     "year": 1927
+    }
+   },
+   "spawn": "capital"
+  },
+  {
+   "name": "伊東巳代治",
+   "era": "showa",
+   "faction": "枢密院",
+   "born": 1857,
+   "died": 1934,
+   "death": "natural",
+   "active": 1927,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "reform": -1
+   },
+   "spawn": "capital",
+   "q": [
+    "showa_01"
+   ],
+   "persuade": {
+    "改革を勧める": {
+     "text": "「憲法の番人」伊東は、議会閉会中の緊急勅令も非常時には必要と考え直した。枢密院は台湾銀行救済を承認し、若槻内閣は総辞職を免れた。",
+     "force": {
+      "q": "showa_01",
+      "choice": 2
+     }
+    }
+   },
+   "doc": {
+    "name": "枢密院の反対意見書",
+    "q": "showa_01",
+    "choice": 2,
+    "text": "伊東巳代治が読み上げるはずの反対意見書が消えた。枢密院の審査は拍子抜けするほどすんなり進み、緊急勅令による台湾銀行救済が認められた。"
+   },
+   "schedule": [
+    {
+     "event": "枢密院本会議",
+     "at": "capital",
+     "year": 1927,
+     "missed": {
+      "force": {
+       "q": "showa_01",
+       "choice": 2
+      }
+     },
+     "text": "反対の急先鋒・伊東が枢密院本会議に遅れ、緊急勅令は可決された。台湾銀行は救済され、片岡蔵相のもとで恐慌は収まった。"
+    }
+   ]
+  },
+  {
+   "name": "團琢磨",
+   "era": "showa",
+   "faction": "三井",
+   "born": 1858,
+   "died": 1932,
+   "death": "assassinated",
+   "active": 1927,
+   "tags": [
+    "merchant"
+   ],
+   "traits": {
+    "open": 2
+   },
+   "persuade": {
+    "倹約を勧める": {
+     "text": "三井の総帥・團琢磨は「共倒れの値下げ競争をやめ、業界ごとに生産を調整しよう」と財界をまとめた。高橋蔵相はこれを法律にし、重要産業統制法が4年早く生まれた。",
+     "force": {
+      "q": "showa_01",
+      "choice": 3
+     }
+    }
+   },
+   "saved": {
+    "year": 1932,
+    "text": "暗殺されるはずの團琢磨が助かり、財界は軍部の暴走に声を上げ続けた。",
+    "vars": {
+     "economy": 5,
+     "militarism": -5
+    }
+   },
+   "spawn": "castle"
   }
  ],
- "battles": []
+ "battles": [
+  {
+   "id": "liutiaohu",
+   "name": "満州事変（柳条湖事件）",
+   "at": "battlefield",
+   "year": 1931,
+   "sides": [
+    {
+     "name": "関東軍",
+     "label": "関東軍の兵",
+     "historical": true
+    },
+    {
+     "name": "中国東北軍",
+     "label": "東北軍の兵",
+     "wins": {
+      "vars": {
+       "militarism": -30,
+       "open_west": 15
+      }
+     },
+     "text": "関東軍の独断の出兵は東北軍に阻まれ、奉天を押さえることもできなかった。政府は不拡大方針を貫き、満州問題は外交の場に戻った。連盟総会で勧告案は否決された。"
+    }
+   ]
+  },
+  {
+   "id": "nomonhan",
+   "name": "ノモンハン事件",
+   "at": "mountain",
+   "year": 1939,
+   "sides": [
+    {
+     "name": "ソ連・モンゴル軍",
+     "label": "ソ連軍の兵",
+     "historical": true
+    },
+    {
+     "name": "関東軍",
+     "label": "関東軍の兵",
+     "wins": {
+      "vars": {
+       "militarism": 10,
+       "open_asia": -10
+      }
+     },
+     "text": "ノモンハンで関東軍が持ちこたえ、陸軍は「北進」の夢を捨てきれなかった。史実ではこの敗北が日本の目を南へ向けさせたが、北と南の二正面の構想が続き、軍事費はさらに膨らんだ。"
+    }
+   ]
+  }
+ ]
 }

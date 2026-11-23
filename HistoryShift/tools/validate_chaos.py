@@ -41,7 +41,13 @@ def gd_keys(const):
     return re.findall(r'^\t"([^"]+)":', m.group(1), re.M) if m else []
 
 
-ARGS, ITEMS, CAUSES = gd_keys("ARGS"), gd_keys("ITEMS"), gd_keys("CAUSE_TEXT")
+def gd_cause_keys():
+    src = open(os.path.join(ROOT, "scripts", "core", "actors.gd"), encoding="utf-8").read()
+    m = re.search(r"const CAUSE_TEXT := \{(.*?)\n\}", src, re.S)
+    return re.findall(r'"([a-z_]+)": "', m.group(1)) if m else []
+
+
+ARGS, ITEMS, CAUSES = gd_keys("ARGS"), gd_keys("ITEMS"), gd_cause_keys()
 
 
 def load_eras():
@@ -112,7 +118,9 @@ def main():
 
     # ---------------- 人物・合戦
     actors, alias, battles = {}, {}, []
-    for f in sorted(glob.glob(os.path.join(BASE, "actors", "*.json"))):
+    afiles = sorted(glob.glob(os.path.join(BASE, "actors", "*.json")),
+                    key=lambda f: ERA_ORDER.index(os.path.basename(f)[:-5]) if os.path.basename(f)[:-5] in ERA_ORDER else 99)
+    for f in afiles:
         name = os.path.basename(f)
         d = json.load(open(f, encoding="utf-8"))
         era = d.get("eraId")
@@ -121,10 +129,19 @@ def main():
         for i, a in enumerate(d.get("actors", [])):
             w = f"actors/{name}[{i}]({a.get('name')})"
             n = a.get("name")
-            if not n or n in actors: err(f"{w}: missing/duplicate name")
+            if not n or (n in actors and actors[n]["_file_era"] == era): err(f"{w}: missing/duplicate name in the same file")
             a.setdefault("era", era); a["_file_era"] = era
             if a["era"] not in eras: err(f"{w}: bad era")
-            actors[n] = a
+            if n in actors:   # 別の時代のファイル＝その時代での追加分（HistoryDB.extend_actor と同じ合成）
+                b = actors[n]
+                for k in ("contrib", "schedule", "q", "aka"):
+                    if k in a: b[k] = b.get(k, []) + [x for x in a[k] if x not in b.get(k, [])]
+                for k in ("persuade", "give"):
+                    if k in a: b.setdefault(k, {}).update(a[k])
+                for k in ("saved", "doc"):
+                    if k in a: b[k] = a[k]
+            else:
+                actors[n] = a
             for al in a.get("aka", []): alias[al] = n
             for t in a.get("tags", []):
                 if t not in TAGS: err(f"{w}: bad tag {t}")

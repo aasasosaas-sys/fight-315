@@ -216,6 +216,626 @@
    },
    "year": 1576,
    "text": "京の南蛮寺が崩れた。宣教師たちは「この国は危険だ」とマカオへ引き揚げ、南蛮貿易もキリスト教の布教も急速にしぼんでいった。"
+  },
+  {
+   "id": "sg_alt_give_xavier_gun",
+   "title": "聖人、鉄砲を携える",
+   "trigger": {
+    "kind": "give",
+    "id": "フランシスコ＝ザビエル",
+    "item": "鉄砲"
+   },
+   "force": {
+    "q": "sengoku_01",
+    "choice": 2
+   },
+   "text": "あなたがザビエルに未来の鉄砲を持たせたので、大名たちは『布教を許せば鉄砲がもらえる』と大喜び。日本に鉄砲を広めたのは宣教師ということになってしまった。"
+  },
+  {
+   "id": "sg_alt_escort_xavier_port",
+   "title": "ザビエル、種子島に先回り",
+   "trigger": {
+    "kind": "escort",
+    "id": "フランシスコ＝ザビエル",
+    "to": "port"
+   },
+   "force": {
+    "q": "sengoku_01",
+    "choice": 2
+   },
+   "text": "あなたがザビエルを種子島の港へ連れて行ったので、ポルトガル商人の鉄砲は彼の手を通じて島主に渡った。鉄砲伝来とキリスト教伝来が同じ日の出来事として記録された。"
+  },
+  {
+   "id": "sg_alt_persuade_xavier_war",
+   "title": "宣教師、武器商人に",
+   "trigger": {
+    "kind": "persuade",
+    "id": "フランシスコ＝ザビエル",
+    "arg": "戦を勧める"
+   },
+   "force": {
+    "q": "sengoku_01",
+    "choice": 2
+   },
+   "text": "『戦国の大名には十字架より鉄砲が効きます』――あなたの助言を真に受けたザビエルは、献上品に鉄砲を加えた。布教の許可は次々と下りた。"
+  },
+  {
+   "id": "sg_alt_steal_tokitaka",
+   "title": "二千両の証文、消える",
+   "trigger": {
+    "kind": "steal",
+    "id": "種子島時堯"
+   },
+   "force": {
+    "q": "sengoku_01",
+    "choice": 2
+   },
+   "text": "鉄砲の買い付け証文が盗まれ、時堯とポルトガル商人の取引は破談に。結局、鉄砲を日本にもたらしたのは数年後に来航したザビエルの一行だった。"
+  },
+  {
+   "id": "sg_alt_destroy_tanegashima",
+   "title": "赤尾木の港、壊滅",
+   "trigger": {
+    "kind": "destroy",
+    "id": "port",
+    "value": 200
+   },
+   "force": {
+    "q": "sengoku_01",
+    "choice": 2
+   },
+   "text": "種子島の港が壊れて船が着けず、ポルトガル商人は鹿児島へ回った。そこへ上陸したザビエルが鉄砲を預かり、布教の手土産として大名に献上した。"
+  },
+  {
+   "id": "sg_alt_persuade_tokitaka_close",
+   "title": "島主、南蛮嫌いに",
+   "trigger": {
+    "kind": "persuade",
+    "id": "種子島時堯",
+    "arg": "鎖国を勧める"
+   },
+   "force": {
+    "q": "sengoku_01",
+    "choice": 3
+   },
+   "text": "『異国の筒など不吉です』とあなたが吹き込んだので、時堯は鉄砲を買ったものの複製を禁じた。国産の鉄砲は生まれず、大名は輸入品を奪い合った。"
+  },
+  {
+   "id": "sg_alt_steal_nobunaga",
+   "title": "掟書、盗まれる",
+   "trigger": {
+    "kind": "steal",
+    "id": "織田信長"
+   },
+   "force": {
+    "q": "sengoku_02",
+    "choice": 0
+   },
+   "text": "安土山下町中掟書の原本が盗まれ、楽市令は世に出なかった。のちに秀吉が大坂で座の特権を保護する掟を出し、教科書に載ったのはそちらだった。"
+  },
+  {
+   "id": "sg_alt_give_hideyoshi_gold",
+   "title": "座の商人の献金",
+   "trigger": {
+    "kind": "give",
+    "id": "豊臣秀吉",
+    "item": "千両箱"
+   },
+   "force": {
+    "q": "sengoku_02",
+    "choice": 0
+   },
+   "text": "千両箱を受け取った秀吉は『商いは座に任せるのが一番』と上機嫌。大坂城下に座の特権を保護する掟を出し、楽市よりもそちらが有名になった。"
+  },
+  {
+   "id": "sg_alt_persuade_hideyoshi_frugal",
+   "title": "倹約令の秀吉",
+   "trigger": {
+    "kind": "persuade",
+    "id": "豊臣秀吉",
+    "arg": "倹約を勧める"
+   },
+   "force": {
+    "q": "sengoku_02",
+    "choice": 0
+   },
+   "text": "あなたの説く倹約に感心した秀吉は、商人を座にまとめて統制する道を選んだ。自由な楽市ではなく、座の保護こそが天下人の商業政策になった。"
+  },
+  {
+   "id": "sg_alt_fire_azuchi",
+   "title": "安土城下、炎上",
+   "trigger": {
+    "kind": "fire",
+    "at": "village",
+    "min": 5
+   },
+   "force": {
+    "q": "sengoku_02",
+    "choice": 0
+   },
+   "text": "安土の城下が燃え、商人たちはこぞって秀吉の大坂へ移った。楽市の掟は灰になり、大坂で座を保護する掟書が後世に残った。"
+  },
+  {
+   "id": "sg_alt_escort_nobunaga_port",
+   "title": "信長、港に入り浸る",
+   "trigger": {
+    "kind": "escort",
+    "id": "織田信長",
+    "to": "port"
+   },
+   "force": {
+    "q": "sengoku_02",
+    "choice": 0
+   },
+   "text": "南蛮船に夢中になった信長は種子島の港に居座り、安土の町づくりを家臣任せにした。城下の掟は座の商人の言いなりで作られ、のちに秀吉の大坂の掟として知られた。"
+  },
+  {
+   "id": "sg_alt_forge_nobunaga",
+   "title": "偽の掟書",
+   "trigger": {
+    "kind": "forge",
+    "id": "織田信長"
+   },
+   "force": {
+    "q": "sengoku_02",
+    "choice": 2
+   },
+   "text": "あなたがつかませた偽の掟書が本物として高札に掲げられた。『城下の商売は許可制とし、油座に独占させる』――楽市とは正反対の法が信長の名で出された。"
+  },
+  {
+   "id": "sg_alt_persuade_hideyoshi_peace",
+   "title": "一揆を恐れた太閤",
+   "trigger": {
+    "kind": "persuade",
+    "id": "豊臣秀吉",
+    "arg": "戦をやめさせる"
+   },
+   "force": {
+    "q": "sengoku_03",
+    "choice": 0
+   },
+   "text": "『百姓から武器を取り上げれば戦はなくなります』――あなたの言葉に動かされた秀吉は、九州平定より先に刀狩を命じた。宣教師の追放はその後になった。"
+  },
+  {
+   "id": "sg_alt_give_hideyoshi_gun",
+   "title": "未来の銃に震える",
+   "trigger": {
+    "kind": "give",
+    "id": "豊臣秀吉",
+    "item": "鉄砲"
+   },
+   "force": {
+    "q": "sengoku_03",
+    "choice": 0
+   },
+   "text": "未来の銃の威力を見た秀吉は『こんな物を百姓が持ったら天下が危うい』と青ざめ、何よりも先に刀狩を断行した。"
+  },
+  {
+   "id": "sg_alt_soldiers15",
+   "title": "足軽、総崩れ",
+   "trigger": {
+    "kind": "kill",
+    "type": "soldier",
+    "min": 15
+   },
+   "force": {
+    "q": "sengoku_03",
+    "choice": 0
+   },
+   "text": "足軽が謎の荒武者に次々と討たれ、『百姓が武器を持てば何が起こるかわからぬ』と恐れた秀吉は刀狩を急いだ。バテレン追放令はその翌年になった。"
+  },
+  {
+   "id": "sg_alt_escort_coelho_away",
+   "title": "コエリョ、長崎を去る",
+   "trigger": {
+    "kind": "escort",
+    "id": "ガスパル＝コエリョ",
+    "to": "mountain"
+   },
+   "force": {
+    "q": "sengoku_03",
+    "choice": 0
+   },
+   "text": "あなたがコエリョを山奥へ連れ出したので、九州で宣教師が軍船を見せびらかす事件は起きなかった。秀吉の怒りの矛先はまず百姓の刀に向かった。"
+  },
+  {
+   "id": "sg_alt_give_mitsunari_book",
+   "title": "三成、未来の教科書を読む",
+   "trigger": {
+    "kind": "give",
+    "id": "石田三成",
+    "item": "未来の教科書"
+   },
+   "force": {
+    "q": "sengoku_03",
+    "choice": 0
+   },
+   "text": "未来の教科書で一揆の歴史を読んだ三成は、刀狩を最優先にするよう秀吉に進言した。追放令と身分統制令はその後に回された。"
+  },
+  {
+   "id": "sg_alt_fire_nanbanji",
+   "title": "南蛮寺、炎上",
+   "trigger": {
+    "kind": "fire",
+    "at": "temple",
+    "min": 5
+   },
+   "force": {
+    "q": "sengoku_03",
+    "choice": 0
+   },
+   "text": "京の南蛮寺が燃え、宣教師たちは九州へ逃れた。目の前の脅威が消えた秀吉は、まず刀狩に取りかかった。バテレン追放令はその後になった。"
+  },
+  {
+   "id": "sg_alt_persuade_coelho_loyal",
+   "title": "おとなしい準管区長",
+   "trigger": {
+    "kind": "persuade",
+    "id": "ガスパル＝コエリョ",
+    "arg": "忠義を説く"
+   },
+   "force": {
+    "q": "sengoku_03",
+    "choice": 1
+   },
+   "text": "『天下人に逆らうと布教ができなくなりますよ』――あなたの忠告でコエリョは秀吉に軍船を見せるのをやめた。宣教師の追放は、刀狩と身分統制のあとまで先送りになった。"
+  },
+  {
+   "id": "sg_alt_give_hideyoshi_map",
+   "title": "世界地図に目がくらむ",
+   "trigger": {
+    "kind": "give",
+    "id": "豊臣秀吉",
+    "item": "世界地図"
+   },
+   "force": {
+    "q": "sengoku_03",
+    "choice": 1
+   },
+   "text": "世界地図を見た秀吉は南蛮貿易の儲けに夢中になり、宣教師の追放をためらった。バテレン追放令は刀狩・身分統制令のあと、最後になった。"
+  },
+  {
+   "id": "sg_alt_give_coelho_gold",
+   "title": "準管区長の献金",
+   "trigger": {
+    "kind": "give",
+    "id": "ガスパル＝コエリョ",
+    "item": "千両箱"
+   },
+   "force": {
+    "q": "sengoku_03",
+    "choice": 1
+   },
+   "text": "あなたの千両箱をコエリョが秀吉に献上したので、太閤はすっかり上機嫌。宣教師の追放はずっと後回しにされた。"
+  },
+  {
+   "id": "sg_alt_persuade_hideyoshi_open",
+   "title": "開国派の太閤",
+   "trigger": {
+    "kind": "persuade",
+    "id": "豊臣秀吉",
+    "arg": "開国を勧める"
+   },
+   "force": {
+    "q": "sengoku_03",
+    "choice": 1
+   },
+   "text": "あなたに開国を説かれた秀吉は、南蛮との交易を何より大事にした。宣教師の追放はなかなか決断できず、刀狩・身分統制令のあとにずれ込んだ。"
+  },
+  {
+   "id": "sg_alt_persuade_kuroda_faith",
+   "title": "キリシタン大名の結束",
+   "trigger": {
+    "kind": "persuade",
+    "id": "黒田長政",
+    "arg": "信仰を勧める"
+   },
+   "force": {
+    "q": "sengoku_03",
+    "choice": 1
+   },
+   "text": "黒田長政が信仰に目覚め、キリシタン大名たちの結束が強まった。彼らを敵に回すのを恐れた秀吉は、追放令を最後まで出せなかった。"
+  },
+  {
+   "id": "sg_alt_escort_xavier_capital",
+   "title": "ザビエル、都で大成功",
+   "trigger": {
+    "kind": "escort",
+    "id": "フランシスコ＝ザビエル",
+    "to": "capital"
+   },
+   "force": [
+    {
+     "q": "sengoku_06",
+     "choice": 2
+    },
+    {
+     "q": "sengoku_03",
+     "choice": 1
+    }
+   ],
+   "text": "あなたがザビエルを京の都へ案内したので、彼は天皇への謁見に成功し、公家の間に信仰が広まった。朝廷が保護するキリスト教を秀吉もなかなか禁じられず、追放令は最後になった。"
+  },
+  {
+   "id": "sg_alt_persuade_kuroda_betray",
+   "title": "長政、家康を裏切る",
+   "trigger": {
+    "kind": "persuade",
+    "id": "黒田長政",
+    "arg": "裏切りを促す"
+   },
+   "force": {
+    "q": "sengoku_04",
+    "choice": 3
+   },
+   "text": "調略の名手・黒田長政をあなたが逆に調略した。長政は家康を見限り、豊臣恩顧の諸将をまとめて西軍を組織した。"
+  },
+  {
+   "id": "sg_alt_give_kuroda_gun",
+   "title": "黒田家の新兵器",
+   "trigger": {
+    "kind": "give",
+    "id": "黒田長政",
+    "item": "鉄砲"
+   },
+   "force": {
+    "q": "sengoku_04",
+    "choice": 3
+   },
+   "text": "未来の鉄砲を手にした長政は『これなら内府にも勝てる』と自信満々。三成に代わって西軍の旗頭になった。"
+  },
+  {
+   "id": "sg_alt_escort_kuroda_osaka",
+   "title": "長政、大坂城へ",
+   "trigger": {
+    "kind": "escort",
+    "id": "黒田長政",
+    "to": "castle"
+   },
+   "force": {
+    "q": "sengoku_04",
+    "choice": 3
+   },
+   "text": "あなたが長政を大坂城へ連れて行くと、北政所や秀頼の近臣に説き伏せられて豊臣方に。西軍を組織したのは黒田長政ということになった。"
+  },
+  {
+   "id": "sg_alt_steal_kuroda",
+   "title": "密約状、消える",
+   "trigger": {
+    "kind": "steal",
+    "id": "黒田長政"
+   },
+   "force": {
+    "q": "sengoku_04",
+    "choice": 3
+   },
+   "text": "家康との密約状を盗まれた長政は、東軍に身の証を立てられなくなった。開き直った長政は西軍の盟主となった。"
+  },
+  {
+   "id": "sg_alt_forge_kuroda",
+   "title": "偽の家康の書状",
+   "trigger": {
+    "kind": "forge",
+    "id": "黒田長政"
+   },
+   "force": {
+    "q": "sengoku_04",
+    "choice": 3
+   },
+   "text": "あなたが渡した『黒田家を取り潰す』という偽の家康の書状に長政は激怒。豊臣恩顧の大名を集めて西軍を組織した。"
+  },
+  {
+   "id": "sg_alt_kuroda_faith",
+   "title": "如水の子、十字架を掲げる",
+   "trigger": {
+    "kind": "give",
+    "id": "黒田長政",
+    "item": "未来の教科書"
+   },
+   "force": {
+    "q": "sengoku_04",
+    "choice": 3
+   },
+   "text": "未来の教科書でキリシタン禁教の行く末を知った長政は、徳川の天下を阻もうと西軍に回った。"
+  },
+  {
+   "id": "sg_alt_persuade_kiyomasa_loyal",
+   "title": "清正、豊臣に殉ず",
+   "trigger": {
+    "kind": "persuade",
+    "id": "加藤清正",
+    "arg": "忠義を説く"
+   },
+   "force": {
+    "q": "sengoku_04",
+    "choice": 0
+   },
+   "text": "『太閤殿下への恩を忘れたか』――あなたの言葉に清正は男泣き。三成との確執を水に流し、自ら西軍を組織した。"
+  },
+  {
+   "id": "sg_alt_give_kiyomasa_gun",
+   "title": "肥後の虎、未来の銃を得る",
+   "trigger": {
+    "kind": "give",
+    "id": "加藤清正",
+    "item": "鉄砲"
+   },
+   "force": {
+    "q": "sengoku_04",
+    "choice": 0
+   },
+   "text": "未来の鉄砲を手にした清正は、家康を討つのは自分だと名乗りを上げた。西軍の中心は加藤清正になった。"
+  },
+  {
+   "id": "sg_alt_escort_kiyomasa",
+   "title": "清正、大坂城に入る",
+   "trigger": {
+    "kind": "escort",
+    "id": "加藤清正",
+    "to": "castle"
+   },
+   "force": {
+    "q": "sengoku_04",
+    "choice": 0
+   },
+   "text": "あなたに連れられて大坂城に入った清正は、秀頼の姿を見て豊臣方につくと決めた。西軍の旗頭は清正になった。"
+  },
+  {
+   "id": "sg_alt_give_nobunaga_gun",
+   "title": "本能寺に未来の銃",
+   "trigger": {
+    "kind": "give",
+    "id": "織田信長",
+    "item": "鉄砲"
+   },
+   "force": {
+    "q": "sengoku_05",
+    "choice": 0
+   },
+   "text": "あなたが渡した未来の銃で、信長と小姓たちは明智勢を撃退した。本能寺を脱した信長は安土へ戻り、天下統一を成し遂げた。"
+  },
+  {
+   "id": "sg_alt_escort_nobunaga_away",
+   "title": "信長、本能寺に泊まらず",
+   "trigger": {
+    "kind": "escort",
+    "id": "織田信長",
+    "to": "mountain"
+   },
+   "force": {
+    "q": "sengoku_05",
+    "choice": 0
+   },
+   "text": "あなたが信長を天王山へ連れ出したので、本能寺はもぬけの殻。光秀の謀反は空振りに終わり、信長がそのまま天下を統一した。"
+  },
+  {
+   "id": "sg_alt_kill_mitsuhide",
+   "title": "光秀、謀反の前に倒れる",
+   "trigger": {
+    "kind": "kill",
+    "id": "明智光秀"
+   },
+   "force": {
+    "q": "sengoku_05",
+    "choice": 0
+   },
+   "text": "明智光秀が謀反の前に倒れ、本能寺の変は起こらなかった。信長は安土を拠点に全国を統一し、織田の天下が続いた。"
+  },
+  {
+   "id": "sg_alt_escort_kennyo_nanbanji",
+   "title": "本願寺、南蛮寺へ",
+   "trigger": {
+    "kind": "escort",
+    "id": "顕如",
+    "to": "temple"
+   },
+   "force": {
+    "q": "sengoku_06",
+    "choice": 3
+   },
+   "text": "あなたが顕如を南蛮寺へ連れて行くと、ザビエルと意気投合。一向宗の門徒の間にキリスト教が広まった。"
+  },
+  {
+   "id": "sg_alt_persuade_kennyo_faith",
+   "title": "門徒とキリシタンの同盟",
+   "trigger": {
+    "kind": "persuade",
+    "id": "顕如",
+    "arg": "開国を勧める"
+   },
+   "force": {
+    "q": "sengoku_06",
+    "choice": 3
+   },
+   "text": "『南蛮の教えも阿弥陀さまも、民を救う点では同じ』――あなたの言葉に顕如はうなずき、ザビエルと手を結んだ。"
+  },
+  {
+   "id": "sg_alt_give_kennyo_map",
+   "title": "顕如、世界地図を見る",
+   "trigger": {
+    "kind": "give",
+    "id": "顕如",
+    "item": "世界地図"
+   },
+   "force": {
+    "q": "sengoku_06",
+    "choice": 3
+   },
+   "text": "世界の広さを知った顕如は、南蛮の宗教者と組んで大名に対抗しようと考えた。石山本願寺はキリシタンの拠点にもなった。"
+  },
+  {
+   "id": "sg_alt_give_xavier_gold",
+   "title": "ザビエルの献金",
+   "trigger": {
+    "kind": "give",
+    "id": "フランシスコ＝ザビエル",
+    "item": "千両箱"
+   },
+   "force": {
+    "q": "sengoku_06",
+    "choice": 2
+   },
+   "text": "あなたの千両箱をザビエルが朝廷に献上したので、天皇への謁見が許された。キリスト教は公家の間に急速に広まった。"
+  },
+  {
+   "id": "sg_alt_persuade_xavier_reform",
+   "title": "ザビエル、都を目指す",
+   "trigger": {
+    "kind": "persuade",
+    "id": "フランシスコ＝ザビエル",
+    "arg": "改革を勧める"
+   },
+   "force": {
+    "q": "sengoku_06",
+    "choice": 2
+   },
+   "text": "『九州より都で布教を』――あなたの勧めでザビエルはまっすぐ京へ向かい、朝廷の保護を取りつけた。"
+  },
+  {
+   "id": "sg_alt_battle_west",
+   "title": "西軍、勝つ",
+   "trigger": {
+    "kind": "battle",
+    "id": "sekigahara",
+    "side": "西軍"
+   },
+   "vars": {
+    "set": {
+     "ruler": "豊臣",
+     "capital": "大坂"
+    },
+    "unity": -10
+   },
+   "year": 1600,
+   "text": "あなたが東軍の兵を蹴散らしたので、関ヶ原は西軍の勝利に終わった。豊臣秀頼のもとで大坂の政権が続き、江戸幕府は生まれなかった。"
+  },
+  {
+   "id": "sg_alt_persuade_mitsunari_frugal",
+   "title": "奉行の座保護策",
+   "trigger": {
+    "kind": "persuade",
+    "id": "石田三成",
+    "arg": "倹約を勧める"
+   },
+   "force": {
+    "q": "sengoku_02",
+    "choice": 0
+   },
+   "text": "倹約と統制を説かれた三成は、商人を座にまとめて年貢と同じように管理する策を秀吉に献じた。自由な楽市ではなく、大坂で座を保護する掟が豊臣の商業政策として教科書に載った。"
+  },
+  {
+   "id": "sg_alt_kill_nobunaga_fire",
+   "title": "信長、炎に消える",
+   "trigger": {
+    "kind": "kill",
+    "id": "織田信長",
+    "cause": "fire"
+   },
+   "force": {
+    "q": "sengoku_02",
+    "choice": 0
+   },
+   "text": "あなたの起こした火に巻かれ、信長は安土の町づくりの途中で世を去った。城下の掟を出したのは後を継いだ秀吉で、それは座を保護する大坂の掟だった。"
   }
  ]
 }

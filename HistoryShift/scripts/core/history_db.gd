@@ -71,19 +71,24 @@ static func load_all(dir := "res://data") -> HistoryDB:
 func _load_actors(adir: String) -> void:
 	if not DirAccess.dir_exists_absolute(adir):
 		return
-	var files := DirAccess.get_files_at(adir)
-	files.sort()
+	var files: Array = Array(DirAccess.get_files_at(adir)).filter(func(f): return f.ends_with(".json"))
+	# 古い時代から読む。別の時代のファイルに同じ人物がいれば「その時代での追加分」として合成する（extend_actor）
+	files.sort_custom(func(a, b): return ERA_ORDER.find(a.get_basename()) < ERA_ORDER.find(b.get_basename()))
 	for f in files:
-		if not f.ends_with(".json"):
-			continue
 		var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(adir.path_join(f)))
 		if typeof(d) != TYPE_DICTIONARY:
 			errors.append("actors/%s: JSON を読めません" % f)
 			continue
+		var fera := str(d.get("eraId", f.get_basename()))
 		for a in d.get("actors", []):
 			if not a.has("era"):
-				a["era"] = d.get("eraId", "")
-			actors[a["name"]] = a
+				a["era"] = fera
+			if a.has("spawn"):
+				a["spawn_eras"] = {fera: a["spawn"]}
+			if actors.has(a["name"]):
+				extend_actor(actors[a["name"]], a, fera)
+			else:
+				actors[a["name"]] = a
 			for al in a.get("aka", []):
 				actor_alias[al] = a["name"]
 		for b in d.get("battles", []):
@@ -104,6 +109,32 @@ func _load_actors(adir: String) -> void:
 		for qid in actors[an].get("q", []):
 			if q_actors.has(qid) and not q_actors[qid].any(func(x): return x["name"] == an):
 				q_actors[qid].append({"name": an, "at": str(actors[an].get("spawn", "capital"))})
+
+
+## 別の時代のファイルに書かれた同じ人物を合成する：一覧（contrib・schedule・q・aka）は足し、辞書（persuade・give）は上書き、
+## saved・doc は後の時代のものがあれば差し替え、spawn はその時代の置き場所として spawn_eras に入れる
+static func extend_actor(base: Dictionary, ext: Dictionary, fera: String) -> void:
+	for k in ["contrib", "schedule", "q", "aka"]:
+		if ext.has(k):
+			var lst: Array = base.get(k, []).duplicate()
+			for x in ext[k]:
+				if not (x in lst):
+					lst.append(x)
+			base[k] = lst
+	for k in ["persuade", "give"]:
+		if ext.has(k):
+			var dd: Dictionary = base.get(k, {}).duplicate()
+			dd.merge(ext[k], true)
+			base[k] = dd
+	for k in ["saved", "doc"]:
+		if ext.has(k):
+			base[k] = ext[k]
+	if ext.has("spawn"):
+		var se: Dictionary = base.get("spawn_eras", {})
+		se[fera] = ext["spawn"]
+		base["spawn_eras"] = se
+	if ext.has("successor") and not base.has("successor"):
+		base["successor"] = ext["successor"]
 
 
 ## 表記ゆれ（「老中 田沼意次」「羽柴秀吉」「厩戸王（聖徳太子）」）→ 人物名。知らなければ ""
