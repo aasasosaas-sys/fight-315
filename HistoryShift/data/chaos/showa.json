@@ -334,7 +334,10 @@
    "trigger": {
     "kind": "kill",
     "id": "石原莞爾",
-    "cause": "player"
+    "cause": [
+     "player",
+     "shot"
+    ]
    },
    "vars": {
     "militarism": -30,
@@ -350,8 +353,15 @@
     "kind": "kill",
     "id": "石原莞爾",
     "cause": [
+     "horse",
+     "vehicle",
+     "debris",
+     "explosion",
      "fire",
-     "crossfire"
+     "stray",
+     "plane",
+     "crossfire",
+     "world"
     ]
    },
    "vars": {
@@ -359,7 +369,7 @@
     "open_west": 15
    },
    "year": 1931,
-   "text": "石原莞爾が火事と撃ち合いの巻き添えで倒れ、関東軍の作戦計画は白紙に戻った。軍の独断を止める時間が生まれ、満州問題は外交で処理された。勧告案は連盟総会で否決された。"
+   "text": "石原莞爾が暴れ馬や崩れた瓦礫といった思わぬ事故で倒れ、関東軍の作戦計画は白紙に戻った。軍の独断を止める時間が生まれ、満州問題は外交で処理された。勧告案は連盟総会で否決された。"
   },
   {
    "id": "sh_kill_komoto",
@@ -367,7 +377,10 @@
    "trigger": {
     "kind": "kill",
     "id": "河本大作",
-    "cause": "player"
+    "cause": [
+     "player",
+     "shot"
+    ]
    },
    "vars": {
     "militarism": -25,
@@ -382,7 +395,10 @@
    "trigger": {
     "kind": "kill",
     "id": "三上卓",
-    "cause": "player"
+    "cause": [
+     "player",
+     "shot"
+    ]
    },
    "vars": {
     "democracy": 40,
@@ -414,7 +430,8 @@
     "id": "河本大作",
     "cause": [
      "fire",
-     "crossfire"
+     "explosion",
+     "debris"
     ]
    },
    "vars": {
@@ -425,14 +442,38 @@
    "text": "河本大作が仕掛けるはずだった爆薬の置き場で火が出て、河本は巻き込まれて倒れた。1928年の張作霖爆殺事件は起こらず、満州の情勢は落ち着いた。満州事変もなく、日本は連盟にとどまった。"
   },
   {
+   "id": "sh_kill_mikami_car",
+   "title": "官邸前の暴走車",
+   "trigger": {
+    "kind": "kill",
+    "id": "三上卓",
+    "cause": [
+     "vehicle",
+     "horse",
+     "debris",
+     "stray",
+     "world"
+    ]
+   },
+   "vars": {
+    "democracy": 40,
+    "unity": 15,
+    "militarism": -15
+   },
+   "year": 1932,
+   "text": "5月15日の夕方、官邸へ向かう三上卓の一団の前に暴走した車が突っ込み、三上は倒れた。襲撃は取りやめとなり、犬養内閣が続いた。政党内閣の時代は途切れず、勧告案は否決された。"
+  },
+  {
    "id": "sh_kill_ando_crossfire",
    "title": "雪の夜の撃ち合い",
    "trigger": {
     "kind": "kill",
     "id": "安藤輝三",
     "cause": [
-     "fire",
-     "crossfire"
+     "crossfire",
+     "stray",
+     "vehicle",
+     "horse"
     ]
    },
    "vars": {
@@ -448,7 +489,10 @@
    "trigger": {
     "kind": "kill",
     "id": "安藤輝三",
-    "cause": "player"
+    "cause": [
+     "player",
+     "shot"
+    ]
    },
    "vars": {
     "militarism": -20,
@@ -800,105 +844,6 @@
     "choice": 0
    },
    "text": "あなたが高橋是清を連れ出したので、田中首相は日銀総裁経験者の井上準之助を蔵相に起用した。井上は1927年のうちに金輸出解禁を断行し、円の信用で取付けを収めようとした。"
-  },
-  {
-   "id": "sh_steal_takahashi",
-   "title": "蔵相就任の承諾書、消える",
-   "trigger": {
-    "kind": "steal",
-    "id": "高橋是清"
-   },
-   "force": {
-    "q": "showa_01",
-    "choice": 0
-   },
-   "text": "高橋是清の蔵相就任の承諾書が消え、田中首相は井上準之助を起用した。井上は金輸出解禁に踏み切った。史実の金解禁は1930年、世界恐慌のさなかで「嵐の中で雨戸を開けた」と言われた。"
-  },
-  {
-   "id": "sh_persuade_takahashi_reform",
-   "title": "モラトリアムと統制、同時に",
-   "trigger": {
-    "kind": "persuade",
-    "id": "高橋是清",
-    "arg": "改革を勧める"
-   },
-   "force": {
-    "q": "showa_01",
-    "choice": 3
-   },
-   "text": "高橋は支払猶予令で取付けを止めるだけでなく、「乱立する企業を整理して共倒れを防げ」と重要産業統制法まで一気に作らせた。統制経済が4年早く始まった。"
-  },
-  {
-   "id": "sh_protect_takahashi",
-   "title": "二・二六、ダルマ起き上がる",
-   "trigger": {
-    "kind": "protect",
-    "id": "高橋是清"
-   },
-   "vars": {
-    "militarism": -25,
-    "democracy": 20
-   },
-   "year": 1936,
-   "text": "二・二六事件の凶弾を逃れた高橋是清は蔵相を続け、「軍事費の膨張は国を滅ぼす」と予算の歯止めであり続けた。議会と内閣が軍を抑え、米内内閣は1940年の倒閣を乗り切った。"
-  },
-  {
-   "id": "sh_persuade_wakatsuki_peace",
-   "title": "不拡大、貫かれる",
-   "trigger": {
-    "kind": "persuade",
-    "id": "若槻礼次郎",
-    "arg": "戦をやめさせる"
-   },
-   "force": {
-    "q": "showa_02",
-    "choice": 3
-   },
-   "text": "1931年、若槻首相は「不拡大」を口で言うだけでなく、独断で越境した朝鮮軍の経費を閣議で認めなかった。関東軍は孤立して矛を収め、連盟総会で勧告案は否決された。"
-  },
-  {
-   "id": "sh_give_wakatsuki_book",
-   "title": "枢密院を先回り",
-   "trigger": {
-    "kind": "give",
-    "id": "若槻礼次郎",
-    "item": "未来の教科書"
-   },
-   "force": {
-    "q": "showa_01",
-    "choice": 2
-   },
-   "text": "教科書で枢密院に救済案を否決される未来を知った若槻首相は、議会の閉会前に台湾銀行救済の法案を通した。内閣は総辞職を免れ、片岡蔵相のもとで恐慌は収まった。"
-  },
-  {
-   "id": "sh_persuade_shidehara_open",
-   "title": "協調外交、太くなる",
-   "trigger": {
-    "kind": "persuade",
-    "id": "幣原喜重郎",
-    "arg": "開国を勧める"
-   },
-   "vars": {
-    "open_west": 25,
-    "militarism": -25
-   },
-   "year": 1930,
-   "text": "幣原外相は協調外交をいっそう押し進め、中国との関税交渉や英米との対話の窓口を太くした。軍の独断は通らず、満州問題は話し合いで処理された。"
-  },
-  {
-   "id": "sh_persuade_shidehara_people",
-   "title": "幣原首相、農地改革を急ぐ",
-   "trigger": {
-    "kind": "persuade",
-    "id": "幣原喜重郎",
-    "arg": "民を大切に"
-   },
-   "vars": {
-    "commoners": 40,
-    "unity": 20
-   },
-   "year": 1946,
-   "text": "1945年に首相となった幣原は「農民の暮らしこそ復興の土台」と考え、地主に自発的な売り渡しを呼びかけた。村々で土地が小作人へ渡り、政府の強制買収は必要なかった。"
   }
  ]
 }
