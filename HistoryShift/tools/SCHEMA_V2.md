@@ -179,3 +179,17 @@ v1（tools/SCHEMA.md）の項目はすべてそのまま有効。v2 では以下
 - exclusions.json（史実の虐殺・戦災・その鎮圧に重なる場面。ここでは設定を無視し、町人は倒れず、casualty も数えない）：
   `landmarks` [{era, at, name, basis}]、`missions` [{q, choice?, method?, basis}]（choice・method を省くとその問題のすべて）、`eras`、
   `reviewed_not_excluded`（検討して除外しなかった場面と理由）。
+
+## data/eras/<eraId>_timeline.json（時代の中の年）
+```json
+{"eraId": "edo", "range": [1603, 1867], "default": 1700, "basis": "...",
+ "ships": [{"id": "susquehanna", "from": 1853, "until": 1868, "basis": "..."}],
+ "units": [{"landmark": "capital", "kind": "castle_keep", "until": 1656, "basis": "明暦の大火で焼失し再建されず"}],
+ "points": [{"year": 1657, "label": "1657年 明暦の大火の直後", "desc": "（年の入った史実）", "basis": "...",
+   "guard": "護衛の名", "crowd": {"KIMONO": 0.5, "COMMONER": 0.5}, "enemy_outfit": "POLICE", "crowd_n": 0.7, "events": ["great_fire"],
+   "ruin": [{"landmark": "village", "kind": ["house"], "frac": 0.5, "burned": true}]}]}
+```
+- 時点は、その時代の**すべての手作りの道がどこかの時点で起こせる**ように選ぶ（人物の在世：活動開始年−10〜没年、15 歳以上）。
+  `godot --headless --path . res://tests/test_timeline.tscn` が検査する（足りなければ時点を足す。内容は削らない）。
+- `units`：from（この年から有る）/ until（この年まで有る）/ keep（大きい順に残す数）。`ruin` はその時点の年ちょうどだけ。
+- 行動の記録に `year`（自由探索で選んだ年）が付く。一般則の効果はその年に起きる。`HistoryState` の保存に `ruins`（壊した建物・沈めた船と年）が加わった。

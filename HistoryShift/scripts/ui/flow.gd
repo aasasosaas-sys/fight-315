@@ -276,7 +276,7 @@ func depart(q: Dictionary, method := 0) -> void:
 func start_free_roam(era_id: String, return_to := "hub", p_year := 0) -> void:
 	if _busy:
 		return
-	var year := p_year if p_year != 0 else load("res://scripts/ui/era_picker.gd").take_year(era_id)
+	var year: int = p_year if p_year != 0 else int(load("res://scripts/ui/era_picker.gd").take_year(era_id))
 	if year == 0:
 		year = EraTimeline.default_year(era_id)
 	_free_year = year

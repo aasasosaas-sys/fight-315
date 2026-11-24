@@ -53,6 +53,13 @@ void vertex() {
 	v_wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	v_wnrm = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	UV *= uv_scale;
+	// 内装は外殻の内壁・床と同じ面に重なる板が多い（z ファイティングで黒い櫛状のちらつき）。
+	// カメラへわずかに寄せて（画面上の位置はほぼ同じ）、内装側を確実に手前に描く。
+	if (hs_indoor > 0.5) {
+		vec3 cam_l = (inverse(MODEL_MATRIX) * vec4(CAMERA_POSITION_WORLD, 1.0)).xyz;
+		vec3 to_cam = cam_l - VERTEX;
+		VERTEX += normalize(to_cam) * min(0.025, length(to_cam) * 0.004);
+	}
 }
 
 vec3 saturate_col(vec3 c, float s) {
@@ -193,7 +200,7 @@ void fragment() {
 	float under = smoothstep(0.2, -0.6, v_wnrm.y) * 0.5 + (1.0 - abs(v_wnrm.y)) * 0.15;
 	if (glass < 0.5) {
 		EMISSION = a * vec3(1.0, 0.62, 0.3) * world_night * under * 0.7 * (1.0 - hs_indoor) + d_emis + in_emis;
-		if (window_glow > 0.5 && vlum < 0.125 && abs(v_wnrm.y) < 0.3) {
+		if (window_glow > 0.5 && vlum < 0.125 && abs(v_wnrm.y) < 0.3 && hs_indoor < 0.5) {
 			// 格子窓・開口部から漏れる灯り（夜）。昼は奥の暗がりを少し青く沈める
 			float flick = 0.85 + 0.15 * texture(macro_tex, v_wpos.xz * 0.2 + vec2(TIME * 0.05)).r;
 			EMISSION += vec3(1.0, 0.66, 0.32) * world_night * 2.6 * flick;

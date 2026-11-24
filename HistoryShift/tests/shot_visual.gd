@@ -44,6 +44,7 @@ func _run() -> void:
 	var w: EraWorld = sess.world
 	var cam: CameraRig = sess.cam
 	var hud: Hud = sess.hud
+	var spawn0: Vector3 = p.global_position
 	var cap: Vector3 = w.landmark_pos("capital")
 	var to_cap := cap - p.global_position
 	cam.yaw = atan2(-to_cap.x, -to_cap.z) + 0.35
@@ -150,7 +151,7 @@ func _run() -> void:
 		hud.visible = false
 		w.set_time_of_day(20.5)
 		c2.fov = 62.0
-		var sp := p.global_position
+		var sp := spawn0
 		c2.global_position = sp + Vector3(0, 1.7, 0)
 		c2.look_at(cap + Vector3(0, 5, 0), Vector3.UP)
 		c2.current = true

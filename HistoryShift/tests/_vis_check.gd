@@ -26,6 +26,7 @@ func _ready() -> void:
 		var mi := MeshInstance3D.new()
 		mi.mesh = BoxMesh.new()
 		mi.material_override = WorldMaterials.get_mat(key)
+		mi.set_instance_shader_parameter("hs_indoor", 1.0 if i % 2 == 0 else 0.0)
 		mi.position = Vector3(i - 4, 0, 0)
 		root.add_child.call_deferred(mi)
 		i += 1

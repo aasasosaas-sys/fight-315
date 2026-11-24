@@ -36,7 +36,8 @@ Game.world / Game.player / Game.input_blocked / Game.lock_mouse()
 ## EraWorld（担当: world）— `scripts/world/era_world.gd`
 ```gdscript
 class_name EraWorld extends Node3D
-static func build(era: Dictionary) -> EraWorld      # era = Game.db.get_era(id)。add_child は呼び出し側
+static func build(era: Dictionary, year := 0, hist := {}) -> EraWorld   # era = Game.db.get_era(id)。add_child は呼び出し側。
+                                                    # year = 時代の中の年（0 = 年の指定なし）、hist = {"ruins": 前の年に壊した建物}（下の「時代の中の年」）
 var era: Dictionary
 var half_size: float          # 遊べる範囲は [-half_size, half_size]（約 600）
 var water_level: float
@@ -58,7 +59,7 @@ signal completed(changes: Array)      # ミッション成功時。apply_change 
 signal failed(reason: String)
 signal aborted
 static func start_mission(q: Dictionary, choice: int) -> Session   # ワールド・プレイヤー・HUD・ミッション進行を生成
-static func start_free_roam(era_id: String) -> Session
+static func start_free_roam(era_id: String, year := 0) -> Session   # year 0 = 時代の代表の年（data/eras の default）。ミッションは問題の年
 static func start_backdrop(era_id: String) -> Session              # タイトル背景用（カメラが周回、操作なし、HUD なし）
 func end()                                                         # 片付け（queue_free）
 ```
@@ -161,3 +162,32 @@ EraWorld.interior_at(pos) -> int
 - 市場: `buildings.json` の `markets`（品ごとの時代の需要倍率と史実の根拠。例 生糸は開港後の明治 ×1.4、玉鋼は廃刀令後 ×0.4）。
   施設画面の「問屋に卸す」＝ `Knowledge.market_price/market_sell`（品の値×0.6×需要×売れ残り（1つ 4%・最低 40%・30 秒で 1 つ分戻る）×話術）。
 - 操船: `Player.apply_sailing(helm)` が乗船時に `ship.sd.pilot` の vmax・turn を操船の技能の倍率で置きかえる（ships/* は変えない）。舵を取って 40m 進むごとに操船の稽古。
+
+## 時代の中の年（担当: gameplay/world）— `data/eras/<era>_timeline.json`・`scripts/core/era_timeline.gd`・`scripts/world/timeline_world.gd`
+箱庭は時代全体の静止画ではなく、選んだ年の姿になる（徳川家康と坂本龍馬が同じ年に並ばない）。
+- 時点（points）：自由探索で選べる年（時代選択のあとに年を選ぶ。`EraPicker.open_years` → `Flow.start_free_roam(era, return_to, year)`）。
+  ミッションは問題の年（`Session.mission_year(q)`）に降り立ち、その年に効いている時点（その年以前で最も新しい時点）の設定を使う。
+  各時点：label・desc（年の入った史実）・basis・guard（護衛の名）・crowd（町人の装いの比率 → `Humanoid.outfit_for`）・enemy_outfit・crowd_n・events・ruin。
+- 人物：`EraTimeline.actor_present`＝活動開始年−10（かつ 15 歳以上）〜没年。あなたが倒した（kill/escort）年から先にはいない（前の年にはいる）。
+  救った（protect・特効薬）人は史実の没年の後も（生年+80 まで）。顔の年齢区分（`Figures.age_at` → AnimeFace の young/adult/elder）と名札の年齢。
+  予定（schedule）・合戦・国家事業は、その年に最も近い時点（予定は人物がいる時点）に現れる。
+- 船：`ShipYard.ships_for(era, year)`（timeline の ships：朱印船 1604–35、サスケハナ 1853–68、咸臨丸 1857–71、三笠 1902–23、赤城 1927–42、加賀 1928–42、大和 1941–45、氷川丸 1930–）。
+- 建物：`units`（その年にまだ無い・もう無い：江戸城天守は 1657 年から天守台だけ、明治の煉瓦建築は銀座煉瓦街 1872 年以後…）と時点の `ruin`
+  （明暦の大火 1657・関東大震災 1923・東京大空襲 1945 の直後の焼け跡）を `TimelineWorld.apply` が組み上げ後に当てる（破片・通知なし。ユニット ID は年によらず同じ）。
+- 歴史：自由探索の行動は選んだ年を `year` に記録し（`ChaosTracker.active_year`）、一般則の効果はその年に起きる（`HistoryActors.resolve`。人物の貢献など年の決まった史実はその年のまま）。
+  自由探索で壊した建物・沈めた船は `HistoryState.ruins[era]`（保存される）に年つきで残り、同じ時代のその年以後の時点でも壊れたまま（家・蔵などは `REBUILD_YEARS` 後に建て直される）。
+- 検査：`tests/test_timeline.tscn`（生没の外に出ない・船・ミッションの年・前の年に壊した建物・**手作りの道（揺らぎのルール・人物の動詞・予定・合戦・事業・各問題の「未来を語る」相手）が
+  どこかの時点で必ず起こせる**）。写真：`tests/shot_timeline.gd -- edo 1615,1657,1853`。
+
+## ルック（アニメ調の描画）— `shaders/`・`scripts/world/atmosphere.gd`・`era_styles.gd`
+- 時代ごとのプリセット（`EraStyles._anime`）: 太陽の色・高さ、影色 `shade_color`、空・雲、漆喰の色味 `plaster_tint`/`wood_tint`/`roof_tint`、低い霞 `haze_*`、
+  カラーグレーディング `grade`（`WorldAtmosphere.grade_lut` が 32³ の 3D LUT を作り `Environment.adjustment_color_correction` に。夜は `grade_night`）。
+  平安＝春のパステル、戦国＝黄金色の夕刻、江戸＝澄んだ青の昼、明治＝暖かいセピア寄り、昭和＝夏の午後（入道雲・褪せたフィルム）。
+- グローバルシェーダ変数: `toon_shade_color` `toon_params` `world_night` `world_sky_color` `world_sun_color` `world_wind`（風向き・強さ）`world_indoor`（屋内の度合い）。
+- `toon.gdshaderinc`: セル 3 段（影は寒色・明部は日の色）、影の中の空の照り返し、明暗の境の色の転び、空色のリム。
+- `building.gdshader`: `mat_kind`（1 漆喰 2 木 3 瓦 4 石 5 茅 6 布 7 畳）で手描きの塗り（色ムラ・雨だれ・裾の汚れ・木目・瓦の列と空の映り込み・石ごとの濃淡）。
+  `instance uniform hs_indoor`（内装のメッシュ）で障子の透け・木と畳の暖色、外殻との z ファイティング回避。
+- `post_anime.gdshader`: 輪郭線（遠景は空気の色へ）、凸の稜線のハイライト（粗さ 1.0 の草・葉・地形・人物には付けない）、光芒、太陽のグレア、周辺減光。
+- 屋内: `WorldInteriors` がプレイヤーの出入りで `WorldAtmosphere.set_indoor` を 0→1 に補間（暖かい環境光・露出・灯りのにじみ）。
+- 人物（MToon）: `_HsKind`（`AnimeChar._tag_materials` が VRM 読み込み時に設定。1 髪＝天使の輪 / 2 肌＝血色の帯 / 3 顔＝影を柔らかく / 4 目）、全員にリムライト、服は影の 3 段目。
+- 被写界深度: `WorldAtmosphere.set_dof(world.env_nodes, 焦点距離)`（0 で無効）。検証は `tests/shot_visual.tscn -- <era> <tag> [shots]`。
