@@ -182,8 +182,8 @@ static func _anime(era_id: String) -> Dictionary:
 				"sunset_amount": 0.7, "shade_color": Color(0.56, 0.54, 0.82),
 				"grass_a": Color(0.46, 0.64, 0.28), "grass_b": Color(0.32, 0.54, 0.3), "grass_c": Color(0.72, 0.76, 0.38),
 				"aerial": Color(0.88, 0.86, 0.84), "plaster_tint": Color(0.95, 0.91, 0.84), "wood_tint": Color(1.02, 0.97, 0.92),
-				"grade": {"contrast": 1.06, "sat": 0.84, "green_sat": 0.82, "green_shift": -0.01, "blue_sat": 0.92, "warm_sat": 1.05,
-					"gain": Color(1.04, 1.0, 0.92), "shadow": Vector3(0.01, 0.0, 0.01), "high": Vector3(0.045, 0.025, -0.03),
+				"grade": {"contrast": 1.12, "sat": 0.94, "green_sat": 0.96, "green_shift": 0.0, "blue_sat": 1.0, "warm_sat": 1.06,
+					"gain": Color(1.02, 1.0, 0.95), "shadow": Vector3(-0.01, 0.0, 0.025), "high": Vector3(0.04, 0.02, -0.025),
 					"lift": Color(0.03, 0.022, 0.018)}}, true)
 		"showa":
 			# 昭和の夕焼け: 茜と紫のグラデーション

@@ -143,7 +143,7 @@ void fragment() {
 	vec3 basec = v_base;
 	vec3 c = mix(basec, v_col, smoothstep(0.0, 1.0, v_t));
 	// 突風の先端の照り（明るい黄緑〜白っぽい筋）
-	c = mix(c, tip_light * 1.12 + 0.05, v_gust * smoothstep(0.45, 1.0, v_t) * 0.55);
+	c = mix(c, tip_light * 1.08 + 0.03, v_gust * smoothstep(0.45, 1.0, v_t) * 0.3);
 	// 花（先端の 30%）
 	c = mix(c, v_fcol, v_flower * smoothstep(0.68, 0.74, v_t));
 	ALBEDO = c;
