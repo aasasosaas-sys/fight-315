@@ -22,6 +22,11 @@ const ERA_SHIPS := {
 	"showa": ["hikawa_maru", "yamato", "akagi", "kaga"],
 }
 const ZONE_PAD := 60.0
+
+
+## その年に港にいる大型船（data/eras/<era>_timeline.json の ships。year 0 = 時代のすべて）
+static func ships_for(era: String, year: int) -> Array:
+	return EraTimeline.ships_for(era, year, ERA_SHIPS.get(era, []))
 const BREATH := 30.0
 
 var world: Node3D
@@ -66,7 +71,13 @@ func _place(lm: Dictionary, shore_z: float) -> void:
 	var wl := float(world.get("water_level"))
 	var inner_x := -62.0
 	var off: Array = []
-	var ids: Array = ERA_SHIPS[era_id]
+	var ids: Array = ships_for(era_id, int(world.get("year")) if world.get("year") != null else 0)
+	# あなたが同じ時代の前の年に沈めた船は、もういない
+	var hist: Variant = world.get("hist")
+	if hist is Dictionary:
+		for r in EraTimeline.ruins_at((hist as Dictionary).get("ruins", []), int(world.get("year"))):
+			if str(r.get("kind", "")) == "ship":
+				ids.erase(str(r.get("ship", "")))
 	var k := 0
 	for sid in ids:
 		var sd := ShipData.load_ship(String(sid))

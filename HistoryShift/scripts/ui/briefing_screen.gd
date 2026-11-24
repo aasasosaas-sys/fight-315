@@ -51,6 +51,9 @@ func _ready() -> void:
 	eyebrow.add_child(JSUI.label("MISSION BRIEFING" if not q.is_empty() else "FREE ROAM", 20, JSUI.CYAN, JSUI.sans_bold()))
 	eyebrow.add_child(JSUI.pill(era.get("eraName", ""), col.darkened(0.3), Color.WHITE, 20))
 	eyebrow.add_child(JSUI.label(JSUI.era_years(era.get("eraId", "")), 20, JSUI.MUTED))
+	if not q.is_empty() and EraTimeline.has_timeline(str(era.get("eraId", ""))):
+		# 跳躍先の年（ミッションは問題の年に降り立つ。その年に生きている人物・港の船・建物の姿になる）
+		eyebrow.add_child(JSUI.pill("跳躍先：" + EraTimeline.label(str(era["eraId"]), int(q["year"])), JSUI.INK4, JSUI.GOLD, 20))
 	v.add_child(eyebrow)
 	var title_text: String = mission.get("title", "") if not q.is_empty() else "%sを自由探索" % String(era.get("eraName", "")).split("（")[0]
 	var title := JSUI.heading(title_text, 56)

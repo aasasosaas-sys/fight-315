@@ -32,6 +32,7 @@ var figures_by_era: Dictionary = {}   # eraId -> Array[{name, at, guards, guard,
 var errors: PackedStringArray = []
 
 var active_era := ""                  # 自由探索中の時代（"" = 無効）
+var active_year := 0                  # 自由探索で選んだ年（data/eras の時点。0 = 指定なし）。行動はこの年に起きたものとして記録する
 var world: Node = null                # landmark_pos(key) を持つワールド（at 判定用、任意）
 var events: Array = []                # 今回の自由探索の出来事 [{kind, id, type, at, count}]
 var fired: Dictionary = {}            # 今回発動したルール id -> true
@@ -98,8 +99,9 @@ func find_rule(rule_id: String) -> Dictionary:
 
 
 # ------------------------------------------------------------------ セッション
-func begin_session(era_id: String, p_world: Node = null) -> void:
+func begin_session(era_id: String, p_world: Node = null, p_year := 0) -> void:
 	active_era = era_id
+	active_year = p_year
 	world = p_world
 	events.clear()
 	fired.clear()
@@ -115,6 +117,7 @@ func begin_session(era_id: String, p_world: Node = null) -> void:
 
 func end_session() -> Array:
 	active_era = ""
+	active_year = 0
 	world = null
 	return session_hits
 
@@ -345,6 +348,8 @@ func _record_ruled(kind: String, id: String, info: Dictionary) -> void:
 	if not (kind in ["kill", "protect", "escort", "give", "persuade", "steal", "forge", "delay"]):
 		return
 	var a := {"verb": kind, "target": nm, "ruled": true, "era": active_era, "ok": true}
+	if active_year != 0:
+		a["year"] = active_year
 	for k in EXTRA_KEYS:
 		if info.has(k):
 			a[k] = info[k]
@@ -403,6 +408,8 @@ func _battle_kill(label: String) -> Array:
 
 func _act(a: Dictionary) -> Dictionary:
 	a["era"] = active_era
+	if active_year != 0:
+		a["year"] = active_year
 	var war_before := state.war_tier()
 	var before := _snapshot()
 	var changes := state.apply_action(a)

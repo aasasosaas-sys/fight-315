@@ -262,11 +262,12 @@ func _integration() -> void:
 	G.set_meta("force_fallback_world", true)
 	G.state.reset_all()
 	var S: GDScript = load("res://scripts/mission/session.gd")
-	var sess: Node = S.start_free_roam("edo")
+	# 国家事業の看板は、その事業の年に近い時点に立つ（data/eras の時点。朱印船は 1635 年 → 1638 年の時点）
+	var sess: Node = S.start_free_roam("edo", 1638)
 	root.add_child(sess)
 	await _frames(5)
-	var n := WarModel.projects_for(G.db, "edo").size()
-	_check(sess.interact.sites.size() == n, "edo free roam has %d project sites (%d)" % [n, sess.interact.sites.size()])
+	var n := WarModel.projects_for(G.db, "edo").filter(func(p): return EraTimeline.project_at(p, "edo", 1638)).size()
+	_check(n >= 2 and sess.interact.sites.size() == n, "edo 1638 free roam has %d project sites (%d)" % [n, sess.interact.sites.size()])
 	var site = null
 	for s in sess.interact.sites:
 		if s.project["id"] == "ed_shuinsen":

@@ -243,6 +243,10 @@ static func resolve(db: HistoryDB, actions: Array) -> Dictionary:
 		if era != "" and ei > HistoryDB.ERA_ORDER.find(aera):
 			aera = era
 			yr = maxi(yr, _era_first(db, era))
+		# 自由探索で年を選んでいた（data/eras の時点）：一般則の効果はその年に起きる（人物の貢献・救命・予定など、年の決まった史実はその年のまま）
+		var ayr := int(a.get("year", 0))
+		if ayr != 0 and era != "":
+			yr = ayr
 		var out: Array = []   # [{force?, vars?, year, note}]
 		match verb:
 			"kill", "escort":
@@ -338,7 +342,7 @@ static func resolve(db: HistoryDB, actions: Array) -> Dictionary:
 			"sabotage":
 				var key := str(a.get("target", ""))
 				var k2 := clampf(float(a.get("value", 400)) / 800.0, 0.5, 2.0)
-				out.append({"vars": _scale(PLACE.get(key, PLACE["town"]), k2), "year": _era_mid(db, era), "era": era,
+				out.append({"vars": _scale(PLACE.get(key, PLACE["town"]), k2), "year": ayr if ayr != 0 else _era_mid(db, era), "era": era,
 					"note": "%sが壊され、人々の暮らしと政治に影が落ちた" % HistoryDB.landmark_name(db.get_era(era), key)})
 			"project":
 				var pr: Dictionary = db.projects.get(str(a.get("target", "")), {})
@@ -366,7 +370,7 @@ static func resolve(db: HistoryDB, actions: Array) -> Dictionary:
 					var inote := "%sに%sができ、人々はその仕組みを学んで各地に広めた" % [place, bdef.get("name", "")]
 					if str(a.get("stage", "")) == "run":
 						inote = "%sの%sが休まず動き続けるのを見て、商人や藩が同じものを建て始めた" % [place, bdef.get("name", "")]
-					out.append({"vars": _scale(bv, ki), "year": _era_mid(db, era), "era": era, "note": inote})
+					out.append({"vars": _scale(bv, ki), "year": ayr if ayr != 0 else _era_mid(db, era), "era": era, "note": inote})
 			"anachronism":
 				var tv := CraftDB.tech_vars(str(a.get("type", "")))
 				if not tv.is_empty():

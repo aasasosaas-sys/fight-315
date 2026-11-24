@@ -356,10 +356,15 @@ func _integration() -> void:
 	_check(sess.figures.size() <= sess.MAX_FIGS, "figure population capped (%d near the player)" % sess.figures.size())
 	sess.spawn_all_figures()
 	await _frames(2)
-	_check(sess.figures.size() == S.figure_specs("sengoku").size() and sess.figures.size() >= specs.size(), "free roam spawns figures (%d)" % sess.figures.size())
+	# 自由探索は年を選ぶ（既定は時代の代表の年）。その年に生きている人物だけが現れる（data/eras の時点。どの問題も、どこかの時点で語れる：tests/test_timeline）
+	var fy: int = int(sess.year)
+	_check(sess.figures.size() == S.figure_specs("sengoku", fy).size() and sess.figures.size() >= 3 and S.figure_specs("sengoku", fy).size() < S.figure_specs("sengoku").size(), "free roam spawns the figures alive in %d (%d)" % [fy, sess.figures.size()])
 	_check(sess.interact != null, "actor interaction node")
 	for q in G.db.questions:
-		if q["era"]["eraId"] == "sengoku":
+		if q["era"]["eraId"] != "sengoku":
+			continue
+		var here: bool = (G.db.q_actors.get(q["id"], []) as Array).any(func(c): return EraTimeline.actor_present(G.db, G.state.actions, G.db.actor(c["name"]), "sengoku", fy))
+		if here:
 			_check(sess.figures.any(func(f): return q["id"] in f.questions), "a free-roam figure can be told the future of %s" % q["id"])
 	# 会話メニューから：渡す → 未来を語る（sengoku_03 を別の選択肢へ）
 	var q03: Dictionary = G.db.by_id["sengoku_03"]

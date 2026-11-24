@@ -33,6 +33,8 @@ var exam_submitted := false
 var alterations := 0
 var restorations := 0
 var history_log: Array = []
+var ruins: Dictionary = {}           # eraId -> [{kind, landmark, x, z, year, burned, full} | {kind:"ship", ship, year}]（自由探索で壊した建物・沈めた船。
+                                     # 同じ時代のその年以後の時点で壊れたまま：TimelineWorld / EraTimeline.ruins_at）
 
 # 再計算結果
 var world: Dictionary = {}           # qid -> 史実の選択肢
@@ -50,7 +52,7 @@ func _init(p_db: HistoryDB) -> void:
 
 
 func reset_all() -> void:
-	interventions.clear(); answers.clear(); history_log.clear(); chaos_mods.clear(); actions.clear()
+	interventions.clear(); answers.clear(); history_log.clear(); chaos_mods.clear(); actions.clear(); ruins.clear()
 	seq = 0
 	for q in db.questions:
 		answers[q["id"]] = -1
@@ -598,7 +600,7 @@ func save() -> void:
 		return
 	f.store_string(JSON.stringify({"interventions": interventions, "answers": answers, "exam_submitted": exam_submitted,
 		"alterations": alterations, "restorations": restorations, "log": history_log,
-		"chaos_mods": chaos_mods, "chaos_count": chaos_count, "actions": actions, "seq": seq}))
+		"chaos_mods": chaos_mods, "chaos_count": chaos_count, "actions": actions, "seq": seq, "ruins": ruins}))
 
 
 func load_save() -> bool:
@@ -635,8 +637,39 @@ func load_save() -> bool:
 				a["choice"] = int(a["choice"])
 			actions.append(a)
 	seq = int(d.get("seq", 0))
+	var rd: Variant = d.get("ruins", {})
+	if rd is Dictionary:
+		for e in rd:
+			if rd[e] is Array:
+				ruins[str(e)] = (rd[e] as Array).filter(func(r): return r is Dictionary)
 	recompute()
 	return true
+
+
+## 自由探索で壊した建物・沈めた船を、その年の出来事として記録する（同じ建物は早い年のほうを残す）
+func record_ruins(era_id: String, list: Array) -> int:
+	var cur: Array = ruins.get(era_id, [])
+	var n := 0
+	for r in list:
+		var dup := false
+		for o in cur:
+			if str(o.get("kind", "")) == str(r.get("kind", "")) and str(o.get("ship", "")) == str(r.get("ship", "")) \
+					and str(o.get("landmark", "")) == str(r.get("landmark", "")) \
+					and absf(float(o.get("x", 0)) - float(r.get("x", 0))) < 1.0 and absf(float(o.get("z", 0)) - float(r.get("z", 0))) < 1.0:
+				var oy := int(o.get("year", 0))
+				var ry := int(r.get("year", 0))
+				if oy <= ry and not EraTimeline.ruins_at([o], ry).is_empty():
+					dup = true          # まだ壊れたまま（建て直される前）
+				elif ry < oy and not EraTimeline.ruins_at([r], oy).is_empty():
+					o["year"] = ry      # もっと前の年に壊していた
+					dup = true
+		if not dup:
+			cur.append(r)
+			n += 1
+	ruins[era_id] = cur
+	if n > 0:
+		save()
+	return n
 
 
 static func has_save() -> bool: return FileAccess.file_exists(save_path)

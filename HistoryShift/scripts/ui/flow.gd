@@ -32,6 +32,7 @@ var _backdrop_idx := 0
 var _backdrop_timer := 0.0
 var _mission_q: Dictionary = {}
 var _free_era := ""
+var _free_year := 0
 var _return_to := "hub"
 var _score_before := 0
 var _correct_before := 0
@@ -265,19 +266,28 @@ func depart(q: Dictionary, method := 0) -> void:
 	_correct_before = Game.state.correct_count()
 	var choice := Game.state.answer(q)
 	var era: Dictionary = q["era"]
-	_warp_into(era["eraName"], JSUI.era_years(era["eraId"]), func(): return _session_make("start_mission", [q, choice, method]))
+	var msub := JSUI.era_years(era["eraId"])
+	if EraTimeline.has_timeline(era["eraId"]):
+		msub = EraTimeline.label(era["eraId"], int(q["year"]))   # ミッションは問題の年に降り立つ
+	_warp_into(era["eraName"], msub, func(): return _session_make("start_mission", [q, choice, method]))
 
 
-func start_free_roam(era_id: String, return_to := "hub") -> void:
+## p_year: 時代の中の年（data/eras の時点）。0 なら時代選択で選んだ年（EraPicker.take_year）、それも無ければ代表の年
+func start_free_roam(era_id: String, return_to := "hub", p_year := 0) -> void:
 	if _busy:
 		return
+	var year := p_year if p_year != 0 else load("res://scripts/ui/era_picker.gd").take_year(era_id)
+	if year == 0:
+		year = EraTimeline.default_year(era_id)
+	_free_year = year
 	_mission_q = {}
 	_free_era = era_id
 	_return_to = return_to
 	_score_before = Game.state.score()
 	_correct_before = Game.state.correct_count()
 	var era := Game.db.get_era(era_id)
-	_warp_into(era.get("eraName", era_id), "自由探索　" + JSUI.era_years(era_id), func(): return _session_make("start_free_roam", [era_id]))
+	var sub := "自由探索　" + (EraTimeline.label(era_id, year) if EraTimeline.has_timeline(era_id) else JSUI.era_years(era_id))
+	_warp_into(era.get("eraName", era_id), sub, func(): return _session_make("start_free_roam", [era_id, year]))
 
 
 func _warp_into(title: String, subtitle: String, make: Callable) -> void:

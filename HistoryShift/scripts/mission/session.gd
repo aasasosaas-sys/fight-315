@@ -26,6 +26,10 @@ var _appt_announced: Dictionary = {}
 var _fig_pending: Array = []      # まだ実体化していない人物 [{spec, pos, name}]
 var _fig_dead: Dictionary = {}
 var _stream_t := 0.0
+## 時代の中の年（data/eras/<era>_timeline.json）。自由探索は選んだ時点（既定は時代の代表の年）、ミッションは問題の年。
+## 人物（生没・あなたが倒した/救った）・港の船・建物・町人の装い・合戦・国家事業・予定がこの年に合わせて変わる（scripts/core/era_timeline.gd）
+var year := 0
+var _ruins_saved := false
 
 
 static func start_mission(q: Dictionary, p_choice: int, p_method := 0) -> Session:
@@ -36,13 +40,21 @@ static func start_mission(q: Dictionary, p_choice: int, p_method := 0) -> Sessio
 	s.era = q["era"]
 	s.method = p_method
 	s.mission = Game.db.mission_for(q, p_choice, p_method)
+	s.year = mission_year(q)
 	return s
 
 
-static func start_free_roam(era_id: String) -> Session:
+## ミッションはその問題の年に降り立つ
+static func mission_year(q: Dictionary) -> int:
+	return int(q.get("year", 0))
+
+
+## p_year: 時点の年（0 = 時代の代表の年 data/eras の default）
+static func start_free_roam(era_id: String, p_year := 0) -> Session:
 	var s := Session.new()
 	s.mode = "free"
 	s.era = Game.db.get_era(era_id)
+	s.year = p_year if p_year != 0 else EraTimeline.default_year(era_id)
 	return s
 
 
@@ -50,15 +62,23 @@ static func start_backdrop(era_id: String) -> Session:
 	var s := Session.new()
 	s.mode = "backdrop"
 	s.era = Game.db.get_era(era_id)
+	s.year = EraTimeline.default_year(era_id)
 	return s
 
 
-static func build_world(p_era: Dictionary):
+static func build_world(p_era: Dictionary, p_year := 0, p_hist: Dictionary = {}):
 	if ResourceLoader.exists("res://scripts/world/era_world.gd") and not Game.has_meta("force_fallback_world"):
 		var W = load("res://scripts/world/era_world.gd")
 		if W and W.can_instantiate():
-			return W.build(p_era)
+			return W.build(p_era, p_year, p_hist)
 	return FallbackWorld.build(p_era)
+
+
+## この世界の歴史のうち、箱庭の姿に関わるもの（あなたが同じ時代の前の年に壊した建物・沈めた船）
+static func world_history(era_id: String) -> Dictionary:
+	if Game.state == null:
+		return {}
+	return {"ruins": Game.state.ruins.get(era_id, [])}
 
 
 static func make_vehicle(kind: String, era_id: String, seed: int) -> Node3D:
@@ -74,7 +94,9 @@ func _ready() -> void:
 	name = "Session"
 	add_to_group("session")
 	get_tree().paused = false
-	world = build_world(era)
+	EraTimeline.set_current(era.get("eraId", ""), year)
+	Figures.age_at.clear()
+	world = build_world(era, year, world_history(era.get("eraId", "")) if mode != "backdrop" else {})
 	add_child(world)
 	Game.set_world(world)
 	cam = CameraRig.new()
@@ -109,7 +131,7 @@ func _ready() -> void:
 	wanted = Wanted.new()
 	wanted.era_id = era["eraId"]
 	add_child(wanted)
-	_spawn_civilians(26)
+	_spawn_civilians(int(round(26 * EraTimeline.crowd_scale(era["eraId"], year))))
 	_spawn_vehicles()
 
 	Effects.time_warp(get_tree(), player.global_position)
@@ -124,11 +146,11 @@ func _ready() -> void:
 		runner.setup(mission, era, hud, self)
 		runner.completed.connect(_on_completed)
 		runner.failed.connect(_on_failed)
-		hud.banner(era["eraName"], Color(0.95, 0.78, 0.35), 2.5)
+		hud.banner(era["eraName"] + ("　" + EraTimeline.year_text(year) if year != 0 else ""), Color(0.95, 0.78, 0.35), 2.5)
 		hud.toast(mission.get("title", ""), 4.0)
 		runner.start()
 	else:
-		hud.banner(era["eraName"] + "　自由探索", Color(0.37, 0.91, 1.0), 2.5)
+		hud.banner(era["eraName"] + "　自由探索" + ("　" + EraTimeline.label(era["eraId"], year) if EraTimeline.has_timeline(era["eraId"]) else ""), Color(0.37, 0.91, 1.0), 2.5)
 		hud.set_objective("自由探索", "好きに暴れろ。乗り物は F で奪える。人物に近づいて E で話せる（T でヒント切替）。\n※ 何をしても歴史は変わりうる。わざとでも、うっかりでも。", "")
 		hud.toast("馬・車・飛行機を探して乗り回せ！ 工房（⚒）に弟子入りして技を磨ける。Tab で時空鞄", 5.0)
 		_begin_chaos()
@@ -141,14 +163,19 @@ func _ready() -> void:
 func _begin_chaos() -> void:
 	if Game.chaos == null:
 		return
-	Game.chaos.begin_session(era["eraId"], world)
+	Game.chaos.begin_session(era["eraId"], world, year)
 	if not Game.chaos.shifted.is_connected(_on_history_shift):
 		Game.chaos.shifted.connect(_on_history_shift)
 	_spawn_figures()
 
 
-## 自由探索に置く人物の一覧：揺らぎルールの figures ＋ その時代の人物（spawn のある人）＋ 各問題に「未来を語れる」人物を1人ずつ
-static func figure_specs(era_id: String) -> Array:
+## 自由探索に置く人物の一覧：揺らぎルールの figures ＋ その時代の人物（spawn のある人）＋ 各問題に「未来を語れる」人物を1人ずつ。
+## p_year を渡すと、その年に生きて活動している人物だけ（あなたが倒した人は倒した年から先にいない。救った人は史実の没年の後もいる）
+static func figure_specs(era_id: String, p_year := 0) -> Array:
+	var db: HistoryDB = Game.db
+	var acts: Array = Game.state.actions if Game.state else []
+	var here := func(nm: String) -> bool:
+		return p_year == 0 or EraTimeline.actor_present(db, acts, db.actor(nm), era_id, p_year)
 	var out: Array = []
 	var seen := {}
 	for spec in Game.chaos.figures_for(era_id):
@@ -157,21 +184,24 @@ static func figure_specs(era_id: String) -> Array:
 		if seen.has(key):
 			continue
 		seen[key] = true
-		out.append(spec)
+		if here.call(key):
+			out.append(spec)
 	for nm in Game.db.actors:
 		var a: Dictionary = Game.db.actors[nm]
 		var se: Dictionary = a.get("spawn_eras", {})
 		if se.has(era_id) and not seen.has(nm):
 			seen[nm] = true
-			out.append({"name": nm, "at": se[era_id], "guards": 0 if HistoryActors.is_noncombatant(a) else 2, "lines": []})
+			if here.call(nm):
+				out.append({"name": nm, "at": se[era_id], "guards": 0 if HistoryActors.is_noncombatant(a) else 2, "lines": []})
 	for q in Game.db.questions:
 		if q["era"]["eraId"] != era_id:
 			continue
-		var cands: Array = Game.db.q_actors.get(q["id"], [])
+		var cands: Array = (Game.db.q_actors.get(q["id"], []) as Array).filter(func(c): return here.call(str(c["name"])))
 		var has := false
 		for c in cands:
-			if seen.has(c["name"]):
-				has = true
+			for o in out:
+				if Game.db.actor_name(str(o.get("name", ""))) == c["name"] or str(o.get("name", "")) == c["name"]:
+					has = true
 		if has or cands.is_empty():
 			continue
 		var pick: Dictionary = cands[0]
@@ -195,7 +225,7 @@ func _spawn_figures() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(era.get("eraId", "")) + 31
 	_fig_pending.clear()
-	for spec in figure_specs(era["eraId"]):
+	for spec in figure_specs(era["eraId"], year):
 		var key: String = spec.get("at", "capital")
 		if not (key in HistoryDB.LANDMARK_KEYS):
 			key = "capital"
@@ -214,7 +244,7 @@ func _spawn_figures() -> void:
 
 ## 国家事業の現場（看板）を名所に立てる
 func _spawn_projects(rng: RandomNumberGenerator) -> void:
-	for pr in WarModel.projects_for(Game.db, era["eraId"]):
+	for pr in WarModel.projects_for(Game.db, era["eraId"]).filter(func(p): return EraTimeline.project_at(p, era["eraId"], year)):
 		var key := str(pr.get("at", "village"))
 		if not (key in HistoryDB.LANDMARK_KEYS):
 			key = "village"
@@ -270,7 +300,12 @@ func _materialize(e: Dictionary) -> void:
 		return
 	var spec: Dictionary = e["spec"]
 	var ad: Dictionary = Game.db.actor(nm)
+	# その年の年齢（顔の年齢区分・名札）
+	var age := EraTimeline.actor_age(ad, year) if year != 0 and not ad.is_empty() else -1
+	if age >= 0:
+		Figures.age_at[nm] = age
 	var f := HistFigure.spawn(self, (e["pos"] as Vector3) + Vector3.UP * 0.5, nm, era["eraId"], spec.get("lines", []), ad)
+	f.age = age
 	f.set_meta("spec", spec)
 	f.killed.connect(func(_x): _fig_dead[nm] = true)
 	var an := Game.db.actor_name(nm)
@@ -281,7 +316,7 @@ func _materialize(e: Dictionary) -> void:
 	f.hint_on = interact.hints_on if interact else true
 	f.refresh_hint()
 	figures.append(f)
-	var label: String = spec.get("guard", Wanted.GUARDS.get(era["eraId"], "護衛"))
+	var label: String = spec.get("guard", EraTimeline.guard_label(era["eraId"], year, Wanted.GUARDS.get(era["eraId"], "護衛")))
 	var ng := mini(int(spec.get("guards", 0)), GUARDS_PER_FIG) if f.killable else 0
 	ng = mini(ng, MAX_GUARDS - _guard_count())
 	var rng := RandomNumberGenerator.new()
@@ -293,7 +328,7 @@ func _materialize(e: Dictionary) -> void:
 		g.aggro_range = 16.0
 		f.guards.append(g)
 	# 予定（遅らせると歴史が揺らぐ）：すべての予定を順に
-	var appts: Array = ad.get("schedule", []).filter(func(sc): return str(sc.get("at", "")) in HistoryDB.LANDMARK_KEYS and str(sc.get("era", ad.get("era", ""))) == era["eraId"])
+	var appts: Array = EraTimeline.schedules_at(Game.db, Game.state.actions, ad, era["eraId"], year).filter(func(sc): return str(sc.get("at", "")) in HistoryDB.LANDMARK_KEYS and str(sc.get("era", ad.get("era", ""))) == era["eraId"])
 	if not appts.is_empty():
 		f.appointments = appts
 		f.next_appointment(world, 50.0 + (absi(hash(nm)) % 60))
@@ -316,7 +351,7 @@ func _sync_figures() -> void:
 ## 合戦：両軍の兵を名所に置く。片方を倒すと、もう片方に加勢したことになる
 func _spawn_battles(rng: RandomNumberGenerator) -> void:
 	for b in Game.db.battles:
-		if str(b.get("era", "")) != era["eraId"]:
+		if str(b.get("era", "")) != era["eraId"] or not EraTimeline.battle_at(b, era["eraId"], year):
 			continue
 		var center: Vector3 = world.landmark_pos(str(b.get("at", "battlefield")))
 		var sides: Array = b.get("sides", [])
@@ -512,7 +547,28 @@ func _on_abort() -> void:
 	aborted.emit()
 
 
+## 自由探索で壊した建物・沈めた船を、この年の出来事として歴史に残す（同じ時代の後の年に来ても壊れたまま。TimelineWorld）
+func save_ruins() -> int:
+	if _ruins_saved or mode != "free" or Game.state == null or world == null or not is_instance_valid(world) or year == 0:
+		return 0
+	_ruins_saved = true
+	var out: Array = []
+	var d = world.get("destruction")
+	if d != null and is_instance_valid(d):
+		for id in d.units:
+			var u = d.units[id]
+			if u.destroyed and not u.has_meta("timeline_ruin") and bool(u.cfg.get("chaos", false)):
+				out.append(TimelineWorld.ruin_record(u, year))
+	var yard = world.get_node_or_null("ShipYard")
+	if yard != null:
+		for sh in yard.ships:
+			if is_instance_valid(sh) and sh.sunk_emitted:
+				out.append({"kind": "ship", "ship": str(sh.sd.id), "landmark": "port", "year": year})
+	return Game.state.record_ruins(era["eraId"], out)
+
+
 func _exit_tree() -> void:
+	save_ruins()
 	if Game.profile and mode != "backdrop":
 		Game.profile.return_loans()
 	# end() を経ずに破棄された場合も、混乱の記録を止める
@@ -521,7 +577,10 @@ func _exit_tree() -> void:
 
 
 func end() -> void:
+	save_ruins()
 	_ended = true
+	if EraTimeline.current_era == str(era.get("eraId", "")):
+		EraTimeline.set_current("", 0)
 	Engine.time_scale = 1.0
 	if craft and is_instance_valid(craft):
 		craft.end_session()

@@ -63,14 +63,21 @@ var tree_defs: Array = []       # 倒せる木 [species, Transform3D, [MultiMesh
 var destruction: Destruction    # 破壊システム（ワールドごとに作り直し＝再入場でリセット）
 var interior_defs: Array = []   # 入れる建物（Architecture.reg_interior が登録。内装は WorldInteriors が近づいた時だけ生成）
 var interiors: WorldInteriors
+## 年（data/eras/<era>_timeline.json の時点・ミッションの年。0 = 年の指定なし＝従来の時代全体の姿）と、この世界の歴史
+## （hist = {"ruins": あなたが前の年に壊した建物 …}。Session が HistoryState から渡す）。港の船・建物の有無・被災が年で変わる（TimelineWorld）
+var year := 0
+var hist: Dictionary = {}
+var timeline_stats: Dictionary = {}
 
 
-static func build(p_era: Dictionary) -> EraWorld:
+static func build(p_era: Dictionary, p_year := 0, p_hist: Dictionary = {}) -> EraWorld:
 	var t0 := Time.get_ticks_msec()
 	var w := EraWorld.new()
 	w.name = "EraWorld"
 	w.era = p_era
 	w.era_id = String(p_era.get("eraId", "heian"))
+	w.year = p_year
+	w.hist = p_hist
 	w._build()
 	w.build_ms = Time.get_ticks_msec() - t0
 	print("[EraWorld] %s built in %d ms" % [w.era_id, w.build_ms])
@@ -153,6 +160,7 @@ func _build() -> void:
 	_tick("destruction")
 	interiors = WorldInteriors.attach(self)
 	_tick("interiors")
+	timeline_stats = TimelineWorld.apply(self)   # 選んだ年の建物（まだ無い・もう無い・被災・あなたが前の年に壊したもの）
 	env_nodes = WorldAtmosphere.build_environment(self, style)
 	for key in landmarks:
 		var b := WorldAtmosphere.make_beacon(landmarks[key]["pos"])

@@ -138,10 +138,10 @@ func build(type: String) -> Dictionary:
 	var w = Game.world
 	var pos := p.global_position + fwd * 18.0
 	if w and w.has_method("random_ground_point_near"):
-		# 建物・水の上を避けた空き地（前方 18m のあたり）
+		# 建物・水の上を避けた空き地（前方 18m のあたり。施設の敷地ぶん丸ごと空いている所）
 		var rng := RandomNumberGenerator.new()
 		rng.seed = hash(type) + prof.next_uid
-		pos = w.random_ground_point_near(pos, 12.0, rng)
+		pos = _free_site(w, pos, rng)
 	if w and w.has_method("height_at"):
 		pos.y = w.height_at(pos.x, pos.z)
 	var rec := {"id": "%s_%d" % [type, prof.next_uid], "type": type, "era": era_id, "at": at, "pos": [pos.x, pos.y, pos.z],
@@ -166,6 +166,36 @@ func build(type: String) -> Dictionary:
 	_industry_event(rec)
 	Sfx.play(get_tree(), Sfx.success(), -6.0)
 	return {"ok": true, "reason": "", "facility": f}
+
+
+## 施設の敷地（半径 SITE_R）が町の建物・水・急斜面・ほかの施設にかからない場所を探す。見つからなければ一番ましな候補
+const SITE_R := 9.0
+
+
+func _free_site(w, around: Vector3, rng: RandomNumberGenerator) -> Vector3:
+	var terr = w.get("terrain")
+	var best: Vector3 = w.random_ground_point_near(around, 12.0, rng)
+	var best_bad := 1 << 30
+	for attempt in 80:
+		var rad := 6.0 + float(attempt) * 0.6        # 近くから少しずつ遠くへ（最大およそ 54m）
+		var c: Vector3 = w.random_ground_point_near(around, rad, rng)
+		var bad := 0
+		if terr:
+			for gx in range(-2, 3):
+				for gz in range(-2, 3):
+					var x := c.x + float(gx) * SITE_R * 0.5
+					var z := c.z + float(gz) * SITE_R * 0.5
+					if terr.is_water(x, z) or terr.is_occupied(x, z):
+						bad += 1
+		for st in stations:
+			if is_instance_valid(st) and st is Facility and (st as Node3D).global_position.distance_to(c) < SITE_R * 2.2:
+				bad += 25
+		if bad == 0:
+			return c
+		if bad < best_bad:
+			best_bad = bad
+			best = c
+	return best
 
 
 ## 歴史への知らせ：Game.chaos.act("industry", 種類, {era, landmark, scale, mult, bonus})（自由探索の間だけ歴史に効く）

@@ -43,6 +43,7 @@ var _delay_cause := ""
 var _appt_done := false
 var _t := 0.0
 var talking := false                  # 会話メニュー中（引き止め）
+var age := -1                         # その年の年齢（Session が EraTimeline.actor_age で入れる。-1 = 不明）
 
 const DELAY_MISS := 25.0              # これだけ遅れると予定に間に合わない
 
@@ -82,7 +83,7 @@ func _ready() -> void:
 	_rig.rotation.y = PI
 	add_child(_rig)
 	_tag = Label3D.new()
-	_tag.text = "◆ " + figure_name
+	_tag.text = "◆ " + figure_name + ("（%d歳）" % age if age > 0 else "")
 	_tag.font = load("res://assets/fonts/NotoSerifJP-Bold.ttf")
 	_tag.font_size = 60
 	_tag.pixel_size = 0.006

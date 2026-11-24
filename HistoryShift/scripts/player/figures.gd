@@ -375,6 +375,8 @@ const FIGURES := {
 }
 
 static var _alias_cache := {}
+## 人物名 → その年の年齢（自由探索で年を選んだとき Session が入れる）。spec_for の face.age を上書きする
+static var age_at := {}
 static var _kamon_cache := {}
 static var _mesh_cache := {}
 static var _acc_mat_cache := {}   # 小物の素材（_mat）
@@ -412,6 +414,12 @@ static func spec_for(name: String) -> Dictionary:
 		var pool: Array = ["Sendagaya_Shino", "HairSample_Female"] if female else ["HairSample_Male", "Sakurada_Fumiriya", "Sendagaya_Shibu"]
 		s["base"] = pool[absi(hash(key)) % pool.size()]
 	var face: Dictionary = s.get("face", {})
+	var at_age: Variant = age_at.get(name, age_at.get(key, null))
+	if at_age != null:
+		face["age"] = int(at_age)
+		if int(at_age) < 40 and str(s.get("hair_color", face.get("hair_color", "black"))) in ["gray", "white"]:
+			s["hair_color"] = "black"   # 若いころの姿（白髪にしない）
+			face["hair_color"] = "black"
 	if s.has("hair_color") and not face.has("hair_color"):
 		face["hair_color"] = s["hair_color"]
 	face["female"] = female

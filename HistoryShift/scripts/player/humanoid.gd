@@ -90,6 +90,10 @@ static func outfit_for(era_id: String, role: String) -> int:
 	# role: "enemy" "civilian" "npc" "guardian" "police"
 	if role == "guardian":
 		return Outfit.GUARDIAN
+	# 時代の中の年ごとの装い（data/eras の crowd・enemy_outfit：明治初めは和装と帯刀、1945 年はもんぺ・国民服、1964 年は背広…）
+	var tl := EraTimeline.crowd_outfit(era_id, role)
+	if tl >= 0:
+		return tl
 	match era_id:
 		"jomon_kofun", "asuka_nara":
 			return Outfit.ANCIENT if role != "npc" else Outfit.NOBLE
@@ -613,6 +617,8 @@ func _construct_anime(outfit: int, rng: RandomNumberGenerator, armed: bool) -> b
 	var fopts := {"female": female, "modern": outfit in MODERN}
 	if combat:
 		fopts["age"] = "young" if rng.randf() < 0.5 else "adult"
+	if _figure != "" and Figures.age_at.has(_figure):
+		fopts["age"] = EraTimeline.age_class(int(Figures.age_at[_figure]))   # その年の年齢（自由探索の人物）
 	if fs.is_empty():
 		fopts["pool"] = FACE_POOL   # 町人・兵の顔の形は素体・年齢ごとに数種類から（顔メッシュを共有する）。色・髭・表情は一人ずつ
 		set_meta("face", AnimeFace.apply(model, rng.randi(), fopts))
