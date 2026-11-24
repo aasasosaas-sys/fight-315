@@ -129,9 +129,9 @@ static func get_mat(key: String) -> Material:
 				bm.set_shader_parameter("mat_kind", 1.0)
 			"plaster":
 				# 漆喰: 白飛びしない落ち着いた白（時代の色味は set_era_look）。雨だれ・裾の汚れは mat_kind=1
-				bm.set_shader_parameter("albedo_mul", 0.94)
+				bm.set_shader_parameter("albedo_mul", 1.02)
 				bm.set_shader_parameter("detail", 0.22)
-				bm.set_shader_parameter("desat", 0.6)
+				bm.set_shader_parameter("desat", 0.75)
 				bm.set_shader_parameter("mat_kind", 1.0)
 			"rooftile":
 				# 瓦は列のくっきりした明暗を残し、艶の帯＋空の映り込み
@@ -154,7 +154,7 @@ static func get_mat(key: String) -> Material:
 				bm.set_shader_parameter("posterize", 3.0)
 				bm.set_shader_parameter("window_glow", 1.0)
 				bm.set_shader_parameter("mat_kind", 2.0)
-				bm.set_shader_parameter("sat_boost", 1.3)
+				bm.set_shader_parameter("sat_boost", 1.12)
 				if key == "darkwood":
 					# 写真の焦げ茶は暗すぎるので、アニメの木部らしい明るさへ
 					bm.set_shader_parameter("albedo_mul", 1.45)

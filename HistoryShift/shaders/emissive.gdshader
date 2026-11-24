@@ -3,6 +3,7 @@ shader_type spatial;
 render_mode diffuse_burley;
 #include "res://shaders/destruct.gdshaderinc"
 uniform float energy = 2.5;
+global uniform float world_night;
 varying vec3 v_wpos;
 void vertex() {
 	vec4 d_st;
@@ -18,6 +19,7 @@ void fragment() {
 		discard;
 	}
 	ALBEDO = COLOR.rgb * mix(0.15, 0.6, lit);
-	EMISSION = COLOR.rgb * energy * lit;
+	// 夜は灯りを強く（ブルームで提灯・窓明かりがにじむ）
+	EMISSION = COLOR.rgb * energy * lit * (1.0 + world_night * 1.6);
 	ROUGHNESS = 0.6;
 }

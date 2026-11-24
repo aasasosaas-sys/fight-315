@@ -113,7 +113,7 @@ static func _anime(era_id: String) -> Dictionary:
 		"aerial": Color(0.7, 0.82, 0.96), "aerial_density": 0.0016,
 		"exposure": 1.0, "glow": 0.6, "line": 0.85, "rays": 0.3, "glare": 0.3,
 		# 塗りの色味（漆喰の白は真っ白にしない）・低い霞
-		"plaster_tint": Color(0.97, 0.95, 0.9), "wood_tint": Color(1, 1, 1), "roof_tint": Color(1, 1, 1),
+		"plaster_tint": Color(1.0, 0.97, 0.9), "wood_tint": Color(1, 1, 1), "roof_tint": Color(1, 1, 1),
 		"haze_height": 4.0, "haze_density": 0.004,
 		# カラーグレーディング（sRGB の LUT。atmosphere.gd の grade_lut）
 		"grade": {"contrast": 1.12, "sat": 1.02, "green_sat": 0.92, "green_shift": 0.015, "blue_sat": 1.1,
@@ -172,8 +172,8 @@ static func _anime(era_id: String) -> Dictionary:
 			# 浮世絵の藍の青空と白い雲
 			a.merge({"sun_elev": 46.0, "tower": 0.7, "cloud_cover": 0.5, "cloud_seed": 0.07,
 				"sky_zenith": Color(0.1, 0.36, 0.84), "sky_horizon": Color(0.58, 0.8, 0.98),
-				"shade_color": Color(0.46, 0.52, 0.88), "plaster_tint": Color(0.95, 0.94, 0.9),
-				"grade": {"contrast": 1.16, "sat": 1.04, "green_sat": 0.92, "green_shift": 0.025, "blue_sat": 1.16,
+				"shade_color": Color(0.46, 0.52, 0.88), "plaster_tint": Color(1.0, 0.97, 0.91),
+				"grade": {"contrast": 1.16, "sat": 1.04, "green_sat": 1.0, "green_shift": 0.03, "blue_sat": 1.16,
 					"shadow": Vector3(-0.025, 0.0, 0.045), "high": Vector3(0.018, 0.01, -0.012), "lift": Color(0.008, 0.016, 0.04)}}, true)
 		"meiji_taisho":
 			# ノスタルジックな午後: 少し暖色の光
