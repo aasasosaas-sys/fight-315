@@ -196,9 +196,9 @@ static func _anime(era_id: String) -> Dictionary:
 				"grass_a": Color(0.4, 0.62, 0.24), "grass_b": Color(0.26, 0.52, 0.3), "grass_c": Color(0.7, 0.76, 0.32),
 				"aerial": Color(0.84, 0.88, 0.92), "rays": 0.4, "glow": 0.75, "glare": 0.45,
 				"plaster_tint": Color(0.93, 0.92, 0.88), "haze_density": 0.005,
-				"grade": {"contrast": 1.04, "sat": 0.96, "green_sat": 0.82, "green_shift": 0.035, "blue_sat": 1.04, "warm_sat": 1.04,
+				"grade": {"contrast": 1.12, "sat": 1.02, "green_sat": 0.94, "green_shift": 0.02, "blue_sat": 1.1, "warm_sat": 1.06,
 					"gain": Color(1.03, 1.0, 0.95), "shadow": Vector3(-0.025, 0.012, 0.03), "high": Vector3(0.035, 0.02, -0.025),
-					"lift": Color(0.03, 0.035, 0.035), "vibrance": 0.1}}, true)
+					"lift": Color(0.02, 0.025, 0.028), "vibrance": 0.12}}, true)
 	return a
 
 
