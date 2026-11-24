@@ -122,6 +122,30 @@ func _run() -> void:
 		hud.history_shift("本能寺の変が起きなかった\n織田信長が天下を統一し、江戸幕府は開かれない。", false, "問12 ○ → ×　問14 × → ○")
 		hud.toast("火縄銃を拾った")
 		await _shot(tag, era_id, "shift", 22)
+	if _want("interior") or _want("interior2"):
+		hud.visible = false
+		var wi: WorldInteriors = w.interiors
+		var types := {"sengoku": "castle", "edo": "machiya", "heian": "shinden", "meiji_taisho": "yokan", "showa": "showa_shop"}
+		for want_t in [types.get(era_id, "machiya"), "machiya", "shoin", "temple"]:
+			var ids: Array = w.find_interiors(want_t, "")
+			if ids.is_empty():
+				continue
+			var id: int = ids[0]
+			var d: Dictionary = wi.defs[id]
+			var xf: Transform3D = d["xf"]
+			var f: Dictionary = d["floors"][0]
+			var r: Rect2 = f["rect"]
+			var y: float = f["y"]
+			w.ensure_interior(id, true)
+			var c := r.get_center()
+			p.teleport(xf * Vector3(c.x - r.size.x * 0.15, y + 0.1, c.y + r.size.y * 0.1))
+			await _frames(3)
+			c2.fov = 70.0
+			c2.global_position = xf * Vector3(c.x + r.size.x * 0.3, y + 1.55, r.end.y - 0.45)
+			c2.look_at(xf * Vector3(c.x, y + 1.0, r.position.y + r.size.y * 0.25), Vector3.UP)
+			c2.current = true
+			await _shot(tag, era_id, "interior", 45)
+			break
 	if _want("night"):
 		hud.visible = false
 		w.set_time_of_day(20.5)

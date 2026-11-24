@@ -111,6 +111,7 @@ static func build_environment(world: Node3D, style: Dictionary) -> Dictionary:
 	world.add_child(sun)
 	set_sun_dir(sun, style["sun_az"], style["sun_elev"])
 	apply_toon_globals(style, 1.0)
+	RenderingServer.global_shader_parameter_set("world_indoor", 0.0)
 
 	var post := make_post(style)
 	world.add_child(post)
@@ -118,12 +119,16 @@ static func build_environment(world: Node3D, style: Dictionary) -> Dictionary:
 
 
 ## セル塗りの共通パラメータ（影色など）をグローバルシェーダ変数へ。day: 0=夜 1=昼
+static var _night := 0.0
+
+
 static func apply_toon_globals(style: Dictionary, day: float) -> void:
 	var sc: Color = style["shade_color"]
 	var night_shade := Color(0.32, 0.36, 0.62)
 	RenderingServer.global_shader_parameter_set("toon_shade_color", night_shade.lerp(sc, day))
 	RenderingServer.global_shader_parameter_set("toon_params", Vector4(0.06, 0.045, 0.34, float(style["shade_strength"])))
 	RenderingServer.global_shader_parameter_set("world_night", 1.0 - day)
+	_night = 1.0 - day
 	RenderingServer.global_shader_parameter_set("world_sky_color", Color(0.12, 0.16, 0.3).lerp(style["sky_horizon"], day))
 	RenderingServer.global_shader_parameter_set("world_sun_color", Color(0.6, 0.7, 1.0).lerp(style["sun_color"], day))
 
@@ -134,6 +139,8 @@ static func apply_time_grade(nodes: Dictionary, style: Dictionary, day: float, e
 	if env == null:
 		return
 	env.adjustment_color_correction = grade_lut(style, day < 0.5)
+	if env.has_meta("out_amb"):
+		env.remove_meta("out_amb")
 	env.glow_hdr_threshold = lerpf(0.75, 0.95, day)
 	env.glow_intensity = float(style["glow"]) * lerpf(1.0, 0.75, day)
 	env.fog_height_density = float(style.get("haze_density", 0.004)) * 0.35 * lerpf(1.6, 1.0, day)
@@ -143,6 +150,26 @@ static func apply_time_grade(nodes: Dictionary, style: Dictionary, day: float, e
 		m.set_shader_parameter("ray_strength", float(style["rays"]) * clampf(day, 0.0, 1.0))
 		m.set_shader_parameter("ridge_strength", lerpf(0.15, 0.55, day))
 		m.set_shader_parameter("vignette", lerpf(0.32, 0.2, day))
+
+
+## 屋内（k=1）: 空の環境光の代わりに、障子越しの柔らかい暖色の照り返し。露出を上げ、灯りのにじみを強く
+static func set_indoor(nodes: Dictionary, style: Dictionary, k: float) -> void:
+	var env: Environment = nodes.get("env")
+	if env == null:
+		return
+	if not env.has_meta("out_amb"):
+		env.set_meta("out_amb", [env.ambient_light_color, env.ambient_light_sky_contribution, env.ambient_light_energy,
+			env.tonemap_exposure, env.ssao_intensity, env.glow_hdr_threshold])
+	var o: Array = env.get_meta("out_amb")
+	var night := _night
+	var warm := Color(1.0, 0.86, 0.68).lerp(Color(0.55, 0.5, 0.6), night)
+	env.ambient_light_color = (o[0] as Color).lerp(warm, k)
+	env.ambient_light_sky_contribution = lerpf(o[1], 0.1, k)
+	env.ambient_light_energy = lerpf(o[2], float(o[2]) * lerpf(1.5, 0.9, night), k)
+	env.tonemap_exposure = lerpf(o[3], float(o[3]) * 1.12, k)
+	env.ssao_intensity = lerpf(o[4], 1.6, k)
+	env.glow_hdr_threshold = lerpf(o[5], 0.7, k)
+	RenderingServer.global_shader_parameter_set("world_indoor", k)
 
 
 # ---------------------------------------------------------------- カラーグレーディング（3D LUT）

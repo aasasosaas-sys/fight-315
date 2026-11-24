@@ -19,6 +19,7 @@ const KITS_JSON := "res://data/interiors/kits.json"
 static var current: WorldInteriors
 
 var world: Node3D
+var _indoor_k := 0.0
 var defs := {}               # id -> def
 var ids: Array = []
 var active := {}             # id -> Node3D（ツリー内）
@@ -227,6 +228,12 @@ func inside_at(p: Vector3) -> int:
 
 # ================================================================ 毎フレーム
 func _process(dt: float) -> void:
+	# 屋内の色調（目の慣れ）: 中にいる間は環境光を暖かく・露出を上げる。ゆっくり切り替える
+	var want_k := 1.0 if player_inside >= 0 else 0.0
+	if absf(_indoor_k - want_k) > 0.001:
+		_indoor_k = move_toward(_indoor_k, want_k, dt * 1.5)
+		if world and "env_nodes" in world:
+			WorldAtmosphere.set_indoor(world.env_nodes, world.style, _indoor_k)
 	_t += dt
 	if _t < TICK:
 		_fire_inside(dt)
@@ -365,6 +372,8 @@ func _build(d: Dictionary) -> Node3D:
 	if not b.kit.is_empty():
 		var mi := b.kit.commit("Mesh", true)
 		mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+		# 建物シェーダの屋内の塗り（障子の透け・木と畳の暖色）
+		mi.set_instance_shader_parameter("hs_indoor", 1.0)
 		# 屋内は近くでしか見ないので、遠くでは描かない
 		mi.visibility_range_end = FREE_DIST + 10.0
 		root.add_child(mi)
@@ -389,13 +398,14 @@ func _build(d: Dictionary) -> Node3D:
 		ol.name = "L%d" % i
 		ol.position = l["p"]
 		ol.light_color = l["c"]
-		ol.light_energy = float(l["e"])
-		ol.omni_range = float(l["r"])
-		ol.omni_attenuation = 1.2
+		# 行灯・燭台の暖かい照り返しが部屋に回るよう、少し広く柔らかく
+		ol.light_energy = float(l["e"]) * 1.25
+		ol.omni_range = float(l["r"]) * 1.2
+		ol.omni_attenuation = 0.9
 		ol.shadow_enabled = false
 		ol.light_specular = 0.2
 		ol.visible = false
-		ol.set_meta("e", float(l["e"]))
+		ol.set_meta("e", float(l["e"]) * 1.25)
 		root.add_child(ol)
 		lights.append(ol)
 	root.set_meta("lights", lights)

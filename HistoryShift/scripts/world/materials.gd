@@ -158,6 +158,9 @@ static func get_mat(key: String) -> Material:
 				if key == "darkwood":
 					# 写真の焦げ茶は暗すぎるので、アニメの木部らしい明るさへ
 					bm.set_shader_parameter("albedo_mul", 1.45)
+			"tatami":
+				bm.set_shader_parameter("mat_kind", 7.0)
+				bm.set_shader_parameter("desat", 0.25)
 			"stonewall", "brick", "cobble":
 				bm.set_shader_parameter("detail", 0.75)
 				bm.set_shader_parameter("flat_normal", 0.55)

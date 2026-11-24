@@ -39,6 +39,7 @@ uniform float mat_kind = 0.0;       // 0 一般 / 1 漆喰・塗り壁 / 2 木�
 uniform vec3 era_tint : source_color = vec3(1.0);   // 時代ごとの色味（漆喰の白を落ち着かせるなど）
 uniform float sheen = 0.0;          // 空の映り込み（瓦・金属）
 uniform float paint = 1.0;          // 筆致の強さ（0 で従来）
+instance uniform float hs_indoor = 0.0;   // 1: 屋内の内装（world_interiors.gd が設定）。障子の透け・木と畳の暖色
 
 varying vec3 v_wpos;
 varying vec3 v_wnrm;
@@ -133,6 +134,11 @@ void fragment() {
 		float h = hash13(cell);
 		a *= mix(0.9, 1.08, h);
 		a = mix(a, a * vec3(0.86, 0.94, 0.8), smoothstep(0.75, 0.95, h) * 0.5 * (1.0 - smoothstep(0.0, 2.0, above)));
+	} else if (mat_kind > 6.5 && mat_kind < 7.5) {
+		// 畳: い草の目（細い縞）と、縁に向かう日焼けのムラ
+		float rush = smoothstep(0.35, 0.65, fract(dot(v_wpos.xz, vec2(1.0, 0.0)) * 9.0 + texture(macro_tex, v_wpos.xz * 0.3).r * 0.5));
+		a *= mix(0.95, 1.03, rush);
+		a *= mix(vec3(1.0), vec3(1.05, 1.0, 0.86), texture(macro_tex, v_wpos.xz * 0.07).r);
 	} else if (mat_kind > 4.5 && mat_kind < 5.5) {
 		// 茅葺: 毛羽立った筆の縦筋
 		float fib = texture(macro_tex, vec2(wall_u * 2.2, v_wpos.y * 0.2)).r;
@@ -147,6 +153,16 @@ void fragment() {
 			discard;
 		}
 		a = destruct_albedo(v_dstate, v_dcut, a, v_wpos, texture(macro_tex, v_wpos.xz * 0.05 + v_wpos.y * 0.07).r, n2, n3, d_emis);
+	}
+	vec3 in_emis = vec3(0.0);
+	if (hs_indoor > 0.5) {
+		// 屋内: 木部・畳は暖かく、白い紙・漆喰の壁は外光が透けてほのかに光る（障子）。天井は少し沈む
+		if (mat_kind > 1.5 && mat_kind < 2.5) {
+			a *= vec3(1.06, 1.0, 0.9);
+		}
+		float paper = smoothstep(0.78, 0.92, vlum) * vert * step(mat_kind, 1.5);
+		in_emis = a * vec3(1.0, 0.95, 0.84) * paper * (0.28 * (1.0 - world_night) + 0.12 * world_night);
+		a *= mix(1.0, 0.86, smoothstep(-0.3, -0.8, v_wnrm.y));
 	}
 	// 瓦・金属: 空の映り込み（浅い角度ほど空の色）。夜は弱く
 	if (sheen > 0.0) {
@@ -176,7 +192,7 @@ void fragment() {
 	// 夜: 軒下・壁面がほのかに暖色（屋内の灯りの照り返し）
 	float under = smoothstep(0.2, -0.6, v_wnrm.y) * 0.5 + (1.0 - abs(v_wnrm.y)) * 0.15;
 	if (glass < 0.5) {
-		EMISSION = a * vec3(1.0, 0.62, 0.3) * world_night * under * 0.7 + d_emis;
+		EMISSION = a * vec3(1.0, 0.62, 0.3) * world_night * under * 0.7 * (1.0 - hs_indoor) + d_emis + in_emis;
 		if (window_glow > 0.5 && vlum < 0.125 && abs(v_wnrm.y) < 0.3) {
 			// 格子窓・開口部から漏れる灯り（夜）。昼は奥の暗がりを少し青く沈める
 			float flick = 0.85 + 0.15 * texture(macro_tex, v_wpos.xz * 0.2 + vec2(TIME * 0.05)).r;
