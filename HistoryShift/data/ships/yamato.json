@@ -8,7 +8,7 @@
   "basis": [
     {"fact": "Length 263 m overall (256 m waterline), beam 38.9 m, draught ~11 m", "source_url": "https://en.wikipedia.org/wiki/Japanese_battleship_Yamato", "year": 1941},
     {"fact": "12 boilers, 4 steam turbines, 4 shafts, 150,000 shp, 27 kt", "source_url": "https://en.Wikipedia.com/wiki/Yamato-class_battleship", "year": 1941},
-    {"fact": "Complement 3,233 (design); 3,332 aboard at the final sortie, of whom ~3,056 died", "source_url": "https://www.mlit.go.jp/tagengo-db/R2-01781.html", "year": 1945},
+    {"fact": "Complement ~2,500 at completion in 1941 (ja.wikipedia; not confirmed this session); 3,332 aboard at the final sortie, of whom ~3,056 died", "source_url": "https://www.mlit.go.jp/tagengo-db/R2-01781.html", "year": 1945},
     {"fact": "9 x Type 94 46 cm guns in 3 triple turrets; each turret 2,774 t; each gun 162 t", "source_url": "https://www.scribd.com/book/375401205/Yamato-Japan-S-Doomed-Flagship", "year": 1941},
     {"fact": "Main belt 41 cm over the citadel, lower belt 28 cm protecting the magazines; turret face ~65 cm", "source_url": "https://www.pressreader.com/uk/history-of-war/20171102/282686162485768", "year": 1941},
     {"fact": "Turret face armour 25 in (~64 cm), the heaviest ever fitted; total armour ~23,000 t; bridge top rangefinder ~100 ft (30 m) above the deck", "source_url": "https://www.pbs.org/wgbh/nova/supership/expl-12.html", "year": 1941},
@@ -92,7 +92,7 @@
     "colors": {"hull": "IJN Kure grey (軍艦色)", "deck": "natural wood with dark steel strips", "boot_topping": "dark red"},
     "features": ["pagoda-like compact bridge tower", "single swept-back funnel", "three triple 46 cm turrets", "flared bow with chrysanthemum crest", "dense 25 mm AA batteries (1945)", "aft catapults"]
   },
-  "crew": {"total": 3332, "design": 3233, "notes": "3,332 at the final sortie"},
+  "crew": {"total": 3332, "design": 2500, "notes": "3,332 at the final sortie"},
   "lighting": {"type": "electric, red battle lighting, blue night lights; blackout at sea", "confidence": "typical"},
   "props_period": ["Type 93 binoculars", "sound-powered telephones", "battle helmets", "lifejackets (kapok)", "sake ration for the final sortie", "farewell letters"],
   "flooding": {

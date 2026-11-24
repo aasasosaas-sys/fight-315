@@ -847,7 +847,7 @@
    ],
    "schedule": [
     {
-     "event": "東京到着",
+     "event": "シベリア経由で来日",
      "at": "port",
      "year": 1940,
      "missed": {
