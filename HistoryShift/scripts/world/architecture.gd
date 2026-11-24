@@ -223,7 +223,9 @@ func shell(mat: String, xf: Transform3D, c: Vector3, size: Vector3, colr: Color,
 
 ## 外側に巻く帯（下見板・胴蛇腹など）。天面・天井なし・当たり判定なし。中が見えても床の上に面が出ない
 func band(mat: String, xf: Transform3D, c: Vector3, size: Vector3, colr: Color, openings := [], th := 0.25) -> void:
-	shell(mat, xf, c, size, colr, openings, {"th": th, "cap": false, "ceil": false, "collide": false})
+	# 帯の内側の面は本体の壁の内面とほぼ同じ所に来て z ファイティングし、屋内に黒い櫛状の模様が出ていた。
+	# 帯は外壁に貼る板なので薄くし、内側の面を本体の壁の厚みの中に隠す（外から見た形は同じ）
+	shell(mat, xf, c, size, colr, openings, {"th": minf(th, 0.06), "cap": false, "ceil": false, "collide": false})
 
 
 ## 矩形の面（hole を抜く）。r は局所 xz（position=(x0,z0)）

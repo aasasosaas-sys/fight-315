@@ -146,6 +146,20 @@ func _run() -> void:
 			c2.look_at(xf * Vector3(c.x, y + 1.0, r.position.y + r.size.y * 0.25), Vector3.UP)
 			c2.current = true
 			await _shot(tag, era_id, "interior", 45)
+			if OS.get_environment("DBG_INT") != "":
+				print("player_inside=", wi.player_inside, " id=", id, " sun_shadow=", (w.env_nodes["sun"] as DirectionalLight3D).shadow_enabled)
+				var node: Node3D = wi.active.get(id)
+				if node:
+					node.visible = false
+				await _shot(tag, era_id, "interior_nokit", 20)
+				if node:
+					node.visible = true
+				(w.env_nodes["sun"] as DirectionalLight3D).visible = false
+				await _shot(tag, era_id, "interior_nosun", 20)
+				(w.env_nodes["sun"] as DirectionalLight3D).visible = true
+				(w.env_nodes["env"] as Environment).ssao_enabled = false
+				(w.env_nodes["post"] as Node3D).visible = false
+				await _shot(tag, era_id, "interior_nossao_nopost", 20)
 			break
 	if _want("night"):
 		hud.visible = false

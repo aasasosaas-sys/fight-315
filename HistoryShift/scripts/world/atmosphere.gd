@@ -183,6 +183,14 @@ static func set_indoor(nodes: Dictionary, style: Dictionary, k: float) -> void:
 		sun.shadow_normal_bias = 0.2 if inside else float(so[0])
 		sun.shadow_bias = 0.012 if inside else float(so[1])
 		sun.directional_shadow_max_distance = minf(float(so[2]), 70.0) if inside else float(so[2])
+		# それでも低い太陽の影は薄い外殻を抜けて家具の影が壁に黒く伸びる（ソフトシャドウのディザで櫛状）。
+		# 屋内では日の影を切り、日の光そのものを弱めて、暖かい環境光と行灯で照らす
+		sun.shadow_enabled = not inside
+		if not sun.has_meta("out_e"):
+			sun.set_meta("out_e", sun.light_energy)
+		sun.light_energy = float(sun.get_meta("out_e")) * lerpf(1.0, 0.4, k)
+		if k <= 0.0:
+			sun.remove_meta("out_e")
 
 
 # ---------------------------------------------------------------- カラーグレーディング（3D LUT）
