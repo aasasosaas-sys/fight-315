@@ -429,6 +429,8 @@ func roof(xf: Transform3D, y: float, hw: float, hd: float, rise: float, style: S
 		kit.roof(rx, hw, hd, rise, gs, mat, "darkwood", colr, curve, lift, thick, under_col, gmat, Color(0.8, 0.75, 0.7))
 	else:
 		kit.roof(rx, hw, hd, rise, gs, mat, "darkwood", colr, curve, lift, thick, under_col, gmat, Color(0.8, 0.75, 0.7), 12, 16, clamp[0], clamp[1])
+	if not clamp.is_empty():
+		return   # 上の層に覆われる屋根: 棟・鬼瓦は上の層の部屋の中に出るので作らない
 	if style != "pyramid":
 		var cap_mat := mat if mat != "thatch" else "thatch"
 		kit.ridge_cap(rx, hw, hd, rise, gs, cap_mat, colr * Color(0.7, 0.7, 0.7) if mat == "rooftile" else colr * Color(0.8, 0.8, 0.8), 0.55 if mat == "rooftile" else 0.9)

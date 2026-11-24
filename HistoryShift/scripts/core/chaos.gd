@@ -298,8 +298,13 @@ func _generic(kind: String, id: String, info: Dictionary, ev: Dictionary) -> Arr
 			# 主人公が過去に建てた施設（工場・高炉・鉄道・学校…）。id = 施設の種類。同じ名所の同じ規模は一度だけ
 			var sc := int(info.get("scale", 1))
 			var lm := str(info.get("landmark", ev.get("at", "")))
-			if not _done_before("industry", id, {"landmark": lm, "scale": sc}):
-				out.append(_act({"verb": "industry", "target": id, "landmark": lm, "scale": sc, "mult": float(info.get("mult", 1.0)), "bonus": bool(info.get("bonus", false))}))
+			# stage "run" = 稼働が軌道に乗った（建てたときとは別に一度だけ）
+			var stg := str(info.get("stage", ""))
+			if not _done_before("industry", id, {"landmark": lm, "scale": sc, "stage": stg}):
+				var ia := {"verb": "industry", "target": id, "landmark": lm, "scale": sc, "mult": float(info.get("mult", 1.0)), "bonus": bool(info.get("bonus", false))}
+				if stg != "":
+					ia["stage"] = stg
+				out.append(_act(ia))
 		"anachronism":
 			# 時代錯誤の品が過去に残った（渡した・落とした・職人の前で作った）。同じ品は一度の自由探索で一度だけ
 			var item := str(info.get("item", id))

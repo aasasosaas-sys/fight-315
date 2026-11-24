@@ -363,8 +363,10 @@ static func resolve(db: HistoryDB, actions: Array) -> Dictionary:
 					if bonus.has("vars") and bool(a.get("bonus", false)):
 						_add(bv, bonus["vars"])
 					var place := HistoryDB.landmark_name(db.get_era(era), str(a.get("landmark", "")))
-					out.append({"vars": _scale(bv, ki), "year": _era_mid(db, era), "era": era,
-						"note": "%sに%sができ、人々はその仕組みを学んで各地に広めた" % [place, bdef.get("name", "")]})
+					var inote := "%sに%sができ、人々はその仕組みを学んで各地に広めた" % [place, bdef.get("name", "")]
+					if str(a.get("stage", "")) == "run":
+						inote = "%sの%sが休まず動き続けるのを見て、商人や藩が同じものを建て始めた" % [place, bdef.get("name", "")]
+					out.append({"vars": _scale(bv, ki), "year": _era_mid(db, era), "era": era, "note": inote})
 			"anachronism":
 				var tv := CraftDB.tech_vars(str(a.get("type", "")))
 				if not tv.is_empty():
@@ -462,6 +464,8 @@ static func headline(db: HistoryDB, a: Dictionary) -> String:
 			return "%sに%sを教えた" % [nm, Skills.skill_name(sk2) if TEACH.has(sk2) else Knowledge.node_name(sk2)]
 		"industry":
 			var bd2 := Knowledge.building(str(a.get("target", "")))
+			if str(a.get("stage", "")) == "run":
+				return "%sの%sが軌道に乗った" % [HistoryDB.landmark_name(db.get_era(str(a.get("era", ""))), str(a.get("landmark", ""))), bd2.get("name", a.get("target", ""))]
 			return "%sに%sを建てた%s" % [HistoryDB.landmark_name(db.get_era(str(a.get("era", ""))), str(a.get("landmark", ""))), bd2.get("name", a.get("target", "")),
 				"（規模 %d）" % int(a.get("scale", 1)) if int(a.get("scale", 1)) > 1 else ""]
 		"anachronism":

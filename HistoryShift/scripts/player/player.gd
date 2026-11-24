@@ -23,6 +23,7 @@ var _reload_end := 0.0
 var _next_shot := 0.0
 var _last_hit := -99.0
 var _vehicle_cd := 0.0
+var _sail_dist := 0.0
 
 var rig: Humanoid
 var tools: DestructionTools     # 破壊ツール（scripts/player/destruction_tools.gd）
@@ -114,6 +115,12 @@ func _physics_process(dt: float) -> void:
 
 	if in_vehicle():
 		rig.speed = vehicle.get_speed() if vehicle.has_method("get_speed") else 0.0
+		if vehicle.get("kind") == "boat" and Game.profile:
+			# 操船の稽古：舵を取って進んだ距離 40m ごとに少し上がる
+			_sail_dist += absf(rig.speed) * dt
+			if _sail_dist >= 40.0:
+				_sail_dist -= 40.0
+				Game.profile.practice("sailing", 0.2)
 		if not blocked and Input.is_action_just_pressed("vehicle") and _vehicle_cd <= 0.0:
 			exit_vehicle()
 		elif not blocked and vehicle.get("kind") != "plane":
@@ -294,6 +301,8 @@ func enter_vehicle(v) -> void:
 	rig.riding = true
 	v.enter(self)
 	var kind: String = v.get("kind")
+	if kind == "boat":
+		apply_sailing(v)
 	if CameraRig.I:
 		CameraRig.I.set_target(v, CameraRig.Mode.PLANE if kind == "plane" else CameraRig.Mode.GROUND)
 	var hud = get_tree().get_first_node_in_group("hud")
@@ -301,6 +310,22 @@ func enter_vehicle(v) -> void:
 		hud.toast("%sに乗った（F で降りる）" % v.get("display_name"))
 	if kind == "plane" and hud:
 		hud.toast("W/S:スロットル  マウス:進路  左クリック:機銃  Shift:ブースト")
+
+
+## 操船の技能を船の舵の効き・速さに反映する（ships/* は変えず、Ship が読む sd.pilot の値を技能の倍率で置きかえる）
+static func apply_sailing(v) -> void:
+	var ship = v.get("ship")
+	if ship == null or not is_instance_valid(ship) or ship.get("sd") == null:
+		return
+	var sd = ship.sd
+	var pil: Dictionary = sd.pilot
+	var L := float(sd.L)
+	if not pil.has("_base_vmax"):
+		pil["_base_vmax"] = float(pil.get("vmax", clampf(L / 6.0, 3.0, 8.0)))
+		pil["_base_turn"] = float(pil.get("turn", clampf(6.0 / L, 0.06, 0.35)))
+	var lv: float = Game.profile.level("sailing") if Game.profile else 0.0
+	pil["vmax"] = float(pil["_base_vmax"]) * Skills.boat_speed_mult(lv)
+	pil["turn"] = float(pil["_base_turn"]) * Skills.boat_turn_mult(lv)
 
 
 func exit_vehicle() -> void:

@@ -39,6 +39,7 @@ func _run() -> void:
 	_master()
 	_history()
 	_knowledge()
+	_markets_sailing_spread()
 	await _integration()
 	await _industry()
 	PlayerProfile.delete_save()
@@ -605,8 +606,23 @@ func _industry() -> void:
 		prof.add("wata", 9)
 		f.deposit(prof)
 		_check(f.produce_once() and f.produce_once(), "the mill spins cotton")
+		# 稼働が軌道に乗る（12回）と、歴史にもう一度知らせる
+		var n_run: int = G.state.actions.size()
+		f.rec["made"] = Knowledge.RUN_MILESTONE - 1
+		prof.add("wata", 3)
+		f.deposit(prof)
+		f.produce_once()
+		_check(G.state.actions.size() > n_run and str(G.state.actions[-1].get("stage", "")) == "run", "a mill running for %d cycles moves history again" % Knowledge.RUN_MILESTONE)
+		_check(f.run_milestone().is_empty(), "the running milestone counts once")
 		var got: Array = f.collect(prof)
 		_check(prof.count("menshi") >= 6, "collected cotton yarn (%d)" % prof.count("menshi"))
+		# 問屋に卸す：江戸の綿糸の需要
+		prof.add("wata", 6)
+		f.deposit(prof)
+		f.produce_once()
+		var m_before := prof.money
+		var sold: Array = f.sell_outputs(prof, "edo")
+		_check(not sold.is_empty() and prof.money > m_before, "selling factory output to wholesalers earns money (%d)" % (prof.money - m_before))
 		var old_skill := float(f.rec.get("skill", 0))
 		var tw: Dictionary = sess.craft.teach_workers(f, "t_boseki")
 		_check(tw["ok"] and float(f.rec["skill"]) > old_skill, "teaching artisans raises their skill")
@@ -659,3 +675,86 @@ func _industry() -> void:
 	G.profile = saved_prof
 	G.state.reset_all()
 	G.remove_meta("force_fallback_world")
+
+
+# ------------------------------------------------------------------ 9. 市場・操船・知識を広めること
+func _markets_sailing_spread() -> void:
+	Knowledge.market_reset()
+	var p := PlayerProfile.new()
+	p.autosave = false
+	_check(Knowledge.demand("kiito", "meiji_taisho") > Knowledge.demand("kiito", "edo"), "raw silk sells better after the ports open (Meiji)")
+	_check(Knowledge.demand("tamahagane", "meiji_taisho") < Knowledge.demand("tamahagane", "sengoku"), "tamahagane demand collapses after the sword ban")
+	_check(Knowledge.demand("sekitan", "meiji_taisho") > Knowledge.demand("sekitan", "edo"), "coal demand grows with steam")
+	for mid in ["kiito", "menshi", "hiryo", "ryusan", "kikai_buhin", "sekitan", "tamahagane", "hagane", "tetsu", "tekkoseki"]:
+		_check(CraftDB.has_item(mid) and str(Knowledge.market(mid).get("basis", "")) != "", "market %s has an item and a basis" % mid)
+	var t0 := 1000000.0
+	var p1 := Knowledge.market_price(p, "kiito", "meiji_taisho", t0)
+	var got := Knowledge.market_sell(p, "kiito", 10, "meiji_taisho", t0)
+	var p2 := Knowledge.market_price(p, "kiito", "meiji_taisho", t0)
+	_check(p2 < p1 and got < p1 * 10 and got > p2 * 10, "flooding the market lowers the price (%d -> %d)" % [p1, p2])
+	Knowledge.market_sell(p, "kiito", 100, "meiji_taisho", t0)
+	_check(Knowledge.market_price(p, "kiito", "meiji_taisho", t0) >= int(p1 * Knowledge.MARKET_FLOOR) - 1, "the price has a floor")
+	_check(Knowledge.market_price(p, "kiito", "meiji_taisho", t0 + 100000.0) == p1, "the market recovers with time")
+	_check(Knowledge.market_price(p, "kiito", "edo", t0) < p1, "each era has its own market")
+	var talker := PlayerProfile.new()
+	talker.autosave = false
+	talker.skills["rhetoric"] = 100.0
+	_check(Knowledge.market_price(talker, "menshi", "showa", t0) > Knowledge.market_price(p, "menshi", "showa", t0), "rhetoric gets a better wholesale price")
+	Knowledge.market_reset()
+	# 操船：舵の効きと速さ（ships/* は変えず sd.pilot を置きかえる）
+	var G: Node = root.get_node_or_null("Game")
+	var saved_prof = G.profile
+	var sd := ShipData.new()
+	sd.L = 30.0
+	var ship: Node3D = (load("res://scripts/world/ships/ship.gd") as GDScript).new()
+	ship.sd = sd
+	var helm: Node3D = (load("res://scripts/world/ships/ship_helm.gd") as GDScript).new()
+	helm.ship = ship
+	var PL: GDScript = load("res://scripts/player/player.gd")
+	var novice := PlayerProfile.new()
+	novice.autosave = false
+	G.profile = novice
+	PL.apply_sailing(helm)
+	var t_lo := float(sd.pilot["turn"])
+	var v_lo := float(sd.pilot["vmax"])
+	var pro := PlayerProfile.new()
+	pro.autosave = false
+	pro.skills["sailing"] = 100.0
+	G.profile = pro
+	PL.apply_sailing(helm)
+	_check(float(sd.pilot["turn"]) > t_lo * 1.5 and float(sd.pilot["vmax"]) > v_lo, "sailing skill sharpens the helm (turn %.3f -> %.3f)" % [t_lo, float(sd.pilot["turn"])])
+	PL.apply_sailing(helm)
+	_check(absf(float(sd.pilot["turn"]) - float(sd.pilot["_base_turn"]) * Skills.boat_turn_mult(100.0)) < 0.0001, "re-boarding does not compound the multiplier")
+	G.profile = saved_prof
+	helm.free()
+	ship.free()
+	# 知識を広める（学校・多くの職人に教える）は、工場 1 つより長く効く（1941年の国力）
+	var db := HistoryDB.load_all()
+	var sa := HistoryState.new(db)
+	var ta := ChaosTracker.new(db, sa)
+	ta.begin_session("edo")
+	ta.act("industry", "boseki", {"landmark": "village", "scale": 1})
+	ta.end_session()
+	var sb := HistoryState.new(db)
+	var tb := ChaosTracker.new(db, sb)
+	tb.begin_session("edo")
+	tb.act("industry", "gakko", {"landmark": "capital", "scale": 1, "mult": 3.0})
+	for nid in ["p_jouki", "m_hansharo", "c_ryusan", "e_denshin", "k_senban"]:
+		tb.act("teach", "village", {"skill": nid, "level": 70})
+	tb.end_session()
+	var pa: Dictionary = sa.war.get("pillars", {})
+	var pb: Dictionary = sb.war.get("pillars", {})
+	var suma := 0.0
+	var sumb := 0.0
+	for k in pa:
+		suma += float(pa[k])
+	for k in pb:
+		sumb += float(pb[k])
+	_check(sumb > suma, "spreading knowledge (school + teaching) beats one factory for 1941 national power (%.1f vs %.1f)" % [sumb, suma])
+	# 江戸に工場を建てると、1941年より前の国際的地位・国力が上がる（複利）
+	var s0 := HistoryState.new(db)
+	s0.recompute()
+	var base_sum := 0.0
+	for k in s0.war.get("pillars", {}):
+		base_sum += float(s0.war["pillars"][k])
+	_check(suma >= base_sum, "an Edo factory does not lower 1941 national power (%.1f vs base %.1f)" % [suma, base_sum])

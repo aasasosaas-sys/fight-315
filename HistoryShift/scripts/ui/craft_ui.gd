@@ -972,6 +972,20 @@ func open_factory(f: Facility, msg := "") -> void:
 		var got := f.collect(prof())
 		prof().save()
 		open_factory(f, "受け取った：" + ("、".join(got.map(func(x): return CraftDB.money_text(x[1], era_id) if x[0] == "money" else "%s ×%d" % [CraftDB.item_name(x[0]), x[1]])) if not got.is_empty() else "まだ何もない")))
+	if not outs.is_empty():
+		var mk: PackedStringArray = []
+		for k in st:
+			if str(k).begins_with("out_") and int(st[k]) > 0:
+				var oid := str(k).substr(4)
+				mk.append("%s 1つ %s（需要 ×%.1f）" % [CraftDB.item_name(oid), CraftDB.money_text(Knowledge.market_price(prof(), oid, era_id), era_id), Knowledge.demand(oid, era_id)])
+		_lbl("問屋の卸値：" + "、".join(mk) + "　（続けて売ると値が下がり、時がたつと戻る）", 17, JSUI.MUTED)
+		var mb := str(Knowledge.market(str(st.keys().filter(func(x): return str(x).begins_with("out_") and int(st[x]) > 0)[0]).substr(4)).get("basis", ""))
+		if mb != "":
+			_lbl("【史実】" + mb, 16, JSUI.DIM)
+		_btn("できた品を問屋に卸す（時代の需要しだい）", func():
+			var sold := f.sell_outputs(prof(), era_id)
+			prof().save()
+			open_factory(f, "卸した：" + "、".join(sold.map(func(x): return "%s ×%d → %s" % [CraftDB.item_name(x[0]), x[1], CraftDB.money_text(x[2], era_id)]))))
 	var nodes: Array = []
 	for kk in b.get("know", {}):
 		nodes.append(kk)

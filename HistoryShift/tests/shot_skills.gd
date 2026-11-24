@@ -163,6 +163,8 @@ func _industry_shots(sess: Session, prof: PlayerProfile, era_id: String) -> void
 		cam.pitch = 0.12
 		cam.snap()
 		await _shot("skills_%s_factory_world" % era_id, 50)
+		for i in 3:
+			f0.produce_once()
 		sess.craft.ui.open_factory(f0)
 		await _shot("skills_%s_factory_panel" % era_id)
 		sess.craft.ui.close()

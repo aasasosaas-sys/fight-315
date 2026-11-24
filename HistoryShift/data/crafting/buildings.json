@@ -17,5 +17,18 @@
     {"id": "denshin", "name": "電信線", "know": {"e_denshin": 40}, "mats": {"dousen": 20, "mokuzai": 10, "denchi": 4}, "money": 200000, "workers": 3, "permit": true, "at": ["capital", "village", "port", "castle", "temple"], "power": "none", "cycle": 30, "money_out": 400, "line": true, "visual": "telegraph", "vars": {"centralization": 5, "tech": 3, "unity": 3}, "desc": "名所どうしを電線で結び、知らせを一瞬で届ける。"},
     {"id": "ginko", "name": "銀行・会社", "know": {"b_kabushiki": 40, "b_boki": 30}, "mats": {"mokuzai": 6}, "money": 500000, "workers": 3, "permit": true, "at": ["port", "capital"], "power": "none", "cycle": 30, "money_out": 1500, "visual": "bank", "vars": {"economy": 6, "commerce": 6}, "desc": "人々の金を集めて事業に回す。"},
     {"id": "gakko", "name": "学校（私塾）", "know": {"b_gakko": 30}, "mats": {"mokuzai": 10}, "money": 60000, "workers": 2, "permit": false, "at": ["capital", "temple", "village"], "power": "none", "cycle": 60, "school": true, "visual": "school", "vars": {"education": 6, "tech": 3}, "desc": "あなたが知っている知識を教える学校。知っている原理が多いほど効き目が大きい（工場1つより長く効く）。", "basis": "適塾（1838年）から福沢諭吉・大村益次郎ら、明治を動かす人材が出た。"}
-  ]
+  ],
+  "_doc_markets": "markets = 施設の品を問屋に卸すときの需要（時代ごとの値の倍率。書いていない時代は default）。同じ時代に続けて売るほど値が下がり（1つにつき4%、最低40%）、時間がたつと戻る。",
+  "markets": {
+    "kiito": {"default": 0.6, "edo": 0.8, "meiji_taisho": 1.4, "showa": 0.7, "basis": "1859年の横浜開港で生糸は最大の輸出品になり、値が跳ね上がった（明治〜大正の輸出の3〜4割）。1929年の世界恐慌と人絹（レーヨン）で暴落した。"},
+    "menshi": {"default": 0.6, "edo": 0.8, "meiji_taisho": 1.2, "showa": 1.0, "basis": "江戸の木綿は手紡ぎの国内市場。1890年代に機械紡績の綿糸が輸入を上回り、1897年に輸出が輸入を超えた。"},
+    "hiryo": {"default": 0.4, "edo": 0.5, "meiji_taisho": 1.0, "showa": 1.1, "basis": "江戸の農民は干鰯・油粕を肥料に買った。1888年に東京人造肥料会社が過燐酸石灰を造り始め、大正期に広まった。"},
+    "ryusan": {"default": 0.3, "edo": 0.4, "meiji_taisho": 1.0, "showa": 1.0, "basis": "硫酸は化学工業がなければ買い手がいない。1872年に大阪の造幣寮が自家用に造り始めた。"},
+    "kikai_buhin": {"default": 0.3, "edo": 0.5, "meiji_taisho": 1.1, "showa": 1.0, "basis": "機械部品を買うのは工場と鉄道。江戸では藩の造船・鉄砲の御用くらいしか買い手がいない。"},
+    "sekitan": {"default": 0.3, "edo": 0.5, "meiji_taisho": 1.2, "showa": 1.0, "basis": "江戸の石炭は瀬戸内の製塩の燃料程度。明治には蒸気船・工場の燃料と上海向けの輸出で、三池・高島の炭が飛ぶように売れた。"},
+    "tamahagane": {"default": 0.8, "sengoku": 1.2, "edo": 1.0, "meiji_taisho": 0.4, "showa": 0.5, "basis": "戦国は刀・槍の需要が最も大きい。1876年の廃刀令で刀の需要が消え、たたら製鉄は大正末に途絶えた。"},
+    "hagane": {"default": 0.6, "edo": 0.8, "meiji_taisho": 1.1, "showa": 1.2, "basis": "幕末は藩が大砲のために鋼を求めた。明治以降は鉄道・造船・軍需で需要が伸び続けた。"},
+    "tetsu": {"default": 1.0, "basis": "鉄は農具・釘・鍋に、どの時代にも買い手がいた。"},
+    "tekkoseki": {"default": 0.3, "meiji_taisho": 0.9, "showa": 1.0, "basis": "鉄鉱石を買うのは高炉だけ。江戸までの製鉄は砂鉄を使った。"}
+  }
 }

@@ -110,7 +110,42 @@ func produce_once() -> bool:
 	if prof:
 		for k in bdef.get("know", {}):
 			Knowledge.train(prof, k, 0.25, Knowledge.CAP_RUN)
+	run_milestone()
 	return true
+
+
+## 稼働が軌道に乗った（生産 Knowledge.RUN_MILESTONE 回）：歴史にもう一度知らせる。自由探索の外なら次の機会に
+func run_milestone() -> Dictionary:
+	if int(rec.get("made", 0)) < Knowledge.RUN_MILESTONE or rec.get("run_told", false):
+		return {}
+	if Game.chaos == null or not Game.chaos.is_active() or Game.profile == null:
+		return {}
+	rec["run_told"] = true
+	var sc := int(rec.get("scale", 1))
+	var hit: Dictionary = Game.chaos.act("industry", str(rec.get("type", "")), {"landmark": str(rec.get("at", "")), "scale": sc, "stage": "run",
+		"mult": 0.5 * Knowledge.industry_scale(Game.profile, rec) / (1.0 + 0.5 * (sc - 1))})
+	if is_inside_tree():
+		var hud = get_tree().get_first_node_in_group("hud")
+		if hud and hud.has_method("toast"):
+			hud.toast("%sが軌道に乗った。まねをする者が現れ始めた" % display_name, 4.0)
+	return hit
+
+
+## できた品を問屋に卸す（時代の需要・売れ残りで値が変わる）。[[id, n, 稼ぎ]...]
+func sell_outputs(prof: PlayerProfile, era_id: String) -> Array:
+	var sold: Array = []
+	var st: Dictionary = rec.get("stock", {})
+	for k in st.keys():
+		if str(k).begins_with("out_") and int(st[k]) > 0:
+			var id := str(k).substr(4)
+			var n := int(st[k])
+			var mon := Knowledge.market_sell(prof, id, n, era_id)
+			prof.add_money(mon)
+			prof.practice("rhetoric", 0.05 * n)
+			sold.append([id, n, mon])
+			st[k] = 0
+	rec["stock"] = st
+	return sold
 
 
 func catch_up() -> void:

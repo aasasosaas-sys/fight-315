@@ -157,3 +157,7 @@ EraWorld.interior_at(pos) -> int
   `Game.chaos.act("industry", <buildings.json の id>, {"landmark": <名所キー>, "scale": 1〜3, "mult": <学校は 1+知っている原理/10>, "bonus": bool})`
   → 行動 `{verb:"industry", target, landmark, scale, mult, bonus, era, seq}`。効果は施設の vars ×(1+0.5(scale−1))×mult を、その時代の年に歴史パラメータへ（WarModel の複利で 1941 年の柱に効く）。
   同じ時代・同じ名所・同じ規模は一度だけ。知識を教える（`teach`、skill に知識ノード id）は knowledge.json の vars。同じ相手に同じ知識は一度だけ（`ChaosTracker._done_before`）。
+  生産が `Knowledge.RUN_MILESTONE`（12）回に達すると `stage: "run"`・mult 0.5 でもう一度だけ知らせる（稼働する工場を見て真似る者が出る）。
+- 市場: `buildings.json` の `markets`（品ごとの時代の需要倍率と史実の根拠。例 生糸は開港後の明治 ×1.4、玉鋼は廃刀令後 ×0.4）。
+  施設画面の「問屋に卸す」＝ `Knowledge.market_price/market_sell`（品の値×0.6×需要×売れ残り（1つ 4%・最低 40%・30 秒で 1 つ分戻る）×話術）。
+- 操船: `Player.apply_sailing(helm)` が乗船時に `ship.sd.pilot` の vmax・turn を操船の技能の倍率で置きかえる（ships/* は変えない）。舵を取って 40m 進むごとに操船の稽古。

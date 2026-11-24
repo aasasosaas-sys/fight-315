@@ -18,6 +18,8 @@ static var _data: Dictionary = {}
 static var _nodes: Dictionary = {}
 static var _order: Array = []
 static var _buildings: Array = []
+static var _markets: Dictionary = {}
+static var _sold: Dictionary = {}       # "era/item" -> [売った量（減っていく）, 最後に売った時刻]
 
 
 static func ensure() -> void:
@@ -32,6 +34,7 @@ static func ensure() -> void:
 	var b := "res://data/crafting/buildings.json"
 	var bd: Variant = JSON.parse_string(FileAccess.get_file_as_string(b)) if FileAccess.file_exists(b) else null
 	_buildings = (bd as Dictionary).get("buildings", []) if bd is Dictionary else []
+	_markets = (bd as Dictionary).get("markets", {}) if bd is Dictionary else {}
 
 
 static func ids() -> Array:
@@ -279,3 +282,55 @@ static func industry_scale(prof, rec: Dictionary) -> float:
 	if b.get("school", false):
 		s *= 1.0 + float(known_count(prof)) / 10.0
 	return s
+
+
+# ------------------------------------------------------------------ 市場（問屋に卸す）
+const MARKET_DROP := 0.04         # 1つ売るごとの値下がり
+const MARKET_FLOOR := 0.4
+const MARKET_RECOVER := 30.0      # この秒数で 1 つ分の値が戻る
+
+
+static func market(item_id: String) -> Dictionary:
+	ensure()
+	return _markets.get(item_id, {})
+
+
+## その時代の需要（値の倍率）
+static func demand(item_id: String, era_id: String) -> float:
+	var m := market(item_id)
+	return float(m.get(era_id, m.get("default", 1.0)))
+
+
+static func _sold_now(key: String, now: float) -> float:
+	var r: Array = _sold.get(key, [0.0, now])
+	return maxf(0.0, float(r[0]) - (now - float(r[1])) / MARKET_RECOVER)
+
+
+## 卸値（1つ）：品の値 × 0.6 × 需要 × 売れ残り × 話術
+static func market_price(prof, item_id: String, era_id: String, now := -1.0) -> int:
+	if now < 0.0:
+		now = Time.get_unix_time_from_system()
+	var sat := maxf(MARKET_FLOOR, 1.0 - MARKET_DROP * _sold_now(era_id + "/" + item_id, now))
+	var rh: float = prof.level("rhetoric") if prof else 0.0
+	var talk := 0.85 + 0.3 * clampf(rh / 100.0, 0.0, 1.0)
+	return maxi(1, int(float(CraftDB.item(item_id).get("price", 0)) * 0.6 * demand(item_id, era_id) * sat * talk))
+
+
+## n 個を卸す（1つずつ値が下がる）。受け取ったお金を返す
+static func market_sell(prof, item_id: String, n: int, era_id: String, now := -1.0) -> int:
+	if now < 0.0:
+		now = Time.get_unix_time_from_system()
+	var key := era_id + "/" + item_id
+	var total := 0
+	for i in n:
+		total += market_price(prof, item_id, era_id, now)
+		_sold[key] = [_sold_now(key, now) + 1.0, now]
+	return total
+
+
+static func market_reset() -> void:
+	_sold.clear()
+
+
+## 施設の稼働が軌道に乗った（生産 RUN_MILESTONE 回）とき、歴史にもう一度知らせる（人々が稼働する工場を見て真似る）
+const RUN_MILESTONE := 12
