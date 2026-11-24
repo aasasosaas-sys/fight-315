@@ -1,0 +1,2409 @@
+{
+ "eraId": "kamakura_muromachi",
+ "actors": [
+  {
+   "name": "源頼朝",
+   "era": "kamakura_muromachi",
+   "faction": "鎌倉幕府",
+   "born": 1147,
+   "died": 1199,
+   "death": "accident",
+   "active": 1180,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "reform": 2,
+    "loyal": -1
+   },
+   "spawn": "capital",
+   "q": [
+    "kamakura_muromachi_01"
+   ],
+   "saved": {
+    "year": 1199,
+    "text": "落馬がもとで亡くなるはずの頼朝が助かり、源氏将軍のもとで幕府は長く安定した。北条氏の執権政治は生まれず、御家人は将軍にじかに仕え続けた。",
+    "vars": {
+     "centralization": 15,
+     "unity": 10,
+     "warrior": 5
+    }
+   },
+   "persuade": {
+    "裏切りを促す": {
+     "vars": {
+      "court": -35,
+      "unity": -25
+     },
+     "year": 1192,
+     "text": "頼朝は「日本国第一の大天狗」後白河法皇との約束を次々に反故にし、朝廷を力ずくで押さえつけた。院の権威が地に落ちたため、その座をめぐる皇族どうしの争いが早くから激しくなった。"
+    }
+   }
+  },
+  {
+   "name": "源実朝",
+   "era": "kamakura_muromachi",
+   "faction": "鎌倉幕府",
+   "born": 1192,
+   "died": 1219,
+   "death": "assassinated",
+   "active": 1203,
+   "tags": [
+    "ruler",
+    "artist"
+   ],
+   "traits": {
+    "war": -2,
+    "reform": 1,
+    "loyal": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "kamakura_muromachi_01"
+   ],
+   "saved": {
+    "year": 1219,
+    "text": "鶴岡八幡宮で公暁に襲われるはずの実朝が無事だった。和歌を通じて後鳥羽上皇と心を通わせる源氏将軍が健在で、院の権威は高まる一方。のちの乱でも院宣は後白河院以来の先例を盾に出された。",
+    "vars": {
+     "court": 30,
+     "unity": 5
+    }
+   },
+   "persuade": {
+    "学問を勧める": {
+     "vars": {
+      "warrior": -30
+     },
+     "year": 1215,
+     "text": "源実朝は『金槐和歌集』の歌作りと蹴鞠にますます打ち込み、弓馬の道はすっかりおろそかに。将軍が武芸を顧みないので鎌倉の武士の力は衰え、禅を保護する有力な武家も育たなかった。"
+    }
+   }
+  },
+  {
+   "name": "北条政子",
+   "era": "kamakura_muromachi",
+   "faction": "鎌倉幕府",
+   "born": 1157,
+   "died": 1225,
+   "death": "natural",
+   "active": 1199,
+   "tags": [
+    "woman",
+    "ruler"
+   ],
+   "traits": {
+    "loyal": 2,
+    "war": 1,
+    "faith": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "kamakura_muromachi_01",
+    "kamakura_muromachi_05"
+   ],
+   "aka": [
+    "尼将軍"
+   ],
+   "contrib": [
+    {
+     "q": "kamakura_muromachi_05",
+     "choice": 3,
+     "note": "栄西のために寿福寺を建てた政子がおらず、栄西は鎌倉で後ろ盾を得られなかった"
+    }
+   ],
+   "persuade": {
+    "戦を勧める": {
+     "vars": {
+      "warrior": 35,
+      "centralization": 20
+     },
+     "year": 1221,
+     "text": "「頼朝公の御恩は山よりも高く海よりも深い」。政子の檄がいつもより三割増しで熱かったので、幕府軍は京を圧倒した。勢いに乗った幕府は、公家の所領にも武家の法を押しつけた。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "御家人への演説",
+     "at": "capital",
+     "year": 1221,
+     "missed": {
+      "vars": {
+       "warrior": -30,
+       "unity": -20
+      }
+     },
+     "text": "政子は御家人を前にした演説に間に合わなかった。院宣に動揺した御家人はなかなかまとまらず、幕府は辛うじて勝ったものの武士の力は大きく削がれた。"
+    }
+   ]
+  },
+  {
+   "name": "北条義時",
+   "era": "kamakura_muromachi",
+   "faction": "鎌倉幕府",
+   "born": 1163,
+   "died": 1224,
+   "death": "illness",
+   "active": 1205,
+   "tags": [
+    "ruler",
+    "official"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": -1,
+    "reform": 1
+   },
+   "q": [
+    "kamakura_muromachi_01"
+   ],
+   "successor": "北条泰時",
+   "contrib": [
+    {
+     "vars": {
+      "centralization": -5
+     },
+     "year": 1220,
+     "note": "義時がいなくなり、執権の政務はしばらく混乱したが、跡継ぎ次第で立て直せる"
+    }
+   ],
+   "saved": {
+    "year": 1224,
+    "text": "急死するはずの義時が薬で回復し、伊賀氏の変のような跡目争いも起こらなかった。得宗家は盤石となり、泰時の系統が長く安定した執権政治を続けた。",
+    "vars": {
+     "centralization": 35,
+     "unity": 20
+    }
+   },
+   "persuade": {
+    "戦を勧める": {
+     "force": {
+      "q": "kamakura_muromachi_01",
+      "choice": 2
+     },
+     "text": "義時は院方の所領三千か所を取り上げるだけでは満足せず、公家の荘園の訴えまで六波羅で裁くよう命じた。この方針を受け継いだ泰時は、のちに定めた御成敗式目を朝廷の支配する地域にまで当てはめた。"
+    }
+   }
+  },
+  {
+   "name": "北条泰時",
+   "era": "kamakura_muromachi",
+   "faction": "鎌倉幕府",
+   "born": 1183,
+   "died": 1242,
+   "death": "illness",
+   "active": 1221,
+   "tags": [
+    "ruler",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2,
+    "loyal": 2,
+    "war": -1
+   },
+   "spawn": "castle",
+   "q": [
+    "kamakura_muromachi_01",
+    "kamakura_muromachi_02"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "centralization": -15,
+      "unity": -10
+     },
+     "year": 1225,
+     "note": "御成敗式目を定める者がおらず、武家の法はばらばらのままだった"
+    }
+   ],
+   "saved": {
+    "year": 1242,
+    "text": "60歳で病死するはずの泰時が宋の薬で長生きし、90歳を超えてなお執権の座にあった。1268年に元の国書を受け取ったのは老執権泰時。九州の御家人には異国警固番役が課された。",
+    "force": {
+     "q": "kamakura_muromachi_02",
+     "choice": 0
+    }
+   },
+   "doc": {
+    "name": "泰時が弟重時に宛てた書状",
+    "q": "kamakura_muromachi_01",
+    "choice": 2,
+    "text": "式目は武家のための法で、律令や公家の法を改めるものではない――そう説いた泰時の書状が盗まれた。趣旨を知らない六波羅は、朝廷の支配する地域にまで式目を当てはめてしまった。"
+   },
+   "persuade": {
+    "改革を勧める": {
+     "force": {
+      "q": "kamakura_muromachi_01",
+      "choice": 2
+     },
+     "text": "乱の後、地頭と荘園領主の争いが六波羅にあふれていた。「同じ道理で裁かねば争いは終わらない」と説かれた泰時は、式目を朝廷の支配する地域にも適用した。公家法・本所法は出番を失い、武家の法が日本の法になった。"
+    }
+   },
+   "give": {
+    "鉄砲": {
+     "vars": {
+      "warrior": 40,
+      "centralization": 20
+     },
+     "year": 1221,
+     "text": "宇治川を渡る泰時の軍勢に鉄砲が加わり、院方は一日で総崩れ。圧倒的な武力を手にした幕府は、公家の荘園にも式目をそのまま押しつけた。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "京へ出陣",
+     "at": "castle",
+     "year": 1221,
+     "missed": {
+      "vars": {
+       "court": 30
+      }
+     },
+     "text": "泰時の出陣が遅れ、院方は京の守りを固める時間を得た。院と摂関家の権威は高まり、義時追討の命令は後白河院の院宣を先例として出された。"
+    }
+   ]
+  },
+  {
+   "name": "北条重時",
+   "era": "kamakura_muromachi",
+   "faction": "鎌倉幕府",
+   "born": 1198,
+   "died": 1261,
+   "death": "illness",
+   "active": 1230,
+   "tags": [
+    "official",
+    "warrior"
+   ],
+   "traits": {
+    "loyal": 2,
+    "faith": 2,
+    "reform": 1
+   },
+   "spawn": "castle",
+   "q": [
+    "kamakura_muromachi_02"
+   ],
+   "persuade": {
+    "忠義を説く": {
+     "vars": {
+      "centralization": 35,
+      "unity": 20
+     },
+     "year": 1250,
+     "text": "六波羅探題として京を治めた北条重時が、一族に忠義を説く家訓をいっそう厳しくした。その家訓のおかげで得宗家と一門の結束は固く、幕府の権力は揺るがなかった。"
+    },
+    "信仰を勧める": {
+     "vars": {
+      "religion": 35,
+      "centralization": 20
+     },
+     "year": 1250,
+     "text": "極楽寺を開いた信心深い北条重時は、念仏を「無間地獄の業」と罵る日蓮ら新しい宗派の攻撃に怒り（日蓮自身、伊豆への流罪の背後に重時がいたと書いている）、旧仏教の大寺院の訴えに耳を傾けた。幕府の重鎮が取りなしたため、幕府は延暦寺・興福寺の求めに応じ、新しい宗派を取り締まる側に回った。"
+    }
+   }
+  },
+  {
+   "name": "大江広元",
+   "era": "kamakura_muromachi",
+   "faction": "鎌倉幕府",
+   "born": 1148,
+   "died": 1225,
+   "death": "illness",
+   "active": 1184,
+   "tags": [
+    "official",
+    "scholar"
+   ],
+   "traits": {
+    "reform": 2,
+    "loyal": 2
+   },
+   "spawn": "capital",
+   "q": [
+    "kamakura_muromachi_01"
+   ],
+   "persuade": {
+    "改革を勧める": {
+     "force": {
+      "q": "kamakura_muromachi_01",
+      "choice": 2
+     },
+     "text": "守護・地頭の設置を献策した京下りの文官・大江広元が、承久の乱の直後「この機に法も全国一律に」と説いた。公家の法に通じた広元の献策は評定衆に受け継がれ、幕府は、朝廷の支配地にも武家の法を全面的に適用した。"
+    }
+   }
+  },
+  {
+   "name": "三浦義村",
+   "era": "kamakura_muromachi",
+   "faction": "三浦",
+   "born": null,
+   "died": 1239,
+   "death": "illness",
+   "active": 1213,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "loyal": -1,
+    "war": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "kamakura_muromachi_01"
+   ],
+   "persuade": {
+    "忠義を説く": {
+     "vars": {
+      "warrior": 35,
+      "centralization": 15
+     },
+     "year": 1221,
+     "text": "弟胤義の誘いをきっぱり断った三浦義村は、いつにも増して幕府に忠実だった。有力御家人の三浦一族が先頭に立ったことで幕府軍は京を制し、武家の法が全国に及んだ。"
+    },
+    "裏切りを促す": {
+     "vars": {
+      "warrior": -30,
+      "unity": -20
+     },
+     "year": 1221,
+     "text": "三浦義村は弟胤義の誘いに乗って院方についた。御家人が二つに割れたせいで、幕府は勝ちはしたものの武士の力は大きく損なわれ、禅を保護する余裕のある武家もいなくなった。"
+    }
+   }
+  },
+  {
+   "name": "後白河法皇",
+   "era": "kamakura_muromachi",
+   "faction": "朝廷",
+   "born": 1127,
+   "died": 1192,
+   "death": "illness",
+   "active": 1158,
+   "tags": [
+    "ruler",
+    "sacred"
+   ],
+   "traits": {
+    "loyal": -2,
+    "faith": 2
+   },
+   "spawn": "temple",
+   "q": [
+    "kamakura_muromachi_01"
+   ],
+   "saved": {
+    "year": 1192,
+    "text": "病死するはずの後白河法皇が持ち直し、驚異の長寿で1221年まで院政を続けた。北条義時追討の院宣を出したのは後鳥羽上皇ではなく、90歳を超えた後白河院だった。",
+    "force": {
+     "q": "kamakura_muromachi_01",
+     "choice": 0
+    }
+   },
+   "persuade": {
+    "倹約を勧める": {
+     "vars": {
+      "court": -35,
+      "unity": -25
+     },
+     "year": 1185,
+     "text": "後白河法皇が院の御所や寺社への寄進を切り詰めると、院政の力は細っていった。院の権威が衰えたため皇族どうしの皇位争いが激しくなり、のちの系統が早く登場した。"
+    }
+   },
+   "give": {
+    "千両箱": {
+     "vars": {
+      "court": 30
+     },
+     "year": 1190,
+     "text": "千両箱を手にした後白河法皇は長講堂に荘園を集め、院の財力は空前のものに。院宣の権威は没後も先例として生き続け、承久の乱でも後白河院の名が掲げられた。"
+    }
+   }
+  },
+  {
+   "name": "後鳥羽上皇",
+   "era": "kamakura_muromachi",
+   "faction": "朝廷",
+   "born": 1180,
+   "died": 1239,
+   "death": "illness",
+   "active": 1198,
+   "tags": [
+    "ruler",
+    "sacred",
+    "artist"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": -1,
+    "faith": 1
+   },
+   "spawn": "temple",
+   "q": [
+    "kamakura_muromachi_01"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "court": -30,
+      "unity": -25
+     },
+     "year": 1220,
+     "note": "院政の主の後鳥羽上皇がいなくなり、皇位をめぐる争いが早くから激しくなった"
+    }
+   ],
+   "persuade": {
+    "戦をやめさせる": {
+     "vars": {
+      "court": 30,
+      "warrior": -20
+     },
+     "year": 1222,
+     "text": "後鳥羽上皇は挙兵を思いとどまり、乱の後も京で院政を続けた。朝廷の力は衰えず、幕府も西国に大きな力を持てないまま。九州の御家人はまず都の警備に回された。"
+    }
+   }
+  },
+  {
+   "name": "藤原秀康",
+   "era": "kamakura_muromachi",
+   "faction": "朝廷",
+   "born": null,
+   "died": 1221,
+   "death": "executed",
+   "active": 1215,
+   "tags": [
+    "official",
+    "warrior"
+   ],
+   "traits": {
+    "loyal": 2,
+    "war": 1
+   },
+   "spawn": "temple",
+   "q": [
+    "kamakura_muromachi_01"
+   ],
+   "aka": [
+    "院の近臣・藤原秀康"
+   ],
+   "doc": {
+    "name": "北条義時追討の院宣の下書き",
+    "q": "kamakura_muromachi_01",
+    "choice": 0,
+    "text": "秀康が持っていた後鳥羽上皇の院宣の下書きが盗まれた。慌てた院の近臣たちは、文箱の底から見つかった後白河院の古い院宣を引っぱり出して義時追討を命じた。"
+   },
+   "persuade": {
+    "未来の技術を教える": {
+     "vars": {
+      "court": 15
+     },
+     "year": 1221,
+     "text": "藤原秀康は未来の兵法を学んだが、院の軍勢はそもそも寄せ集めだった。それでも兵法のおかげで京の守りは固くなり、院と朝廷の発言力が強まった。"
+    }
+   }
+  },
+  {
+   "name": "北条時頼",
+   "era": "kamakura_muromachi",
+   "faction": "鎌倉幕府",
+   "born": 1227,
+   "died": 1263,
+   "death": "illness",
+   "active": 1246,
+   "tags": [
+    "ruler"
+   ],
+   "traits": {
+    "faith": 2,
+    "loyal": 1,
+    "reform": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "kamakura_muromachi_05",
+    "kamakura_muromachi_02"
+   ],
+   "persuade": {
+    "信仰を勧める": {
+     "force": {
+      "q": "kamakura_muromachi_05",
+      "choice": 1
+     },
+     "text": "1256年の大病を延暦寺の高僧の祈祷で乗り越えたと信じた時頼は、禅から比叡山へと帰依を移した。そのため比叡山の強訴を受けた幕府は、念仏も禅も題目も「仏法を乱す」として禁じ、旧仏教だけを保護した。"
+    },
+    "民を大切に": {
+     "vars": {
+      "religion": 25,
+      "commoners": 20
+     },
+     "year": 1250,
+     "text": "時頼は僧の姿で諸国を巡り、民の暮らしを見て回った（という廻国伝説そのままに）。救いを求める民衆に念仏の教えが深く根づき、禅僧までもが念仏を説くようになった。"
+    },
+    "戦をやめさせる": {
+     "vars": {
+      "warrior": -30
+     },
+     "year": 1247,
+     "text": "時頼は宝治合戦を避け、御家人の武装を緩めさせた。そのぶん鎌倉の武士の力は衰え、禅を保護できる有力な武家もいなくなった。"
+    }
+   },
+   "give": {
+    "未来の教科書": {
+     "vars": {
+      "centralization": 35,
+      "unity": 20
+     },
+     "year": 1256,
+     "text": "教科書で得宗専制の行く末を読んだ時頼は、御家人との合議と得宗家の結束を固め直した。幕府の権力は安定し、泰時以来の路線が長く続いた。"
+    }
+   }
+  },
+  {
+   "name": "後嵯峨上皇",
+   "era": "kamakura_muromachi",
+   "faction": "朝廷",
+   "born": 1220,
+   "died": 1272,
+   "death": "illness",
+   "active": 1246,
+   "tags": [
+    "ruler",
+    "sacred"
+   ],
+   "traits": {
+    "reform": 1,
+    "loyal": 1
+   },
+   "spawn": "temple",
+   "q": [
+    "kamakura_muromachi_02"
+   ],
+   "persuade": {
+    "改革を勧める": {
+     "vars": {
+      "court": 30,
+      "warrior": -20
+     },
+     "year": 1250,
+     "text": "後嵯峨上皇が院評定を整えて院政を立て直したので、朝廷の発言力は増し、幕府の武力は相対的に弱まった。都を守れと求められた幕府は、九州の御家人をまず都の警護に回した。"
+    }
+   }
+  },
+  {
+   "name": "亀山上皇",
+   "era": "kamakura_muromachi",
+   "faction": "朝廷",
+   "born": 1249,
+   "died": 1305,
+   "death": "illness",
+   "active": 1274,
+   "tags": [
+    "ruler",
+    "sacred"
+   ],
+   "traits": {
+    "faith": 2,
+    "loyal": 1
+   },
+   "spawn": "temple",
+   "q": [
+    "kamakura_muromachi_02",
+    "kamakura_muromachi_06"
+   ],
+   "give": {
+    "千両箱": {
+     "vars": {
+      "court": 30,
+      "warrior": -20
+     },
+     "year": 1270,
+     "text": "千両箱で院の財政を潤した亀山上皇は、石清水八幡宮で「敵国降伏」を祈る一方、御家人を都の警固に呼び寄せた。朝廷の発言力が高まり、京都大番役が九州にまで課された。"
+    }
+   },
+   "persuade": {
+    "忠義を説く": {
+     "vars": {
+      "court": 40,
+      "centralization": -25
+     },
+     "year": 1300,
+     "text": "亀山上皇は大覚寺統の院政の伝統を、子孫に固く守らせた。上皇が政務を執り摂関家が補佐する形が続いたので、天皇に権力を集める発想は育たなかった。"
+    }
+   }
+  },
+  {
+   "name": "北条時宗",
+   "era": "kamakura_muromachi",
+   "faction": "鎌倉幕府",
+   "born": 1251,
+   "died": 1284,
+   "death": "illness",
+   "active": 1268,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "open": -2,
+    "loyal": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "kamakura_muromachi_02"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "unity": -30,
+      "centralization": -15
+     },
+     "year": 1270,
+     "note": "執権不在で元への対応が混乱し、御家人の心は幕府から離れていった"
+    }
+   ],
+   "saved": {
+    "year": 1284,
+    "text": "34歳で病死するはずの時宗が薬で長生きし、恩賞に不満な御家人たちをなんとか抑えた。",
+    "vars": {
+     "unity": 10,
+     "centralization": 10
+    }
+   },
+   "doc": {
+    "name": "蒙古国牒状（元の国書）",
+    "q": "kamakura_muromachi_02",
+    "choice": 2,
+    "text": "元の国書が盗まれ、大宰府からの報告も「高麗の商人のうわさ」として片づけられたため、時宗は元の脅威をまったく知らないままだった。警戒する理由がない以上、九州の御家人は異国警固どころか、いつもどおり京都大番役に回された。"
+   },
+   "persuade": {
+    "鎖国を勧める": {
+     "vars": {
+      "open_asia": -35
+     },
+     "year": 1270,
+     "text": "時宗は大陸との往来そのものを断った。宋の商人も禅僧も来なくなり、元の軍事力の情報は幕府に届かない。九州の御家人は京都の警備に回されてしまった。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "元の国書の評定",
+     "at": "capital",
+     "year": 1268,
+     "missed": {
+      "force": {
+       "q": "kamakura_muromachi_02",
+       "choice": 2
+      }
+     },
+     "text": "時宗は評定に遅れ、元の国書は「放っておけ」の一言で棚上げに。九州の御家人には異国警固番役ではなく、いつもの京都大番役が課された。"
+    }
+   ]
+  },
+  {
+   "name": "安達泰盛",
+   "era": "kamakura_muromachi",
+   "faction": "鎌倉幕府",
+   "born": 1231,
+   "died": 1285,
+   "death": "killed",
+   "active": 1265,
+   "tags": [
+    "official",
+    "warrior",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2,
+    "loyal": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "kamakura_muromachi_02"
+   ],
+   "saved": {
+    "year": 1285,
+    "text": "霜月騒動で討たれるはずの安達泰盛が生き延び、御家人を救う弘安徳政を続けた。恩賞に不満な御家人もなだめられ、幕府はしばらく安定した。",
+    "vars": {
+     "unity": 15,
+     "centralization": 10
+    }
+   },
+   "persuade": {
+    "改革を勧める": {
+     "vars": {
+      "centralization": 35,
+      "unity": 20
+     },
+     "year": 1270,
+     "text": "安達泰盛が御家人の所領を守る改革を早めに進めたので、幕府と御家人の結束は固まった。元の襲来を前に、得宗家を中心とする体制は盤石だった。"
+    }
+   },
+   "give": {
+    "千両箱": {
+     "vars": {
+      "centralization": 35,
+      "unity": 20
+     },
+     "year": 1272,
+     "text": "泰盛は千両箱で窮乏した御家人に恩賞を前払いした。御家人は奮い立ち、幕府の権力はかつてなく安定した。"
+    }
+   }
+  },
+  {
+   "name": "竹崎季長",
+   "era": "kamakura_muromachi",
+   "faction": "御家人",
+   "born": 1246,
+   "died": 1314,
+   "death": "natural",
+   "active": 1274,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": 1
+   },
+   "spawn": "battlefield",
+   "q": [
+    "kamakura_muromachi_02"
+   ],
+   "schedule": [
+    {
+     "event": "鎌倉へ恩賞を直訴",
+     "at": "capital",
+     "year": 1275,
+     "missed": {
+      "vars": {
+       "unity": -30
+      }
+     },
+     "text": "季長は鎌倉への直訴に間に合わず、恩賞を得られなかった。『蒙古襲来絵詞』も描かれず、直訴で恩賞を勝ち取った前例も生まれなかった。泣き寝入りした御家人たちの不満は幕府を見限る方向へ積もり、幕府が倒れた後も武士はなかなかまとまらず、南北朝の内乱は長引いた。"
+    }
+   ]
+  },
+  {
+   "name": "趙良弼",
+   "era": "kamakura_muromachi",
+   "faction": "元",
+   "born": 1217,
+   "died": 1286,
+   "death": "natural",
+   "active": 1271,
+   "tags": [
+    "diplomat",
+    "foreigner"
+   ],
+   "traits": {
+    "open": 2,
+    "war": -1
+   },
+   "spawn": "port",
+   "q": [
+    "kamakura_muromachi_02"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "open_asia": -30
+     },
+     "year": 1272,
+     "note": "国書を携えた元の使者が日本に来ず、大陸の軍事力の情報が幕府に届かなくなった"
+    }
+   ]
+  },
+  {
+   "name": "蘭渓道隆",
+   "era": "kamakura_muromachi",
+   "faction": "臨済宗",
+   "born": 1213,
+   "died": 1278,
+   "death": "illness",
+   "active": 1246,
+   "tags": [
+    "religious",
+    "foreigner"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": 2
+   },
+   "spawn": "temple",
+   "q": [
+    "kamakura_muromachi_05"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "religion": 35,
+      "centralization": 20
+     },
+     "year": 1250,
+     "note": "宋から禅僧が来ず建長寺も開かれないまま、延暦寺・興福寺など旧仏教の大寺院が幕府の宗教政策を握った"
+    }
+   ]
+  },
+  {
+   "name": "道元",
+   "era": "kamakura_muromachi",
+   "faction": "曹洞宗",
+   "born": 1200,
+   "died": 1253,
+   "death": "illness",
+   "active": 1227,
+   "tags": [
+    "religious"
+   ],
+   "traits": {
+    "faith": 2,
+    "war": -2
+   },
+   "spawn": "mountain",
+   "q": [
+    "kamakura_muromachi_05"
+   ],
+   "persuade": {
+    "民を大切に": {
+     "force": {
+      "q": "kamakura_muromachi_05",
+      "choice": 0
+     },
+     "text": "越前の山里で、田畑を離れられず坐禅の暇もない民の暮らしに触れた道元は、民衆に寄り添おうと坐禅に代えて念仏を勧めた。「只管打坐」の教えは生まれず、永平寺は念仏の道場として開かれた。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "越前へ向かう",
+     "at": "mountain",
+     "year": 1243,
+     "missed": {
+      "force": {
+       "q": "kamakura_muromachi_05",
+       "choice": 0
+      }
+     },
+     "text": "道元は越前へ旅立ちそびれ、比叡山の圧迫を受けながら念仏の盛んな京に留まった。弟子や支援者を集めるには念仏も取り入れるしかなく、坐禅の修行は廃れ、のちに開いた永平寺も念仏の道場になった。"
+    }
+   ]
+  },
+  {
+   "name": "栄西",
+   "era": "kamakura_muromachi",
+   "faction": "臨済宗",
+   "born": 1141,
+   "died": 1215,
+   "death": "natural",
+   "active": 1191,
+   "tags": [
+    "religious",
+    "scholar"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": 2
+   },
+   "spawn": "temple",
+   "q": [
+    "kamakura_muromachi_05"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "open_asia": -30
+     },
+     "year": 1200,
+     "note": "二度も宋に渡った栄西がいなくなり、禅も喫茶の習慣も大陸から届かず、宋との往来は細った"
+    }
+   ],
+   "persuade": {
+    "信仰を勧める": {
+     "force": {
+      "q": "kamakura_muromachi_05",
+      "choice": 3
+     },
+     "text": "1194年、延暦寺の訴えで朝廷は禅の布教を禁じた。「権力に近づくより修行を」と説かれた栄西は都での弁明をあきらめ、幕府や朝廷との付き合いを断って山中の寺にこもった。『興禅護国論』も書かれず、寿福寺も建仁寺も開かれなかった。"
+    },
+    "民を大切に": {
+     "vars": {
+      "religion": 25,
+      "commoners": 15
+     },
+     "year": 1200,
+     "text": "栄西は茶の効能を説く『喫茶養生記』を民衆向けに広め、病に苦しむ人々には念仏まで勧めた。禅の開祖が念仏を口にしたので民衆の信仰心は高まり、禅僧も念仏を取り入れるようになった。"
+    }
+   }
+  },
+  {
+   "name": "親鸞",
+   "era": "kamakura_muromachi",
+   "faction": "浄土真宗",
+   "born": 1173,
+   "died": 1263,
+   "death": "natural",
+   "active": 1224,
+   "tags": [
+    "religious"
+   ],
+   "traits": {
+    "faith": 2,
+    "reform": 1
+   },
+   "spawn": "village",
+   "q": [
+    "kamakura_muromachi_05",
+    "kamakura_muromachi_04"
+   ],
+   "persuade": {
+    "民を大切に": {
+     "vars": {
+      "religion": 30,
+      "commoners": 20
+     },
+     "year": 1250,
+     "text": "「善人なおもて往生をとぐ、いわんや悪人をや」。親鸞が関東の農村でそう説いて回ったので、念仏の講が村々に広がった。禅を学んだ道元さえ念仏を取り入れ、のちの門徒の結びつきも早く育った。"
+    }
+   },
+   "give": {
+    "千両箱": {
+     "vars": {
+      "religion": 25,
+      "commoners": 15
+     },
+     "year": 1240,
+     "text": "千両箱で念仏の道場が各地に建ち、親鸞の教えは東国の農民に深く根づいた。坐禅より念仏、という時代の空気に道元も逆らえなかった。"
+    }
+   }
+  },
+  {
+   "name": "法然",
+   "era": "kamakura_muromachi",
+   "faction": "浄土宗",
+   "born": 1133,
+   "died": 1212,
+   "death": "natural",
+   "active": 1175,
+   "tags": [
+    "religious"
+   ],
+   "traits": {
+    "faith": 2,
+    "reform": 1
+   },
+   "spawn": "village",
+   "q": [
+    "kamakura_muromachi_05"
+   ],
+   "persuade": {
+    "民を大切に": {
+     "vars": {
+      "religion": 25,
+      "commoners": 15
+     },
+     "year": 1200,
+     "text": "法然は「南無阿弥陀仏と唱えるだけでよい」という専修念仏を、ますます民衆に向けて説いた。念仏の教えは武士にも農民にも深く根づき、禅を学んだ道元さえ念仏を取り入れなければ人々に受け入れられなかった。"
+    }
+   }
+  },
+  {
+   "name": "日蓮",
+   "era": "kamakura_muromachi",
+   "faction": "日蓮宗",
+   "born": 1222,
+   "died": 1282,
+   "death": "illness",
+   "active": 1253,
+   "tags": [
+    "religious"
+   ],
+   "traits": {
+    "faith": 2,
+    "war": 1
+   },
+   "spawn": "mountain",
+   "q": [
+    "kamakura_muromachi_05"
+   ],
+   "contrib": [
+    {
+     "q": "kamakura_muromachi_05",
+     "choice": 1,
+     "note": "法華経の題目で念仏や禅と論争する日蓮が現れず、新しい宗派との争いは延暦寺の僧兵の強訴だけで決着がつけられた。比叡山に押された幕府は新しい宗派をすべて禁じた"
+    }
+   ],
+   "schedule": [
+    {
+     "event": "清澄寺で題目を唱える",
+     "at": "mountain",
+     "year": 1253,
+     "missed": {
+      "force": {
+       "q": "kamakura_muromachi_05",
+       "choice": 1
+      }
+     },
+     "text": "日蓮は清澄寺での説法に間に合わず、新しい宗派を開かずに比叡山の内側から念仏や禅を批判する道を選んだ。天台の学僧の鋭い論難を得た比叡山は勢いづき、幕府に迫って新しい宗派をすべて禁じさせた。"
+    }
+   ]
+  },
+  {
+   "name": "北条高時",
+   "era": "kamakura_muromachi",
+   "faction": "鎌倉幕府",
+   "born": 1304,
+   "died": 1333,
+   "death": "suicide",
+   "active": 1316,
+   "tags": [
+    "ruler"
+   ],
+   "traits": {
+    "war": -1,
+    "faith": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "kamakura_muromachi_06"
+   ],
+   "saved": {
+    "year": 1333,
+    "text": "東勝寺で自害するはずの高時が落ち延び、関東の武士はなお北条のもとに結集した。京の朝廷の力は伸びず、鎌倉が武家政権の都であり続けた。",
+    "vars": {
+     "warrior": 35,
+     "court": -25
+    }
+   }
+  },
+  {
+   "name": "後醍醐天皇",
+   "era": "kamakura_muromachi",
+   "faction": "朝廷",
+   "born": 1288,
+   "died": 1339,
+   "death": "illness",
+   "active": 1318,
+   "tags": [
+    "ruler",
+    "sacred",
+    "reformer"
+   ],
+   "traits": {
+    "reform": 2,
+    "war": 1,
+    "loyal": -1
+   },
+   "spawn": "temple",
+   "q": [
+    "kamakura_muromachi_06",
+    "kamakura_muromachi_01"
+   ],
+   "contrib": [
+    {
+     "q": "kamakura_muromachi_01",
+     "choice": 3,
+     "note": "未来から連れ出された後醍醐天皇が1221年の騒乱に巻き込まれ、承久の乱に敗れて隠岐へ流された"
+    }
+   ],
+   "persuade": {
+    "戦をやめさせる": {
+     "force": {
+      "q": "kamakura_muromachi_06",
+      "choice": 0
+     },
+     "text": "戦を避けた後醍醐天皇は、倒幕の戦いを足利や新田の武士たちに任せた。自らの武功がないまま京に戻った天皇は、公家たちの支えを得るため先例どおり関白を置き、自らは上皇として院政を行った。こうして「延喜・天暦の治」を理想とする天皇親政は幻に終わった。"
+    }
+   },
+   "give": {
+    "未来の教科書": {
+     "force": {
+      "q": "kamakura_muromachi_01",
+      "choice": 3
+     },
+     "text": "教科書で「隠岐」の二文字を見た後醍醐天皇はいてもたってもいられず、時空を越えて承久の乱に参戦。案の定、敗れて隠岐へ流された。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "隠岐から帰京する",
+     "at": "temple",
+     "year": 1333,
+     "missed": {
+      "force": {
+       "q": "kamakura_muromachi_06",
+       "choice": 0
+      }
+     },
+     "text": "後醍醐天皇の帰京が遅れ、京では関白が政務を取り仕切っていた。戻った天皇は既成事実を受け入れて摂関を置き、自らは院政に退いた。"
+    }
+   ]
+  },
+  {
+   "name": "護良親王",
+   "era": "kamakura_muromachi",
+   "faction": "朝廷",
+   "born": 1308,
+   "died": 1335,
+   "death": "killed",
+   "active": 1331,
+   "tags": [
+    "sacred",
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": 1
+   },
+   "spawn": "mountain",
+   "q": [
+    "kamakura_muromachi_06"
+   ],
+   "saved": {
+    "year": 1335,
+    "text": "鎌倉で殺されるはずの護良親王が幽閉先から救い出されて京へ戻り、父帝と和解して尊氏の動きに目を光らせ続けた。征夷大将軍を務めた親王が武士の一部をつなぎとめたので、尊氏は離反の機会をつかめず、建武の新政は長く続いた。",
+    "force": {
+     "q": "kamakura_muromachi_06",
+     "choice": 1
+    }
+   }
+  },
+  {
+   "name": "二条道平",
+   "era": "kamakura_muromachi",
+   "faction": "朝廷",
+   "born": 1287,
+   "died": 1335,
+   "death": "natural",
+   "active": 1330,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "loyal": 2
+   },
+   "spawn": "temple",
+   "q": [
+    "kamakura_muromachi_06"
+   ],
+   "doc": {
+    "name": "関白の辞表",
+    "q": "kamakura_muromachi_06",
+    "choice": 0,
+    "text": "道平の関白の辞表が盗まれ、手続きが止まったまま道平は関白に居座った。摂関を置かないはずの新政は、なし崩しに藤原氏に政務を任せる形になった。"
+   },
+   "persuade": {
+    "忠義を説く": {
+     "force": {
+      "q": "kamakura_muromachi_06",
+      "choice": 0
+     },
+     "text": "道平は天皇への忠義から「先例こそ大事」と説き続けた。倒幕の企てに加わって罰せられたこともある忠臣の願いを、綸旨を求める訴えの山に疲れた後醍醐天皇は退けきれず、摂政・関白を置いた。さらに皇位を我が子に確実に伝えるため早めに譲位し、上皇として院政を行った。"
+    }
+   },
+   "give": {
+    "千両箱": {
+     "vars": {
+      "court": 40,
+      "centralization": -25
+     },
+     "year": 1330,
+     "text": "千両箱で五摂家の財政が立ち直り、摂関家の権威は鎌倉末期になっても衰えなかった。天皇に権力を集める仕組みは育たず、新政は摂関と院政の形をとった。"
+    }
+   }
+  },
+  {
+   "name": "北畠親房",
+   "era": "kamakura_muromachi",
+   "faction": "南朝",
+   "born": 1293,
+   "died": 1354,
+   "death": "natural",
+   "active": 1330,
+   "tags": [
+    "official",
+    "scholar"
+   ],
+   "traits": {
+    "loyal": 2,
+    "reform": 1
+   },
+   "spawn": "mountain",
+   "q": [
+    "kamakura_muromachi_03"
+   ],
+   "persuade": {
+    "忠義を説く": {
+     "vars": {
+      "unity": -30
+     },
+     "year": 1339,
+     "text": "親房は『神皇正統記』で南朝こそ正統と説き、東国の武士を次々に味方につけた。南北朝の内乱はいつまでも終わらず、国内はまとまらなかった。"
+    }
+   }
+  },
+  {
+   "name": "楠木正成",
+   "era": "kamakura_muromachi",
+   "faction": "南朝",
+   "born": null,
+   "died": 1336,
+   "death": "suicide",
+   "active": 1331,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "loyal": 2,
+    "war": 1
+   },
+   "spawn": "mountain",
+   "q": [
+    "kamakura_muromachi_06"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "court": -15
+     },
+     "year": 1333,
+     "note": "千早城で幕府軍を引きつけた正成がいなくなり、天皇の政治を武力で支える者が欠けた"
+    }
+   ],
+   "saved": {
+    "year": 1336,
+    "text": "湊川で自害するはずの正成が生き延び、南朝は京都を何度も取り戻した。南北朝の内乱は長引き、その始末に追われるうちに、義満は明との交渉に乗り出す前に世を去った。",
+    "vars": {
+     "court": 15,
+     "unity": -30
+    }
+   },
+   "give": {
+    "千両箱": {
+     "force": {
+      "q": "kamakura_muromachi_06",
+      "choice": 1
+     },
+     "text": "正成は千両箱を武士への恩賞に充てるよう帝に進言した。恩賞に満足した武士たちは新政を支持し、尊氏も離反の口実を失った。"
+    }
+   }
+  },
+  {
+   "name": "新田義貞",
+   "era": "kamakura_muromachi",
+   "faction": "南朝",
+   "born": 1301,
+   "died": 1338,
+   "death": "killed",
+   "active": 1333,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": 2
+   },
+   "spawn": "capital",
+   "q": [
+    "kamakura_muromachi_06"
+   ]
+  },
+  {
+   "name": "足利尊氏",
+   "era": "kamakura_muromachi",
+   "faction": "足利",
+   "born": 1305,
+   "died": 1358,
+   "death": "illness",
+   "active": 1333,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": -1,
+    "faith": 1
+   },
+   "spawn": "castle",
+   "q": [
+    "kamakura_muromachi_06",
+    "kamakura_muromachi_03"
+   ],
+   "contrib": [
+    {
+     "q": "kamakura_muromachi_06",
+     "choice": 1,
+     "note": "後醍醐天皇に背く有力武士がおらず、恩賞に不満な武士も旗頭を欠いて、建武の新政が続いた"
+    }
+   ],
+   "saved": {
+    "year": 1358,
+    "text": "病死するはずの尊氏が回復し、1368年の明の建国を見届けた。天龍寺船の縁を生かした尊氏は明の使者を迎え、日明の国交と勘合貿易の創始者になった。",
+    "force": {
+     "q": "kamakura_muromachi_03",
+     "choice": 1
+    }
+   },
+   "persuade": {
+    "忠義を説く": {
+     "force": {
+      "q": "kamakura_muromachi_06",
+      "choice": 1
+     },
+     "text": "尊氏は帝への忠義を誓い直し、中先代の乱の後も新政に背かなかった。武家の棟梁が離れなかったため、建武の新政は武家の支持をつなぎとめて長く続いた。"
+    },
+    "戦を勧める": {
+     "force": {
+      "q": "kamakura_muromachi_06",
+      "choice": 3
+     },
+     "text": "尊氏は鎌倉で兵を挙げると、京へは戻らずそのまま関東から全国に号令した。号令の出どころが鎌倉だったので、足利の幕府も鎌倉に置かれた。"
+    }
+   },
+   "give": {
+    "世界地図": {
+     "force": {
+      "q": "kamakura_muromachi_03",
+      "choice": 1
+     },
+     "text": "世界地図に描かれた大陸を見た尊氏は、元に送った天龍寺船をきっかけに大陸との正式な国交を早々に開いた。日明貿易の祖は尊氏となった。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "鎌倉へ下向する",
+     "at": "capital",
+     "year": 1335,
+     "missed": {
+      "force": {
+       "q": "kamakura_muromachi_06",
+       "choice": 1
+      }
+     },
+     "text": "尊氏は中先代の乱を鎮めるための鎌倉下向に出遅れ、帝の許しを待つうちに乱は収まった。離反のきっかけを失った尊氏は新政の柱であり続けた。"
+    }
+   ]
+  },
+  {
+   "name": "足利直義",
+   "era": "kamakura_muromachi",
+   "faction": "足利",
+   "born": 1306,
+   "died": 1352,
+   "death": "poisoned",
+   "active": 1336,
+   "tags": [
+    "official",
+    "warrior"
+   ],
+   "traits": {
+    "loyal": 1,
+    "reform": 1
+   },
+   "spawn": "castle",
+   "q": [
+    "kamakura_muromachi_06"
+   ],
+   "saved": {
+    "year": 1352,
+    "text": "毒殺されるはずの足利直義が助かり、兄の尊氏と和解した。争いの火種だった兄弟の対立が解けたので、観応の擾乱は早く収まった。",
+    "vars": {
+     "unity": 10
+    }
+   },
+   "doc": {
+    "name": "建武式目の答申（幕府をどこに置くか）",
+    "q": "kamakura_muromachi_06",
+    "choice": 3,
+    "text": "「鎌倉元のごとく柳営たるべきか、他所たるべきや否やの事」。建武式目の冒頭のこの問いへの答申が盗まれた。答申は「鎌倉は吉土だが、移るかどうかは人々の意向次第」と京にとどまる余地を残していた。それが失われると「鎌倉に戻るべし」とする東国武士の声が通り、尊氏は鎌倉を本拠に幕府を開き、京都には代官を置いて東国から全国を治めた。"
+   },
+   "persuade": {
+    "忠義を説く": {
+     "force": {
+      "q": "kamakura_muromachi_06",
+      "choice": 1
+     },
+     "text": "「朝敵の汚名を着れば、東国の武士も離れていく」と説かれた直義は考えを改め、兄に帝に背かぬよう説いた。護良親王の殺害も起こらず、足利兄弟は新政の柱として働き続けた。"
+    },
+    "改革を勧める": {
+     "force": {
+      "q": "kamakura_muromachi_06",
+      "choice": 3
+     },
+     "text": "直義は「武家の政は武家の都で」と主張し、鎌倉を本拠とする幕府を作り上げた。尊氏も京都には戻らず、東国から全国を治めた。"
+    }
+   },
+   "give": {
+    "千両箱": {
+     "vars": {
+      "open_asia": 30,
+      "commerce": 20
+     },
+     "year": 1341,
+     "text": "直義は千両箱を天龍寺の造営費に充て、天龍寺船を毎年のように大陸へ送らせた。博多の交易は大いに栄え、のちの国交の土台ができた。"
+    }
+   }
+  },
+  {
+   "name": "高師直",
+   "era": "kamakura_muromachi",
+   "faction": "足利",
+   "born": null,
+   "died": 1351,
+   "death": "killed",
+   "active": 1336,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": -1
+   },
+   "spawn": "castle",
+   "q": [
+    "kamakura_muromachi_06"
+   ],
+   "persuade": {
+    "戦を勧める": {
+     "vars": {
+      "warrior": 35,
+      "court": -25
+     },
+     "year": 1333,
+     "text": "「院や帝が要るなら木か金で作ればよい」と言い放ったと『太平記』に伝わる高師直が、ますます武断に走った。朝廷を恐れぬ執事のもとで東国の武士の力は圧倒的になり、京の朝廷は見る影もなくなった。"
+    }
+   }
+  },
+  {
+   "name": "夢窓疎石",
+   "era": "kamakura_muromachi",
+   "faction": "臨済宗",
+   "born": 1275,
+   "died": 1351,
+   "death": "natural",
+   "active": 1335,
+   "tags": [
+    "religious",
+    "scholar"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": 1
+   },
+   "spawn": "temple",
+   "q": [
+    "kamakura_muromachi_03"
+   ],
+   "persuade": {
+    "開国を勧める": {
+     "force": {
+      "q": "kamakura_muromachi_03",
+      "choice": 1
+     },
+     "text": "夢窓疎石は天龍寺船だけでなく、大陸の新しい王朝とも正式に国交を結ぶよう尊氏に説いた。禅の師の言葉に尊氏が従ったため、日明の国交は尊氏の代に始まった。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "天龍寺船の進言",
+     "at": "temple",
+     "year": 1341,
+     "missed": {
+      "vars": {
+       "open_asia": -35
+      }
+     },
+     "text": "夢窓疎石が進言の場に遅れ、天龍寺船は送られなかった。大陸との関係が冷え込んだまま倭寇ばかりが海を行き交い、義満の代になっても国交の機運は高まらなかった。"
+    }
+   ]
+  },
+  {
+   "name": "懐良親王",
+   "era": "kamakura_muromachi",
+   "faction": "南朝",
+   "born": 1329,
+   "died": 1383,
+   "death": "illness",
+   "active": 1348,
+   "tags": [
+    "ruler",
+    "sacred"
+   ],
+   "traits": {
+    "war": 1,
+    "open": 1
+   },
+   "spawn": "port",
+   "q": [
+    "kamakura_muromachi_03"
+   ],
+   "persuade": {
+    "開国を勧める": {
+     "vars": {
+      "open_asia": 30,
+      "commerce": 15
+     },
+     "year": 1370,
+     "text": "「日本国王良懐」として明の使者を迎えた懐良親王が、博多で明との交易を盛大に始めた。南朝に儲けを独り占めさせるわけにはいかないので北朝の幕府も交易に乗り出し、大陸との往来と商いは早くから盛んになった。"
+    }
+   },
+   "give": {
+    "鉄砲": {
+     "vars": {
+      "unity": -35
+     },
+     "year": 1372,
+     "text": "懐良親王の征西府は新式の鉄砲で大宰府を守り抜き、九州は南朝のものとなった。南北朝の内乱が終わらないので、義満は明との交渉どころではなかった。"
+    }
+   }
+  },
+  {
+   "name": "今川了俊",
+   "era": "kamakura_muromachi",
+   "faction": "室町幕府",
+   "born": 1326,
+   "died": 1420,
+   "death": "natural",
+   "active": 1371,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": 2
+   },
+   "q": [
+    "kamakura_muromachi_03"
+   ],
+   "aka": [
+    "今川貞世"
+   ],
+   "persuade": {
+    "戦をやめさせる": {
+     "vars": {
+      "open_asia": -35
+     },
+     "year": 1380,
+     "text": "九州探題の今川了俊が倭寇の取り締まりをやめた。倭寇が東シナ海を荒らし回ったので明は日本を相手にしなくなり、正式な国交はずっと後の世に持ち越された。"
+    }
+   }
+  },
+  {
+   "name": "足利義満",
+   "era": "kamakura_muromachi",
+   "faction": "室町幕府",
+   "born": 1358,
+   "died": 1408,
+   "death": "illness",
+   "active": 1368,
+   "tags": [
+    "ruler"
+   ],
+   "traits": {
+    "open": 2,
+    "war": 1
+   },
+   "spawn": "temple",
+   "q": [
+    "kamakura_muromachi_03"
+   ],
+   "contrib": [
+    {
+     "q": "kamakura_muromachi_03",
+     "choice": 2,
+     "note": "「日本国王」として冊封を受ける将軍がおらず、明との国交は義教の代まで開かれなかった"
+    }
+   ],
+   "doc": {
+    "name": "「日本准三后道義」の国書",
+    "q": "kamakura_muromachi_03",
+    "choice": 2,
+    "text": "明の皇帝に宛てた義満の国書が盗まれた。使者は手ぶらで帰り、出直すうちに明では靖難の変で皇帝が代わって交渉はやり直しに。そのまま義満が世を去り、朝貢を嫌う義持も国交を拒んだので、勘合貿易が始まったのは、くじ引きで選ばれた義教の代だった。"
+   },
+   "persuade": {
+    "鎖国を勧める": {
+     "force": {
+      "q": "kamakura_muromachi_03",
+      "choice": 2
+     },
+     "text": "「日本国王臣源」と書いて明に頭を下げるのは、もうやめだ。そう決めた義満が朝貢をやめたため、勘合貿易は義教の代まで持ち越された。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "南北朝の合一",
+     "at": "temple",
+     "year": 1392,
+     "missed": {
+      "vars": {
+       "unity": -35
+      }
+     },
+     "text": "義満が南北朝の合一の場に遅れ、和議は流れた。内乱はさらに続いて国内はまとまらず、明との交渉に乗り出す前に義満は世を去った。"
+    }
+   ]
+  },
+  {
+   "name": "肥富",
+   "era": "kamakura_muromachi",
+   "faction": "博多商人",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 1400,
+   "tags": [
+    "merchant",
+    "commoner"
+   ],
+   "traits": {
+    "open": 2
+   },
+   "spawn": "port",
+   "q": [
+    "kamakura_muromachi_03"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "open_asia": -35
+     },
+     "year": 1400,
+     "note": "明との通交を義満に勧めた博多商人がいなくなり、大陸との関係は冷えきったままだった"
+    }
+   ],
+   "give": {
+    "千両箱": {
+     "vars": {
+      "open_asia": 30,
+      "commerce": 20
+     },
+     "year": 1350,
+     "text": "千両箱を元手に肥富は博多から大陸へ船を出し続けた。南北朝の頃から明との商いは大いに栄え、国交は尊氏の代の交易からそのまま発展した。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "明へ出航する",
+     "at": "port",
+     "year": 1401,
+     "missed": {
+      "force": {
+       "q": "kamakura_muromachi_03",
+       "choice": 2
+      }
+     },
+     "text": "祖阿と肥富を乗せた遣明船の出航が遅れ、義満の存命中に冊封は間に合わなかった。日明の国交を開いたのは6代義教となった。"
+    }
+   ]
+  },
+  {
+   "name": "祖阿",
+   "era": "kamakura_muromachi",
+   "faction": "室町幕府",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 1401,
+   "tags": [
+    "diplomat",
+    "religious"
+   ],
+   "traits": {
+    "open": 1,
+    "faith": 1
+   },
+   "spawn": "port",
+   "q": [
+    "kamakura_muromachi_03"
+   ],
+   "persuade": {
+    "鎖国を勧める": {
+     "vars": {
+      "open_asia": -35
+     },
+     "year": 1401,
+     "text": "正使の祖阿が明への渡海を渋った。義満の使節は送られず、大陸との関係は冷えきったまま。勘合貿易は唐物好きの義政の代までお預けになった。"
+    }
+   }
+  },
+  {
+   "name": "絶海中津",
+   "era": "kamakura_muromachi",
+   "faction": "臨済宗",
+   "born": 1336,
+   "died": 1405,
+   "death": "natural",
+   "active": 1378,
+   "tags": [
+    "religious",
+    "scholar",
+    "diplomat"
+   ],
+   "traits": {
+    "open": 2
+   },
+   "spawn": "temple",
+   "q": [
+    "kamakura_muromachi_03"
+   ],
+   "persuade": {
+    "鎖国を勧める": {
+     "vars": {
+      "open_asia": -35
+     },
+     "year": 1390,
+     "text": "明に学び洪武帝にも謁見した五山僧・絶海中津が、「明に臣と称する国書は書けぬ」と外交文書の起草を断った。五山の僧たちも長老にならって筆をとらなかったので大陸との関係は冷えきり、勘合貿易は義政の代まで始まらなかった。"
+    }
+   },
+   "give": {
+    "世界地図": {
+     "vars": {
+      "open_asia": 30,
+      "commerce": 15
+     },
+     "year": 1350,
+     "text": "地図を広げた絶海中津が明との交易の利を説いて回ったため、南北朝の頃から大陸との商いは盛んになった。国交は尊氏以来の流れに乗って開かれた。"
+    }
+   }
+  },
+  {
+   "name": "足利義持",
+   "era": "kamakura_muromachi",
+   "faction": "室町幕府",
+   "born": 1386,
+   "died": 1428,
+   "death": "illness",
+   "active": 1408,
+   "tags": [
+    "ruler"
+   ],
+   "traits": {
+    "open": -2,
+    "faith": 1
+   },
+   "spawn": "temple",
+   "q": [
+    "kamakura_muromachi_04"
+   ],
+   "give": {
+    "千両箱": {
+     "vars": {
+      "commoners": -30
+     },
+     "year": 1425,
+     "text": "義持は千両箱で土倉・酒屋への借金を肩代わりし、馬借や農民の負債を帳消しにした。蜂起の理由がなくなり、徳政を求める土一揆は15世紀前半には起こらなかった。"
+    }
+   }
+  },
+  {
+   "name": "畠山満家",
+   "era": "kamakura_muromachi",
+   "faction": "室町幕府",
+   "born": 1372,
+   "died": 1433,
+   "death": "illness",
+   "active": 1410,
+   "tags": [
+    "official",
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": 2
+   },
+   "spawn": "castle",
+   "q": [
+    "kamakura_muromachi_04"
+   ],
+   "persuade": {
+    "戦を勧める": {
+     "vars": {
+      "commoners": -30
+     },
+     "year": 1427,
+     "text": "管領の満家は正長の土一揆の兆しが見えると、すぐさま兵を出して村々を押さえつけた。民衆の結びつきは育たず、土一揆が起こるのはずっと後のことになった。"
+    }
+   }
+  },
+  {
+   "name": "足利義教",
+   "era": "kamakura_muromachi",
+   "faction": "室町幕府",
+   "born": 1394,
+   "died": 1441,
+   "death": "assassinated",
+   "active": 1429,
+   "tags": [
+    "ruler"
+   ],
+   "traits": {
+    "war": 2,
+    "reform": 1,
+    "loyal": -1
+   },
+   "spawn": "castle",
+   "q": [
+    "kamakura_muromachi_03",
+    "kamakura_muromachi_04"
+   ],
+   "saved": {
+    "year": 1441,
+    "text": "嘉吉の乱で討たれるはずの義教が助かり、「万人恐怖」と評された将軍の専制がさらに続いた。守護大名が抑え込まれたため、応仁の乱はずっと後まで起こらなかった。",
+    "vars": {
+     "centralization": 30,
+     "unity": 15
+    }
+   },
+   "persuade": {
+    "改革を勧める": {
+     "vars": {
+      "commoners": -30
+     },
+     "year": 1430,
+     "text": "「万人恐怖」の義教が、改革と称して惣村を厳しく取り締まった。村の寄合が解散させられて一揆の相談もできなくなったため、徳政を求める土一揆はしばらく影をひそめた。"
+    }
+   },
+   "schedule": [
+    {
+     "event": "赤松邸の猿楽見物",
+     "at": "castle",
+     "year": 1441,
+     "missed": {
+      "vars": {
+       "centralization": 30,
+       "unity": 15
+      }
+     },
+     "text": "義教は赤松満祐邸での猿楽見物に遅れ、待ち伏せの刺客は空振りに終わった。嘉吉の乱は起こらず、将軍の専制のもとで守護大名の対立は抑え込まれた。"
+    }
+   ]
+  },
+  {
+   "name": "赤松満祐",
+   "era": "kamakura_muromachi",
+   "faction": "赤松",
+   "born": 1381,
+   "died": 1441,
+   "death": "suicide",
+   "active": 1427,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": -2
+   },
+   "q": [
+    "kamakura_muromachi_04"
+   ],
+   "persuade": {
+    "忠義を説く": {
+     "vars": {
+      "centralization": 30,
+      "unity": 15
+     },
+     "year": 1441,
+     "text": "所領を取り上げられるという噂が根拠のないものだと知った赤松満祐は、将軍への忠義を思い直し、義教を討つ計画を取りやめた。嘉吉の乱が起こらなかったので将軍の権威は保たれ、守護大名どうしの大乱は大きく遅れた。"
+    }
+   }
+  },
+  {
+   "name": "上杉憲実",
+   "era": "kamakura_muromachi",
+   "faction": "関東管領",
+   "born": 1410,
+   "died": 1466,
+   "death": "natural",
+   "active": 1438,
+   "tags": [
+    "official",
+    "warrior",
+    "scholar"
+   ],
+   "traits": {
+    "loyal": 2,
+    "reform": 1
+   },
+   "spawn": "capital",
+   "q": [
+    "kamakura_muromachi_04"
+   ],
+   "persuade": {
+    "学問を勧める": {
+     "vars": {
+      "education": 30,
+      "set": {
+       "edu_center": "足利学校"
+      }
+     },
+     "year": 1439,
+     "text": "上杉憲実は足利学校の再興に一層打ち込み、蔵書と学徒を全国から集めた。書物と人が集まったことで「坂東の大学」は五山をしのぐ学問の中心となった。"
+    }
+   }
+  },
+  {
+   "name": "一休宗純",
+   "era": "kamakura_muromachi",
+   "faction": "臨済宗",
+   "born": 1394,
+   "died": 1481,
+   "death": "natural",
+   "active": 1440,
+   "tags": [
+    "religious",
+    "artist"
+   ],
+   "traits": {
+    "faith": 1,
+    "reform": 1
+   },
+   "spawn": "village",
+   "q": [
+    "kamakura_muromachi_04"
+   ],
+   "persuade": {
+    "民を大切に": {
+     "vars": {
+      "religion": 30,
+      "commoners": 20
+     },
+     "year": 1450,
+     "text": "一休は権威を笑い飛ばしつつ、町や村の人々に寄り添って教えを説いた。その人気で民衆の信仰と結びつきが強まったため、門徒の一揆が早くから起こる土壌ができた。"
+    }
+   }
+  },
+  {
+   "name": "蓮如",
+   "era": "kamakura_muromachi",
+   "faction": "本願寺",
+   "born": 1415,
+   "died": 1499,
+   "death": "natural",
+   "active": 1457,
+   "tags": [
+    "religious"
+   ],
+   "traits": {
+    "faith": 2,
+    "reform": 1
+   },
+   "spawn": "village",
+   "q": [
+    "kamakura_muromachi_04"
+   ],
+   "persuade": {
+    "民を大切に": {
+     "force": {
+      "q": "kamakura_muromachi_04",
+      "choice": 1
+     },
+     "text": "本願寺を継いだばかりの蓮如は、比叡山に追われる前から北陸へ出向いて「御文」で民衆に語りかけ、講を通じて門徒を結びつけた。講で結束していたため加賀の門徒は応仁の乱より前に守護を倒し、乱より先に「百姓ノ持タル国」が生まれた。"
+    }
+   },
+   "give": {
+    "千両箱": {
+     "vars": {
+      "religion": 30,
+      "commoners": 25
+     },
+     "year": 1460,
+     "text": "千両箱で蓮如は北陸各地に道場を建てた。念仏の講が村々を結び、加賀の門徒は応仁の乱を待たずに守護を倒した。"
+    },
+    "世界地図": {
+     "force": {
+      "q": "sengoku_06",
+      "choice": 3
+     },
+     "text": "世界地図で遠い南蛮を知った本願寺は、のちに来日したザビエルと手を結んだ。一向一揆を担った門徒の間にキリスト教が広まるという、前代未聞の戦国時代になった。"
+    }
+   }
+  },
+  {
+   "name": "富樫政親",
+   "era": "kamakura_muromachi",
+   "faction": "富樫",
+   "born": 1455,
+   "died": 1488,
+   "death": "suicide",
+   "active": 1474,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": -1
+   },
+   "q": [
+    "kamakura_muromachi_04"
+   ],
+   "persuade": {
+    "戦を勧める": {
+     "force": {
+      "q": "kamakura_muromachi_04",
+      "choice": 1
+     },
+     "text": "幼い政親を後見する富樫家の重臣たちは門徒の力を恐れ、早々に一向宗の弾圧に乗り出した。反発した門徒は応仁の乱より前に蜂起し、政親を高尾城に追い詰めた。"
+    }
+   }
+  },
+  {
+   "name": "足利義政",
+   "era": "kamakura_muromachi",
+   "faction": "室町幕府",
+   "born": 1436,
+   "died": 1490,
+   "death": "illness",
+   "active": 1449,
+   "tags": [
+    "ruler",
+    "artist"
+   ],
+   "traits": {
+    "war": -2,
+    "faith": 1
+   },
+   "spawn": "temple",
+   "q": [
+    "kamakura_muromachi_03",
+    "kamakura_muromachi_04"
+   ],
+   "contrib": [
+    {
+     "q": "kamakura_muromachi_03",
+     "choice": 3,
+     "note": "連れ出された義政が1404年の北山に現れ、唐物好きの義政の名で明との国交が開かれた"
+    }
+   ],
+   "doc": {
+    "name": "義視を跡継ぎとする約束状",
+    "q": "kamakura_muromachi_04",
+    "choice": 3,
+    "text": "義政が弟義視に「跡は譲る」と約束した書状が盗まれた。義尚が生まれても跡継ぎ争いはこじれず、応仁の乱は加賀の一向一揆より後まで起こらなかった。"
+   },
+   "persuade": {
+    "戦をやめさせる": {
+     "force": {
+      "q": "kamakura_muromachi_04",
+      "choice": 3
+     },
+     "text": "もともと戦嫌いの義政が、珍しく本気で細川と山名の仲裁に乗り出した。将軍が腰を上げたので両者も矛を収め、応仁の乱の勃発は大きく遅れて加賀の一向一揆の後になった。"
+    },
+    "信仰を勧める": {
+     "vars": {
+      "religion": 30,
+      "commoners": 20
+     },
+     "year": 1460,
+     "text": "義政は政治を投げ出して念仏三昧になった。将軍の信仰に背中を押されて門徒の講が広がったため、加賀の門徒は乱の前に守護を倒した。"
+    }
+   },
+   "give": {
+    "世界地図": {
+     "force": {
+      "q": "kamakura_muromachi_03",
+      "choice": 3
+     },
+     "text": "世界地図に夢中になった義政は「唐物をもっと！」と明への遣使を命じた……のが、なぜか1404年。勘合貿易を始めた将軍は義政となった。"
+    }
+   }
+  },
+  {
+   "name": "日野富子",
+   "era": "kamakura_muromachi",
+   "faction": "室町幕府",
+   "born": 1440,
+   "died": 1496,
+   "death": "natural",
+   "active": 1455,
+   "tags": [
+    "woman"
+   ],
+   "traits": {
+    "war": -1,
+    "reform": 1
+   },
+   "spawn": "temple",
+   "q": [
+    "kamakura_muromachi_04"
+   ],
+   "persuade": {
+    "戦をやめさせる": {
+     "force": {
+      "q": "kamakura_muromachi_04",
+      "choice": 3
+     },
+     "text": "富子は我が子義尚を跡継ぎにと山名宗全を頼ることをやめ、義視との話し合いで決着をつけた。将軍家の跡継ぎ問題はこじれず、応仁の乱は大きく遅れた。"
+    }
+   },
+   "give": {
+    "千両箱": {
+     "vars": {
+      "commerce": 35
+     },
+     "year": 1470,
+     "text": "日野富子は千両箱を元手に、関所の通行料や米相場でさらに財を増やし、大名にまで金を貸した。京都の土倉・酒屋はその金の流れで大いに栄え、商いの力が政治を動かすようになった。"
+    }
+   }
+  },
+  {
+   "name": "足利義視",
+   "era": "kamakura_muromachi",
+   "faction": "室町幕府",
+   "born": 1439,
+   "died": 1491,
+   "death": "illness",
+   "active": 1464,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": -1
+   },
+   "spawn": "castle",
+   "q": [
+    "kamakura_muromachi_04"
+   ],
+   "contrib": [
+    {
+     "q": "kamakura_muromachi_04",
+     "choice": 3,
+     "note": "将軍の跡継ぎを争う義視がおらず、義尚がすんなり跡を継いだ。応仁の乱は加賀の一向一揆より後まで起こらなかった"
+    }
+   ]
+  },
+  {
+   "name": "細川勝元",
+   "era": "kamakura_muromachi",
+   "faction": "細川",
+   "born": 1430,
+   "died": 1473,
+   "death": "illness",
+   "active": 1445,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": -1
+   },
+   "spawn": "castle",
+   "q": [
+    "kamakura_muromachi_04"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "unity": 20,
+      "centralization": 30
+     },
+     "year": 1460,
+     "note": "東軍の総大将がおらず、将軍家の跡継ぎ争いは大乱に発展しないまましぼんだ"
+    }
+   ],
+   "doc": {
+    "name": "東軍の軍勢催促状",
+    "q": "kamakura_muromachi_04",
+    "choice": 3,
+    "text": "細川勝元が諸国に出した軍勢催促状が盗まれ、東軍の兵は京に集まらなかった。兵がいなければ戦は始まらない。応仁の乱は加賀の一向一揆より後までずれ込んだ。"
+   },
+   "give": {
+    "鉄砲": {
+     "vars": {
+      "warrior": 35,
+      "unity": -30
+     },
+     "year": 1467,
+     "text": "応仁の乱に1世紀早く鉄砲が持ち込まれ、戦は泥沼化。各地の武士は鉄砲を求めて争い、のちに伝来した鉄砲の製法は一部の大名が独占した。"
+    }
+   }
+  },
+  {
+   "name": "山名宗全",
+   "era": "kamakura_muromachi",
+   "faction": "山名",
+   "born": 1404,
+   "died": 1473,
+   "death": "illness",
+   "active": 1441,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": -1
+   },
+   "spawn": "village",
+   "q": [
+    "kamakura_muromachi_04"
+   ],
+   "contrib": [
+    {
+     "vars": {
+      "unity": 20,
+      "centralization": 30
+     },
+     "year": 1460,
+     "note": "西軍の総大将がおらず、畠山・斯波の家督争いも大乱に発展しないまましぼんだ"
+    }
+   ],
+   "persuade": {
+    "戦を勧める": {
+     "vars": {
+      "warrior": 25,
+      "unity": -35
+     },
+     "year": 1467,
+     "text": "赤入道こと山名宗全が一段と好戦的になり、乱は京から全国へ飛び火した。秩序が崩れて地方の力が強まったため、のちの天下統一でも毛利のような地方の大名が主役に躍り出た。"
+    }
+   }
+  },
+  {
+   "name": "雪舟",
+   "era": "kamakura_muromachi",
+   "faction": "画僧",
+   "born": 1420,
+   "died": 1506,
+   "death": "natural",
+   "active": 1467,
+   "tags": [
+    "artist",
+    "religious"
+   ],
+   "traits": {
+    "open": 2,
+    "faith": 1
+   },
+   "spawn": "port",
+   "q": [
+    "kamakura_muromachi_04"
+   ],
+   "give": {
+    "世界地図": {
+     "vars": {
+      "open_asia": 30
+     },
+     "year": 1469,
+     "text": "雪舟は地図を携えて明へ渡り、帰国後も大陸との往来を絵と話で広めた。山口の画僧の土産話が明・朝鮮との交易熱をあおり、博多には明人の町までできた。"
+    }
+   }
+  }
+ ],
+ "battles": [
+  {
+   "era": "kamakura_muromachi",
+   "id": "bunei",
+   "name": "文永の役（博多湾）",
+   "at": "battlefield",
+   "year": 1274,
+   "sides": [
+    {
+     "name": "鎌倉の御家人",
+     "label": "御家人の武者",
+     "historical": true,
+     "wins": {
+      "vars": {
+       "centralization": 35,
+       "unity": 20
+      }
+     },
+     "text": "あなたが元軍を蹴散らしたので、御家人は上陸した元軍を浜辺で押し返す大勝利。幕府の威信はかつてなく高まり、得宗家のもとで執権政治は盤石になった。"
+    },
+    {
+     "name": "元・高麗の軍",
+     "label": "元軍の兵",
+     "wins": {
+      "vars": {
+       "unity": -20,
+       "open_asia": 30,
+       "commerce": 15,
+       "warrior": -10
+      }
+     },
+     "text": "御家人の守りが崩れ、元軍は博多に上陸して大宰府まで進んだ。幕府は元への服属を迫られ、九州は大陸の商人であふれた。大陸との往来が当たり前になったため、のちの尊氏の天龍寺船の交易が、そのまま明との国交の始まりとされた。"
+    }
+   ]
+  },
+  {
+   "era": "kamakura_muromachi",
+   "id": "jokyu",
+   "name": "承久の乱（京の攻防）",
+   "at": "castle",
+   "year": 1221,
+   "sides": [
+    {
+     "name": "幕府軍",
+     "label": "幕府軍の武者",
+     "historical": true
+    },
+    {
+     "name": "院方",
+     "label": "院方の武者",
+     "wins": {
+      "vars": {
+       "court": 40,
+       "warrior": -25
+      }
+     },
+     "text": "承久の乱は院方の勝利に終わった。幕府軍が崩れたため朝廷の力は息を吹き返し、六波羅探題も置かれなかった。鎌倉の武士は東国に閉じこもった。"
+    }
+   ]
+  },
+  {
+   "era": "kamakura_muromachi",
+   "id": "kamakura_seme",
+   "name": "鎌倉攻め（元弘の乱）",
+   "at": "capital",
+   "year": 1333,
+   "sides": [
+    {
+     "name": "新田軍",
+     "label": "新田軍の武者",
+     "historical": true
+    },
+    {
+     "name": "北条方",
+     "label": "北条方の武者",
+     "wins": {
+      "vars": {
+       "warrior": 35,
+       "court": -25
+      }
+     },
+     "text": "稲村ヶ崎を越えた新田義貞は、鎌倉から押し戻された。関東の武士の力が健在だったため、のちに尊氏も鎌倉を本拠に幕府を開いた。"
+    }
+   ]
+  },
+  {
+   "era": "kamakura_muromachi",
+   "id": "minatogawa",
+   "name": "湊川の戦い",
+   "at": "mountain",
+   "year": 1336,
+   "sides": [
+    {
+     "name": "足利軍",
+     "label": "足利軍の兵",
+     "historical": true
+    },
+    {
+     "name": "南朝方",
+     "label": "南朝方の兵",
+     "wins": {
+      "vars": {
+       "court": 20,
+       "unity": -35
+      }
+     },
+     "text": "湊川の戦いは楠木・新田方の勝利に終わった。九州から攻め上った尊氏が押し返されたため、南北朝の内乱は果てしなく長引いた。"
+    }
+   ]
+  }
+ ]
+}

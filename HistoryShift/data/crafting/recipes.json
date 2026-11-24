@@ -1,0 +1,966 @@
+{
+ "_doc": "製作のレシピ。station = 作れる場所（any は持ち物画面からどこでも）。era = 史実でその技術が日本にある最初の時代。それより前の時代でも anachro の技能がそろえば作れる（未来の知識。職人の前で作ると技術が漏れて歴史が揺らぐ）。skill = 主技能と必要値、aux = 品質に効く補助の技能（時代をまたいで学んだ知識も効く）。品質は scripts/core/crafting.gd の式で決まる。",
+ "stations": {
+  "forge": "鍛冶場",
+  "gunsmith": "鉄砲鍛冶",
+  "powder": "煙硝づくり",
+  "lab": "化学の実験場",
+  "machine": "町工場",
+  "shipyard": "造船所",
+  "any": "どこでも"
+ },
+ "recipes": [
+  {
+   "id": "r_tetsu",
+   "out": "tetsu",
+   "count": 1,
+   "station": "forge",
+   "era": "jomon_kofun",
+   "skill": {
+    "katana_smith": 0
+   },
+   "mats": {
+    "satetsu": 2,
+    "mokutan": 2
+   },
+   "basis": "古墳時代後期（6世紀）には国内で砂鉄・鉄鉱石から鉄をつくる製鉄が始まった。"
+  },
+  {
+   "id": "r_tamahagane",
+   "out": "tamahagane",
+   "count": 1,
+   "station": "forge",
+   "era": "asuka_nara",
+   "skill": {
+    "katana_smith": 10
+   },
+   "mats": {
+    "satetsu": 3,
+    "mokutan": 3
+   },
+   "basis": "たたら製鉄：粘土の炉に砂鉄と木炭を交互に入れ、ふいごで送風しながら三昼夜燃やす。"
+  },
+  {
+   "id": "r_hagane",
+   "out": "hagane",
+   "count": 1,
+   "station": "forge",
+   "era": "edo",
+   "skill": {
+    "machining": 20
+   },
+   "aux": {
+    "katana_smith": 0.5,
+    "chemistry": 0.5
+   },
+   "mats": {
+    "tetsu": 2,
+    "mokutan": 2
+   },
+   "anachro": {
+    "machining": 60,
+    "chemistry": 40
+   },
+   "basis": "佐賀藩の反射炉（1850年）、韮山反射炉（1857年）で鉄を溶かし大砲を鋳造した。"
+  },
+  {
+   "id": "r_tekken",
+   "out": "tekken",
+   "count": 1,
+   "station": "forge",
+   "era": "jomon_kofun",
+   "skill": {
+    "katana_smith": 0
+   },
+   "aux": {
+    "kenjutsu": 0.3
+   },
+   "mats": {
+    "tetsu": 2,
+    "mokutan": 1
+   }
+  },
+  {
+   "id": "r_chokuto",
+   "out": "chokuto",
+   "count": 1,
+   "station": "forge",
+   "era": "asuka_nara",
+   "skill": {
+    "katana_smith": 15
+   },
+   "aux": {
+    "kenjutsu": 0.3
+   },
+   "mats": {
+    "tamahagane": 1,
+    "tetsu": 1,
+    "mokutan": 2,
+    "mokuzai": 1
+   }
+  },
+  {
+   "id": "r_tachi",
+   "out": "tachi",
+   "count": 1,
+   "station": "forge",
+   "era": "heian",
+   "skill": {
+    "katana_smith": 30
+   },
+   "aux": {
+    "kenjutsu": 0.3
+   },
+   "mats": {
+    "tamahagane": 2,
+    "mokutan": 3,
+    "nendo": 1,
+    "mokuzai": 1
+   },
+   "anachro": {
+    "katana_smith": 60
+   },
+   "basis": "日本刀は硬い皮鉄で柔らかい心鉄を包み、粘土を塗り分けて焼き入れすることで反りと刃文が生まれる。"
+  },
+  {
+   "id": "r_uchigatana",
+   "out": "uchigatana",
+   "count": 1,
+   "station": "forge",
+   "era": "kamakura_muromachi",
+   "skill": {
+    "katana_smith": 35
+   },
+   "aux": {
+    "kenjutsu": 0.3
+   },
+   "mats": {
+    "tamahagane": 2,
+    "mokutan": 3,
+    "nendo": 1,
+    "mokuzai": 1
+   },
+   "anachro": {
+    "katana_smith": 65
+   },
+   "basis": "折り返し鍛錬で不純物を叩き出し、十数回折り返して数万層の鋼にする。"
+  },
+  {
+   "id": "r_wakizashi",
+   "out": "wakizashi",
+   "count": 1,
+   "station": "forge",
+   "era": "kamakura_muromachi",
+   "skill": {
+    "katana_smith": 25
+   },
+   "mats": {
+    "tamahagane": 1,
+    "mokutan": 2,
+    "nendo": 1,
+    "mokuzai": 1
+   },
+   "anachro": {
+    "katana_smith": 55
+   }
+  },
+  {
+   "id": "r_yari",
+   "out": "yari",
+   "count": 1,
+   "station": "forge",
+   "era": "kamakura_muromachi",
+   "skill": {
+    "katana_smith": 15
+   },
+   "aux": {
+    "sojutsu": 0.3
+   },
+   "mats": {
+    "tamahagane": 1,
+    "mokutan": 1,
+    "mokuzai": 2
+   },
+   "anachro": {
+    "katana_smith": 40
+   }
+  },
+  {
+   "id": "r_naginata",
+   "out": "naginata",
+   "count": 1,
+   "station": "forge",
+   "era": "heian",
+   "skill": {
+    "katana_smith": 25
+   },
+   "aux": {
+    "sojutsu": 0.3
+   },
+   "mats": {
+    "tamahagane": 2,
+    "mokutan": 2,
+    "mokuzai": 2
+   },
+   "anachro": {
+    "katana_smith": 50
+   }
+  },
+  {
+   "id": "r_guntou",
+   "out": "guntou",
+   "count": 1,
+   "station": "forge",
+   "era": "meiji_taisho",
+   "skill": {
+    "katana_smith": 30
+   },
+   "aux": {
+    "machining": 0.3
+   },
+   "mats": {
+    "hagane": 2,
+    "mokutan": 2,
+    "mokuzai": 1
+   }
+  },
+  {
+   "id": "r_toishi",
+   "out": "toishi",
+   "count": 1,
+   "station": "forge",
+   "era": "jomon_kofun",
+   "skill": {
+    "katana_smith": 5
+   },
+   "mats": {
+    "nendo": 2
+   }
+  },
+  {
+   "id": "r_tankyu",
+   "out": "tankyu",
+   "count": 1,
+   "station": "any",
+   "era": "jomon_kofun",
+   "skill": {
+    "kyujutsu": 0
+   },
+   "mats": {
+    "mokuzai": 1,
+    "nuno": 1
+   }
+  },
+  {
+   "id": "r_wakyu",
+   "out": "wakyu",
+   "count": 1,
+   "station": "forge",
+   "era": "heian",
+   "skill": {
+    "kyujutsu": 30
+   },
+   "aux": {
+    "architecture": 0.3
+   },
+   "mats": {
+    "take": 3,
+    "mokuzai": 2,
+    "nuno": 1
+   },
+   "anachro": {
+    "kyujutsu": 60
+   }
+  },
+  {
+   "id": "r_ya",
+   "out": "ya",
+   "count": 10,
+   "station": "any",
+   "era": "jomon_kofun",
+   "skill": {
+    "kyujutsu": 0
+   },
+   "mats": {
+    "take": 2,
+    "tetsu": 1
+   }
+  },
+  {
+   "id": "r_hinawa",
+   "out": "hinawaju",
+   "count": 1,
+   "station": "gunsmith",
+   "era": "sengoku",
+   "skill": {
+    "gun_smith": 25
+   },
+   "aux": {
+    "katana_smith": 0.3,
+    "machining": 0.4
+   },
+   "mats": {
+    "tetsu": 3,
+    "mokuzai": 2,
+    "dou": 1
+   },
+   "anachro": {
+    "gun_smith": 60
+   },
+   "basis": "1543年、種子島の刀鍛冶・八板金兵衛が銃身の底をふさぐ尾栓のねじの作り方を学び、国産化に成功したと伝わる。"
+  },
+  {
+   "id": "r_taihou",
+   "out": "taihou",
+   "count": 1,
+   "station": "gunsmith",
+   "era": "sengoku",
+   "skill": {
+    "gun_smith": 50
+   },
+   "aux": {
+    "machining": 0.4
+   },
+   "mats": {
+    "dou": 6,
+    "tetsu": 2,
+    "mokuzai": 3
+   },
+   "anachro": {
+    "gun_smith": 80
+   }
+  },
+  {
+   "id": "r_hodan",
+   "out": "hodan",
+   "count": 3,
+   "station": "gunsmith",
+   "era": "sengoku",
+   "skill": {
+    "gun_smith": 20
+   },
+   "aux": {
+    "powder": 0.5
+   },
+   "mats": {
+    "tetsu": 2,
+    "kokushoku": 1
+   },
+   "anachro": {
+    "gun_smith": 50,
+    "powder": 40
+   }
+  },
+  {
+   "id": "r_murata",
+   "out": "murataju",
+   "count": 1,
+   "station": "machine",
+   "era": "meiji_taisho",
+   "skill": {
+    "gun_smith": 40,
+    "machining": 30
+   },
+   "aux": {
+    "chemistry": 0.2
+   },
+   "mats": {
+    "hagane": 3,
+    "mokuzai": 2
+   },
+   "anachro": {
+    "gun_smith": 75,
+    "machining": 70
+   },
+   "basis": "村田銃は東京砲兵工廠で製造された。精密な工作機械で部品をそろえて量産した。"
+  },
+  {
+   "id": "r_arisaka",
+   "out": "arisaka38",
+   "count": 1,
+   "station": "machine",
+   "era": "meiji_taisho",
+   "skill": {
+    "gun_smith": 55,
+    "machining": 50
+   },
+   "aux": {
+    "chemistry": 0.2
+   },
+   "mats": {
+    "hagane": 4,
+    "mokuzai": 2
+   },
+   "anachro": {
+    "gun_smith": 85,
+    "machining": 80
+   }
+  },
+  {
+   "id": "r_pistol",
+   "out": "pistol14",
+   "count": 1,
+   "station": "machine",
+   "era": "meiji_taisho",
+   "skill": {
+    "gun_smith": 50,
+    "machining": 55
+   },
+   "mats": {
+    "hagane": 2,
+    "mokuzai": 1
+   },
+   "anachro": {
+    "gun_smith": 85,
+    "machining": 85
+   }
+  },
+  {
+   "id": "r_lmg",
+   "out": "lmg96",
+   "count": 1,
+   "station": "machine",
+   "era": "showa",
+   "skill": {
+    "gun_smith": 70,
+    "machining": 70
+   },
+   "mats": {
+    "hagane": 6,
+    "mokuzai": 1,
+    "dou": 1
+   },
+   "anachro": {
+    "gun_smith": 95,
+    "machining": 95
+   }
+  },
+  {
+   "id": "r_kokushoku",
+   "out": "kokushoku",
+   "count": 2,
+   "station": "powder",
+   "era": "kamakura_muromachi",
+   "skill": {
+    "powder": 0
+   },
+   "aux": {
+    "chemistry": 0.5
+   },
+   "mats": {
+    "shoseki": 3,
+    "iou": 1,
+    "mokutan": 1
+   },
+   "anachro": {
+    "powder": 40
+   },
+   "basis": "黒色火薬＝硝石・硫黄・木炭。よく知られた重さの比は 75：10：15。よく混ぜて湿らせ、粒にするほど燃えが速い。"
+  },
+  {
+   "id": "r_shoseki",
+   "out": "shoseki",
+   "count": 2,
+   "station": "powder",
+   "era": "sengoku",
+   "skill": {
+    "powder": 20
+   },
+   "aux": {
+    "chemistry": 0.5
+   },
+   "mats": {
+    "nendo": 3,
+    "yakusou": 2,
+    "mokutan": 1
+   },
+   "anachro": {
+    "powder": 50,
+    "chemistry": 40
+   },
+   "basis": "越中五箇山では床下で蚕の糞や草を土と混ぜて数年寝かせる培養法で硝石（塩硝）をつくり、加賀藩へ納めた。"
+  },
+  {
+   "id": "r_hayago",
+   "out": "hayago",
+   "count": 10,
+   "station": "powder",
+   "era": "sengoku",
+   "skill": {
+    "powder": 10
+   },
+   "aux": {
+    "gun_smith": 0.3,
+    "chemistry": 0.3
+   },
+   "mats": {
+    "namari": 1,
+    "kokushoku": 1,
+    "nuno": 1
+   },
+   "anachro": {
+    "powder": 40
+   }
+  },
+  {
+   "id": "r_murata_dan",
+   "out": "murata_dan",
+   "count": 10,
+   "station": "machine",
+   "era": "meiji_taisho",
+   "skill": {
+    "powder": 20
+   },
+   "aux": {
+    "machining": 0.3,
+    "chemistry": 0.3
+   },
+   "mats": {
+    "dou": 1,
+    "namari": 1,
+    "kokushoku": 1
+   },
+   "anachro": {
+    "powder": 50,
+    "machining": 40
+   }
+  },
+  {
+   "id": "r_dan38",
+   "out": "dan38",
+   "count": 15,
+   "station": "machine",
+   "era": "meiji_taisho",
+   "skill": {
+    "powder": 35
+   },
+   "aux": {
+    "machining": 0.3,
+    "chemistry": 0.5
+   },
+   "mats": {
+    "dou": 1,
+    "namari": 1,
+    "muen": 1
+   },
+   "anachro": {
+    "powder": 60,
+    "chemistry": 50,
+    "machining": 50
+   }
+  },
+  {
+   "id": "r_pistol_dan",
+   "out": "pistol_dan",
+   "count": 12,
+   "station": "machine",
+   "era": "meiji_taisho",
+   "skill": {
+    "powder": 30
+   },
+   "aux": {
+    "machining": 0.3,
+    "chemistry": 0.5
+   },
+   "mats": {
+    "dou": 1,
+    "namari": 1,
+    "muen": 1
+   },
+   "anachro": {
+    "powder": 60,
+    "chemistry": 50,
+    "machining": 50
+   }
+  },
+  {
+   "id": "r_shousan",
+   "out": "shousan",
+   "count": 1,
+   "station": "lab",
+   "era": "edo",
+   "skill": {
+    "chemistry": 30
+   },
+   "aux": {
+    "powder": 0.3
+   },
+   "mats": {
+    "shoseki": 2,
+    "iou": 1
+   },
+   "anachro": {
+    "chemistry": 60
+   },
+   "basis": "宇田川榕菴の『舎密開宗』（1837年）がラヴォアジエ以後の化学を日本に紹介した。硝酸は硝石に硫酸を加えて蒸留してつくる。"
+  },
+  {
+   "id": "r_muen",
+   "out": "muen",
+   "count": 2,
+   "station": "lab",
+   "era": "meiji_taisho",
+   "skill": {
+    "chemistry": 45,
+    "powder": 30
+   },
+   "mats": {
+    "wata": 1,
+    "shousan": 1
+   },
+   "anachro": {
+    "chemistry": 75,
+    "powder": 50
+   },
+   "basis": "綿を硝酸と硫酸に浸すと綿火薬（ニトロセルロース）になる（1846年、シェーンバイン）。"
+  },
+  {
+   "id": "r_horoku",
+   "out": "horoku",
+   "count": 2,
+   "station": "powder",
+   "era": "kamakura_muromachi",
+   "skill": {
+    "powder": 15
+   },
+   "aux": {
+    "chemistry": 0.3
+   },
+   "mats": {
+    "kokushoku": 2,
+    "nendo": 1
+   },
+   "anachro": {
+    "powder": 40
+   }
+  },
+  {
+   "id": "r_keg",
+   "out": "keg",
+   "count": 1,
+   "station": "powder",
+   "era": "sengoku",
+   "skill": {
+    "powder": 25
+   },
+   "aux": {
+    "architecture": 0.3
+   },
+   "mats": {
+    "kokushoku": 5,
+    "mokuzai": 2
+   },
+   "anachro": {
+    "powder": 50
+   }
+  },
+  {
+   "id": "r_hiya",
+   "out": "hiya",
+   "count": 2,
+   "station": "powder",
+   "era": "sengoku",
+   "skill": {
+    "powder": 30,
+    "kyujutsu": 10
+   },
+   "mats": {
+    "kokushoku": 2,
+    "take": 1,
+    "tetsu": 1
+   },
+   "anachro": {
+    "powder": 55
+   }
+  },
+  {
+   "id": "r_dynamite",
+   "out": "dynamite",
+   "count": 2,
+   "station": "lab",
+   "era": "meiji_taisho",
+   "skill": {
+    "chemistry": 50,
+    "powder": 40
+   },
+   "aux": {
+    "architecture": 0.3
+   },
+   "mats": {
+    "shousan": 2,
+    "abura": 1,
+    "nendo": 1
+   },
+   "anachro": {
+    "chemistry": 80,
+    "powder": 60
+   },
+   "basis": "ノーベルはニトログリセリンを珪藻土に染み込ませて安全に運べるダイナマイトにした（1867年特許）。"
+  },
+  {
+   "id": "r_grenade",
+   "out": "grenade",
+   "count": 2,
+   "station": "machine",
+   "era": "showa",
+   "skill": {
+    "powder": 40,
+    "machining": 25
+   },
+   "mats": {
+    "tetsu": 1,
+    "muen": 1
+   },
+   "anachro": {
+    "powder": 70,
+    "machining": 60
+   }
+  },
+  {
+   "id": "r_kizugusuri",
+   "out": "kizugusuri",
+   "count": 2,
+   "station": "any",
+   "era": "jomon_kofun",
+   "skill": {
+    "medicine": 0
+   },
+   "aux": {
+    "chemistry": 0.3
+   },
+   "mats": {
+    "yakusou": 2,
+    "nuno": 1
+   }
+  },
+  {
+   "id": "r_tokkouyaku",
+   "out": "tokkouyaku",
+   "count": 1,
+   "station": "lab",
+   "era": "showa",
+   "skill": {
+    "medicine": 60,
+    "chemistry": 60
+   },
+   "mats": {
+    "yakusou": 3,
+    "shousan": 1,
+    "wata": 1
+   },
+   "anachro": {
+    "medicine": 85,
+    "chemistry": 75
+   },
+   "basis": "青カビから抗生物質を取り出すには培養・抽出・精製の化学が要る。未来の知識があれば江戸の蘭方医の器具でも試みられる……かもしれない。"
+  },
+  {
+   "id": "r_shuri",
+   "out": "shuri",
+   "count": 1,
+   "station": "machine",
+   "era": "kamakura_muromachi",
+   "skill": {
+    "machining": 10
+   },
+   "mats": {
+    "tetsu": 1,
+    "mokuzai": 1
+   }
+  },
+  {
+   "id": "r_shuri_forge",
+   "out": "shuri",
+   "count": 1,
+   "station": "forge",
+   "era": "kamakura_muromachi",
+   "skill": {
+    "machining": 15
+   },
+   "aux": {
+    "katana_smith": 0.3
+   },
+   "mats": {
+    "tetsu": 2,
+    "mokuzai": 1
+   }
+  },
+  {
+   "id": "r_shuri_ship",
+   "out": "shuri",
+   "count": 2,
+   "station": "shipyard",
+   "era": "jomon_kofun",
+   "skill": {
+    "shipbuilding": 10
+   },
+   "aux": {
+    "architecture": 0.5
+   },
+   "mats": {
+    "mokuzai": 3,
+    "tetsu": 1
+   },
+   "basis": "和船は船釘と木の継ぎで組み、傷んだ板は船大工がその場で張り替えた。"
+  },
+  {
+   "id": "r_renga",
+   "out": "renga",
+   "count": 4,
+   "station": "forge",
+   "era": "edo",
+   "skill": {
+    "katana_smith": 0
+   },
+   "know": {
+    "m_tatara": 10
+   },
+   "mats": {
+    "nendo": 3,
+    "mokutan": 1
+   },
+   "basis": "耐火煉瓦は珪石や良い粘土を高温で焼きしめる。"
+  },
+  {
+   "id": "r_buhin_forge",
+   "out": "kikai_buhin",
+   "count": 1,
+   "station": "forge",
+   "era": "edo",
+   "skill": {
+    "machining": 10
+   },
+   "know": {
+    "k_karakuri": 30
+   },
+   "mats": {
+    "tetsu": 3
+   }
+  },
+  {
+   "id": "r_buhin",
+   "out": "kikai_buhin",
+   "count": 2,
+   "station": "machine",
+   "era": "edo",
+   "skill": {
+    "machining": 20
+   },
+   "know": {
+    "k_senban": 20
+   },
+   "mats": {
+    "tetsu": 2
+   }
+  },
+  {
+   "id": "r_jouki",
+   "out": "jouki",
+   "count": 1,
+   "station": "machine",
+   "era": "edo",
+   "skill": {
+    "machining": 30
+   },
+   "aux": {
+    "gun_smith": 0.3
+   },
+   "know": {
+    "p_jouki": 40
+   },
+   "mats": {
+    "hagane": 4,
+    "dou": 2,
+    "kikai_buhin": 3
+   },
+   "basis": "ボイラー・シリンダー・ピストン・弁・調速機。漏れない精度の工作が要る。"
+  },
+  {
+   "id": "r_jouki_forge",
+   "out": "jouki",
+   "count": 1,
+   "station": "forge",
+   "era": "edo",
+   "skill": {
+    "machining": 40
+   },
+   "know": {
+    "p_jouki": 50
+   },
+   "mats": {
+    "tetsu": 8,
+    "dou": 3,
+    "kikai_buhin": 4
+   }
+  },
+  {
+   "id": "r_rail",
+   "out": "rail",
+   "count": 2,
+   "station": "forge",
+   "era": "meiji_taisho",
+   "skill": {
+    "machining": 10
+   },
+   "know": {
+    "m_koro": 30
+   },
+   "mats": {
+    "tetsu": 3
+   },
+   "anachro": {
+    "machining": 30
+   }
+  },
+  {
+   "id": "r_dousen",
+   "out": "dousen",
+   "count": 4,
+   "station": "forge",
+   "era": "edo",
+   "skill": {
+    "machining": 5
+   },
+   "know": {
+    "e_denchi": 20
+   },
+   "mats": {
+    "dou": 1
+   }
+  },
+  {
+   "id": "r_denchi",
+   "out": "denchi",
+   "count": 2,
+   "station": "lab",
+   "era": "edo",
+   "skill": {
+    "chemistry": 20
+   },
+   "know": {
+    "e_denchi": 30
+   },
+   "mats": {
+    "dou": 1,
+    "ryusan": 1
+   }
+  },
+  {
+   "id": "r_ryusan",
+   "out": "ryusan",
+   "count": 1,
+   "station": "lab",
+   "era": "edo",
+   "skill": {
+    "chemistry": 25
+   },
+   "know": {
+    "c_ryusan": 30
+   },
+   "mats": {
+    "iou": 2,
+    "shoseki": 1
+   }
+  }
+ ]
+}

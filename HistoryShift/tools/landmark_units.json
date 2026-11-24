@@ -1,0 +1,464 @@
+{
+ "asuka_nara": {
+  "battlefield": {
+   "flammable": 6,
+   "kinds": {
+    "bridge": 6
+   },
+   "value": 300
+  },
+  "capital": {
+   "flammable": 28,
+   "kinds": {
+    "gate": 1,
+    "hall": 5,
+    "house": 22
+   },
+   "value": 1810
+  },
+  "castle": {
+   "flammable": 5,
+   "kinds": {
+    "gate": 2,
+    "hall": 3
+   },
+   "value": 900
+  },
+  "mountain": {
+   "flammable": 1,
+   "kinds": {
+    "hall": 1
+   },
+   "value": 200
+  },
+  "port": {
+   "flammable": 5,
+   "kinds": {
+    "boat": 4,
+    "hall": 1,
+    "warehouse": 3
+   },
+   "value": 1040
+  },
+  "temple": {
+   "flammable": 3,
+   "kinds": {
+    "gate": 1,
+    "hall": 1,
+    "pagoda": 1
+   },
+   "value": 1150
+  },
+  "village": {
+   "flammable": 10,
+   "kinds": {
+    "house": 10
+   },
+   "value": 300
+  }
+ },
+ "edo": {
+  "battlefield": {
+   "flammable": 21,
+   "kinds": {
+    "house": 20,
+    "tower": 1
+   },
+   "value": 615
+  },
+  "capital": {
+   "flammable": 50,
+   "kinds": {
+    "bridge": 6,
+    "castle_keep": 1,
+    "gate": 1,
+    "hall": 2,
+    "house": 36,
+    "yagura": 4
+   },
+   "value": 7530
+  },
+  "castle": {
+   "flammable": 8,
+   "kinds": {
+    "gate": 4,
+    "hall": 4,
+    "kura": 4
+   },
+   "value": 1640
+  },
+  "mountain": {
+   "flammable": 2,
+   "kinds": {
+    "gate": 1,
+    "hall": 1
+   },
+   "value": 350
+  },
+  "port": {
+   "flammable": 18,
+   "kinds": {
+    "boat": 6,
+    "house": 11,
+    "kura": 6,
+    "tower": 1
+   },
+   "value": 1065
+  },
+  "temple": {
+   "flammable": 3,
+   "kinds": {
+    "gate": 2,
+    "hall": 1
+   },
+   "value": 500
+  },
+  "village": {
+   "flammable": 41,
+   "kinds": {
+    "house": 40,
+    "kura": 8,
+    "tower": 1
+   },
+   "value": 1695
+  }
+ },
+ "heian": {
+  "battlefield": {
+   "flammable": 4,
+   "kinds": {
+    "gate": 1,
+    "hall": 3
+   },
+   "value": 750
+  },
+  "capital": {
+   "flammable": 35,
+   "kinds": {
+    "gate": 3,
+    "hall": 9,
+    "house": 23
+   },
+   "value": 2940
+  },
+  "castle": {
+   "flammable": 6,
+   "kinds": {
+    "gate": 1,
+    "hall": 3,
+    "tower": 2
+   },
+   "value": 780
+  },
+  "mountain": {
+   "flammable": 1,
+   "kinds": {
+    "hall": 1
+   },
+   "value": 200
+  },
+  "port": {
+   "flammable": 8,
+   "kinds": {
+    "boat": 5,
+    "house": 3,
+    "warehouse": 3
+   },
+   "value": 990
+  },
+  "temple": {
+   "flammable": 4,
+   "kinds": {
+    "gate": 1,
+    "hall": 2,
+    "pagoda": 1
+   },
+   "value": 1350
+  },
+  "village": {
+   "flammable": 12,
+   "kinds": {
+    "hall": 1,
+    "house": 10,
+    "torii": 1
+   },
+   "value": 540
+  }
+ },
+ "jomon_kofun": {
+  "battlefield": {
+   "flammable": 4,
+   "kinds": {
+    "tower": 4
+   },
+   "value": 60
+  },
+  "capital": {
+   "flammable": 21,
+   "kinds": {
+    "hall": 3,
+    "house": 16,
+    "tower": 2
+   },
+   "value": 1110
+  },
+  "castle": {
+   "flammable": 15,
+   "kinds": {
+    "hall": 1,
+    "house": 10,
+    "tower": 4
+   },
+   "value": 560
+  },
+  "port": {
+   "flammable": 11,
+   "kinds": {
+    "boat": 5,
+    "house": 6
+   },
+   "value": 480
+  },
+  "temple": {
+   "flammable": 3,
+   "kinds": {
+    "torii": 3
+   },
+   "value": 120
+  },
+  "village": {
+   "flammable": 16,
+   "kinds": {
+    "house": 16
+   },
+   "value": 480
+  }
+ },
+ "kamakura_muromachi": {
+  "capital": {
+   "flammable": 32,
+   "kinds": {
+    "gate": 3,
+    "hall": 5,
+    "house": 22,
+    "kura": 2,
+    "torii": 2
+   },
+   "value": 2310
+  },
+  "castle": {
+   "flammable": 8,
+   "kinds": {
+    "gate": 4,
+    "hall": 4,
+    "kura": 4
+   },
+   "value": 1640
+  },
+  "mountain": {
+   "flammable": 1,
+   "kinds": {
+    "hall": 1
+   },
+   "value": 200
+  },
+  "port": {
+   "flammable": 14,
+   "kinds": {
+    "boat": 5,
+    "house": 9,
+    "warehouse": 3
+   },
+   "value": 1170
+  },
+  "temple": {
+   "flammable": 3,
+   "kinds": {
+    "gate": 1,
+    "hall": 2
+   },
+   "value": 550
+  },
+  "village": {
+   "flammable": 11,
+   "kinds": {
+    "house": 10,
+    "torii": 1
+   },
+   "value": 340
+  }
+ },
+ "meiji_taisho": {
+  "battlefield": {
+   "flammable": 0,
+   "kinds": {
+    "brick": 2
+   },
+   "value": 600
+  },
+  "capital": {
+   "flammable": 11,
+   "kinds": {
+    "brick": 5,
+    "bridge": 6,
+    "castle_keep": 1,
+    "yagura": 4
+   },
+   "value": 7400
+  },
+  "castle": {
+   "flammable": 0,
+   "kinds": {
+    "brick": 3
+   },
+   "value": 900
+  },
+  "mountain": {
+   "flammable": 1,
+   "kinds": {
+    "house": 1
+   },
+   "value": 30
+  },
+  "port": {
+   "flammable": 4,
+   "kinds": {
+    "boat": 4,
+    "brick": 1,
+    "warehouse": 3
+   },
+   "value": 1140
+  },
+  "temple": {
+   "flammable": 15,
+   "kinds": {
+    "gate": 1,
+    "hall": 1,
+    "house": 12,
+    "pagoda": 1
+   },
+   "value": 1510
+  },
+  "village": {
+   "flammable": 7,
+   "kinds": {
+    "house": 6,
+    "school": 1
+   },
+   "value": 330
+  }
+ },
+ "sengoku": {
+  "capital": {
+   "flammable": 39,
+   "kinds": {
+    "castle_keep": 1,
+    "hall": 2,
+    "house": 32,
+    "yagura": 4
+   },
+   "value": 6960
+  },
+  "castle": {
+   "flammable": 11,
+   "kinds": {
+    "bridge": 6,
+    "castle_keep": 1,
+    "yagura": 4
+   },
+   "value": 5900
+  },
+  "mountain": {
+   "flammable": 2,
+   "kinds": {
+    "hall": 1,
+    "torii": 1
+   },
+   "value": 240
+  },
+  "port": {
+   "flammable": 16,
+   "kinds": {
+    "boat": 6,
+    "house": 10,
+    "kura": 5
+   },
+   "value": 960
+  },
+  "temple": {
+   "flammable": 4,
+   "kinds": {
+    "gate": 1,
+    "hall": 1,
+    "house": 2
+   },
+   "value": 410
+  },
+  "village": {
+   "flammable": 40,
+   "kinds": {
+    "house": 40
+   },
+   "value": 1200
+  }
+ },
+ "showa": {
+  "battlefield": {
+   "flammable": 0,
+   "kinds": {
+    "concrete": 1,
+    "hangar": 2
+   },
+   "value": 1000
+  },
+  "capital": {
+   "flammable": 0,
+   "kinds": {
+    "concrete": 6,
+    "monument": 1
+   },
+   "value": 8400
+  },
+  "castle": {
+   "flammable": 0,
+   "kinds": {
+    "brick": 1,
+    "concrete": 3
+   },
+   "value": 1500
+  },
+  "mountain": {
+   "flammable": 2,
+   "kinds": {
+    "concrete": 1,
+    "hall": 1,
+    "torii": 1
+   },
+   "value": 640
+  },
+  "port": {
+   "flammable": 3,
+   "kinds": {
+    "boat": 3,
+    "concrete": 3
+   },
+   "value": 1380
+  },
+  "temple": {
+   "flammable": 4,
+   "kinds": {
+    "hall": 2,
+    "torii": 2
+   },
+   "value": 480
+  },
+  "village": {
+   "flammable": 34,
+   "kinds": {
+    "concrete": 2,
+    "house": 34
+   },
+   "value": 1820
+  }
+ }
+}

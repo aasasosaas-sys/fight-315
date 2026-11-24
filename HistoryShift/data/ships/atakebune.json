@@ -1,0 +1,61 @@
+{
+  "id": "atakebune",
+  "name": {"ja": "安宅船（九鬼嘉隆の鉄甲船を含む）", "en": "Atakebune (incl. Kuki Yoshitaka's iron-clad ships)"},
+  "era": "sengoku",
+  "year": 1578,
+  "type": "large Japanese war galley with full-length armoured superstructure (総矢倉)",
+  "schema_notes": "level_m = deck height above the waterline. confidence: sourced / typical / reconstruction.",
+  "basis": [
+    {"fact": "Developed from large merchant hulls (二形船, 伊勢船); 500 koku small to 1,000+ koku large; propelled by dozens to 100+ oarsmen with a similar number of fighters", "source_url": "https://pedia.3rd-in.co.jp/wiki/%E5%AE%89%E5%AE%85%E8%88%B9", "year": 1570},
+    {"fact": "Box-like 矢倉 superstructure; when it covers nearly the full length it is 総矢倉; 楯板 shield boards with 狭間 loopholes", "source_url": "https://pedia.3rd-in.co.jp/wiki/%E5%AE%89%E5%AE%85%E8%88%B9", "year": 1570},
+    {"fact": "Atakemaru, built by Mukai Tadakatsu for Hidetada/Iemitsu, was fully covered in copper plates", "source_url": "https://EN.wikipedia.com/wiki/Atakebune", "year": 1630},
+    {"fact": "After defeat at the 1st Kizugawaguchi (1576), Nobunaga ordered Kuki Yoshitaka to build 7 great atakebune, completed 1578", "source_url": "https://www.city.toba.mie.jp/material/files/group/70/yoshitakagaiyou.pdf", "year": 1578},
+    {"fact": "多聞院日記: ships arrived at Sakai, 7 ken wide and 12-13 ken long, made of iron to stop gunfire", "source_url": "https://www.city.toba.mie.jp/material/files/group/70/yoshitakagaiyou.pdf", "year": 1578},
+    {"fact": "6 iron ships vs 600 Mori vessels at the 2nd Kizugawaguchi, 1578", "source_url": "https://www.mlit.go.jp/tagengo-db/en/R2-00768.html", "year": 1578},
+    {"fact": "Nihon Maru: reputed 70 ken x 40 ken is doubted by Ishii Kenji", "source_url": "https://ja.wikid.org/%E6%97%A5%E6%9C%AC%E4%B8%B8_(%E5%AE%89%E5%AE%85%E8%88%B9)", "year": 1592}
+  ],
+  "dimensions": {
+    "length_overall_m": 23.6,
+    "length_note": "Kuki 1578: 12-13 ken (1 ken ~1.82 m) => 22-24 m",
+    "beam_m": 12.7,
+    "beam_note": "7 ken",
+    "draft_m": 1.8,
+    "displacement_t": 300,
+    "displacement_confidence": "reconstruction",
+    "freeboard_m": {"mid": 1.5, "confidence": "reconstruction"},
+    "superstructure_height_m": 6.0
+  },
+  "decks": [
+    {"name": "Top 櫓 (天守-like tower)", "level_m": 7.5, "rooms": [
+      {"name": "Command tower", "purpose": "commander (Kuki) and flags", "approx_size_m": [5, 5], "position": "stern-mid", "key_props": ["clan banners (九鬼 七曜紋)", "war fans", "drums", "conch shells"], "notes": "", "confidence": "reconstruction"}
+    ]},
+    {"name": "Upper 矢倉 (gun deck)", "level_m": 4.5, "rooms": [
+      {"name": "Gun deck", "purpose": "arquebusiers and large guns (大鉄砲)", "approx_size_m": [20, 11], "position": "full length", "key_props": ["楯板 with 狭間", "matchlocks", "powder flasks", "大筒"], "notes": "Iron plates (Kuki) on the outer walls", "confidence": "sourced (concept)"}
+    ]},
+    {"name": "Lower 矢倉 (oar deck)", "level_m": 1.5, "rooms": [
+      {"name": "Oar deck", "purpose": "rowers at 艪", "approx_size_m": [20, 11], "position": "full length, port and starboard", "key_props": ["艪 (sculling oars)", "rowers' benches", "drum"], "notes": "", "confidence": "sourced (oarsmen)"}
+    ]},
+    {"name": "Hold", "level_m": -1.0, "rooms": [
+      {"name": "Hold", "purpose": "stores and powder", "approx_size_m": [18, 10], "position": "mid", "key_props": ["rice", "powder", "water"], "notes": "", "confidence": "reconstruction"}
+    ]}
+  ],
+  "exterior": {
+    "materials": ["wood", "iron plates (Kuki)"],
+    "colors": {"hull": "black iron / dark wood"},
+    "features": ["boxy fortress shape", "loopholes", "banners"]
+  },
+  "crew": {"total": 200, "notes": "100+ rowers and fighters"},
+  "lighting": {"type": "lanterns", "confidence": "reconstruction"},
+  "props_period": ["matchlocks", "banners"],
+  "flooding": {
+    "watertight_subdivision": "Japanese hulls had no bulkheads (typical)",
+    "pumps": "Buckets",
+    "sea_cocks": "None",
+    "magazines": [{"name": "powder", "position": "hold"}],
+    "freeboard_m": 1.5,
+    "historical_damage": [],
+    "game_sinking_hooks": ["Top-heavy with iron: capsizes easily", "Fire arrows (焙烙火矢) set the wooden hull on fire"]
+  },
+  "uncertain": ["Whether the iron covered the whole hull", "Dimensions", "Gun count"],
+  "layout": {"note": "game layout (reconstruction, Kuki Yoshitaka's 1578 鉄甲船): wide flat hull, two-storey 矢倉 box armoured with black iron plates and loopholes, 天守-like tower, many 艪.", "form": "wood_jp", "hull": {"pb": 1.3, "ps": 1.2, "mid": 0.35, "q": 0.65, "tb": 0.45, "ts": 0.7, "bilge": 8.0, "flare": 0.1, "rise_b": 0.3, "rise_s": 0.15, "sheer": [2.4, 1.5, 2.0], "bulwark": 0.5, "colors": {"hull": [0.25, 0.2, 0.17], "bottom": [0.18, 0.15, 0.13], "boot": [0.18, 0.15, 0.13], "deck": [0.7, 0.56, 0.4], "inner": [0.55, 0.42, 0.3]}}, "parts": [{"t": "yagura", "s0": 1.0, "s1": 22.6, "w": 12.0, "y0": 1.5, "y1": 4.5, "iron": true, "ports": true, "col": [0.06, 0.06, 0.07], "mat": "metal", "screen": false, "rail": false}, {"t": "yagura", "s0": 2.5, "s1": 21.0, "w": 11.0, "y0": 4.5, "y1": 7.5, "iron": true, "ports": true, "col": [0.07, 0.07, 0.08], "mat": "metal", "rail_col": [0.16, 0.16, 0.18]}, {"t": "house", "s0": 13.5, "s1": 18.5, "w": 5.5, "y0": 7.5, "y1": 10.0, "col": [0.12, 0.11, 0.11], "mat": "wood", "roof": "irimoya", "roof_col": [0.38, 0.4, 0.45], "rise": 1.6, "over": 0.8, "floor": false}, {"t": "oars", "s0": 3, "s1": 21, "n": 12, "y": 2.2, "len": 6}, {"t": "flag", "kind": "banner", "s": 4, "x": 4.5, "y": 8.6, "size": 2.6}, {"t": "flag", "kind": "banner", "s": 20, "x": -4.5, "y": 8.6, "size": 2.6}, {"t": "rudder", "tiller": false}], "rooms": {"Command tower": {"s": [13.8, 18.2]}}, "sim": {"gm": 0.4, "vanish": 40, "pump": 0.03, "power": "manual", "fire": "wood", "strength": 420, "value": 1500, "cookoff": 30, "magazines": [{"s0": 0, "s1": 23.6, "name": "船倉の火薬"}], "sea_cocks": [{"s": 12, "side": 0, "name": "船底の板（外して自沈）", "area": 0.6, "kind": "plug"}]}, "pilot": {"enabled": true, "vmax": 2.5, "helm_s": 17, "helm_y": 7.65}, "ladder": {"s": 12, "side": 1}}
+}

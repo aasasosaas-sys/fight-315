@@ -1,0 +1,73 @@
+{
+  "id": "hikawa_maru",
+  "name": {"ja": "氷川丸", "en": "Hikawa Maru"},
+  "era": "showa",
+  "year": 1930,
+  "type": "cargo-passenger liner (NYK Seattle route); WWII hospital ship; preserved at Yamashita Park, Yokohama",
+  "schema_notes": "level_m = deck height above the waterline. confidence: sourced / typical / reconstruction.",
+  "basis": [
+    {"fact": "Length 163.3 m, beam 20.1 m, 11,622 GT; owner NYK", "source_url": "https://online.bunka.go.jp/heritages/detail/389361", "year": 1930},
+    {"fact": "Built by Yokohama Dock Co., completed 25 Apr 1930; 2 B&W double-acting 4-cycle diesels, 2 propellers; max 18.38 kt", "source_url": "https://nyk.com/rekishi/e/exhibitions/history_hikawa.htm", "year": 1930},
+    {"fact": "Passengers 331: 76 first, 69 tourist, 186 third; survived mine damage three times", "source_url": "https://en.wikipedia.org/wiki/Hikawa_Maru-class_ocean_liner", "year": 1930},
+    {"fact": "B deck: entrance lobby, 一等児童室 (first-class children's room), 一等社交室 with grand piano, Seattle route exhibit room", "source_url": "https://allabout.co.jp/gm/gc/77284/", "year": 2024},
+    {"fact": "Wheelhouse and engine room preserved nearly as built; the engine room on the lowest visitor deck (C deck) keeps the B&W diesels", "source_url": "https://allabout.co.jp/gm/gc/77284/2/", "year": 2024},
+    {"fact": "First-class dining saloon spans the full width of the ship with an Art Deco skylight; interiors by the Frenchman Marc Simon", "source_url": "https://serai.jp/tour/338692", "year": 1930},
+    {"fact": "First-class social hall used for receptions; interior almost exactly as designed", "source_url": "https://serai.jp/tour/338692", "year": 1930},
+    {"fact": "First-class smoking room has a skylight and ventilator", "source_url": "https://nlab.itmedia.co.jp/cont/articles/3276001/3/", "year": 2024},
+    {"fact": "Designated Important Cultural Property in 2016", "source_url": "https://nyk.com/english/news/2016/004434.html", "year": 2016},
+    {"fact": "Served as a hospital ship (registry entry)", "source_url": "https://hec.lrfoundation.org.uk/archive-library/ships/hikawa-maru-1930", "year": 1941}
+  ],
+  "dimensions": {
+    "length_overall_m": 163.3,
+    "beam_m": 20.1,
+    "draft_m": 9.0,
+    "draft_confidence": "typical (unverified)",
+    "gross_tonnage": 11622,
+    "freeboard_m": {"mid": 6.0, "confidence": "typical"},
+    "deck_height_m": 2.8
+  },
+  "decks": [
+    {"name": "Boat deck / bridge deck", "level_m": 17.0, "rooms": [
+      {"name": "操舵室 Wheelhouse", "purpose": "navigation (preserved)", "approx_size_m": [10, 5], "position": "bow-mid, centre (front of superstructure)", "key_props": ["wooden ship's wheel", "engine telegraphs", "magnetic compass", "voice tubes", "brass fittings", "radar (postwar addition)"], "notes": "", "confidence": "sourced"},
+      {"name": "船長室 Captain's cabin", "purpose": "captain's quarters", "approx_size_m": [5, 4], "position": "behind the wheelhouse", "key_props": ["desk", "bed", "sofa"], "notes": "", "confidence": "typical"},
+      {"name": "Lifeboats", "purpose": "lifeboats on davits", "approx_size_m": [60, 3], "position": "mid, port and starboard", "key_props": ["lifeboats", "davits", "funnel (black, white band with 2 red stripes)"], "notes": "", "confidence": "typical"}
+    ]},
+    {"name": "A deck (first-class cabins, promenade)", "level_m": 14.0, "rooms": [
+      {"name": "一等客室 First-class staterooms (incl. Chaplin's stay)", "purpose": "first-class cabins", "approx_size_m": [4, 3.5], "position": "mid, port and starboard", "key_props": ["brass beds", "wash basin", "portholes", "wardrobe"], "notes": "Charlie Chaplin famously travelled on Hikawa Maru (1932).", "confidence": "typical"},
+      {"name": "一等喫煙室 First-class smoking room", "purpose": "men's lounge", "approx_size_m": [12, 14], "position": "stern-mid", "key_props": ["leather armchairs", "skylight", "fireplace", "bar"], "notes": "", "confidence": "sourced (exists); typical (position)"},
+      {"name": "Promenade", "purpose": "walkway", "approx_size_m": [80, 3], "position": "port and starboard", "key_props": ["deck chairs", "teak deck"], "notes": "", "confidence": "typical"}
+    ]},
+    {"name": "B deck (entrance, first-class public rooms)", "level_m": 11.0, "rooms": [
+      {"name": "Entrance lobby", "purpose": "boarding", "approx_size_m": [10, 10], "position": "mid", "key_props": ["Art Deco staircase", "ironwork"], "notes": "", "confidence": "sourced"},
+      {"name": "一等社交室 First-class social hall", "purpose": "main lounge", "approx_size_m": [15, 18], "position": "mid", "key_props": ["grand piano", "Art Deco ceiling", "carved panels", "armchairs"], "notes": "", "confidence": "sourced"},
+      {"name": "一等児童室 First-class children's room", "purpose": "children's playroom", "approx_size_m": [5, 5], "position": "mid", "key_props": ["toys", "small tables"], "notes": "", "confidence": "sourced"},
+      {"name": "一等食堂 First-class dining saloon", "purpose": "dining", "approx_size_m": [18, 20], "position": "mid, full width", "key_props": ["Art Deco skylight", "set tables", "dining chairs"], "notes": "", "confidence": "sourced (full width; deck assignment typical)"}
+    ]},
+    {"name": "C deck and below (tourist/third class, machinery)", "level_m": 3.0, "rooms": [
+      {"name": "Tourist/third-class quarters", "purpose": "cabins and dormitories", "approx_size_m": [30, 18], "position": "fore and aft", "key_props": ["bunks", "tables"], "notes": "", "confidence": "typical"},
+      {"name": "機関室 Engine room", "purpose": "2 B&W double-acting diesels", "approx_size_m": [25, 18], "position": "mid", "key_props": ["diesel engines", "catwalks", "control stand", "gauges"], "notes": "", "confidence": "sourced"},
+      {"name": "Cargo holds", "purpose": "raw silk, general cargo", "approx_size_m": [20, 18], "position": "fore and aft", "key_props": ["silk bales", "crates", "hatches", "derricks"], "notes": "", "confidence": "typical"}
+    ]}
+  ],
+  "exterior": {
+    "materials": ["riveted steel", "teak decks", "Art Deco interiors"],
+    "colors": {"hull_1930": "black with red boot topping (typical)", "superstructure": "white", "funnel": "NYK black with a white band and two red stripes (typical)", "hospital_ship": "white hull with a green band and red crosses (typical)"},
+    "features": ["single funnel", "two masts with derricks", "cruiser stern"]
+  },
+  "crew": {"total": null, "passengers": 331, "notes": "Crew count unverified"},
+  "lighting": {"type": "electric Art Deco fixtures", "confidence": "sourced (Art Deco interiors)"},
+  "props_period": ["steamer trunks", "1930s menus", "silk bales"],
+  "flooding": {
+    "watertight_subdivision": "Merchant-ship transverse bulkheads (typical)",
+    "pumps": "Electric bilge pumps (typical)",
+    "sea_cocks": "Engine-room sea cocks (typical)",
+    "magazines": [],
+    "freeboard_m": 6.0,
+    "historical_damage": [
+      {"event": "Mine damage (3 times)", "date": "1941-1945", "sequence": ["Struck mines three times and survived"], "source_url": "https://en.wikipedia.org/wiki/Hikawa_Maru-class_ocean_liner"}
+    ],
+    "game_sinking_hooks": ["A mine strike floods one hold; it survives if the bulkheads hold"]
+  },
+  "uncertain": ["Exact deck assignment of the rooms", "Draft", "Crew size", "Exterior colours by period"],
+  "layout": {"note": "game layout (reconstruction): black hull, white superstructure in three tiers (B/A/boat deck), single NYK funnel; an intermediate deck at 7.0 m is added for headroom (reconstruction).", "form": "steel", "hull": {"pb": 1.8, "ps": 2.8, "mid": 0.3, "q": 0.5, "bilge": 3.0, "rake": 7.0, "forefoot": 2.0, "overhang": 6.0, "cutup": 4.0, "bulwark": 1.1, "sheer": [12.5, 11.0, 11.5], "colors": {"hull": [0.1, 0.1, 0.11], "bottom": [0.62, 0.18, 0.14], "boot": [0.62, 0.18, 0.14], "deck": [0.8, 0.66, 0.48], "super": [0.95, 0.95, 0.93], "inner": [0.93, 0.9, 0.82], "bulwark": [0.95, 0.95, 0.93], "rail": [0.85, 0.85, 0.82], "stripe": [0.95, 0.95, 0.93], "stripe_y": [10.4, 10.6]}}, "extra_decks": [{"name": "上甲板 Upper deck (second class, crew)", "level_m": 7.0, "rooms": [{"name": "二等客室 Second-class cabins", "purpose": "second-class passengers", "approx_size_m": [24, 6], "position": "stern-mid, port and starboard", "key_props": ["bunks", "wash basin", "portholes"], "confidence": "reconstruction"}, {"name": "船員室 Crew quarters", "purpose": "seamen", "approx_size_m": [16, 14], "position": "bow", "key_props": ["bunks", "lockers", "mess table"], "confidence": "reconstruction"}, {"name": "二等食堂 Second-class dining room", "purpose": "meals", "approx_size_m": [12, 14], "position": "stern", "key_props": ["dining", "set tables", "chairs"], "confidence": "reconstruction"}]}], "parts": [{"t": "house", "s0": 32, "s1": 128, "w": 19, "y0": 11.0, "y1": 14.0, "glass": true, "win_h": 1.0, "wood_top": true}, {"t": "house", "s0": 38, "s1": 120, "w": 13, "y0": 14.0, "y1": 17.0, "glass": true, "win_h": 1.0, "wood_top": true}, {"t": "house", "s0": 38, "s1": 50, "w": 14, "y0": 17.0, "y1": 20.0, "glass": true, "win_h": 1.1}, {"t": "funnel", "s": 84, "rx": 3.4, "rz": 5.0, "y0": 17.0, "y1": 31.0, "col": [0.06, 0.06, 0.07], "bands": [{"y0": 6.0, "h": 2.6, "col": [0.95, 0.95, 0.93]}, {"y0": 5.3, "h": 0.45, "col": [0.8, 0.12, 0.1]}, {"y0": 4.3, "h": 0.45, "col": [0.8, 0.12, 0.1]}]}, {"t": "mast", "s": 22, "h": 26, "r": 0.35, "yards": [{"y": 10, "w": 8}], "col": [0.85, 0.75, 0.55]}, {"t": "mast", "s": 142, "h": 24, "r": 0.35, "yards": [{"y": 9, "w": 7}], "col": [0.85, 0.75, 0.55], "flag": "nyk", "flag_size": 1.6}, {"t": "boats", "s0": 56, "s1": 108, "n": 5, "y": 18.3, "len": 8}, {"t": "ports", "s0": 15, "s1": 150, "n": 36, "y": 8.6, "rows": 2, "row_gap": 2.6, "size": 0.42}, {"t": "flag", "kind": "hinomaru", "s": 166, "y": 14.5, "size": 2.0}], "rooms": {"Lifeboats": {"skip": true}, "Promenade": {"skip": true}, "Entrance lobby": {"s": [70, 80]}, "一等社交室": {"s": [52, 68]}, "一等食堂": {"s": [88, 108]}, "一等児童室": {"s": [82, 87]}, "一等喫煙室": {"s": [100, 114]}, "一等客室": {"s": [50, 95]}, "操舵室": {"s": [39, 44]}, "船長室": {"s": [45, 49]}, "機関室": {"s": [75, 100]}}, "sim": {"split": false, "n_bulkheads": 8, "gm": 0.9, "vanish": 55, "pump": 0.5, "power": "diesel", "fire": "steel", "strength": 650, "value": 2000, "boilers": [70, 100], "sea_cocks": [{"s": 90, "side": -1, "name": "機関室の海水弁（左舷）", "area": 0.5, "kind": "kingston"}, {"s": 90, "side": 1, "name": "機関室の海水弁（右舷）", "area": 0.5, "kind": "kingston"}], "pump_s": 95}, "pilot": {"enabled": false}, "ladder": {"s": 120, "side": 1}, "lighting": "electric"}
+}

@@ -1,0 +1,102 @@
+{
+ "eraId": "asuka_nara",
+ "roles": {
+  "capital": "職人",
+  "village": "農民",
+  "temple": "職人",
+  "port": "漁民",
+  "castle": "農民",
+  "battlefield": "農民",
+  "mountain": "農民",
+  "town": "農民"
+ },
+ "rules": [
+  {
+   "id": "cv_an_handen",
+   "title": "班田の里の農民が失われる",
+   "trigger": {
+    "kind": "casualty",
+    "at": "village",
+    "min": 8
+   },
+   "vars": {
+    "economy": -10,
+    "centralization": -8
+   },
+   "year": 720,
+   "text": "口分田を耕す農民が命を落とし、田は荒れて租・庸・調が集まらなくなった。朝廷は開墾を急がせた。",
+   "basis": "722年、朝廷は百万町歩の開墾計画を立て、723年に三世一身法を出した。口分田の不足と、農民の逃亡（浮浪）に開墾の奨励で応じたもの。",
+   "recover": 60
+  },
+  {
+   "id": "cv_an_handen2",
+   "title": "口分田、耕す人なし",
+   "trigger": {
+    "kind": "casualty",
+    "at": "village",
+    "min": 20
+   },
+   "vars": {
+    "centralization": -12,
+    "commoners": -5
+   },
+   "year": 740,
+   "text": "村々で耕し手がいなくなり、班田を続ける土台が崩れた。朝廷は私有を認めてでも田を開かせるしかなかった。",
+   "basis": "743年の墾田永年私財法は、開墾した田の永久の私有を認めた。荒れた口分田の穴を開墾で埋めようとする政策だった。",
+   "recover": 60
+  },
+  {
+   "id": "cv_an_kako",
+   "title": "難波津の水手が失われる",
+   "trigger": {
+    "kind": "casualty",
+    "at": "port",
+    "min": 6
+   },
+   "vars": {
+    "open_asia": -10
+   },
+   "year": 700,
+   "text": "遣唐使船を漕ぐ水手たちが倒れ、唐へ渡る船は人をそろえられなくなった。",
+   "basis": "遣唐使船1隻には100〜150人ほどが乗り、その多くは水手（かこ）だった（702年の粟田真人の遣唐使など）。",
+   "recover": 60
+  },
+  {
+   "id": "cv_an_daibutsu",
+   "title": "大仏の工人が失われる",
+   "trigger": {
+    "kind": "casualty",
+    "at": [
+     "capital",
+     "temple"
+    ],
+    "role": "職人",
+    "min": 8
+   },
+   "vars": {
+    "tech": -8,
+    "religion": -5
+   },
+   "year": 745,
+   "text": "鋳物師や瓦工などの工人が犠牲になった。大仏の鋳造は遅れ、都の寺づくりも滞った。",
+   "basis": "東大寺の大仏は747〜749年に鋳造され、752年に開眼供養が行われた。のべ260万人が造立に関わったと伝わる（『東大寺要録』）。",
+   "recover": 60
+  },
+  {
+   "id": "cv_an_unrest",
+   "title": "民の不安、都に満ちる",
+   "trigger": {
+    "kind": "casualty",
+    "min": 15
+   },
+   "vars": {
+    "unity": -10,
+    "economy": -5
+   },
+   "year": 735,
+   "text": "罪のない民が殺される騒ぎが続き、人々は村を捨てて逃げた。朝廷は米や塩を配る賑給で民をなだめた。",
+   "basis": "『続日本紀』には、飢饉や疫病のたびに朝廷が困窮した民に稲や塩を配った賑給（しんごう）の記事が多い（735〜737年の天然痘の流行時など）。",
+   "unrest": true
+  }
+ ]
+}

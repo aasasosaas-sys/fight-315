@@ -1,0 +1,7 @@
+.godot/
+/android/
+*.tmp
+*.part
+export/
+# 大きい3Dモデルは tools/download_assets.py で取得
+assets/polyhaven/models/

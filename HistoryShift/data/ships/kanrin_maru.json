@@ -1,0 +1,65 @@
+{
+  "id": "kanrin_maru",
+  "name": {"ja": "咸臨丸", "en": "Kanrin Maru"},
+  "era": "bakumatsu",
+  "year": 1860,
+  "type": "screw steam corvette with 3-masted sailing rig (L. Smit en Zoon, Kinderdijk, Netherlands; delivered 1857 as 'Japan')",
+  "schema_notes": "level_m = deck height above the waterline. confidence: sourced / typical / reconstruction.",
+  "basis": [
+    {"fact": "Built by L. Smit en Zoon, Kinderdijk; ~50 m long; Japan's first screw-propelled steam corvette; 100 hp coal-fired engine", "source_url": "https://wikiwand.com/en/articles/Japanese_warship_Kanrin_Maru", "year": 1857},
+    {"fact": "Ordered by the shogunate from the Netherlands in 1853; delivered 21 Sep 1857 as 'Japan'", "source_url": "https://wikiwand.com/en/articles/Japanese_warship_Kanrin_Maru", "year": 1857},
+    {"fact": "Under Katsu Kaishu as captain, escort to the 1860 embassy: left Uraga 10 Feb 1860, reached San Francisco 17 Mar, returned to Uraga 23 Jun", "source_url": "https://www.mofa.go.jp/mofaj/annai/honsho/shiryo/akebono/13.html", "year": 1860},
+    {"fact": "Sailed under canvas at sea; the engine was used only against headwinds and entering or leaving port", "source_url": "https://intojapanwaraku.com/rock/culture-rock/168013/", "year": 1860},
+    {"fact": "11 Americans aboard including Lt John M. Brooke", "source_url": "https://intojapanwaraku.com/rock/culture-rock/168013/", "year": 1860},
+    {"fact": "Fukuzawa Yukichi sailed as servant to Kimura Settsu-no-kami (admiral)", "source_url": "https://objecthub.keio.ac.jp/en/object/15255", "year": 1860},
+    {"fact": "Wrecked off Saraki Point (Kikonai) 1871 carrying ~401 former Sendai-domain samurai and families; wreck not found", "source_url": "https://tabi-mag.jp/ho1272/", "year": 1871}
+  ],
+  "dimensions": {
+    "length_overall_m": 49.7,
+    "length_confidence": "typical (~50 m sourced)",
+    "beam_m": 7.3,
+    "draft_m": 3.5,
+    "displacement_t": 625,
+    "displacement_confidence": "typical (625 t often quoted; one source says ~300 t)",
+    "freeboard_m": {"mid": 2.2, "confidence": "typical"},
+    "masts": 3,
+    "guns": 12
+  },
+  "decks": [
+    {"name": "Upper (weather) deck", "level_m": 2.2, "rooms": [
+      {"name": "Quarterdeck and wheel", "purpose": "steering", "approx_size_m": [10, 7], "position": "stern", "key_props": ["ship's wheel", "binnacle", "Hinomaru flag (日の丸) and Tokugawa aoi (葵) flags"], "notes": "", "confidence": "typical"},
+      {"name": "Gun deck (open)", "purpose": "~12 guns on carriages", "approx_size_m": [30, 7], "position": "mid", "key_props": ["guns", "ropes", "belaying pins", "funnel (lowerable)", "boats"], "notes": "", "confidence": "typical"},
+      {"name": "Forecastle", "purpose": "anchors and bowsprit", "approx_size_m": [8, 6], "position": "bow", "key_props": ["anchor", "capstan"], "notes": "", "confidence": "typical"}
+    ]},
+    {"name": "Lower deck", "level_m": 0.0, "rooms": [
+      {"name": "Captain's cabin (Katsu)", "purpose": "captain", "approx_size_m": [4, 4], "position": "stern", "key_props": ["bunk", "chart table"], "notes": "Katsu was seasick in bed for much of the voyage (popular account)", "confidence": "typical"},
+      {"name": "Kimura's cabin", "purpose": "admiral", "approx_size_m": [4, 4], "position": "stern", "key_props": ["bunk", "Fukuzawa's servant space"], "notes": "", "confidence": "typical"},
+      {"name": "Crew berthing", "purpose": "~96 Japanese and 11 Americans", "approx_size_m": [15, 7], "position": "bow", "key_props": ["hammocks", "tatami?"], "notes": "", "confidence": "typical"}
+    ]},
+    {"name": "Hold", "level_m": -2.5, "rooms": [
+      {"name": "Engine and boiler room", "purpose": "100 hp engine", "approx_size_m": [10, 6], "position": "mid", "key_props": ["boiler", "coal", "screw shaft"], "notes": "", "confidence": "sourced (engine); typical (layout)"},
+      {"name": "Stores", "purpose": "food, water", "approx_size_m": [10, 6], "position": "fore and aft", "key_props": ["barrels", "rice"], "notes": "", "confidence": "typical"}
+    ]}
+  ],
+  "exterior": {
+    "materials": ["wood hull"],
+    "colors": {"hull": "black (typical)", "trim": "white stripe (typical)"},
+    "features": ["3 masts", "funnel", "Hinomaru flag"]
+  },
+  "crew": {"total": 107, "notes": "~96 Japanese + 11 Americans (number unverified)"},
+  "lighting": {"type": "oil lamps", "confidence": "typical"},
+  "props_period": ["sextant", "Dutch charts", "katana"],
+  "flooding": {
+    "watertight_subdivision": "Wooden hull, no bulkheads (typical)",
+    "pumps": "Hand pumps (typical)",
+    "sea_cocks": "None meaningful (typical)",
+    "magazines": [{"name": "powder", "position": "low, aft"}],
+    "freeboard_m": 2.2,
+    "historical_damage": [
+      {"event": "Wreck at Saraki Point", "date": "1871-11-02", "sequence": ["Ran onto rocks off Saraki Point", "~401 passengers rescued by locals", "Hull broke up"], "source_url": "https://tabi-mag.jp/ho1272/"}
+    ],
+    "game_sinking_hooks": ["Grounding: hull breach on rocks"]
+  },
+  "uncertain": ["Dimensions and displacement", "Gun count", "Crew number", "Paint colours", "The 1871 cause (storm vs drunk captain)"],
+  "layout": {"note": "game layout (reconstruction): three-masted screw corvette, black hull with a white gunport strap, Hinomaru ensign and Tokugawa aoi flag.", "form": "wood_west", "hull": {"pb": 2.0, "ps": 2.3, "mid": 0.3, "ts": 0.4, "bilge": 2.6, "flare": -0.04, "rake": 3.0, "cutup": 1.2, "bulwark": 0.9, "sheer": [3.0, 2.2, 2.7], "colors": {"hull": [0.09, 0.09, 0.1], "bottom": [0.72, 0.42, 0.25], "boot": [0.72, 0.42, 0.25], "stripe": [0.95, 0.95, 0.92], "stripe_y": [1.25, 1.85], "deck": [0.82, 0.72, 0.56], "inner": [0.85, 0.8, 0.7], "bulwark": [0.1, 0.1, 0.1]}}, "parts": [{"t": "mast", "s": 11, "h": 26, "r": 0.3, "yards": [{"y": 10, "w": 11}, {"y": 17, "w": 8}, {"y": 22, "w": 5}], "sails": [{"kind": "furled", "y1": 10, "w": 10}, {"kind": "furled", "y1": 17, "w": 7}]}, {"t": "mast", "s": 24, "h": 28, "r": 0.32, "yards": [{"y": 11, "w": 12}, {"y": 18, "w": 9}, {"y": 23, "w": 6}], "sails": [{"kind": "furled", "y1": 11, "w": 11}, {"kind": "furled", "y1": 18, "w": 8}], "flag": "aoi", "flag_size": 1.6}, {"t": "mast", "s": 37, "h": 21, "r": 0.26, "yards": [{"y": 12, "w": 6}], "sails": [{"kind": "furled", "y1": 12, "w": 5}]}, {"t": "funnel", "s": 31, "r": 0.75, "y0": 2.2, "y1": 9.0, "col": [0.08, 0.08, 0.08]}, {"t": "guns", "s0": 10, "s1": 42, "n": 6, "y": 2.9, "len": 2.0, "r": 0.12, "deck": true, "col": [0.15, 0.14, 0.13]}, {"t": "ports", "s0": 10, "s1": 42, "n": 6, "y": 1.55, "size": 0.5, "round": false}, {"t": "bowsprit", "len": 10, "rise": 15}, {"t": "stern_gallery", "y0": 1.2, "y1": 2.6}, {"t": "boats", "s0": 17, "s1": 21, "n": 1, "y": 3.4, "len": 5}, {"t": "flag", "kind": "hinomaru", "s": 49.5, "y": 6.5, "size": 1.8}, {"t": "rudder"}], "rooms": {"Captain's cabin (Katsu)": {"s": [40, 44], "side": 1}, "Kimura's cabin": {"s": [40, 44], "side": -1}, "Crew berthing": {"s": [4, 18]}, "Engine and boiler room": {"s": [26, 36]}}, "sim": {"bulkheads": [38], "gm": 0.6, "vanish": 55, "pump": 0.05, "power": "manual", "fire": "wood", "strength": 260, "value": 900, "magazines": [{"s0": 38, "s1": 49.7, "name": "火薬庫"}], "boilers": [26, 36], "sea_cocks": [{"s": 25, "side": 0, "name": "船底の栓（ビルジ）", "area": 0.4, "kind": "plug"}], "pump_s": 30, "cookoff": 35}, "pilot": {"enabled": true, "vmax": 4.5, "helm_s": 44}, "ladder": {"s": 30, "side": 1}}
+}

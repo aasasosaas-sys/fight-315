@@ -1,0 +1,108 @@
+{
+  "id": "akagi",
+  "name": {"ja": "航空母艦赤城", "en": "IJN Aircraft Carrier Akagi"},
+  "era": "showa_war",
+  "year": 1941,
+  "type": "fleet carrier (converted battlecruiser hull; single flight deck after the 1935-38 rebuild)",
+  "schema_notes": "level_m = deck height above the waterline. confidence: sourced / typical / reconstruction.",
+  "basis": [
+    {"fact": "After the 1938 rebuild: length 260.67 m, beam 31.32 m, draught 8.71 m; 36,500 long tons standard, 41,300 deep load", "source_url": "https://www.wikiwand.com/en/Japanese_aircraft_carrier_Akagi", "year": 1938},
+    {"fact": "Rebuild gave one flight deck ~249 m long over two enclosed hangars", "source_url": "https://en.wikipedia.org/wiki/Japanese_aircraft_carrier_Akagi", "year": 1938},
+    {"fact": "Three lifts (fore, middle, aft)", "source_url": "https://navypedia.org/ships/japan/jap_cv_akagi.htm", "year": 1938},
+    {"fact": "Island on the port side (Kaga's on the starboard); funnels on the starboard side, angled downward, below the flight deck", "source_url": "https://www.historyofwar.org/articles/weapons_akagi.html", "year": 1938},
+    {"fact": "Hangar area after rebuild 6,521.1 m2; aircraft 60 -> 91; flight deck made single and continuous on 31 Aug 1938", "source_url": "https://trafficnews.jp/post/89855", "year": 1938},
+    {"fact": "Originally completed with three stepped flight decks and twin 20 cm turrets on the middle level", "source_url": "https://trafficnews.jp/post/532169/2", "year": 1927},
+    {"fact": "Flagship of the First Air Fleet, Apr 1941; sailed for Pearl Harbor from Hitokappu Bay 26 Nov 1941", "source_url": "https://en.Wikipedia.com/wiki/Japanese_aircraft_carrier_Akagi", "year": 1941},
+    {"fact": "Midway: Lt Richard Best's bomb hit at the aft edge of the middle elevator and exploded in the upper hangar among fuelled, armed B5N torpedo bombers", "source_url": "https://www.maritime-executive.com/article/second-japanese-aircraft-carrier-wreck-discovered", "year": 1942},
+    {"fact": "Yamamoto ordered her scuttled; destroyers Arashi, Hagikaze, Maikaze, Nowaki torpedoed her on 5 June 1942", "source_url": "https://warhistory.org/2020/05/27/sinking-of-akagi/", "year": 1942},
+    {"fact": "Wreck found Oct 2019 by RV Petrel at ~5,490 m", "source_url": "https://phys.org/news/2019-10-warship-wwii-midway.pdf", "year": 2019}
+  ],
+  "dimensions": {
+    "length_overall_m": 260.67,
+    "beam_m": 31.32,
+    "draft_m": 8.71,
+    "displacement_t": {"standard": 36500, "full": 41300},
+    "flight_deck_m": {"length": 249.2, "width": 30.5, "height_above_wl": 16.0, "confidence": "length sourced; width and height typical"},
+    "freeboard_m": {"hull_main_deck": 7.0, "flight_deck": 16.0},
+    "hangar_area_m2": 6521.1
+  },
+  "decks": [
+    {
+      "name": "艦橋 Island (port side)",
+      "level_m": 22.0,
+      "rooms": [
+        {"name": "羅針艦橋 Compass bridge", "purpose": "conning; Nagumo and Captain Aoki at Midway", "approx_size_m": [6, 4], "position": "mid (slightly forward of amidships), PORT edge of the flight deck", "key_props": ["windows", "binnacle", "voice tubes", "telegraphs", "Nagumo's position at the front"], "notes": "Small two/three-level island; Nagumo's staff escaped via rope from the bridge windows when fire spread.", "confidence": "sourced (port); typical (detail)"},
+        {"name": "発着艦指揮所 Flight control", "purpose": "air officer", "approx_size_m": [4, 3], "position": "island, aft face", "key_props": ["flags", "chalkboard"], "notes": "", "confidence": "typical"},
+        {"name": "Mast and rangefinder", "purpose": "signal mast", "approx_size_m": [2, 2], "position": "island top", "key_props": ["signal flags", "Z flag (flown for Pearl Harbor)", "radio aerials"], "notes": "", "confidence": "typical"}
+      ]
+    },
+    {
+      "name": "飛行甲板 Flight deck",
+      "level_m": 16.0,
+      "rooms": [
+        {"name": "Flight deck", "purpose": "launch and recovery", "approx_size_m": [249, 30.5], "position": "full length", "key_props": ["wooden planking laid fore-aft with steel tie-down strips", "transverse arresting wires (aft)", "crash barriers", "3 elevator openings", "white edge lines and lateral stripes (typical)", "katakana 'ア' identification at the aft end", "A6M, D3A, B5N aircraft"], "notes": "Elevator positions approx: fore ~30 m from bow, middle ~amidships behind the island, aft ~40 m from stern.", "confidence": "sourced (length, 3 lifts); typical (markings)"}
+      ]
+    },
+    {
+      "name": "上部格納庫 Upper hangar",
+      "level_m": 10.5,
+      "rooms": [
+        {"name": "Upper hangar", "purpose": "aircraft storage and arming", "approx_size_m": [180, 22], "position": "full length under the flight deck", "key_props": ["aircraft with folded wings", "fuel hoses", "800 kg torpedoes and bombs on trolleys", "fire curtains", "ammunition lifts", "overhead lights"], "notes": "Enclosed hangar (fire and fumes trapped). Best's bomb exploded here.", "confidence": "sourced (enclosed)"}
+      ]
+    },
+    {
+      "name": "中部格納庫 Middle hangar",
+      "level_m": 5.5,
+      "rooms": [
+        {"name": "Middle hangar", "purpose": "aircraft storage", "approx_size_m": [160, 20], "position": "full length", "key_props": ["aircraft", "workshop benches", "spare engines"], "notes": "A partial third lower hangar existed forward (typical).", "confidence": "typical"}
+      ]
+    },
+    {
+      "name": "Main / living decks",
+      "level_m": 0.5,
+      "rooms": [
+        {"name": "20 cm casemate guns", "purpose": "6 x 20 cm anti-ship guns (3 per side)", "approx_size_m": [30, 4], "position": "stern, port and starboard, low on the hull", "key_props": ["casemate guns"], "notes": "", "confidence": "typical"},
+        {"name": "12 cm HA gun sponsons", "purpose": "anti-aircraft", "approx_size_m": [6, 6], "position": "port and starboard sponsons below flight deck level", "key_props": ["twin 12 cm HA", "25 mm twin mounts"], "notes": "", "confidence": "typical"},
+        {"name": "Crew berthing and messes", "purpose": "~1,600 crew, hammocks", "approx_size_m": [40, 25], "position": "bow and stern", "key_props": ["hammocks", "mess tables"], "notes": "", "confidence": "typical"},
+        {"name": "Aircrew ready rooms", "purpose": "briefing", "approx_size_m": [10, 8], "position": "island base / upper hangar side", "key_props": ["chalkboards", "maps", "flight suits"], "notes": "", "confidence": "reconstruction"},
+        {"name": "Funnel uptakes", "purpose": "exhaust trunking", "approx_size_m": [20, 6], "position": "mid, STARBOARD side", "key_props": ["large downward-curved funnel", "smaller vertical funnel"], "notes": "", "confidence": "sourced"}
+      ]
+    },
+    {
+      "name": "Machinery and storage (below the waterline)",
+      "level_m": -5.0,
+      "rooms": [
+        {"name": "Boiler and turbine rooms", "purpose": "19 Kampon boilers, 4 turbines (typical figures)", "approx_size_m": [80, 25], "position": "mid", "key_props": ["boilers", "turbines"], "notes": "", "confidence": "typical"},
+        {"name": "Aviation fuel tanks", "purpose": "aviation gasoline", "approx_size_m": [10, 10], "position": "fore and aft, low", "key_props": ["fuel tanks", "pumps"], "notes": "", "confidence": "typical"},
+        {"name": "Bomb and torpedo magazines", "purpose": "aircraft ordnance", "approx_size_m": [15, 15], "position": "fore and aft, low", "key_props": ["bombs", "torpedoes", "hoists to the hangars"], "notes": "", "confidence": "typical"}
+      ]
+    }
+  ],
+  "exterior": {
+    "materials": ["steel hull", "wooden flight deck"],
+    "colors": {"hull": "IJN grey", "flight_deck": "natural wood (yellowish-brown)", "markings": "white"},
+    "features": ["PORT-side island", "starboard downward-curved funnel", "long overhanging flight deck", "battlecruiser-shaped hull", "AA sponsons"]
+  },
+  "crew": {"total": 1630, "confidence": "typical (not verified this session)"},
+  "lighting": {"type": "electric; hangar lighting; red night lights", "confidence": "typical"},
+  "props_period": ["A6M2 Zero", "D3A1 Val", "B5N2 Kate", "Type 91 torpedoes", "800 kg bombs", "hachimaki", "Z flag (Pearl Harbor)"],
+  "flooding": {
+    "watertight_subdivision": "Battlecruiser hull with armoured belt and transverse bulkheads below the main deck; the enclosed hangars above are essentially open fire zones with poor ventilation for venting explosions.",
+    "pumps": "Fire mains; electric pumps failed when power was lost (typical)",
+    "sea_cocks": "Kingston valves (typical); magazines had flooding valves",
+    "magazines": [{"name": "bomb/torpedo magazines", "position": "fore and aft below the waterline"}, {"name": "aviation fuel", "position": "fore and aft"}],
+    "freeboard_m": 7.0,
+    "historical_damage": [
+      {"event": "Midway", "date": "1942-06-04", "sequence": ["~10:26 one 1,000 lb bomb at the aft edge of the middle elevator, exploding in the upper hangar", "A near miss jams the rudder", "Fuelled, armed aircraft and ordnance in the hangar explode; fire spreads through both hangars", "Bridge abandoned; Nagumo transfers to cruiser Nagara", "Ship burns all night, dead in the water but afloat (hull intact below the waterline)", "5 June: scuttled by destroyer torpedoes; sinks bow first"], "source_url": "https://warhistory.org/2020/05/27/sinking-of-akagi/"}
+    ],
+    "game_sinking_hooks": ["Fire spreading between hangar bays: ordnance on trolleys causes chain explosions", "The hull stays afloat despite total burnout; sinking requires torpedoes/scuttling (open sea cocks)", "Fire curtains can slow the spread"]
+  },
+  "uncertain": [
+    "Crew size (1,630 commonly cited, unverified).",
+    "Exact elevator positions and sizes.",
+    "The extent of the third (lower) hangar.",
+    "Flight deck markings at Midway (the 'ア' marking is typical, unverified).",
+    "Reason for the port-side island (exhaust vs paired operation with Kaga) is disputed."
+  ],
+  "layout": {"note": "game layout (reconstruction): 1941 single long flight deck on pillars, port-side island, starboard downward-curved funnel; hangar sides as hull.", "form": "steel", "hull": {"pb": 2.0, "ps": 2.6, "mid": 0.35, "q": 0.5, "bilge": 3.5, "flare": 0.04, "rake": 4.0, "overhang": 3.0, "cutup": 4.0, "bulwark": 0.0, "sheer": [13.0, 16.0, 15.0], "no_deck": true, "colors": {"hull": [0.5, 0.52, 0.54], "bottom": [0.5, 0.17, 0.13], "boot": [0.12, 0.12, 0.13], "deck": [0.82, 0.68, 0.48], "super": [0.52, 0.54, 0.56], "inner": [0.82, 0.82, 0.78]}}, "parts": [{"t": "flight_deck", "s0": -4, "s1": 252, "w": 30.5, "y": 16.0, "elevators": [[55, 14, 12], [130, 12, 12], [195, 12, 12]]}, {"t": "pillars", "pts": [[-8, 2, 13.0, 15.5], [8, 2, 13.0, 15.5], [-8, 10, 14.0, 15.5], [8, 10, 14.0, 15.5]], "r": 0.5}, {"t": "tower", "x": -12.4, "tiers": [{"s0": 112, "s1": 120, "w": 5.2, "y0": 16.0, "y1": 22.0, "win": true}, {"s0": 113, "s1": 120, "w": 5.8, "y0": 22.0, "y1": 25.0, "win": true, "glass": true, "win_h": 1.0}]}, {"t": "mast", "s": 118, "x": -12.4, "y0": 25.2, "h": 8, "r": 0.22, "flag": "z", "flag_size": 1.8, "stays": false}, {"t": "trunk", "pts": [[13.5, 11.0, 118], [17.5, 10.0, 123], [19.0, 6.0, 126]], "r": 2.6}, {"t": "funnel", "s": 132, "x": 16.4, "r": 1.2, "y0": 11.0, "y1": 19.0, "top": [0.1, 0.1, 0.1], "top_h": 0.8}, {"t": "guns", "s0": 180, "s1": 225, "n": 3, "y": 4.0, "len": 9.0, "r": 0.1, "casemate": true}, {"t": "aa", "s0": 90, "s1": 170, "n": 6, "y": 14.6, "inset": -1.5}, {"t": "ports", "s0": 30, "s1": 230, "n": 26, "y": 12.5, "size": 1.0, "round": false}, {"t": "ports", "s0": 30, "s1": 230, "n": 26, "y": 8.0, "size": 0.9, "round": false}, {"t": "ports", "s0": 15, "s1": 245, "n": 40, "y": 3.0, "size": 0.35}, {"t": "flag", "kind": "rising_sun", "s": 259, "y": 17.0, "size": 2.6}], "rooms": {"Flight deck": {"skip": true}, "Mast and rangefinder": {"skip": true}, "Funnel uptakes": {"skip": true}, "12 cm HA gun sponsons": {"skip": true}, "Boiler and turbine rooms": {"s": [100, 170]}, "Bomb and torpedo magazines": {"copies": [[32, 48, -7, 7], [207, 223, -7, 7]]}}, "sim": {"split": true, "gm": 2.2, "vanish": 60, "pump": 1.2, "power": "steam", "fire": "hangar", "fire_zone": [40, 220], "fire_y": 11.0, "strength": 1300, "value": 4500, "magazines": [{"s0": 30, "s1": 50, "name": "前部爆弾・魚雷庫"}, {"s0": 205, "s1": 225, "name": "後部爆弾・魚雷庫"}], "boilers": [100, 170], "sea_cocks": [{"s": 140, "side": -1, "name": "左舷キングストン弁", "area": 0.8, "kind": "kingston"}, {"s": 140, "side": 1, "name": "右舷キングストン弁", "area": 0.8, "kind": "kingston"}, {"s": 40, "side": 0, "name": "前部弾火薬庫注水弁", "area": 0.4, "kind": "magazine"}, {"s": 215, "side": 0, "name": "後部弾火薬庫注水弁", "area": 0.4, "kind": "magazine"}], "pump_s": 150, "cookoff": 60, "magazine_breach": 30}, "pilot": {"enabled": false}, "ladder": {"s": 150, "side": 1}}
+}

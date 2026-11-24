@@ -1,0 +1,618 @@
+{
+ "eraId": "sengoku",
+ "actors": [
+  {
+   "name": "織田信長",
+   "era": "sengoku",
+   "faction": "織田",
+   "born": 1534,
+   "died": 1582,
+   "death": "suicide",
+   "active": 1560,
+   "tags": [
+    "ruler",
+    "warrior",
+    "reformer"
+   ],
+   "traits": {
+    "war": 2,
+    "open": 2,
+    "reform": 2,
+    "faith": -2,
+    "loyal": -1
+   },
+   "spawn": "village",
+   "contrib": [
+    {
+     "q": "sengoku_05",
+     "choice": 3,
+     "note": "主を失った織田家は分裂し、毛利が義昭を奉じて上洛した"
+    }
+   ],
+   "saved": {
+    "year": 1582,
+    "text": "本能寺の炎をくぐり抜けた信長は安土へ戻り、光秀を討った。天下人を失わずにすんだ織田家は割れることなく、信長自身の手で天下統一が成し遂げられた。",
+    "force": {
+     "q": "sengoku_05",
+     "choice": 0
+    }
+   },
+   "schedule": [
+    {
+     "event": "本能寺に入る",
+     "at": "capital",
+     "year": 1582,
+     "missed": {
+      "force": {
+       "q": "sengoku_05",
+       "choice": 0
+      }
+     },
+     "text": "信長は本能寺に入るのが遅れ、宿所を変えて光秀の襲撃をかわした。"
+    }
+   ]
+  },
+  {
+   "name": "豊臣秀吉",
+   "era": "sengoku",
+   "faction": "豊臣",
+   "born": 1537,
+   "died": 1598,
+   "death": "illness",
+   "active": 1573,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "open": 1,
+    "loyal": 1
+   },
+   "spawn": "mountain",
+   "contrib": [
+    {
+     "q": "sengoku_05",
+     "choice": 2,
+     "note": "中国大返しが起きず、山崎の戦いで光秀が勝った"
+    }
+   ],
+   "saved": {
+    "year": 1598,
+    "text": "病死するはずの秀吉が薬で回復し、秀頼の成人まで政権を守り抜いた。豊臣の天下が続いた。",
+    "vars": {
+     "set": {
+      "ruler": "豊臣",
+      "capital": "大坂"
+     },
+     "unity": 5
+    }
+   },
+   "schedule": [
+    {
+     "event": "中国大返し",
+     "at": "mountain",
+     "year": 1582,
+     "missed": {
+      "force": {
+       "q": "sengoku_05",
+       "choice": 2
+      }
+     },
+     "text": "秀吉の天王山への到着が遅れ、羽柴勢が布陣を整えないうちに戦いが始まった。山崎の戦いは光秀の勝利に終わった。"
+    }
+   ],
+   "aka": [
+    "羽柴秀吉"
+   ]
+  },
+  {
+   "name": "徳川家康",
+   "era": "sengoku",
+   "faction": "徳川",
+   "born": 1543,
+   "died": 1616,
+   "death": "illness",
+   "active": 1560,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": 1,
+    "open": 1,
+    "reform": 1
+   },
+   "contrib": [
+    {
+     "vars": {
+      "set": {
+       "ruler": "豊臣",
+       "capital": "大坂"
+      },
+      "unity": -10
+     },
+     "year": 1600,
+     "note": "家康がいなければ関ヶ原は起きず、豊臣政権が続いた"
+    }
+   ]
+  },
+  {
+   "name": "今川義元",
+   "era": "sengoku",
+   "faction": "今川",
+   "born": 1519,
+   "died": 1560,
+   "death": "killed",
+   "active": 1536,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 1,
+    "loyal": 1
+   },
+   "saved": {
+    "year": 1560,
+    "text": "桶狭間で討たれるはずの義元が生き延び、駿府から東海道を制した。",
+    "force": {
+     "q": "sengoku_02",
+     "choice": 3
+    }
+   }
+  },
+  {
+   "name": "石田三成",
+   "era": "sengoku",
+   "faction": "豊臣",
+   "born": 1560,
+   "died": 1600,
+   "death": "executed",
+   "active": 1585,
+   "tags": [
+    "official"
+   ],
+   "traits": {
+    "loyal": 2,
+    "reform": 1,
+    "war": -1
+   },
+   "spawn": "castle",
+   "contrib": [
+    {
+     "q": "sengoku_04",
+     "choice": 0,
+     "note": "三成がおらず、三成憎しで家康に近づいていた清正が、豊臣家を守るため家康と対立して西軍の旗頭になった"
+    }
+   ]
+  },
+  {
+   "name": "加藤清正",
+   "era": "sengoku",
+   "faction": "豊臣",
+   "born": 1562,
+   "died": 1611,
+   "death": "illness",
+   "active": 1583,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": 2
+   },
+   "spawn": "castle"
+  },
+  {
+   "name": "北政所",
+   "era": "sengoku",
+   "faction": "豊臣",
+   "born": null,
+   "died": 1624,
+   "death": "natural",
+   "active": 1561,
+   "tags": [
+    "woman"
+   ],
+   "traits": {
+    "loyal": 1,
+    "faith": 1
+   },
+   "aka": [
+    "ねね",
+    "高台院"
+   ]
+  },
+  {
+   "name": "小早川秀秋",
+   "era": "sengoku",
+   "faction": "小早川",
+   "born": 1582,
+   "died": 1602,
+   "death": "illness",
+   "active": 1597,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "loyal": -1,
+    "war": -1
+   },
+   "spawn": "battlefield",
+   "contrib": [
+    {
+     "vars": {
+      "set": {
+       "ruler": "豊臣",
+       "capital": "大坂"
+      },
+      "unity": -10
+     },
+     "year": 1600,
+     "note": "寝返る者がおらず西軍が勝った"
+    }
+   ],
+   "persuade": {
+    "忠義を説く": {
+     "vars": {
+      "set": {
+       "ruler": "豊臣",
+       "capital": "大坂"
+      },
+      "unity": -10
+     },
+     "year": 1600,
+     "text": "小早川秀秋は豊臣への忠義を貫き、松尾山から東軍に襲いかかった。寝返るはずの大軍が逆に攻めてきたので東軍は崩れ、関ヶ原は西軍の勝利に終わった。"
+    }
+   }
+  },
+  {
+   "name": "小早川隆景",
+   "era": "sengoku",
+   "faction": "毛利",
+   "born": 1533,
+   "died": 1597,
+   "death": "illness",
+   "active": 1555,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "loyal": 2,
+    "war": -1
+   }
+  },
+  {
+   "name": "毛利輝元",
+   "era": "sengoku",
+   "faction": "毛利",
+   "born": 1553,
+   "died": 1625,
+   "death": "natural",
+   "active": 1570,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": -1,
+    "loyal": 1
+   }
+  },
+  {
+   "name": "黒田長政",
+   "era": "sengoku",
+   "faction": "黒田",
+   "born": 1568,
+   "died": 1623,
+   "death": "illness",
+   "active": 1587,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "loyal": -1,
+    "faith": 1
+   },
+   "spawn": "battlefield"
+  },
+  {
+   "name": "後藤又兵衛",
+   "era": "sengoku",
+   "faction": "黒田",
+   "born": 1560,
+   "died": 1615,
+   "death": "killed",
+   "active": 1586,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": 1
+   }
+  },
+  {
+   "name": "フランシスコ＝ザビエル",
+   "era": "sengoku",
+   "faction": "イエズス会",
+   "born": 1506,
+   "died": 1552,
+   "death": "illness",
+   "active": 1549,
+   "tags": [
+    "religious",
+    "foreigner"
+   ],
+   "traits": {
+    "faith": 2,
+    "open": 2
+   },
+   "spawn": "temple",
+   "aka": [
+    "ザビエル"
+   ]
+  },
+  {
+   "name": "ガスパル＝コエリョ",
+   "era": "sengoku",
+   "faction": "イエズス会",
+   "born": null,
+   "died": 1590,
+   "death": "illness",
+   "active": 1581,
+   "tags": [
+    "religious",
+    "foreigner"
+   ],
+   "traits": {
+    "faith": 2,
+    "war": 1
+   },
+   "spawn": "port"
+  },
+  {
+   "name": "種子島時堯",
+   "era": "sengoku",
+   "faction": "種子島",
+   "born": 1528,
+   "died": 1579,
+   "death": "illness",
+   "active": 1542,
+   "tags": [
+    "official",
+    "ruler"
+   ],
+   "traits": {
+    "open": 2,
+    "reform": 1
+   },
+   "spawn": "port",
+   "contrib": [
+    {
+     "q": "sengoku_01",
+     "choice": 3,
+     "note": "鉄砲を買う者がおらず、国産は始まらなかった"
+    }
+   ],
+   "schedule": [
+    {
+     "event": "南蛮人との鉄砲の取引",
+     "at": "port",
+     "year": 1543,
+     "missed": {
+      "force": {
+       "q": "sengoku_01",
+       "choice": 2
+      }
+     },
+     "text": "時堯が取引に間に合わず、ポルトガル商人は鉄砲を売らずに去った。「日本では鉄砲は売れぬ」と伝わって商人たちは鉄砲を積まなくなり、日本に鉄砲を持ち込んだのは、6年後に大名への献上品として携えてきたザビエルだった。"
+    }
+   ]
+  },
+  {
+   "name": "八板金兵衛",
+   "era": "sengoku",
+   "faction": "種子島",
+   "born": null,
+   "died": null,
+   "death": "natural",
+   "active": 1543,
+   "tags": [
+    "merchant",
+    "commoner"
+   ],
+   "traits": {
+    "reform": 1
+   },
+   "contrib": [
+    {
+     "q": "sengoku_01",
+     "choice": 3,
+     "note": "鉄砲を複製できる鍛冶がおらず、国産は始まらなかった"
+    }
+   ]
+  },
+  {
+   "name": "顕如",
+   "era": "sengoku",
+   "faction": "本願寺",
+   "born": 1543,
+   "died": 1592,
+   "death": "illness",
+   "active": 1554,
+   "tags": [
+    "religious"
+   ],
+   "traits": {
+    "faith": 2,
+    "war": 1
+   },
+   "spawn": "temple"
+  },
+  {
+   "name": "吉田兼見",
+   "era": "sengoku",
+   "faction": "吉田神道",
+   "born": 1535,
+   "died": 1610,
+   "death": "natural",
+   "active": 1570,
+   "tags": [
+    "religious"
+   ],
+   "traits": {
+    "faith": 2
+   }
+  },
+  {
+   "name": "里村紹巴",
+   "era": "sengoku",
+   "faction": "連歌",
+   "born": 1525,
+   "died": 1602,
+   "death": "natural",
+   "active": 1570,
+   "tags": [
+    "artist"
+   ],
+   "traits": {
+    "open": 1
+   }
+  },
+  {
+   "name": "森蘭丸",
+   "era": "sengoku",
+   "faction": "織田",
+   "born": 1565,
+   "died": 1582,
+   "death": "killed",
+   "active": 1577,
+   "tags": [
+    "warrior"
+   ],
+   "traits": {
+    "loyal": 2
+   }
+  },
+  {
+   "name": "明智光秀",
+   "era": "sengoku",
+   "faction": "織田",
+   "born": 1528,
+   "died": 1582,
+   "death": "killed",
+   "active": 1568,
+   "tags": [
+    "warrior",
+    "official"
+   ],
+   "traits": {
+    "loyal": -1,
+    "faith": 1,
+    "reform": 1
+   },
+   "spawn": "capital",
+   "contrib": [
+    {
+     "q": "sengoku_05",
+     "choice": 0,
+     "note": "本能寺の変が起きず、信長が天下統一を成し遂げた"
+    }
+   ],
+   "persuade": {
+    "忠義を説く": {
+     "force": {
+      "q": "sengoku_05",
+      "choice": 0
+     },
+     "text": "光秀は謀反を思いとどまった。本能寺の変は起きず、信長が天下を統一した。"
+    }
+   }
+  },
+  {
+   "name": "武田信玄",
+   "era": "sengoku",
+   "faction": "武田",
+   "born": 1521,
+   "died": 1573,
+   "death": "illness",
+   "active": 1541,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": -1
+   },
+   "saved": {
+    "year": 1573,
+    "text": "病死するはずの信玄が薬で持ち直し、上洛して信長と雌雄を決した。天下は二つに割れた。",
+    "vars": {
+     "warrior": 10,
+     "unity": -20
+    }
+   }
+  },
+  {
+   "name": "上杉謙信",
+   "era": "sengoku",
+   "faction": "上杉",
+   "born": 1530,
+   "died": 1578,
+   "death": "illness",
+   "active": 1548,
+   "tags": [
+    "ruler",
+    "warrior"
+   ],
+   "traits": {
+    "war": 2,
+    "loyal": 2,
+    "faith": 2
+   },
+   "saved": {
+    "year": 1578,
+    "text": "急死するはずの謙信が回復し、越後の龍が信長の北陸進出を止め続けた。",
+    "vars": {
+     "warrior": 10,
+     "unity": -10
+    }
+   }
+  }
+ ],
+ "battles": [
+  {
+   "era": "sengoku",
+   "id": "sekigahara",
+   "name": "関ヶ原の戦い",
+   "at": "battlefield",
+   "year": 1600,
+   "sides": [
+    {
+     "name": "東軍",
+     "label": "東軍の兵",
+     "historical": true
+    },
+    {
+     "name": "西軍",
+     "label": "西軍の兵",
+     "wins": {
+      "vars": {
+       "set": {
+        "ruler": "豊臣",
+        "capital": "大坂"
+       },
+       "unity": -10
+      }
+     },
+     "text": "関ヶ原は西軍の勝利に終わり、豊臣秀頼のもとで大坂の政権が続いた。"
+    }
+   ]
+  }
+ ]
+}

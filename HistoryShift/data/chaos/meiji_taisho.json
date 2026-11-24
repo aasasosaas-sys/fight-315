@@ -1,0 +1,767 @@
+{
+ "eraId": "meiji_taisho",
+ "figures": [
+  {
+   "name": "大久保利通",
+   "at": "castle",
+   "guards": 4,
+   "guard": "政府の護衛",
+   "lines": [
+    "地租を金納にせねば、国の財政は立ち行かぬ。",
+    "おはん、どこの藩の者じゃ。"
+   ]
+  },
+  {
+   "name": "伊藤博文",
+   "at": "capital",
+   "guards": 4,
+   "guard": "近衛兵",
+   "lines": [
+    "憲法はプロイセンに学ぶ。",
+    "わしは英語も少しはできるぞ。"
+   ]
+  },
+  {
+   "name": "小村寿太郎",
+   "at": "port",
+   "guards": 3,
+   "guard": "外務省の護衛",
+   "lines": [
+    "関税自主権、必ず取り戻してみせる。"
+   ]
+  },
+  {
+   "name": "高橋是清",
+   "at": "castle",
+   "guards": 3,
+   "guard": "日銀の守衛",
+   "lines": [
+    "外債はロンドンで集めてまいります。",
+    "だるまと呼ばれても転んでは起きるさ。"
+   ]
+  },
+  {
+   "name": "加藤高明",
+   "at": "battlefield",
+   "guards": 3,
+   "guard": "護憲派の壮士",
+   "lines": [
+    "普通選挙を実現するのは我が内閣だ。"
+   ]
+  },
+  {
+   "name": "西郷隆盛",
+   "at": "village",
+   "guards": 4,
+   "guard": "私学校の生徒",
+   "lines": [
+    "敬天愛人。",
+    "もう、ここらでよか。"
+   ]
+  },
+  {
+   "name": "山県有朋",
+   "at": "capital",
+   "guards": 5,
+   "guard": "近衛兵",
+   "lines": [
+    "主権線を守るだけでは足りぬ、利益線を守らねば。"
+   ]
+  },
+  {
+   "name": "原敬",
+   "at": "capital",
+   "guards": 2,
+   "guard": "政友会の院外団",
+   "lines": [
+    "普選はまだ時期尚早だ。",
+    "わしは爵位をもらわぬ平民だよ。"
+   ]
+  },
+  {
+   "name": "渋沢栄一",
+   "at": "port",
+   "guards": 1,
+   "guard": "銀行の守衛",
+   "lines": [
+    "論語と算盤、両方そろわねば商いではない。"
+   ]
+  },
+  {
+   "name": "平塚らいてう",
+   "at": "village",
+   "guards": 0,
+   "guard": "青鞜社の同人",
+   "lines": [
+    "元始、女性は実に太陽であった。"
+   ]
+  },
+  {
+   "name": "陸奥宗光",
+   "at": "castle",
+   "guards": 3,
+   "guard": "外務省の護衛",
+   "lines": [
+    "領事裁判権は、この陸奥が撤廃する。"
+   ]
+  },
+  {
+   "name": "板垣退助",
+   "at": "battlefield",
+   "guards": 3,
+   "guard": "自由党の壮士",
+   "lines": [
+    "板垣死すとも自由は死せず！"
+   ]
+  }
+ ],
+ "rules": [
+  {
+   "id": "mt_kill_okubo",
+   "title": "地租改正、先送り",
+   "trigger": {
+    "kind": "kill",
+    "id": "大久保利通"
+   },
+   "force": {
+    "q": "meiji_taisho_01",
+    "choice": 0
+   },
+   "text": "改革の大黒柱・大久保利通が倒れ、地租改正は先送りに。税は相変わらずその年の収穫に応じて米で納める方式のまま、政府の財政は豊作・凶作と米相場に振り回された。"
+  },
+  {
+   "id": "mt_kill_ito",
+   "title": "伊藤なき憲法",
+   "trigger": {
+    "kind": "kill",
+    "id": "伊藤博文"
+   },
+   "force": {
+    "q": "meiji_taisho_02",
+    "choice": 3
+   },
+   "text": "憲法起草の中心・伊藤博文が倒れた。政府は自由民権派の要求を抑えきれず、国民の代表が集まる憲法制定会議を開いて民定憲法を作ることになった。"
+  },
+  {
+   "id": "mt_kill_komura",
+   "title": "外交の要、失われる",
+   "trigger": {
+    "kind": "kill",
+    "id": "小村寿太郎"
+   },
+   "vars": {
+    "open_west": -26,
+    "militarism": 15
+   },
+   "year": 1904,
+   "text": "小村寿太郎が倒れ、日本の外交は迷走。欧米との交渉は行き詰まって市場も細り、第一次世界大戦の好機にも輸出を伸ばせず輸入超過が続いた。"
+  },
+  {
+   "id": "mt_kill_takahashi",
+   "title": "財政の達人、散る",
+   "trigger": {
+    "kind": "kill",
+    "id": "高橋是清"
+   },
+   "vars": {
+    "economy": -25,
+    "commerce": -15
+   },
+   "year": 1914,
+   "text": "財政の達人・高橋是清が倒れた。大戦景気をうまく生かす舵取り役がいないため、日本は輸出を伸ばせないまま輸入超過に苦しんだ。"
+  },
+  {
+   "id": "mt_kill_kato",
+   "title": "護憲三派、まとまらず",
+   "trigger": {
+    "kind": "kill",
+    "id": "加藤高明"
+   },
+   "vars": {
+    "democracy": -20
+   },
+   "year": 1924,
+   "text": "護憲三派をまとめる加藤高明が倒れ、普通選挙法の成立は大きく遠のいた。政党政治への期待もしぼんでしまった。"
+  },
+  {
+   "id": "mt_destroy_kasumigaseki",
+   "title": "官庁街、壊滅",
+   "trigger": {
+    "kind": "destroy",
+    "id": "castle",
+    "value": 600
+   },
+   "vars": {
+    "centralization": -20,
+    "economy": -15
+   },
+   "year": 1880,
+   "text": "【霞が関、大蔵・外務両省倒壊】書類も予算も吹き飛び、中央集権の明治政府はしばらく地方の府県に頭を下げて回るはめになった。"
+  },
+  {
+   "id": "mt_destroy_yokohama",
+   "title": "生糸倉庫、全滅",
+   "trigger": {
+    "kind": "destroy",
+    "id": "port",
+    "type": [
+     "warehouse",
+     "brick"
+    ],
+    "value": 400
+   },
+   "vars": {
+    "economy": -25,
+    "commerce": -20,
+    "open_west": -10
+   },
+   "year": 1910,
+   "text": "横浜港の生糸倉庫が壊された。日本の輸出の柱だった生糸がアメリカに届かず、大戦景気どころか貿易赤字が続くことになった。"
+  },
+  {
+   "id": "mt_usui_bridge",
+   "title": "碓氷峠の鉄道橋、落ちる",
+   "trigger": {
+    "kind": "destroy",
+    "id": "mountain",
+    "value": 30
+   },
+   "vars": {
+    "tech": -25,
+    "economy": -10
+   },
+   "year": 1893,
+   "text": "碓氷峠のめがね橋のそば、保線小屋ごと線路が壊された。信越線が分断されて生糸も石炭も運べなくなったため、工業化は大きく遅れ、重化学工業はほとんど育たなかった。"
+  },
+  {
+   "id": "mt_destroy_hibiya",
+   "title": "日比谷、焼け野原",
+   "trigger": {
+    "kind": "destroy",
+    "id": "battlefield",
+    "value": 300
+   },
+   "vars": {
+    "democracy": -15
+   },
+   "year": 1905,
+   "text": "日比谷の広場が壊滅した。日比谷焼打ち事件のような民衆の集会の場がなくなり、民衆が政治に声を上げる機会は減った。"
+  },
+  {
+   "id": "mt_massacre",
+   "title": "民権運動、激化",
+   "trigger": {
+    "kind": "kill",
+    "type": "soldier",
+    "min": 30
+   },
+   "vars": {
+    "democracy": 36,
+    "commoners": 22,
+    "unity": -15
+   },
+   "year": 1880,
+   "text": "巡査隊が謎の人物に次々と倒され、政府の威信は地に落ちた。これに勢いづいた自由民権運動が全国に広がり、政府は国民の代表を集めた憲法制定会議を開かざるをえなくなった。"
+  },
+  {
+   "id": "mt_fire_asakusa",
+   "title": "浅草、大火",
+   "trigger": [
+    {
+     "kind": "fire",
+     "at": "temple",
+     "min": 5
+    },
+    {
+     "kind": "fire",
+     "min": 12
+    }
+   ],
+   "vars": {
+    "commerce": -16,
+    "economy": -26
+   },
+   "year": 1890,
+   "text": "浅草の仲見世から火の手が上がり、東京の繁華街が灰になった。凌雲閣（浅草十二階）も芝居小屋も焼け、東京の商人は資金を失って、大戦の好機にも輸出に打って出られなかった。"
+  },
+  {
+   "id": "mt_fire_village",
+   "title": "地券台帳、灰になる",
+   "trigger": {
+    "kind": "fire",
+    "at": "village",
+    "min": 5
+   },
+   "force": {
+    "q": "meiji_taisho_01",
+    "choice": 0
+   },
+   "text": "武蔵野の村が燃え、測量したばかりの地券台帳も検地帳も灰になった。誰の土地か、いくらの値打ちかが分からなくなり、地租は昔ながらの収穫高に応じた米納とされた。"
+  },
+  {
+   "id": "mt_forge_matsukata",
+   "title": "偽の通達「米で納めよ」",
+   "trigger": {
+    "kind": "forge",
+    "id": "松方正義"
+   },
+   "force": {
+    "q": "meiji_taisho_01",
+    "choice": 0
+   },
+   "text": "租税権頭の松方は偽の太政官通達「地租は当分米納とする」をつかまされた。全国の府県に米納の指示が回り、地価と地券による金納は幻となった。"
+  },
+  {
+   "id": "mt_give_yamagata_gun",
+   "title": "徴兵令の軍隊、強くなりすぎる",
+   "trigger": {
+    "kind": "give",
+    "id": "山県有朋",
+    "item": "鉄砲"
+   },
+   "vars": {
+    "centralization": 30,
+    "militarism": 25
+   },
+   "year": 1873,
+   "text": "未来の鉄砲を手にした山県は、徴兵令でできた新しい軍隊にこれを配った。政府は一揆を力で抑え込めると自信を深め、地租の税率3％を一切変えなかった。"
+  },
+  {
+   "id": "mt_forge_sanjo",
+   "title": "偽の布告「税率は永久に3％」",
+   "trigger": {
+    "kind": "forge",
+    "id": "三条実美"
+   },
+   "force": {
+    "q": "meiji_taisho_01",
+    "choice": 2
+   },
+   "text": "【地租は永久に地価の3％】三条実美につかまされた偽の布告案が、そのまま布告されてしまった。伊勢暴動や真壁騒動が起きても、「永久」と書いた手前、政府は面子にかけて税率を下げられなかった。"
+  },
+  {
+   "id": "mt_persuade_ikki",
+   "title": "竹槍を鍬に持ち替えて",
+   "trigger": {
+    "kind": "persuade",
+    "id": "一揆の頭取",
+    "arg": "戦をやめさせる"
+   },
+   "force": {
+    "q": "meiji_taisho_01",
+    "choice": 2
+   },
+   "text": "一揆の頭取は竹槍を置き、村人たちを田んぼに帰した。一揆が小さく収まったため、政府は「下げる理由がない」と地租の税率を最後まで変えなかった。"
+  },
+  {
+   "id": "mt_forge_okubo",
+   "title": "書き換えられた地租改正案",
+   "trigger": {
+    "kind": "forge",
+    "id": "大久保利通"
+   },
+   "force": {
+    "q": "meiji_taisho_01",
+    "choice": 3
+   },
+   "text": "大久保の机の草案に「小作料もまた金納とすべし」と一行書き足された。気づかぬまま布告されたため、地主に納める小作料まで現金払いが義務づけられた。"
+  },
+  {
+   "id": "mt_give_shoemon_gold",
+   "title": "千両箱で地主を動かせ",
+   "trigger": {
+    "kind": "give",
+    "id": "地主の庄右衛門",
+    "item": "千両箱"
+   },
+   "force": {
+    "q": "meiji_taisho_01",
+    "choice": 3
+   },
+   "text": "千両箱を受け取った地主の庄右衛門は、その金で村に両替商を呼んだ。現金が回り始めた村では、小作料も米ではなくお金で受け取ることになり、政府もそれを全国に義務づけた。"
+  },
+  {
+   "id": "mt_escort_yohei",
+   "title": "与平、横浜で生糸を売る",
+   "trigger": {
+    "kind": "escort",
+    "id": "小作人の与平",
+    "to": "port"
+   },
+   "vars": {
+    "commoners": 30,
+    "commerce": 25
+   },
+   "year": 1872,
+   "text": "あなたに連れられて横浜に出た小作人の与平は、生糸を外国商人に売って大もうけ。村に帰って皆に現金の稼ぎ方を広めたので、小作料も現金で払うのが当たり前になった。"
+  },
+  {
+   "id": "mt_destroy_sanbo",
+   "title": "参謀本部、崩れる",
+   "trigger": {
+    "kind": "destroy",
+    "id": "capital",
+    "type": "brick",
+    "value": 300
+   },
+   "force": {
+    "q": "meiji_taisho_02",
+    "choice": 0
+   },
+   "text": "宮城の西、三宅坂の赤レンガ（参謀本部の庁舎）が崩れ落ちた。軍の作戦部門は陸軍省に間借りし、内閣の下に収まった。憲法でも統帥は内閣の輔弼にもとづくと定められた。"
+  },
+  {
+   "id": "mt_kill_konoe",
+   "title": "竹橋の近衛兵、壊滅",
+   "trigger": {
+    "kind": "kill",
+    "type": "soldier",
+    "at": "castle",
+    "min": 20
+   },
+   "vars": {
+    "militarism": -30,
+    "warrior": -25
+   },
+   "year": 1878,
+   "text": "官庁街を守る近衛兵が次々と倒され、軍の権威は地に落ちた（史実では1878年の竹橋事件を受けて軍人訓戒が出され、1882年の軍人勅諭で軍人の政治関与が戒められた）。軍は内閣の統制に従うことになった。"
+  },
+  {
+   "id": "mt_kill_yamagata_horse",
+   "title": "山県、落馬",
+   "trigger": {
+    "kind": "kill",
+    "id": "山県有朋",
+    "cause": [
+     "horse",
+     "vehicle"
+    ]
+   },
+   "force": {
+    "q": "meiji_taisho_02",
+    "choice": 0
+   },
+   "text": "陸軍卿の山県が暴れ馬に巻き込まれて倒れた。統帥権の独立を進める者がおらず、参謀本部は生まれなかった。憲法でも陸海軍の統帥は内閣の輔弼にもとづくとされた。"
+  },
+  {
+   "id": "mt_kill_saigo",
+   "title": "西南戦争、起きず",
+   "trigger": {
+    "kind": "kill",
+    "id": "西郷隆盛"
+   },
+   "vars": {
+    "militarism": -26,
+    "warrior": -22
+   },
+   "year": 1877,
+   "text": "西郷隆盛が倒れ、士族の旗頭はいなくなった。西南戦争は起こらず、恩賞の不満から起きた竹橋事件もなかったので、軍を内閣から切り離す話は出なかった。統帥も内閣の輔弼のもとに置かれた。"
+  },
+  {
+   "id": "mt_forge_inoue",
+   "title": "草案の一行",
+   "trigger": {
+    "kind": "forge",
+    "id": "井上毅"
+   },
+   "force": {
+    "q": "meiji_taisho_02",
+    "choice": 0
+   },
+   "text": "井上毅は「統帥ハ国務大臣ノ輔弼ニ依ル」と書かれた偽のロエスレル意見書をつかまされた。そのまま草案に取り込まれ、軍は内閣の統制下に置かれた。"
+  },
+  {
+   "id": "mt_fire_palace",
+   "title": "皇居炎上、再び",
+   "trigger": [
+    {
+     "kind": "fire",
+     "at": "capital",
+     "min": 2
+    },
+    {
+     "kind": "destroy",
+     "id": "capital",
+     "type": "castle_keep"
+    }
+   ],
+   "vars": {
+    "court": -30,
+    "democracy": 16
+   },
+   "year": 1873,
+   "text": "1873年の皇居炎上（史実で旧西の丸の御所が焼けた）がさらに広がり、公家の屋敷も記録も失われた。宮中と華族の力が弱まったため、帝国議会は貴族院のない一院制で始まった。"
+  },
+  {
+   "id": "mt_steal_sanjo",
+   "title": "華族名簿、消える",
+   "trigger": {
+    "kind": "steal",
+    "id": "三条実美"
+   },
+   "force": {
+    "q": "meiji_taisho_02",
+    "choice": 2
+   },
+   "text": "三条実美の手元から、旧公家・旧大名の家格を記した名簿が盗まれた。誰に爵位を授けるか決められず華族令は宙に浮く。議員を出す華族がいなければ貴族院も組めず、帝国議会は衆議院だけで開かれた。"
+  },
+  {
+   "id": "mt_forge_yamagata",
+   "title": "偽の英国の親書",
+   "trigger": {
+    "kind": "forge",
+    "id": "山県有朋"
+   },
+   "vars": {
+    "open_west": 42,
+    "militarism": 18
+   },
+   "year": 1891,
+   "text": "山県有朋のもとに「ロシアに備えて同盟を」という英国首相の偽の親書が届いた。すっかりその気になった山県は軍拡と対英接近を急ぎ、日英同盟は三国干渉より前に結ばれた。"
+  },
+  {
+   "id": "mt_escort_hayashi",
+   "title": "林董、ロンドンへ急行",
+   "trigger": {
+    "kind": "escort",
+    "id": "林董",
+    "to": "port"
+   },
+   "force": {
+    "q": "meiji_taisho_03",
+    "choice": 1
+   },
+   "text": "林董がロンドン行きの船に押し込まれた。1890年代前半から英国政府に通い詰めた林は、ロシアの南下を恐れる英国と早々に話をまとめる。日英が手を結んだのは、三国干渉が起こる前のことだった。"
+  },
+  {
+   "id": "mt_forge_kato",
+   "title": "偽の訓令「英国と組め」",
+   "trigger": {
+    "kind": "forge",
+    "id": "加藤高明"
+   },
+   "vars": {
+    "open_west": 42,
+    "militarism": 16
+   },
+   "year": 1894,
+   "text": "【日英、早くも同盟】駐英公使・加藤高明に届いた「英国との同盟を急げ」の訓令は偽物だった。だが親英派の加藤は大喜びで交渉を進め、三国干渉の前に調印にこぎつけてしまった。"
+  },
+  {
+   "id": "mt_protect_mori",
+   "title": "憲法発布の朝",
+   "trigger": {
+    "kind": "protect",
+    "id": "森有礼"
+   },
+   "vars": {
+    "education": 20,
+    "open_west": 15
+   },
+   "year": 1889,
+   "text": "憲法発布の日に刺されるはずの文部大臣・森有礼を守り抜いた。学校令で学校制度を整えた森はその後も教育改革を進め、師範学校と英語教育が全国に広がった。"
+  },
+  {
+   "id": "mt_kill_togo_explosion",
+   "title": "旗艦三笠、爆発",
+   "trigger": {
+    "kind": "kill",
+    "id": "東郷平八郎",
+    "cause": [
+     "explosion",
+     "debris"
+    ]
+   },
+   "force": {
+    "q": "meiji_taisho_05",
+    "choice": 2
+   },
+   "text": "東郷平八郎が爆発に巻き込まれて倒れた（史実でも三笠は戦後に弾薬庫の爆発で沈んでいる）。名将を失った連合艦隊が敗れ、バルチック艦隊が極東の海を握れば、英国の中国貿易も香港も危うくなる。それを恐れた英国艦隊が、同盟を越えて日本海海戦に加わった。"
+  },
+  {
+   "id": "mt_escort_macdonald",
+   "title": "公使、横浜で見たもの",
+   "trigger": {
+    "kind": "escort",
+    "id": "英国公使マクドナルド",
+    "to": "port"
+   },
+   "force": {
+    "q": "meiji_taisho_05",
+    "choice": 2
+   },
+   "text": "あなたに横浜港へ連れ出されたマクドナルドは、石炭を積めずに困る日本の艦隊を目の当たりにした。本国に参戦を進言し、英国艦隊が日本海海戦に加わった。"
+  },
+  {
+   "id": "mt_forge_witte",
+   "title": "皇帝の電報を書き換えろ",
+   "trigger": {
+    "kind": "forge",
+    "id": "ウィッテ"
+   },
+   "force": {
+    "q": "meiji_taisho_05",
+    "choice": 0
+   },
+   "text": "ポーツマスのウィッテに「賠償に応じてよし」という偽の皇帝電報が届いた。ウィッテはしぶしぶ巨額の賠償金に署名し、日本では各地で祝賀会が開かれた。"
+  },
+  {
+   "id": "mt_forge_katsura",
+   "title": "講和は北京で",
+   "trigger": {
+    "kind": "forge",
+    "id": "桂太郎"
+   },
+   "force": {
+    "q": "meiji_taisho_05",
+    "choice": 3
+   },
+   "text": "首相の桂に「米国は仲介を断る、清国に頼め」という偽の公電がつかまされた。講和会議は戦場の主である清の首都北京で、日・露・清の3国で開かれた。"
+  },
+  {
+   "id": "mt_steal_komura",
+   "title": "全権委任状、紛失",
+   "trigger": {
+    "kind": "steal",
+    "id": "小村寿太郎"
+   },
+   "force": {
+    "q": "meiji_taisho_05",
+    "choice": 3
+   },
+   "text": "小村の全権委任状が盗まれ、ポーツマスへの出発が間に合わなくなった。日本が代わりの全権を立てるのに手間取るあいだに、戦場の主である清が「ずっと近い北京で」と会議の開催を申し出て、講和会議は北京で開かれた。"
+  },
+  {
+   "id": "mt_fire_yokohama",
+   "title": "外国人居留地、焼ける",
+   "trigger": {
+    "kind": "destroy",
+    "id": "port",
+    "type": "warehouse"
+   },
+   "vars": {
+    "open_west": -15,
+    "open_asia": 32
+   },
+   "year": 1899,
+   "text": "横浜の外国人居留地の倉庫が壊され、欧米の商館は神戸や上海へ去った。残った南京町の華僑の商人が貿易の主役になり、日本は欧米より大陸との結びつきを深めた。日露の講和も北京で結ばれた。"
+  },
+  {
+   "id": "mt_sink_yokohama",
+   "title": "輸出船、出航できず",
+   "trigger": {
+    "kind": "sink",
+    "at": "port",
+    "min": 3
+   },
+   "vars": {
+    "economy": -28,
+    "commerce": -18
+   },
+   "year": 1915,
+   "text": "【横浜港、輸出船相次ぎ沈没】アジアへの綿織物もアメリカへの生糸も運べなくなった。せっかくの大戦の好機に、日本の貿易は赤字のまま年を越した。"
+  },
+  {
+   "id": "mt_escort_shibusawa",
+   "title": "渋沢、故郷の村へ帰る",
+   "trigger": {
+    "kind": "escort",
+    "id": "渋沢栄一",
+    "to": "village"
+   },
+   "vars": {
+    "tech": -26,
+    "economy": -10
+   },
+   "year": 1873,
+   "text": "武蔵の血洗島村に連れ帰られた渋沢栄一は、藍玉づくりの家業を継いでしまった。旗振り役を欠いたため、第一国立銀行も大阪紡績も王子製紙も生まれず、近代産業の芽はなかなか育たなかった。"
+  },
+  {
+   "id": "mt_escort_raicho",
+   "title": "らいてう、議会へ",
+   "trigger": {
+    "kind": "escort",
+    "id": "平塚らいてう",
+    "to": "capital"
+   },
+   "force": {
+    "q": "meiji_taisho_06",
+    "choice": 0
+   },
+   "text": "帝国議会の前に、平塚らいてうが立った。新婦人協会の請願（史実でも1922年に治安警察法第5条を改正させた）が勢いづき、普通選挙法は男女に選挙権を与えるものになった。"
+  },
+  {
+   "id": "mt_destroy_naimusho",
+   "title": "内務省、崩れる",
+   "trigger": {
+    "kind": "destroy",
+    "id": "castle",
+    "type": [
+     "brick",
+     "concrete"
+    ],
+    "value": 900
+   },
+   "force": {
+    "q": "meiji_taisho_06",
+    "choice": 3
+   },
+   "text": "官庁街の奥の内務省が崩れ、警保局の書類も取り締まりの計画も消えた。治安維持法の法案は作り直しが間に合わず、議会は治安警察法の廃止まで決めた。"
+  },
+  {
+   "id": "mt_kill_wakatsuki",
+   "title": "法案の起草者、倒れる",
+   "trigger": {
+    "kind": "kill",
+    "id": "若槻礼次郎"
+   },
+   "force": {
+    "q": "meiji_taisho_06",
+    "choice": 3
+   },
+   "text": "治安維持法案を準備していた内相の若槻が倒れた。後任は普選の実施で手一杯で取り締まり法は棚上げになり、治安警察法も廃止された。"
+  },
+  {
+   "id": "mt_escort_hara",
+   "title": "平民宰相、普選大会へ",
+   "trigger": {
+    "kind": "escort",
+    "id": "原敬",
+    "to": "battlefield"
+   },
+   "force": {
+    "q": "meiji_taisho_06",
+    "choice": 1
+   },
+   "text": "【日比谷に数万の群衆、原首相も登壇】「普選を！」の声を浴びた原敬は、群衆の多くが政友会の地盤である地方の青年団や商工業者だと知って驚いた。「普選でも政友会の票は減らぬ」と踏んだ原は「時期尚早」の持論を撤回し、自らの内閣で普通選挙法を成立させた。"
+  },
+  {
+   "id": "mt_forge_hara",
+   "title": "偽の電報「政友会は普選賛成」",
+   "trigger": {
+    "kind": "forge",
+    "id": "原敬"
+   },
+   "force": {
+    "q": "meiji_taisho_06",
+    "choice": 1
+   },
+   "text": "原敬に「政友会の地方支部はすべて普選賛成」という偽の電報がつかまされた。党内の声に逆らえないと思った原は、納税資格の撤廃を自ら決めた。"
+  },
+  {
+   "id": "mt_kill_ugaki",
+   "title": "練兵場の兵、消える",
+   "trigger": {
+    "kind": "kill",
+    "type": "soldier",
+    "at": "battlefield",
+    "min": 25
+   },
+   "vars": {
+    "militarism": -30
+   },
+   "year": 1925,
+   "text": "日比谷の兵が次々と倒され、陸軍はすっかり自信をなくした。1925年の宇垣軍縮（史実では4個師団を削減）はさらに大きくなり、昭和の軍部は力を持てず、終戦の決断も早まった。"
+  }
+ ]
+}

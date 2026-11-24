@@ -1,0 +1,708 @@
+class_name ActorInteract
+extends Node
+## 自由探索で歴史上の人物（HistFigure）に近づいて E で開く会話メニュー。
+## 説得する（論点を選ぶ）／未来を語る（関わる問題の選択肢へ導く）／渡す（未来の品）／守る（刺客を退ける）／
+## 連れて行く（別の名所まで同行させる）／書状を盗む・偽の書状を渡す。結果は Game.chaos.act() で歴史に反映される。
+## T キーで「この人物は第N問に関わる」ヒントの表示を切り替える。
+## ミッション中（runner あり）は MissionRunner が data/actors に載っている人物（Npc）を add_figure で渡す。メニューの先頭は
+## そのミッションの会話（「ミッションの会話」）で、選ぶと今までどおり talk ステップが進む。ほかの行動は自由探索と同じく
+## Game.chaos で歴史に反映される（ミッション中は揺らぎの記録が止まっているので、行動の間だけ有効にする）。
+## 人物は HistFigure（自由探索）か Npc（ミッション）で、どちらも figure_name / actor / questions / lines / dead /
+## talking / follow_target / home / era_id / refresh_hint() を持つ。
+
+var session: Node
+var hud
+var figures: Array = []
+var sites: Array = []                 # 国家事業の現場（ProjectSite）
+var runner: MissionRunner = null      # ミッション中の会話メニューなら、そのミッション
+var _near: Variant = null             # HistFigure / Npc
+var _near_site: ProjectSite = null
+var _task: Dictionary = {}            # 進行中の事業 {site, type, enemies, pickups, got}
+var _menu_fig: Variant = null         # HistFigure / Npc
+var _layer: CanvasLayer
+var _panel: PanelContainer
+var _title: Label
+var _line: Label
+var _box: VBoxContainer
+var _escort: Variant = null
+var _escort_t := 0.0
+var _assassins: Array = []
+var _protect_fig: Variant = null
+var hints_on := true
+var _input_frame := -1                # E を受け取ったフレーム（MissionRunner が同じ E で直接会話を始めないように）
+var _prompted := false                # ミッション中：自分が出した案内を消すため
+var _gifted: Dictionary = {}          # この探索で武器を譲ってもらった（頼んだ）人物
+
+const TALK_RANGE := 3.8
+const ESCORT_RADIUS := 30.0
+
+
+func setup(p_session: Node, p_hud, p_figures: Array) -> void:
+	session = p_session
+	hud = p_hud
+	figures = p_figures
+
+
+## ミッション中：会話メニューを開ける人物を加える
+func add_figure(f: Node3D) -> void:
+	if not (f in figures):
+		figures.append(f)
+
+
+## この人物の E を会話メニューが受け取るか
+func offers(f: Node) -> bool:
+	return f != null and is_instance_valid(f) and f in figures
+
+
+## このフレームの E を会話メニューが使った（開いた・閉じた）か、メニューが開いているか
+func took_input() -> bool:
+	return is_open() or _input_frame == Engine.get_process_frames()
+
+
+func is_mission() -> bool:
+	return runner != null and is_instance_valid(runner)
+
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	if is_mission() and Game.chaos:
+		# ミッション中の行動の記録は、このミッションの分だけ（直前の自由探索の出来事と混ぜない）
+		if not Game.chaos.is_active():
+			Game.chaos.begin_session(str(session.era.get("eraId", "")) if session else "", Game.world)
+			Game.chaos.end_session()
+		if session and session.has_method("_on_history_shift") and not Game.chaos.shifted.is_connected(session._on_history_shift):
+			Game.chaos.shifted.connect(session._on_history_shift)
+	_layer = CanvasLayer.new()
+	_layer.layer = 12
+	add_child(_layer)
+	_panel = PanelContainer.new()
+	_panel.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+	_panel.position = Vector2(-640, -330)
+	_panel.custom_minimum_size = Vector2(600, 0)
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.05, 0.04, 0.08, 0.93)
+	sb.border_color = Color(0.95, 0.78, 0.35)
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(14)
+	sb.content_margin_left = 22; sb.content_margin_right = 22; sb.content_margin_top = 16; sb.content_margin_bottom = 16
+	_panel.add_theme_stylebox_override("panel", sb)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 8)
+	_panel.add_child(v)
+	_title = _mk_label(v, 32, Color(0.95, 0.78, 0.35))
+	_title.add_theme_font_override("font", load("res://assets/fonts/NotoSerifJP-Bold.ttf"))
+	_line = _mk_label(v, 22, Color.WHITE)
+	_line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_line.custom_minimum_size = Vector2(556, 0)
+	_box = VBoxContainer.new()
+	_box.add_theme_constant_override("separation", 6)
+	v.add_child(_box)
+	_panel.visible = false
+	_layer.add_child(_panel)
+
+
+func _exit_tree() -> void:
+	if is_mission() and Game.chaos and session and is_instance_valid(session) and Game.chaos.shifted.is_connected(session._on_history_shift):
+		Game.chaos.shifted.disconnect(session._on_history_shift)
+
+
+func _mk_label(parent: Node, size: int, c: Color) -> Label:
+	var l := Label.new()
+	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_color_override("font_color", c)
+	parent.add_child(l)
+	return l
+
+
+func _button(t: String, cb: Callable, enabled := true) -> void:
+	var b := Button.new()
+	b.text = t
+	b.disabled = not enabled
+	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	b.custom_minimum_size = Vector2(556, 46)
+	b.add_theme_font_size_override("font_size", 22)
+	b.pressed.connect(cb)
+	_box.add_child(b)
+
+
+func is_open() -> bool:
+	return _panel.visible
+
+
+# ------------------------------------------------------------------ 毎フレーム
+func _process(dt: float) -> void:
+	if session == null or Game.player == null or not is_instance_valid(Game.player):
+		return
+	figures = figures.filter(func(f): return is_instance_valid(f))
+	if not is_open():
+		_near = _nearest()
+		_near_site = null if _near else _nearest_site()
+		if hud and not hud.is_dialog_open():
+			if _near:
+				var pending: bool = is_mission() and runner.is_pending_talk(_near)
+				hud.set_prompt(("E：%sと話す（ミッションの会話・ほかの行動）" if pending else "E：%sと話す") % _near.figure_name)
+				_prompted = true
+			elif _near_site:
+				hud.set_prompt("E：国家事業「%s」" % _near_site.project.get("name", ""))
+				_prompted = true
+			elif not is_mission() or _prompted:
+				# ミッション中は MissionRunner も案内を出すので、自分の出した案内だけ消す
+				hud.set_prompt("")
+				_prompted = false
+	_tick_escort(dt)
+	_tick_protect()
+	_tick_task()
+
+
+func _nearest() -> Node3D:
+	var p: Node3D = Game.player
+	if p.in_vehicle():
+		return null
+	var best: Node3D = null
+	var bd := TALK_RANGE
+	for f in figures:
+		if f.dead:
+			continue
+		var d := (f as Node3D).global_position.distance_to(p.global_position)
+		if d < bd:
+			bd = d
+			best = f
+	return best
+
+
+func _nearest_site() -> ProjectSite:
+	var p: Node3D = Game.player
+	if p.in_vehicle():
+		return null
+	var best: ProjectSite = null
+	var bd := TALK_RANGE + 1.0
+	for st in sites:
+		if not is_instance_valid(st):
+			continue
+		var d := (st as Node3D).global_position.distance_to(p.global_position)
+		if d < bd:
+			bd = d
+			best = st
+	return best
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_T and not is_open():
+		hints_on = not hints_on
+		for f in figures:
+			if is_instance_valid(f):
+				f.hint_on = hints_on
+				f.refresh_hint()
+		if hud:
+			hud.toast("ヒント表示：" + ("ON" if hints_on else "OFF"), 2.0)
+		return
+	if event.is_action_pressed("interact"):
+		if is_open():
+			close()
+			get_viewport().set_input_as_handled()
+		elif _near and not Game.input_blocked and not (hud and hud.is_dialog_open()):
+			open(_near)
+			get_viewport().set_input_as_handled()
+		elif _near_site and not Game.input_blocked:
+			open_site(_near_site)
+			get_viewport().set_input_as_handled()
+		if is_open() or get_viewport().is_input_handled():
+			_input_frame = Engine.get_process_frames()
+	elif event.is_action_pressed("pause") and is_open():
+		close()
+		get_viewport().set_input_as_handled()
+
+
+# ------------------------------------------------------------------ メニュー
+func open(f: Node3D) -> void:
+	_menu_fig = f
+	_menu_fig.talking = true
+	_panel.visible = true
+	Game.input_blocked = true
+	Game.lock_mouse(false)
+	_main_page()
+
+
+# ------------------------------------------------------------------ 国家事業
+var _site: ProjectSite = null
+
+
+func open_site(st: ProjectSite) -> void:
+	_site = st
+	_menu_fig = null
+	_panel.visible = true
+	Game.input_blocked = true
+	Game.lock_mouse(false)
+	_site_page()
+
+
+func _site_page(msg := "") -> void:
+	_clear()
+	var pr: Dictionary = _site.project
+	var m: Dictionary = Game.db.war_model
+	_title.text = "国家事業：" + str(pr.get("name", ""))
+	var eff: PackedStringArray = []
+	for pid in pr.get("pillars", {}):
+		var v := int(pr["pillars"][pid])
+		eff.append("%s%s%d" % [WarModel.pillar_name(Game.db, pid), "+" if v >= 0 else "", v])
+	var lines: PackedStringArray = []
+	if msg != "":
+		lines.append(msg)
+	lines.append("【史実】" + str(pr.get("basis", pr.get("desc", ""))))
+	lines.append("【この事業】%d年ごろ　1941年への効き目 %s　（%s）" % [int(pr["year"]), WarModel.leverage_text(m, int(pr["year"])), "、".join(eff)])
+	if pr.has("cost"):
+		lines.append("【代償】" + str(pr["cost"]))
+	_line.text = "\n".join(lines)
+	var av: Array = WarModel.available(Game.db, Game.state.actions, Game.state.war.get("pillars", {}), str(pr["id"]))
+	if _task.is_empty() and av[0]:
+		var t: Dictionary = pr.get("task", {})
+		var label := "着手する"
+		match str(t.get("type", "talk")):
+			"defend": label = "着手する（%sを %d 人退ける）" % [t.get("enemy", "妨害者"), int(t.get("count", 3))]
+			"collect": label = "着手する（%sを %d 個集めてここへ）" % [t.get("item", "資材"), int(t.get("count", 3))]
+			_: label = "着手する（関係者を説き伏せる）"
+		_button(label, _start_task)
+	elif not av[0]:
+		_button("着手できない：" + str(av[1]), func(): pass, false)
+	else:
+		_button("別の事業が進行中", func(): pass, false)
+	_button("立ち去る", close)
+
+
+func _start_task() -> void:
+	var pr: Dictionary = _site.project
+	var t: Dictionary = pr.get("task", {})
+	var st := _site
+	close()
+	match str(t.get("type", "talk")):
+		"defend":
+			var rng := RandomNumberGenerator.new()
+			rng.randomize()
+			var en: Array = []
+			var n := int(t.get("count", 3))
+			for i in n:
+				var ang := TAU * i / n
+				var p: Vector3 = Game.world.random_ground_point_near(st.global_position + Vector3(cos(ang), 0, sin(ang)) * 26.0, 4.0, rng)
+				var e := Enemy.spawn(session, p + Vector3.UP * 0.5, str(t.get("enemy", "妨害者")), session.era["eraId"], i == 0)
+				e.aggro_range = 120.0
+				en.append(e)
+			_task = {"site": st, "type": "defend", "enemies": en}
+			if hud:
+				hud.extra_markers = hud.extra_markers + en
+				hud.set_objective("国家事業：" + str(pr["name"]), "現場を襲う%sを退けよ。" % t.get("enemy", "妨害者"), "")
+		"collect":
+			var rng2 := RandomNumberGenerator.new()
+			rng2.randomize()
+			var center: Vector3 = Game.world.landmark_pos(str(t.get("from", "village")))
+			var pk: Array = []
+			for i in int(t.get("count", 3)):
+				var pp: Vector3 = Game.world.random_ground_point_near(center, 18.0, rng2)
+				pk.append(Pickup.spawn(session, pp + Vector3.UP * 1.0, str(t.get("item", "資材"))))
+			_task = {"site": st, "type": "collect", "pickups": pk}
+			if hud:
+				hud.set_objective("国家事業：" + str(pr["name"]), "%sで%sを集め、現場へ運べ。" % [HistoryDB.landmark_name(session.era, str(t.get("from", "village"))), t.get("item", "資材")], "")
+		_:
+			_finish_project(st)
+
+
+func _tick_task() -> void:
+	if _task.is_empty():
+		return
+	var st: ProjectSite = _task["site"]
+	if not is_instance_valid(st):
+		_task = {}
+		return
+	match str(_task["type"]):
+		"defend":
+			var en: Array = _task["enemies"]
+			var left := en.filter(func(e): return is_instance_valid(e) and not e.dead).size()
+			if hud:
+				hud.set_counter("残り %d" % left)
+			if left == 0:
+				_finish_project(st)
+		"collect":
+			var pk: Array = _task["pickups"]
+			var left2 := pk.filter(func(p): return is_instance_valid(p) and not p.get("_taken")).size()
+			if hud:
+				hud.set_counter("資材 %d / %d" % [pk.size() - left2, pk.size()] + ("　→ 現場へ運べ" if left2 == 0 else ""))
+			if left2 == 0 and Game.player and (Game.player as Node3D).global_position.distance_to(st.global_position) < 10.0:
+				_finish_project(st)
+
+
+func _finish_project(st: ProjectSite) -> void:
+	_task = {}
+	if hud:
+		hud.set_objective("自由探索", "好きに暴れろ。人物に近づいて E で話せる。看板で国家事業に着手できる。", "")
+	_chaos_act("project", str(st.project.get("id", "")), {})
+	for s2 in sites:
+		if is_instance_valid(s2):
+			s2.refresh()
+
+
+func close() -> void:
+	if _menu_fig and is_instance_valid(_menu_fig):
+		_menu_fig.talking = false
+	_menu_fig = null
+	_site = null
+	_panel.visible = false
+	Game.input_blocked = false
+	Game.lock_mouse(true)
+
+
+func _clear() -> void:
+	for c in _box.get_children():
+		c.queue_free()
+
+
+func _actor() -> Dictionary:
+	return _menu_fig.actor if _menu_fig else {}
+
+
+func _main_page(msg := "") -> void:
+	_clear()
+	var f: Variant = _menu_fig
+	var a := _actor()
+	var title := String(Figures.spec_for(f.figure_name).get("title", "")) if not a.is_empty() else ""
+	_title.text = f.figure_name + (("　―　" + title) if title != "" else "")
+	_line.text = msg if msg != "" else ("%s「%s」" % [f.figure_name, str(f.lines[0]) if not f.lines.is_empty() else "……何用か。"])
+	var verbs: Array = HistoryActors.verbs_for(a) if not a.is_empty() else ["persuade", "give", "escort"]
+	if is_mission():
+		# ミッションの会話を先頭に（選ぶと今までどおり talk ステップが進む）
+		if runner.is_pending_talk(f):
+			_button("ミッションの会話", _mission_talk)
+		elif f is Npc and not (f.lines as Array).is_empty():
+			_button("話を聞く（ミッションの会話をもう一度）", _replay_talk)
+	_button("説得する", _persuade_page)
+	if not f.questions.is_empty():
+		_button("未来を語る", _steer_page)
+	_button("未来の品を渡す", _give_page)
+	if Game.profile and (not Game.profile.skills_summary(30.0).is_empty() or Knowledge.known_count(Game.profile) > 0):
+		_button("技術を教える", _teach_page)
+	var tags: Array = a.get("tags", []) if not a.is_empty() else []
+	if Game.profile and ("ruler" in tags or "official" in tags or "reformer" in tags) and not Game.profile.permits.get(str(f.era_id), false):
+		_button("殖産の許しを請う（工場・鉄道などを建てる許し：話術）", _ask_permit, not _gifted.has("permit:" + f.figure_name))
+	_button("武器を譲ってもらう（話術）", _ask_weapon, not _gifted.has(f.figure_name))
+	if "protect" in verbs:
+		_button("守る（刺客から命を救う）", _start_protect, _protect_fig == null)
+	if _escort == f:
+		_button("ここに残ってもらう", func(): _escort = null; f.follow_target = null; _main_page("「ここで待とう」"))
+	else:
+		_button("連れて行く（別の名所まで同行させる）", _start_escort)
+	if "steal" in verbs:
+		var doc: Dictionary = a.get("doc", {})
+		var pct := roundi(Skills.forge_success(Game.profile.level("komonjo")) * 100) if Game.profile else 100
+		_button("書状を盗む" + ("（%s）" % doc["name"] if doc.has("name") else "") + "　成功 %d%%（古文読解）" % pct, func(): _doc_try("steal"))
+		_button("偽の書状を渡す　成功 %d%%（古文読解）" % pct, func(): _doc_try("forge"))
+	_button("立ち去る", close)
+
+
+func _persuade_page() -> void:
+	_clear()
+	_line.text = "何を説く？（相手の性格によっては、はねつけられる）"
+	for arg in HistoryActors.ARGS:
+		_button(arg, func(): _do("persuade", {"arg": arg, "skill_bonus": _rhetoric_bonus()}))
+	_button("戻る", _main_page)
+
+
+func _give_page() -> void:
+	_clear()
+	_line.text = "時空鞄から何を渡す？（渡すと信頼も得られる）"
+	for it in HistoryActors.ITEMS:
+		_button(it, func(): _do("give", {"item": it}))
+	# 実際の持ち物から（この時代にまだない品を渡すと、それだけで歴史が揺らぐ）
+	if Game.profile:
+		var era_id := str(_menu_fig.era_id) if _menu_fig else ""
+		var shown := 0
+		for w in Game.profile.weapons():
+			if w.get("loan", false) or shown >= 4:
+				continue
+			shown += 1
+			var uid := int(w["uid"])
+			var gap := CraftDB.anachronism_gap(str(w["id"]), era_id)
+			_button("持ち物から：%s%s" % [Game.profile.item_label(w), "　［未来の品］" if gap > 0 else ""], func(): _give_inv(str(w["id"]), uid))
+		for id in Game.profile.stacks.keys():
+			if int(Game.profile.stacks[id]) - int(Game.profile.loan_stacks.get(id, 0)) <= 0 or shown >= 7:
+				continue
+			shown += 1
+			var sid := str(id)
+			var gap2 := CraftDB.anachronism_gap(sid, era_id)
+			_button("持ち物から：%s%s" % [CraftDB.item_name(sid), "　［未来の品］" if gap2 > 0 else ""], func(): _give_inv(sid, -1))
+	_button("戻る", _main_page)
+
+
+## 持ち物の品を渡す。時空鞄の「未来の品」と同じ品（鉄砲・特効薬・千両箱）ならその効き目、
+## この時代にまだない品なら「時代錯誤」（anachronism）として歴史を揺らす。どちらでもなければ贈り物（信頼）
+const INV_TO_ITEMS := {"hinawaju": "鉄砲", "murataju": "鉄砲", "arisaka38": "鉄砲", "pistol14": "鉄砲", "lmg96": "鉄砲",
+	"tokkouyaku": "特効薬", "senryobako": "千両箱", "kyokasho": "未来の教科書"}
+
+
+func _give_inv(id: String, uid: int) -> void:
+	if _menu_fig == null or Game.profile == null:
+		return
+	var era_id := str(_menu_fig.era_id)
+	var gap := CraftDB.anachronism_gap(id, era_id)
+	if uid >= 0:
+		Game.profile.remove_instance(uid)
+	else:
+		Game.profile.take(id, 1)
+	var hit: Dictionary = {}
+	if INV_TO_ITEMS.has(id):
+		hit = _chaos_act("give", _menu_fig.figure_name, {"item": INV_TO_ITEMS[id]})
+	if gap > 0:
+		var h2: Dictionary = _chaos_act("anachronism", _menu_fig.figure_name, {"item": id, "gap": gap, "cause": "give", "type": CraftDB.item_type(id)})
+		if hit.is_empty():
+			hit = h2
+	if hit.is_empty() and not INV_TO_ITEMS.has(id):
+		hit = _chaos_act("give", _menu_fig.figure_name, {"item": CraftDB.item_name(id)})
+	for f in figures:
+		if is_instance_valid(f):
+			f.refresh_hint()
+	if hit.is_empty() or hit.get("refused", false):
+		_main_page("%s「%sか。ありがたく頂戴する」" % [_menu_fig.figure_name, CraftDB.item_name(id)])
+		return
+	close()
+
+
+func _rhetoric_bonus() -> int:
+	if Game.profile == null:
+		return 0
+	Game.profile.practice("rhetoric", 0.4)
+	return Skills.persuade_bonus(Game.profile.level("rhetoric"))
+
+
+# ------------------------------------------------------------------ 技術を教える
+func _teach_page() -> void:
+	_clear()
+	_line.text = "どの技を教える？（未来の知識は、この時代の技術・軍事・暮らしを動かす）"
+	for s in Game.profile.skills_summary(30.0):
+		var sid := str(s["id"])
+		var lv := float(s["level"])
+		_button("%s（%s %d）" % [s["name"], s["rank"], int(lv)], func(): _do("teach", {"skill": sid, "level": int(lv)}))
+	var n := 0
+	for nid in Knowledge.ids():
+		var m := Knowledge.mastery(Game.profile, nid)
+		if m >= 30.0 and n < 8:
+			n += 1
+			var n2 := str(nid)
+			_button("知識：%s（習熟 %d）" % [Knowledge.node_name(nid), int(m)], func(): _do("teach", {"skill": n2, "level": int(m)}))
+	_button("戻る", _main_page)
+
+
+func _ask_permit() -> void:
+	var f: Variant = _menu_fig
+	if f == null:
+		return
+	_gifted["permit:" + f.figure_name] = true
+	var tr := Game.chaos.trust(Game.db.actor_name(f.figure_name)) if Game.chaos else 0
+	var p := clampf(Skills.gift_success(Game.profile.level("rhetoric"), tr) + 0.1, 0.05, 0.95)
+	Game.profile.practice("rhetoric", 0.6)
+	if randf() < p:
+		Game.profile.permits[str(f.era_id)] = true
+		Game.profile.save()
+		_main_page("%s「国が富むなら、よかろう。好きに建てるがよい」――殖産の許しを得た" % f.figure_name)
+	else:
+		_main_page("%s「得体の知れぬ工夫で世を乱すな」（成功 %d%%：話術・信頼で上がる。冥加金を納める道もある）" % [f.figure_name, roundi(p * 100)])
+
+
+# ------------------------------------------------------------------ 武器を譲ってもらう
+const GIFTS := {
+	"jomon_kofun": ["tekken", "tankyu"], "asuka_nara": ["chokuto", "tankyu"], "heian": ["tachi", "wakyu"],
+	"kamakura_muromachi": ["tachi", "naginata", "wakyu"], "sengoku": ["uchigatana", "hinawaju", "yari"],
+	"edo": ["uchigatana", "wakizashi", "hinawaju"], "meiji_taisho": ["guntou", "murataju"], "showa": ["guntou", "arisaka38"],
+}
+const GIFT_AMMO := {"tankyu": ["ya", 20], "wakyu": ["ya", 20], "hinawaju": ["hayago", 12], "murataju": ["murata_dan", 15], "arisaka38": ["dan38", 25]}
+
+
+func _ask_weapon() -> void:
+	var f: Variant = _menu_fig
+	if f == null or Game.profile == null:
+		return
+	_gifted[f.figure_name] = true
+	var tr := Game.chaos.trust(Game.db.actor_name(f.figure_name)) if Game.chaos else 0
+	var p := Skills.gift_success(Game.profile.level("rhetoric"), tr)
+	Game.profile.practice("rhetoric", 0.6)
+	if randf() >= p:
+		_main_page("%s「得体の知れぬ者に、刀は渡せぬ」（成功 %d%%：話術・信頼で上がる）" % [f.figure_name, roundi(p * 100)])
+		return
+	var list: Array = GIFTS.get(str(f.era_id), ["uchigatana"])
+	var id: String = list[randi() % list.size()]
+	var q := randf_range(0.6, 0.88)
+	var it: Dictionary = Game.profile.add_instance(Crafting.make_item(id, q, f.figure_name, str(f.era_id)))
+	var extra := ""
+	if GIFT_AMMO.has(id):
+		Game.profile.add(GIFT_AMMO[id][0], GIFT_AMMO[id][1], 0.65)
+		extra = "と%s" % CraftDB.item_name(GIFT_AMMO[id][0])
+	_main_page("%s「よかろう。これを持っていけ」――%s%sを譲り受けた" % [f.figure_name, Game.profile.item_label(it), extra])
+
+
+# ------------------------------------------------------------------ 書状（古文読解）
+func _doc_try(verb: String) -> void:
+	if Game.profile:
+		var ok := randf() < Skills.forge_success(Game.profile.level("komonjo"))
+		Game.profile.practice("komonjo", 0.8)
+		if not ok:
+			var f: Variant = _menu_fig
+			Wanted.report((f as Node3D).global_position if f else Vector3.ZERO, 1.5)
+			_main_page("見破られた！ %s" % ("「その書状に触れるな！」" if verb == "steal" else "「この花押は偽物だ！」") + "（古文読解を磨けば成功しやすい）")
+			return
+	_do(verb, {})
+
+
+func _steer_page() -> void:
+	_clear()
+	_line.text = "どの出来事の未来を語る？"
+	for qid in _menu_fig.questions:
+		var q: Dictionary = Game.db.by_id.get(qid, {})
+		if q.is_empty():
+			continue
+		var n := Game.db.questions.find(q) + 1
+		var mark := "" if Game.state.answer(q) < 0 else ("　○" if Game.state.is_correct(q) else "　×")
+		_button("第%d問『%s』%s" % [n, q["topic"], mark], func(): _steer_choices(q))
+	_button("戻る", _main_page)
+
+
+func _steer_choices(q: Dictionary) -> void:
+	_clear()
+	_line.text = "%s を、どの未来へ導く？" % q["topic"]
+	for c in 4:
+		var t: String = q["choices"][c]
+		if t.length() > 34:
+			t = t.substr(0, 33) + "…"
+		var tag := "（今の史実）" if Game.state.world_choice(q) == c else ""
+		_button("%s %s%s" % [JSUI.circled(c), t, tag], func(): _do("steer", {"q": q["id"], "choice": c}))
+	_button("戻る", _steer_page)
+
+
+## ミッションの会話（MissionRunner.talk_npc：会話が終わると次のステップへ）
+func _mission_talk() -> void:
+	close()
+	if is_mission():
+		runner.talk_npc()
+
+
+## 済んだミッションの会話をもう一度見る（ステップは進めない）
+func _replay_talk() -> void:
+	var f: Variant = _menu_fig
+	close()
+	if hud and f != null and is_instance_valid(f):
+		hud.dialog(f.figure_name, f.lines)
+
+
+## 行動を歴史に反映する。自由探索中はそのまま、ミッション中は揺らぎの記録をこの行動の間だけ有効にする
+func _chaos_act(verb: String, target: String, info: Dictionary) -> Dictionary:
+	if Game.chaos == null:
+		return {}
+	if Game.chaos.is_active():
+		return Game.chaos.act(verb, target, info)
+	var era_id := str(session.era.get("eraId", "")) if session and "era" in session else ""
+	if era_id == "":
+		return {}
+	Game.chaos.active_era = era_id
+	Game.chaos.world = Game.world
+	var hit: Dictionary = Game.chaos.act(verb, target, info)
+	Game.chaos.active_era = ""
+	Game.chaos.world = null
+	return hit
+
+
+## 「守る」などで書き換えた目標表示を戻す
+func _restore_objective(text := "好きに暴れろ。人物に近づいて E で話せる。") -> void:
+	if hud == null:
+		return
+	if is_mission():
+		runner.refresh_objective()
+	else:
+		hud.set_objective("自由探索", text, "")
+
+
+func _do(verb: String, info: Dictionary) -> void:
+	if _menu_fig == null:
+		return
+	var hit: Dictionary = _chaos_act(verb, _menu_fig.figure_name, info)
+	for f in figures:
+		if is_instance_valid(f):
+			f.refresh_hint()
+	if hit.get("refused", false):
+		_main_page(str(hit.get("title", "……")))
+		return
+	if hit.is_empty():
+		_main_page("%s「……ふむ」（歴史は動かなかった）" % _menu_fig.figure_name)
+		return
+	close()
+
+
+# ------------------------------------------------------------------ 連れて行く
+func _start_escort() -> void:
+	var f: Variant = _menu_fig
+	if _escort and is_instance_valid(_escort):
+		_escort.follow_target = null
+	_escort = f
+	f.follow_target = Game.player
+	_escort_t = 0.0
+	close()
+	if hud:
+		hud.toast("%sがついてくる。別の名所まで連れて行こう" % f.figure_name, 3.5)
+
+
+func _tick_escort(dt: float) -> void:
+	if _escort == null or not is_instance_valid(_escort) or _escort.dead:
+		_escort = null
+		return
+	var w = Game.world
+	if w == null:
+		return
+	var here := ""
+	for k in HistoryDB.LANDMARK_KEYS:
+		if (_escort as Node3D).global_position.distance_to(w.landmark_pos(k)) < ESCORT_RADIUS:
+			here = k
+	var home_key := str(_escort.actor.get("spawn", ""))
+	if here != "" and (_escort.home.distance_to(w.landmark_pos(here)) > ESCORT_RADIUS * 1.5) and here != home_key:
+		_escort_t += dt
+		if _escort_t > 2.0:
+			var f: Variant = _escort
+			_escort = null
+			f.follow_target = null
+			f.home = f.global_position
+			_chaos_act("escort", f.figure_name, {"to": here})
+	else:
+		_escort_t = 0.0
+
+
+# ------------------------------------------------------------------ 守る
+func _start_protect() -> void:
+	var f: Variant = _menu_fig
+	close()
+	_protect_fig = f
+	_assassins.clear()
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	var n := 4
+	for i in n:
+		var ang := TAU * i / n
+		var p: Vector3 = Game.world.random_ground_point_near(f.global_position + Vector3(cos(ang), 0, sin(ang)) * 24.0, 4.0, rng)
+		var e := Enemy.spawn(session, p + Vector3.UP * 0.5, "刺客", f.era_id, i == 0)
+		e.aggro_range = 120.0
+		_assassins.append(e)
+	if hud:
+		hud.extra_markers = hud.extra_markers + _assassins
+		hud.toast("%sを狙う刺客が現れた！ すべて倒して命を救え" % f.figure_name, 4.0)
+		hud.set_objective("歴史を書き換える：%sを守れ" % f.figure_name, "史実では非業の死を遂げる%sを、刺客から守り抜け。" % f.figure_name, "刺客 %d / %d" % [0, n])
+
+
+func _tick_protect() -> void:
+	if _protect_fig == null:
+		return
+	if not is_instance_valid(_protect_fig) or _protect_fig.dead:
+		_protect_fig = null
+		if hud:
+			hud.toast("守りきれなかった……", 3.0)
+			_restore_objective()
+		return
+	var left := _assassins.filter(func(e): return is_instance_valid(e) and not e.dead).size()
+	if hud:
+		hud.set_counter("刺客 %d / %d" % [_assassins.size() - left, _assassins.size()])
+	if left == 0:
+		var f: Variant = _protect_fig
+		_protect_fig = null
+		_restore_objective()
+		_chaos_act("protect", f.figure_name, {})

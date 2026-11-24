@@ -1,0 +1,64 @@
+{
+  "id": "nanban_nau",
+  "name": {"ja": "南蛮船（ポルトガルのナウ）", "en": "Portuguese Nau (Carrack)"},
+  "era": "sengoku_azuchi",
+  "year": 1580,
+  "type": "carrack (Macau-Nagasaki 'Great Ship')",
+  "schema_notes": "level_m = deck height above the waterline. confidence: sourced / typical / reconstruction. Dimensions are scaled from the Pepper Wreck (Nossa Senhora dos Martires, 1606) reconstruction.",
+  "basis": [
+    {"fact": "India-run naus averaged ~400 t for much of the 16th century; Madre de Deus (1589) ~1,600 t with 7 decks and ~600 crew", "source_url": "https://www.worldhistory.org/Carrack/", "year": 1589},
+    {"fact": "Claims of carracks over 1,000 t in the 16th century are exaggerated; 500-600 t typical", "source_url": "https://eve.fcsh.unl.pt/index.php/en/node/5197", "year": 1580},
+    {"fact": "Pepper Wreck identified as Nossa Senhora dos Martires, lost 1606 at Sao Juliao da Barra", "source_url": "https://en.wikipedia.org/wiki/Nossa_Senhora_dos_M%C3%A1rtires", "year": 1606},
+    {"fact": "Raised forecastle and sterncastle", "source_url": "https://exploration.marinersmuseum.org/?p=232", "year": 1580},
+    {"fact": "Nanban screens: black ship arriving, captain-major procession", "source_url": "https://global.canon/ja/tsuzuri/works/tosen-nambansenzu/", "year": 1600}
+  ],
+  "dimensions": {
+    "length_overall_m": 40.0,
+    "keel_m": 27.0,
+    "beam_m": 13.0,
+    "draft_m": 5.5,
+    "displacement_t": 600,
+    "freeboard_m": {"mid": 3.5, "bow": 9.0, "stern": 11.0},
+    "confidence": "reconstruction",
+    "masts": 3,
+    "decks": 4
+  },
+  "decks": [
+    {"name": "Sterncastle (tolda / chapitéu)", "level_m": 9.0, "rooms": [
+      {"name": "Captain's great cabin", "purpose": "captain-major", "approx_size_m": [8, 8], "position": "stern", "key_props": ["stern windows", "table", "Portuguese chair", "crucifix"], "notes": "", "confidence": "typical"},
+      {"name": "Poop deck", "purpose": "navigation", "approx_size_m": [8, 8], "position": "stern", "key_props": ["lantern", "flags"], "notes": "", "confidence": "typical"}
+    ]},
+    {"name": "Upper deck", "level_m": 3.5, "rooms": [
+      {"name": "Waist", "purpose": "sailing and boarding", "approx_size_m": [15, 12], "position": "mid", "key_props": ["mainmast", "boats", "capstan"], "notes": "", "confidence": "typical"},
+      {"name": "Forecastle", "purpose": "anchors", "approx_size_m": [8, 10], "position": "bow", "key_props": ["anchors", "bitts"], "notes": "", "confidence": "typical"},
+      {"name": "Chapel", "purpose": "Jesuits' mass", "approx_size_m": [4, 4], "position": "stern", "key_props": ["altar"], "notes": "", "confidence": "reconstruction"}
+    ]},
+    {"name": "Gun deck", "level_m": 1.0, "rooms": [
+      {"name": "Gun deck", "purpose": "bronze guns and berthing", "approx_size_m": [30, 12], "position": "full length", "key_props": ["bronze guns", "gun ports", "whipstaff (steering)"], "notes": "", "confidence": "typical"}
+    ]},
+    {"name": "Hold", "level_m": -3.0, "rooms": [
+      {"name": "Cargo hold", "purpose": "silk, gold", "approx_size_m": [25, 11], "position": "full length", "key_props": ["silk bales", "water casks", "ballast stones", "pump well"], "notes": "", "confidence": "typical"}
+    ]}
+  ],
+  "exterior": {
+    "materials": ["oak and pine", "tar"],
+    "colors": {"hull": "black tar (黒船)"},
+    "features": ["high castles", "3 masts", "cross on the sails"]
+  },
+  "crew": {"total": 150},
+  "lighting": {"type": "candles, lanterns"},
+  "props_period": ["rosaries", "Chinese silk", "matchlocks"],
+  "flooding": {
+    "watertight_subdivision": "None (single hold)",
+    "pumps": "Chain pumps at the pump well amidships (typical)",
+    "sea_cocks": "None",
+    "magazines": [{"name": "powder room", "position": "stern, low"}],
+    "freeboard_m": 3.5,
+    "historical_damage": [
+      {"event": "Madre de Deus (Nossa Senhora da Graça) 1610 Nagasaki", "date": "1610-01-06", "sequence": ["Attacked by Arima forces; captain blew up the powder magazine; sank"], "source_url": null, "note": "General historical knowledge; not verified in this session"}
+    ],
+    "game_sinking_hooks": ["Single hold: a large breach floods the whole hull", "Magazine scuttling (1610 precedent)"]
+  },
+  "uncertain": ["Exact dimensions", "Interior layout", "1610 Nagasaki event source not directly verified"],
+  "layout": {"note": "game layout (reconstruction): carrack with high fore and stern castles, tumblehome, square sails with the Order of Christ cross, lateen mizzen, black tar hull (黒船).", "form": "wood_west", "deck_levels": {"0": 6.5}, "hull": {"pb": 1.5, "ps": 1.8, "mid": 0.25, "q": 0.6, "ts": 0.6, "bilge": 2.5, "flare": -0.12, "rake": 5.0, "cutup": 2.0, "sheer": [4.5, 3.5, 4.8], "bulwark": 1.1, "colors": {"hull": [0.1, 0.09, 0.09], "bottom": [0.18, 0.15, 0.13], "boot": [0.18, 0.15, 0.13], "stripe": [0.65, 0.45, 0.2], "stripe_y": [2.8, 3.1], "deck": [0.72, 0.6, 0.45], "inner": [0.62, 0.48, 0.34], "transom": [0.3, 0.2, 0.12]}}, "parts": [{"t": "castle", "s0": 0, "s1": 9, "y": 8.0, "col": [0.12, 0.1, 0.1]}, {"t": "castle", "s0": 28, "s1": 40, "y": 6.5, "col": [0.12, 0.1, 0.1]}, {"t": "house", "s0": 31, "s1": 40.5, "w": 10, "y0": 6.5, "y1": 9.0, "col": [0.15, 0.12, 0.11], "mat": "wood", "win": true, "glass": false}, {"t": "mast", "s": 7.5, "y0": 8.0, "h": 24, "r": 0.35, "yards": [{"y": 8, "w": 12}, {"y": 15, "w": 8}], "sails": [{"kind": "square", "y0": 1.5, "y1": 8.0, "w": 11}, {"kind": "square", "y0": 9.0, "y1": 15.0, "w": 7.5}]}, {"t": "mast", "s": 19, "h": 32, "r": 0.45, "top": "crow", "yards": [{"y": 13, "w": 16}, {"y": 23, "w": 10}], "sails": [{"kind": "square", "y0": 4.0, "y1": 13.0, "w": 15, "cross": true}, {"kind": "square", "y0": 14.5, "y1": 23.0, "w": 9.5}], "flag": "cross", "flag_size": 1.6}, {"t": "mast", "s": 30, "y0": 6.5, "h": 18, "r": 0.25, "sails": [{"kind": "lateen", "y0": 3.0, "y1": 15.0, "w": 9, "cross": true}]}, {"t": "bowsprit", "len": 11, "rise": 25, "sail": {"col": [0.95, 0.93, 0.86]}}, {"t": "stern_gallery", "y0": 6.8, "y1": 8.8}, {"t": "guns", "s0": 10, "s1": 30, "n": 5, "y": 1.7, "len": 2.4, "r": 0.14}, {"t": "ports", "s0": 10, "s1": 30, "n": 5, "y": 1.7, "size": 0.6, "round": false}, {"t": "flag", "kind": "cross", "s": 40.5, "y": 11.5, "size": 1.8}, {"t": "rudder"}], "rooms": {"Captain's great cabin": {"s": [32, 39.5]}, "Poop deck": {"s": [28.5, 31]}}, "sim": {"bulkheads": [30], "gm": 0.8, "vanish": 50, "pump": 0.06, "power": "manual", "fire": "wood", "strength": 300, "value": 1200, "magazines": [{"s0": 30, "s1": 40, "name": "火薬室"}], "cookoff": 40, "sea_cocks": [{"s": 20, "side": 0, "name": "ポンプの井戸（船底の栓）", "area": 0.6, "kind": "plug"}], "pump_s": 20}, "pilot": {"enabled": true, "vmax": 4.5, "helm_s": 26, "helm_y": 3.5}, "ladder": {"s": 20, "side": 1}}
+}

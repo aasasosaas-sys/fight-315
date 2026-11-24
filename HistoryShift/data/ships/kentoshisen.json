@@ -1,0 +1,56 @@
+{
+  "id": "kentoshisen",
+  "name": {"ja": "遣唐使船", "en": "Japanese Envoy Ship to Tang China"},
+  "era": "nara_heian",
+  "year": 750,
+  "type": "ocean-going sailing ship (RECONSTRUCTION; no wreck or drawing survives)",
+  "schema_notes": "level_m = deck height above the waterline. Every layout element is a RECONSTRUCTION based on the 2010 Heijo Palace replica.",
+  "basis": [
+    {"fact": "Full-scale replica displayed at Heijo Palace Site for the 2010 1300th anniversary; now at 朱雀門ひろば, free to board", "source_url": "https://tabi-mag.jp/na0487/", "year": 2010},
+    {"fact": "Replica: length 30 m, beam 9.6 m, displacement 300 t, cargo 150 t", "source_url": "https://tabi-mag.jp/na0487/", "year": 2010},
+    {"fact": "Replica built by Okamura shipyard, Matsuzaki (Izu)", "source_url": "https://tabi-mag.jp/na0487/", "year": 2010},
+    {"fact": "Report on the replica exhibition", "source_url": "https://sitereports.nabunken.go.jp/article/47494", "year": 2010},
+    {"fact": "From the 8th mission (717), 4 ships became the norm: ambassador on ship 1, vice-ambassador on ship 2, judges and recorders on ships 3 and 4; only once did all 4 return", "source_url": "https://www.moneypost.jp/1180165/4/", "year": 717},
+    {"fact": "Crew organisation: sailing crew (captain, navigator, sailors, soldiers) vs passengers (envoys, students, monks)", "source_url": "https://rekihaku.repo.nii.ac.jp/record/2761/files/kenkyuhokoku_223_02.pdf", "year": 750},
+    {"fact": "Nara Prefecture document on the replica", "source_url": "https://www.pref.nara.jp/miryoku/ikasu-nara/assets/images/narafuto/kentoshisen-1-2.pdf", "year": 2010}
+  ],
+  "dimensions": {
+    "length_overall_m": 30.0,
+    "beam_m": 9.6,
+    "draft_m": 2.5,
+    "displacement_t": 300,
+    "freeboard_m": {"mid": 1.8, "confidence": "reconstruction"},
+    "masts": 2
+  },
+  "decks": [
+    {"name": "Main deck", "level_m": 1.8, "rooms": [
+      {"name": "Deckhouse (屋形)", "purpose": "envoy cabin", "approx_size_m": [10, 6], "position": "mid", "key_props": ["Tang-style lattice", "tatami/mats", "lacquered chests", "sutra scrolls"], "notes": "", "confidence": "reconstruction"},
+      {"name": "Masts and mat sails", "purpose": "2 masts with bamboo mat sails (網代帆)", "approx_size_m": [2, 2], "position": "bow and mid", "key_props": ["網代帆", "ropes"], "notes": "", "confidence": "reconstruction"},
+      {"name": "Steering", "purpose": "stern rudder", "approx_size_m": [5, 5], "position": "stern", "key_props": ["large tiller"], "notes": "", "confidence": "reconstruction"}
+    ]},
+    {"name": "Hold", "level_m": -1.0, "rooms": [
+      {"name": "Cargo hold", "purpose": "tribute goods, water, rice", "approx_size_m": [20, 8], "position": "full length", "key_props": ["jars", "bales", "silk"], "notes": "", "confidence": "reconstruction"}
+    ]}
+  ],
+  "exterior": {
+    "materials": ["wood"],
+    "colors": {"hull": "natural/black lower hull (uncertain)", "rails": "vermilion (uncertain)", "walls": "white (uncertain)"},
+    "features": ["box-shaped hull", "2 masts", "flags"]
+  },
+  "crew": {"total": 120, "notes": "~100-150 per ship (common estimate, unverified)"},
+  "lighting": {"type": "oil lamps", "confidence": "reconstruction"},
+  "props_period": ["Buddhist statues", "Tang coins", "sutras"],
+  "flooding": {
+    "watertight_subdivision": "Unknown. If Chinese-built style is assumed, transverse bulkheads (reconstruction).",
+    "pumps": "Bailing buckets",
+    "sea_cocks": "None",
+    "magazines": [],
+    "freeboard_m": 1.8,
+    "historical_damage": [
+      {"event": "Ship 1 of the 659 mission", "date": "659-09-15", "sequence": ["Wrecked in headwinds after landing south of Baekje; drifted to a southern island"], "source_url": "https://ja.wikid.org/%E9%81%A3%E5%94%90%E4%BD%BF"}
+    ],
+    "game_sinking_hooks": ["Storm: waves flood the deck; shipwrecks were common"]
+  },
+  "uncertain": ["Everything is reconstruction; the replica's design basis is not documented in the sources reached (picture scrolls such as 吉備大臣入唐絵巻 and 鑑真和上東征絵伝 are commonly cited but unverified)", "Colours", "Crew numbers"],
+  "layout": {"note": "game layout (reconstruction, after the 2010 Heijo-kyo replica): box-like hull with raised ends, vermilion rails, white-walled 屋形 with a dark roof, two masts with 網代帆 mat sails, large stern rudder.", "form": "wood_cn", "hull": {"pb": 1.4, "ps": 1.2, "mid": 0.3, "q": 0.6, "tb": 0.4, "ts": 0.65, "bilge": 6.0, "flare": 0.12, "rise_b": 0.3, "rise_s": 0.25, "sheer": [3.4, 1.8, 3.6], "bulwark": 0.9, "hull_mat": "wood", "colors": {"hull": [0.68, 0.54, 0.38], "bottom": [0.15, 0.13, 0.12], "boot": [0.15, 0.13, 0.12], "bulwark": [0.8, 0.25, 0.13], "rail": [0.85, 0.3, 0.15], "deck": [0.82, 0.7, 0.52], "inner": [0.75, 0.6, 0.42], "transom": [0.72, 0.56, 0.4]}}, "parts": [{"t": "house", "s0": 10.5, "s1": 21, "w": 6.4, "y1": 4.3, "col": [0.96, 0.95, 0.91], "mat": "plaster", "pillar_col": [0.8, 0.25, 0.13], "roof": "irimoya", "roof_col": [0.32, 0.3, 0.3], "rise": 1.4, "over": 0.7, "floor": false, "win_col": [0.35, 0.2, 0.12]}, {"t": "mast", "s": 4.5, "h": 13, "r": 0.24, "sails": [{"kind": "mat", "y0": 3.0, "y1": 11.5, "w": 6.5, "col": [0.78, 0.62, 0.38]}], "flag": "red", "flag_size": 1.0}, {"t": "mast", "s": 9.0, "h": 17, "r": 0.3, "sails": [{"kind": "mat", "y0": 3.5, "y1": 15.0, "w": 8.5, "col": [0.78, 0.62, 0.38]}], "flag": "red", "flag_size": 1.2}, {"t": "rudder", "big": true, "tiller": true, "tiller_len": 4}, {"t": "oars", "s0": 6, "s1": 26, "n": 6, "y": 2.0, "len": 5}, {"t": "flag", "kind": "banner", "s": 27.5, "x": 2.2, "y": 6.0, "size": 2.2, "col": [0.95, 0.93, 0.86], "mon_col": [0.8, 0.2, 0.12]}], "rooms": {"Masts and mat sails": {"skip": true}, "Deckhouse": {"s": [10.8, 20.7]}, "Steering": {"s": [24, 29]}}, "sim": {"n_bulkheads": 3, "gm": 0.8, "vanish": 55, "pump": 0.02, "power": "manual", "fire": "wood", "strength": 200, "value": 500, "sea_cocks": [{"s": 15, "side": 0, "name": "船底の板（外して自沈）", "area": 0.5, "kind": "plug"}]}, "pilot": {"enabled": true, "vmax": 3.5, "helm_s": 27.5}, "ladder": {"s": 15, "side": 1}}
+}

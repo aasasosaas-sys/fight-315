@@ -1,0 +1,4 @@
+VRM 素体の出典
+- assets/characters/vrm/vroid_base.vrm : VRM1_Constraint_Twist_Sample (c) 2022 pixiv Inc. — VRM Public License 1.0（暴力表現可・改変可・クレジット不要）
+- assets/characters/vrm/cc0/*.vrm : VRoid Studio beta サンプル（HairSample_Male/Female, Sakurada_Fumiriya, Sendagaya_Shibu/Shino）— CC0
+- addons/vrm, addons/Godot-MToon-Shader : V-Sekai godot-vrm（MIT）

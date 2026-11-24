@@ -1,0 +1,114 @@
+{
+ "eraId": "kamakura_muromachi",
+ "roles": {
+  "capital": "職人",
+  "village": "農民",
+  "temple": "職人",
+  "port": "商人",
+  "castle": "町人",
+  "battlefield": "漁民",
+  "mountain": "農民",
+  "town": "町人"
+ },
+ "rules": [
+  {
+   "id": "cv_km_smith",
+   "title": "鎌倉の鍛冶が失われる",
+   "trigger": {
+    "kind": "casualty",
+    "at": "capital",
+    "min": 8
+   },
+   "vars": {
+    "tech": -8
+   },
+   "year": 1300,
+   "text": "鎌倉の鍛冶たちが倒れ、相州の刀工の技は弟子に伝わりきらなかった。",
+   "basis": "鎌倉時代末（1300年前後）、鎌倉では正宗ら相州伝の刀工が活躍した。",
+   "recover": 50
+  },
+  {
+   "id": "cv_km_sou",
+   "title": "坂本の惣村が傷つく",
+   "trigger": {
+    "kind": "casualty",
+    "at": "village",
+    "min": 8
+   },
+   "vars": {
+    "commoners": -10
+   },
+   "year": 1420,
+   "text": "近江の惣村で農民や馬借が命を落とした。寄合で村を守ってきた人々の結束は弱まった。",
+   "basis": "1428年の正長の土一揆は、近江坂本の馬借の蜂起から始まった（『大乗院日記目録』）。惣村の寄合と結束が一揆の土台だった。",
+   "recover": 50
+  },
+  {
+   "id": "cv_km_sou2",
+   "title": "惣村、立ち上がる力を失う",
+   "trigger": {
+    "kind": "casualty",
+    "at": "village",
+    "min": 20
+   },
+   "vars": {
+    "commoners": -20,
+    "economy": -5
+   },
+   "year": 1425,
+   "text": "坂本の村々から働き手が消え、借金の帳消しを求めて立ち上がる人々そのものがいなくなった。",
+   "basis": "正長の土一揆（1428年）は畿内一帯に広がり、『日本開白以来、土民蜂起これ初めなり』と記された（『大乗院日記目録』）。蜂起には村々の人の数と結束が要った。",
+   "recover": 50
+  },
+  {
+   "id": "cv_km_hakata",
+   "title": "博多の商人が失われる",
+   "trigger": {
+    "kind": "casualty",
+    "at": "port",
+    "min": 8
+   },
+   "vars": {
+    "commerce": -10,
+    "open_asia": -10
+   },
+   "year": 1395,
+   "text": "博多津の商人たちが倒れ、明との交易を説く者も、船を出す元手も失われた。",
+   "basis": "1401年、足利義満は博多商人肥富の進言を受けて明に使いを送った（『善隣国宝記』）。",
+   "recover": 50
+  },
+  {
+   "id": "cv_km_hakata2",
+   "title": "博多津、さびれる",
+   "trigger": {
+    "kind": "casualty",
+    "at": "port",
+    "min": 20
+   },
+   "vars": {
+    "open_asia": -10,
+    "commerce": -5
+   },
+   "year": 1400,
+   "text": "博多の町そのものが人を失い、大陸と行き来する船はめっきり減った。",
+   "basis": "博多は宋・元との貿易の拠点で、1151年には大宰府の役人が博多の宋商人の家1600軒を襲ったと記録される（『宮寺縁事抄』）ほど、宋の商人が多く住んでいた。",
+   "recover": 50
+  },
+  {
+   "id": "cv_km_unrest",
+   "title": "土民蜂起、徳政を求める",
+   "trigger": {
+    "kind": "casualty",
+    "min": 15
+   },
+   "vars": {
+    "centralization": -10,
+    "commerce": -5
+   },
+   "year": 1441,
+   "text": "民が殺される騒ぎに怒った土民が京を囲んだ。幕府は徳政令を出して借金を帳消しにし、土倉・酒屋の営業は大きく傷ついた。",
+   "basis": "1441年の嘉吉の徳政一揆では数万の土民が京を囲み、室町幕府は初めて徳政令を出した。土倉・酒屋からの税は幕府の大切な収入だった。",
+   "unrest": true
+  }
+ ]
+}

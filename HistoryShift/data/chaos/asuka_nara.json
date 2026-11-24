@@ -1,0 +1,785 @@
+{
+ "eraId": "asuka_nara",
+ "figures": [
+  {
+   "name": "中臣鎌足",
+   "at": "capital",
+   "guards": 3,
+   "guard": "中臣家の舎人",
+   "lines": [
+    "皇子、今はまだ即位を急がれますな。",
+    "…何者だ。蘇我の手の者か。"
+   ]
+  },
+  {
+   "name": "蘇我入鹿",
+   "at": "capital",
+   "guards": 5,
+   "guard": "東漢氏の兵",
+   "lines": [
+    "山背大兄王さえ除けば、この国は蘇我のものよ。",
+    "宮中で剣を帯びるなと？　わしに指図するか。"
+   ]
+  },
+  {
+   "name": "蘇我蝦夷",
+   "at": "capital",
+   "guards": 3,
+   "guard": "蘇我家の兵",
+   "lines": [
+    "甘樫丘の邸から見下ろす飛鳥は格別じゃ。",
+    "入鹿め、少しやりすぎておる…。"
+   ]
+  },
+  {
+   "name": "蘇我馬子",
+   "at": "temple",
+   "guards": 4,
+   "guard": "蘇我家の兵",
+   "lines": [
+    "飛鳥寺の造営は我が蘇我の誇りよ。"
+   ]
+  },
+  {
+   "name": "物部守屋",
+   "at": "mountain",
+   "guards": 5,
+   "guard": "物部の兵",
+   "lines": [
+    "疫病は異国の神を拝んだたたりじゃ！",
+    "仏像など難波の堀江に流してしまえ。"
+   ]
+  },
+  {
+   "name": "小野妹子",
+   "at": "port",
+   "guards": 2,
+   "guard": "遣隋使の護衛",
+   "lines": [
+    "この国書、隋の皇帝にお渡しせねば。",
+    "「日出づる処の天子」…本当にこの文面で大丈夫だろうか。"
+   ]
+  },
+  {
+   "name": "阿倍比羅夫",
+   "at": "castle",
+   "guards": 4,
+   "guard": "筑紫の防人",
+   "lines": [
+    "百済救援の後将軍として、唐の水軍を打ち破ってみせよう。",
+    "水城の土塁、もっと高く積め！"
+   ]
+  },
+  {
+   "name": "藤原広嗣",
+   "at": "castle",
+   "guards": 4,
+   "guard": "広嗣方の兵",
+   "lines": [
+    "玄昉と吉備真備を朝廷から除け！",
+    "大宰府から都に物申す。"
+   ]
+  },
+  {
+   "name": "橘諸兄",
+   "at": "capital",
+   "guards": 3,
+   "guard": "衛府の兵",
+   "lines": [
+    "開墾した田を永く私有させれば、田は増えよう。"
+   ]
+  },
+  {
+   "name": "藤原仲麻呂",
+   "at": "battlefield",
+   "guards": 4,
+   "guard": "恵美押勝の兵",
+   "lines": [
+    "瀬田の橋を渡れば近江の国府じゃ。",
+    "わしは恵美押勝。太師（太政大臣）であるぞ。"
+   ]
+  }
+ ],
+ "rules": [
+  {
+   "id": "an_kill_kamatari",
+   "title": "鎌足なき乙巳の変",
+   "trigger": {
+    "kind": "kill",
+    "id": "中臣鎌足"
+   },
+   "force": {
+    "q": "asuka_nara_02",
+    "choice": 0
+   },
+   "text": "中臣鎌足が倒れ、「今は即位を急ぐべきではない」と諫める者がいなくなった。中大兄皇子は蘇我入鹿を討つとその場で即位し、のちに都も近江へ。孝徳天皇の出番は消えた。"
+  },
+  {
+   "id": "an_kill_umako",
+   "title": "飛鳥寺、未完に終わる",
+   "trigger": {
+    "kind": "kill",
+    "id": "蘇我馬子"
+   },
+   "vars": {
+    "religion": -25,
+    "education": -10
+   },
+   "year": 600,
+   "text": "仏教の最大の後ろ盾・蘇我馬子が倒れ、飛鳥寺の造営は中断。檀越を失った寺は財も人手も尽き、物部の残党は「仏を祀ったたたり」と言いふらした。「篤く三宝を敬え」どころか、仏教そのものが朝廷から遠ざけられていった。"
+  },
+  {
+   "id": "an_kill_imoko",
+   "title": "国書、届かず",
+   "trigger": {
+    "kind": "kill",
+    "id": "小野妹子"
+   },
+   "force": {
+    "q": "asuka_nara_05",
+    "choice": 2
+   },
+   "text": "小野妹子が倒れ、代わりの使者は「日出づる処の天子」の国書をうまく取り繕えなかった。煬帝の怒りは解けず国交は断絶、留学生も留学僧も海を渡れなくなった。"
+  },
+  {
+   "id": "an_kill_moroe",
+   "title": "諸兄政権、崩壊",
+   "trigger": {
+    "kind": "kill",
+    "id": "橘諸兄"
+   },
+   "vars": {
+    "centralization": -20,
+    "court": -10
+   },
+   "year": 740,
+   "text": "政権を担っていた橘諸兄が倒れ、朝廷は大混乱。土地の管理も手が回らず、743年の法令をきっかけに班田収授はなし崩しに放棄されてしまった。"
+  },
+  {
+   "id": "an_destroy_daigokuden",
+   "title": "大極殿、崩落",
+   "trigger": {
+    "kind": "destroy",
+    "id": "capital",
+    "type": "hall",
+    "value": 400
+   },
+   "force": {
+    "q": "asuka_nara_06",
+    "choice": 3
+   },
+   "text": "平城京の大極殿が崩れ落ちた。もともと恭仁京・難波宮・紫香楽宮と都を転々としていた聖武天皇は「もう平城京には戻らぬ」と宣言し、大仏ともども紫香楽に腰を落ち着けた。"
+  },
+  {
+   "id": "an_destroy_horyuji",
+   "title": "法隆寺、再び失われる",
+   "trigger": [
+    {
+     "kind": "destroy",
+     "id": "temple",
+     "type": "pagoda"
+    },
+    {
+     "kind": "destroy",
+     "id": "temple",
+     "value": 350
+    }
+   ],
+   "vars": {
+    "religion": -25,
+    "education": -15
+   },
+   "year": 604,
+   "text": "『日本書紀』は670年に法隆寺が全焼したと記すが、今回の倒壊はあなたのせいだ。「仏の寺が崩れたのは神々の怒り」と噂され、十七条からも仏教を敬う条文が消えた。"
+  },
+  {
+   "id": "an_destroy_mizuki",
+   "title": "水城、決壊",
+   "trigger": {
+    "kind": "destroy",
+    "id": "castle",
+    "value": 300
+   },
+   "vars": {
+    "militarism": 20,
+    "warrior": 15,
+    "unity": -10
+   },
+   "year": 664,
+   "text": "白村江の敗戦後に築いた大宰府の水城が壊された。唐・新羅の来襲に怯えた豪族たちは私兵をかき集め、国じゅうが武装する物騒な時代になった。"
+  },
+  {
+   "id": "an_sink",
+   "title": "遣隋使船、沈没",
+   "trigger": {
+    "kind": "sink",
+    "min": 2
+   },
+   "vars": {
+    "open_asia": -30
+   },
+   "year": 607,
+   "text": "難波津を出た遣隋使の船が沈められた。隋に渡るのは命がけという評判が立ち、大陸との往来は細る一方。仏典も律令の知識も届かない。"
+  },
+  {
+   "id": "an_seta_bridge",
+   "title": "瀬田の唐橋、落ちる",
+   "trigger": {
+    "kind": "bridge",
+    "id": "battlefield"
+   },
+   "vars": {
+    "unity": -30,
+    "militarism": 10
+   },
+   "year": 672,
+   "text": "壬申の乱の決戦の地・瀬田の唐橋が落とされた。大海人皇子の軍は近江大津宮へ攻め込めず、戦いは長期化。国じゅうの豪族が二つに割れたまま奈良時代を迎え、聖武天皇は平城京の貴族を避けて紫香楽にこもった。"
+  },
+  {
+   "id": "an_massacre",
+   "title": "都の兵、総崩れ",
+   "trigger": {
+    "kind": "kill",
+    "type": "soldier",
+    "min": 30
+   },
+   "vars": {
+    "unity": -30,
+    "militarism": 10
+   },
+   "year": 700,
+   "text": "都を守る衛府の兵が謎の怪人に次々と打ち倒された。藤原広嗣の乱どころではない大混乱に、聖武天皇は都を転々とするほかなかった。"
+  },
+  {
+   "id": "an_fire",
+   "title": "平城京の大火",
+   "trigger": {
+    "kind": "fire",
+    "min": 10
+   },
+   "vars": {
+    "economy": -15,
+    "centralization": -25
+   },
+   "year": 710,
+   "text": "平城京の町並みが次々と燃え、市の蔵も官人の屋敷も灰になった。戸籍・計帳や班田図まで焼けて律令の土台が揺らぎ、743年の法令が出ると班田収授はそのまま打ち切られた。"
+  },
+  {
+   "id": "an_forge_umayado",
+   "title": "罰則入りの偽草案",
+   "trigger": {
+    "kind": "forge",
+    "id": "厩戸王"
+   },
+   "force": {
+    "q": "asuka_nara_01",
+    "choice": 1
+   },
+   "text": "草案の条文の末尾に、いつの間にか「違へば杖百」などの罰則が書き足されていた。すり替えに気づかないまま厩戸王が公布したので、十七条は道徳の訓戒ではなく刑罰つきの法典として伝わった。"
+  },
+  {
+   "id": "an_forge_suiko",
+   "title": "公布延期の偽詔",
+   "trigger": {
+    "kind": "forge",
+    "id": "推古天皇"
+   },
+   "force": {
+    "q": "asuka_nara_01",
+    "choice": 3
+   },
+   "text": "「十七条の公布はしばし待て」という偽の詔をつかまされた推古天皇の宮で、草案は棚ざらしに。成文の訓戒が世に出たのは、乙巳の変の後に中大兄皇子が改新の方針を示したときだった。"
+  },
+  {
+   "id": "an_fire_asukadera",
+   "title": "飛鳥寺、炎上",
+   "trigger": {
+    "kind": "destroy",
+    "id": "temple",
+    "type": "gate"
+   },
+   "vars": {
+    "religion": -30
+   },
+   "year": 600,
+   "text": "完成間近の飛鳥寺（法興寺）が崩れ落ちた。物部氏の残党は「異国の神を祀ったたたりだ」と言いふらし、動揺する群臣に押された厩戸王でさえ、仏教を国の柱にするのをためらった。"
+  },
+  {
+   "id": "an_sink_relics",
+   "title": "仏舎利、海に沈む",
+   "trigger": {
+    "kind": "sink",
+    "min": 1
+   },
+   "vars": {
+    "religion": -25
+   },
+   "year": 595,
+   "text": "百済から仏舎利と寺工・瓦博士を乗せた船が難波津の沖に沈んだ。飛鳥寺の塔に納める舎利も職人も失われ、「仏は海を渡れぬ神」と笑われて仏教は根付かなかった。"
+  },
+  {
+   "id": "an_destroy_oharida",
+   "title": "小墾田宮、倒壊",
+   "trigger": {
+    "kind": "destroy",
+    "id": "capital",
+    "value": 150
+   },
+   "vars": {
+    "centralization": -30
+   },
+   "year": 605,
+   "text": "推古天皇の小墾田宮が崩れ、冠位十二階の儀式も行えなくなった。大王の権威は地に落ち、豪族連合の筆頭・蘇我氏が遣隋使まで自分の名で送り出した。"
+  },
+  {
+   "id": "an_destroy_naniwa",
+   "title": "難波の客館、崩落",
+   "trigger": {
+    "kind": "destroy",
+    "id": "port",
+    "value": 200
+   },
+   "vars": {
+    "open_asia": -30
+   },
+   "year": 606,
+   "text": "外国の使節をもてなす難波の客館が壊された。答礼使を迎える場所もないと隋に侮られ、倭は礼法も知らぬまま強気の国書を送って国交を断たれた。"
+  },
+  {
+   "id": "an_kill_moriya_stray",
+   "title": "流れ矢、守屋を射る",
+   "trigger": {
+    "kind": "kill",
+    "id": "物部守屋",
+    "cause": [
+     "stray",
+     "crossfire"
+    ]
+   },
+   "vars": {
+    "religion": 35
+   },
+   "year": 590,
+   "text": "史実でも木の上から迹見赤檮の矢に射落とされた守屋が、今度は流れ矢で倒れた。排仏派が消えた朝廷では崇仏の蘇我氏の権威が大王をしのぎ、遣隋使も蘇我馬子の名で送られた。"
+  },
+  {
+   "id": "an_escort_oama",
+   "title": "吉野の皇子、都へ",
+   "trigger": {
+    "kind": "escort",
+    "id": "大海人皇子",
+    "to": "capital"
+   },
+   "force": {
+    "q": "asuka_nara_02",
+    "choice": 1
+   },
+   "text": "乙巳の変のその日、飛鳥の宮に大海人皇子が現れた。武勇の皇子が入鹿の兵を追い散らす姿に宮廷は熱狂し、皇極天皇の譲位を受けたのは兄ではなく弟のほうだった。"
+  },
+  {
+   "id": "an_kill_iruka_accident",
+   "title": "入鹿、思わぬ最期",
+   "trigger": {
+    "kind": "kill",
+    "id": "蘇我入鹿",
+    "cause": [
+     "horse",
+     "debris",
+     "stray",
+     "fire",
+     "explosion",
+     "world",
+     "vehicle",
+     "crossfire"
+    ]
+   },
+   "force": {
+    "q": "asuka_nara_02",
+    "choice": 1
+   },
+   "text": "入鹿が乙巳の変を待たずに事故で倒れた。中大兄皇子の「入鹿を斬った功」は消え、混乱する宮廷では武勇で知られる大海人皇子を推す声が圧倒した。"
+  },
+  {
+   "id": "an_kill_emishi_fire",
+   "title": "『国記』も灰に",
+   "trigger": {
+    "kind": "kill",
+    "id": "蘇我蝦夷",
+    "cause": [
+     "fire",
+     "explosion"
+    ]
+   },
+   "vars": {
+    "education": -30
+   },
+   "year": 645,
+   "text": "史実では邸に火を放って自害した蝦夷とともに『天皇記』が焼け、『国記』だけが船恵尺に救われた。今回は炎が早すぎて『国記』も灰に。記録の技が途絶え、庚午年籍は壬申の乱の後までずれ込んだ。"
+  },
+  {
+   "id": "an_kill_soldiers_capital",
+   "title": "宮の衛士、倒れる",
+   "trigger": {
+    "kind": "kill",
+    "type": "soldier",
+    "at": "capital",
+    "min": 15
+   },
+   "vars": {
+    "warrior": 30
+   },
+   "year": 644,
+   "text": "飛鳥の宮を守る衛士が次々と倒された。蘇我氏も皇子たちも東国の武人を呼び寄せて身を守り、乙巳の変の後には武勇の大海人皇子を推す声が宮廷を覆った。"
+  },
+  {
+   "id": "an_destroy_village",
+   "title": "戸籍の里、壊滅",
+   "trigger": {
+    "kind": "destroy",
+    "id": "village",
+    "value": 150
+   },
+   "vars": {
+    "centralization": -30
+   },
+   "year": 668,
+   "text": "戸籍づくりの拠点となる里の倉が壊され、郡司たちは「人を書き記すどころではない」と協力を拒んだ。全国的な戸籍は壬申の乱の後までずれ込み、班田収授も最後まで根付かなかった。"
+  },
+  {
+   "id": "an_forge_nakanooe",
+   "title": "偽りの遺詔",
+   "trigger": {
+    "kind": "forge",
+    "id": "中大兄皇子"
+   },
+   "force": {
+    "q": "asuka_nara_03",
+    "choice": 2
+   },
+   "text": "「弟を討て」と読める偽の書状をつかまされた中大兄皇子は、百済救援どころではなくなった。疑心暗鬼の兄弟は662年に兵を挙げ、壬申の乱が白村江の戦いより前に起きた。"
+  },
+  {
+   "id": "an_kill_hirafu_accident",
+   "title": "比羅夫、落馬す",
+   "trigger": {
+    "kind": "kill",
+    "id": "阿倍比羅夫",
+    "cause": [
+     "horse",
+     "debris",
+     "stray",
+     "fire",
+     "explosion",
+     "world",
+     "vehicle",
+     "crossfire"
+    ]
+   },
+   "vars": {
+    "open_asia": -30
+   },
+   "year": 660,
+   "text": "日本海の遠征から戻った阿倍比羅夫が思わぬ事故で倒れた。外洋の船団を動かせる将を失ったため、倭は海の向こうと疎遠になり、白村江への出兵は壬申の乱の後までずれ込んだ。"
+  },
+  {
+   "id": "an_sink_fleet",
+   "title": "救援船団、沈む",
+   "trigger": {
+    "kind": "sink",
+    "min": 4
+   },
+   "vars": {
+    "open_asia": -30
+   },
+   "year": 660,
+   "text": "百済救援のため難波津に集めた軍船が、次々と沈められた。船を造り直すうちに百済の遺臣たちは散り散りになり、救うべき相手を失った出兵は、壬申の乱が終わるまで見送られた。"
+  },
+  {
+   "id": "an_kill_sakimori",
+   "title": "防人、倒れる",
+   "trigger": {
+    "kind": "kill",
+    "type": "soldier",
+    "at": "castle",
+    "min": 12
+   },
+   "vars": {
+    "militarism": 25,
+    "warrior": 20
+   },
+   "year": 665,
+   "text": "大宰府を守る防人が次々と倒された。朝廷は東国からさらに兵をかき集め、国じゅうが武装した。唐・新羅の来襲に備えて東国の兵が大勢集められたまま武の気風が強まり、のちの壬申の乱では双方がはるかに大きな軍勢を動かすことになった。"
+  },
+  {
+   "id": "an_destroy_yoshino",
+   "title": "吉野の隠れ家、崩る",
+   "trigger": {
+    "kind": "destroy",
+    "id": "mountain",
+    "value": 150
+   },
+   "vars": {
+    "set": {
+     "capital": "近江"
+    }
+   },
+   "year": 671,
+   "text": "大海人皇子が出家して籠もるはずの吉野の宮が壊された。行き場を失った皇子は近江にとどまって挙兵できず、大友皇子の近江朝廷が続いて都は近江に置かれた。"
+  },
+  {
+   "id": "an_fire_handen",
+   "title": "班田図、焼失",
+   "trigger": {
+    "kind": "fire",
+    "at": "village",
+    "min": 3
+   },
+   "force": {
+    "q": "asuka_nara_04",
+    "choice": 1
+   },
+   "text": "里の役所に保管された班田図と戸籍が燃えた。口分田の割り当てを作り直す手間を嫌った朝廷は、743年の法令が出るとこれ幸いと班田収授をただちに打ち切ってしまった。"
+  },
+  {
+   "id": "an_forge_nagaya",
+   "title": "一代限りの偽草案",
+   "trigger": {
+    "kind": "forge",
+    "id": "長屋王"
+   },
+   "force": {
+    "q": "asuka_nara_04",
+    "choice": 0
+   },
+   "text": "長屋王が受け取った三世一身法の草案は、あなたの手で「一身に限る」と書き換えられていた。灌漑施設を新たに造って開墾しても本人一代しか私有できず、開墾は少しも進まなかった。"
+  },
+  {
+   "id": "an_escort_yamabe",
+   "title": "幼い皇子、宮へ",
+   "trigger": {
+    "kind": "escort",
+    "id": "山部王",
+    "to": "capital"
+   },
+   "force": {
+    "q": "asuka_nara_04",
+    "choice": 2
+   },
+   "text": "宮に連れてこられた6歳の山部王は、詔の木簡を手に取って朗々と読み上げた。居並ぶ貴族は大笑いしたが、記録には墾田永年私財法が桓武天皇の名で残った。"
+  },
+  {
+   "id": "an_escort_ganjin",
+   "title": "鑑真、ひと足早く",
+   "trigger": {
+    "kind": "escort",
+    "id": "鑑真",
+    "to": "port"
+   },
+   "force": {
+    "q": "asuka_nara_06",
+    "choice": 1
+   },
+   "text": "5度の渡航失敗も、失明もなかった。難波津まで無事に送り届けられた鑑真が国分寺建立の詔より前に来日したため、詔と同時に東大寺に戒壇を設けることが命じられた。"
+  },
+  {
+   "id": "an_fire_heijo",
+   "title": "平城京、炎上",
+   "trigger": {
+    "kind": "fire",
+    "at": "capital",
+    "min": 5
+   },
+   "force": {
+    "q": "asuka_nara_06",
+    "choice": 3
+   },
+   "text": "平城宮の殿舎が燃え上がった。もともと都を転々としていた聖武天皇は、焼けた都に戻る気をなくし、大仏の完成した紫香楽に都を置き続けた。"
+  },
+  {
+   "id": "an_destroy_todaiji",
+   "title": "東大寺、崩落",
+   "trigger": {
+    "kind": "destroy",
+    "id": "temple",
+    "value": 800
+   },
+   "vars": {
+    "religion": -30,
+    "court": 35
+   },
+   "year": 760,
+   "text": "大仏殿まで崩れ落ち、南都の大寺院は再建の費用を貴族に頼るほかなかった。仏教の力は衰え、権威を強めた朝廷は末法の世にも浄土教を禁じて神祇と南都の祈りだけを認めた。"
+  },
+  {
+   "id": "an_kill_nakamaro",
+   "title": "押勝、瀬田に散る",
+   "trigger": {
+    "kind": "kill",
+    "id": "藤原仲麻呂"
+   },
+   "vars": {
+    "centralization": 30
+   },
+   "year": 764,
+   "text": "史実では瀬田橋を焼かれて近江国府に入れず、琵琶湖西岸を北へ逃れた末に討たれた恵美押勝が、ここで倒れた。専権をふるう者が早く消え、律令の公地公民は8世紀末までほとんど崩れなかった。"
+  },
+  {
+   "id": "an_alt_give_umako_gun",
+   "title": "鉄砲で豪族を威圧",
+   "trigger": {
+    "kind": "give",
+    "id": "蘇我馬子",
+    "item": "鉄砲"
+   },
+   "force": {
+    "q": "asuka_nara_01",
+    "choice": 1
+   },
+   "text": "鉄砲の威力に味をしめた馬子は「言うことを聞かぬ豪族は撃つ」と言い出した。厩戸王の十七条にも、心構えではなく違反者への刑罰が細かく書き込まれた。"
+  },
+  {
+   "id": "an_alt_escort_moriya",
+   "title": "守屋、宮へ招かれる",
+   "trigger": {
+    "kind": "escort",
+    "id": "物部守屋",
+    "to": "capital"
+   },
+   "vars": {
+    "set": {
+     "ruler": "物部"
+    }
+   },
+   "year": 586,
+   "text": "あなたが物部守屋を大王の宮へ連れてくると、守屋は崇仏派より先に次の大王を擁立してしまった。軍事氏族の物部氏が朝廷を握り、十七条は刑罰で豪族を従わせる法典になった。"
+  },
+  {
+   "id": "an_alt_escort_umayado",
+   "title": "太子、難波津へ",
+   "trigger": {
+    "kind": "escort",
+    "id": "厩戸王",
+    "to": "port"
+   },
+   "force": {
+    "q": "asuka_nara_01",
+    "choice": 3
+   },
+   "text": "難波津に連れ出された厩戸王は「自ら隋を見てくる」と言い出し、604年の起草どころではなくなった。成文の訓戒は乙巳の変の後、中大兄皇子が改新の方針として示した。"
+  },
+  {
+   "id": "an_alt_persuade_kawakatsu",
+   "title": "秦氏、筆を置く",
+   "trigger": {
+    "kind": "persuade",
+    "id": "秦河勝",
+    "arg": "鎖国を勧める"
+   },
+   "vars": {
+    "education": -25
+   },
+   "year": 603,
+   "text": "大陸の学問から手を引くよう説かれた秦河勝は、一族の文筆の者を山背の田畑に戻した。漢文を書ける者が宮から消え、十七条を起草できる人材がいなかった。"
+  },
+  {
+   "id": "an_alt_give_pei_map",
+   "title": "裴世清の地図",
+   "trigger": {
+    "kind": "give",
+    "id": "裴世清",
+    "item": "世界地図"
+   },
+   "force": {
+    "q": "asuka_nara_05",
+    "choice": 1
+   },
+   "text": "地図を見た裴世清は「この島国は隋の東の藩屏にちょうどよい」と煬帝に上奏した。倭王は冊封を受けて将軍号を授かり、対等外交の国書は幻となった。"
+  },
+  {
+   "id": "an_alt_persuade_umayado_loyal",
+   "title": "大国への忠義",
+   "trigger": {
+    "kind": "persuade",
+    "id": "厩戸王",
+    "arg": "忠義を説く"
+   },
+   "force": {
+    "q": "asuka_nara_05",
+    "choice": 1
+   },
+   "text": "「天子は天下に一人」と忠義を説かれた厩戸王は、600年の遣隋使が文帝に「義理なし」と退けられた苦い記憶もあって、「日出づる処の天子」の一句を削って臣従の国書を書かせた。倭王は5世紀の倭の五王のように隋の将軍号を受けた。"
+  },
+  {
+   "id": "an_alt_give_fuhito_box",
+   "title": "不比等の千両箱",
+   "trigger": {
+    "kind": "give",
+    "id": "藤原不比等",
+    "item": "千両箱"
+   },
+   "vars": {
+    "court": 30
+   },
+   "year": 718,
+   "text": "千両箱の財力で、藤原氏は娘の宮子・光明子を通じて皇室と深く結びついた。貴族の力が強まりすぎるのを恐れた朝廷は、開墾地の私有を本人一代しか認めなかった。"
+  },
+  {
+   "id": "an_alt_forge_muchimaro",
+   "title": "偽の太政官符",
+   "trigger": {
+    "kind": "forge",
+    "id": "藤原武智麻呂"
+   },
+   "force": {
+    "q": "asuka_nara_04",
+    "choice": 0
+   },
+   "text": "「開墾地は一身に限る」という偽の太政官符をつかまされた武智麻呂は、そのまま諸国に下した。三世一身法は、灌漑施設を新しく造っても一代限りという中身で伝わった。"
+  },
+  {
+   "id": "an_alt_persuade_nakamaro",
+   "title": "押勝の改革",
+   "trigger": {
+    "kind": "persuade",
+    "id": "藤原仲麻呂",
+    "arg": "改革を勧める"
+   },
+   "vars": {
+    "court": 30,
+    "centralization": -25
+   },
+   "year": 760,
+   "text": "仲麻呂は養老律令を施行し、官名まで唐風に改めた。貴族は豊かになったが国司の統制はかえって緩み、8世紀のうちに勅旨田や私的な大土地所有が広がった。"
+  },
+  {
+   "id": "an_alt_give_naramaro_gun",
+   "title": "奈良麻呂の鉄砲隊",
+   "trigger": {
+    "kind": "give",
+    "id": "橘奈良麻呂",
+    "item": "鉄砲"
+   },
+   "vars": {
+    "warrior": 35,
+    "centralization": -25
+   },
+   "year": 757,
+   "text": "鉄砲を得た奈良麻呂の挙兵は都を二分する内戦になった。地方の豪族は私兵を蓄えて国司に従わなくなり、のちに東国の武士団が独立政権を築く下地になった。"
+  },
+  {
+   "id": "an_alt_escort_dokyo",
+   "title": "道鏡、吉野へ",
+   "trigger": {
+    "kind": "escort",
+    "id": "道鏡",
+    "to": "mountain"
+   },
+   "vars": {
+    "religion": -25,
+    "court": 35
+   },
+   "year": 770,
+   "text": "道鏡が吉野の山奥へ姿を消すと、朝廷は「僧に政治を任せるな」と寺院を厳しく締めつけた。仏教が衰えるほど朝廷の権威は強まり、のちの末法の世にも浄土教は許されなかった。"
+  }
+ ]
+}

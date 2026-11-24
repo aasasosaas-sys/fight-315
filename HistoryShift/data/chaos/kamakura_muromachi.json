@@ -1,0 +1,882 @@
+{
+ "eraId": "kamakura_muromachi",
+ "figures": [
+  {
+   "name": "北条時宗",
+   "at": "capital",
+   "guards": 4,
+   "guard": "鎌倉の御家人",
+   "lines": [
+    "元の国書には返事をせぬ。九州の守りを固めよ。"
+   ]
+  },
+  {
+   "name": "北条義時",
+   "at": "capital",
+   "guards": 3,
+   "guard": "北条家の郎党",
+   "lines": [
+    "院宣が何だというのだ。鎌倉殿の御恩を忘れるな。"
+   ]
+  },
+  {
+   "name": "足利尊氏",
+   "at": "castle",
+   "guards": 4,
+   "guard": "足利家の武者",
+   "lines": [
+    "帝の新政には、武士の恩賞が足りぬ…。"
+   ]
+  },
+  {
+   "name": "楠木正成",
+   "at": "mountain",
+   "guards": 3,
+   "guard": "楠木党",
+   "lines": [
+    "帝のために、この命を捧げましょう。",
+    "千早城の守りは、知恵でするものですぞ。"
+   ]
+  },
+  {
+   "name": "新田義貞",
+   "at": "capital",
+   "guards": 3,
+   "guard": "新田家の武者",
+   "lines": [
+    "稲村ヶ崎に太刀を投じ、潮を引かせてみせよう。"
+   ]
+  },
+  {
+   "name": "高師直",
+   "at": "castle",
+   "guards": 3,
+   "guard": "高家の郎党",
+   "lines": [
+    "恩賞は自分の腕で取るものよ。"
+   ]
+  },
+  {
+   "name": "足利義満",
+   "at": "temple",
+   "guards": 4,
+   "guard": "幕府の奉公衆",
+   "lines": [
+    "明と国交を開けば、銅銭がどっさり入るぞ。"
+   ]
+  },
+  {
+   "name": "今川了俊",
+   "at": "port",
+   "guards": 3,
+   "guard": "九州探題の兵",
+   "lines": [
+    "倭寇を取り締まらねば、明も朝鮮も相手にしてくれぬ。"
+   ]
+  },
+  {
+   "name": "赤松満祐",
+   "at": "castle",
+   "guards": 3,
+   "guard": "赤松家の兵",
+   "lines": [
+    "次は我が身か……。将軍家の猿楽の宴、支度を急げ。"
+   ]
+  },
+  {
+   "name": "細川勝元",
+   "at": "castle",
+   "guards": 3,
+   "guard": "細川家の兵",
+   "lines": [
+    "山名殿とは、もはや戦うほかあるまい。"
+   ]
+  },
+  {
+   "name": "山名宗全",
+   "at": "village",
+   "guards": 3,
+   "guard": "山名家の兵",
+   "lines": [
+    "細川の若造に好きにはさせぬ。"
+   ]
+  },
+  {
+   "name": "富樫政親",
+   "at": "village",
+   "guards": 3,
+   "guard": "富樫家の兵",
+   "lines": [
+    "門徒どもが我が物顔に……加賀の守護は誰だと思っておる。"
+   ]
+  }
+ ],
+ "rules": [
+  {
+   "id": "km_kill_yoritomo",
+   "title": "頼朝、旗揚げ早々に倒れる",
+   "trigger": {
+    "kind": "kill",
+    "id": "源頼朝",
+    "cause": [
+     "player",
+     "shot",
+     "crossfire",
+     "explosion",
+     "vehicle",
+     "plane",
+     "world",
+     "stray",
+     "fire",
+     "debris"
+    ]
+   },
+   "vars": {
+    "court": 30,
+    "warrior": -30
+   },
+   "year": 1190,
+   "text": "源頼朝が、幕府の土台を固める前に倒れた。御家人をまとめる鎌倉殿を失った東国武士はばらばらになり、「日本国第一の大天狗」後白河法皇の院宣が再び天下を動かす。武家政権は京都の顔色をうかがう存在に逆戻りした。"
+  },
+  {
+   "id": "km_kill_yoritomo_horse",
+   "title": "暴れ馬、歴史を早送り",
+   "trigger": {
+    "kind": "kill",
+    "id": "源頼朝",
+    "cause": "horse"
+   },
+   "vars": {
+    "warrior": -30
+   },
+   "year": 1190,
+   "text": "暴れ馬に蹴られて頼朝が倒れた。史実でも頼朝は落馬がもとで亡くなったとされるが、それが十年早まったことになる。幼い頼家を支える体制は整わず、鎌倉の武士の力は衰えた。禅を保護する有力な武家も育たなかった。"
+  },
+  {
+   "id": "km_destroy_gosho",
+   "title": "鎌倉御所、崩落",
+   "trigger": {
+    "kind": "destroy",
+    "id": "capital",
+    "value": 500
+   },
+   "vars": {
+    "court": 30,
+    "warrior": -20
+   },
+   "year": 1219,
+   "text": "鎌倉の幕府御所が崩れ落ちた。実朝暗殺後の混乱に追い打ちをかけられた幕府は、京から迎える将軍の御所すら用意できない。院の権威はうなぎのぼりで、御家人は京都大番役で都の警護に駆り出された。"
+  },
+  {
+   "id": "km_forge_gotoba",
+   "title": "偽院宣、後白河院の名で",
+   "trigger": {
+    "kind": "forge",
+    "id": "後鳥羽上皇"
+   },
+   "force": {
+    "q": "kamakura_muromachi_01",
+    "choice": 0
+   },
+   "text": "「後白河院の院宣」なる偽の書状を手にした後鳥羽上皇は、これぞ先例と喜び、祖父の名で北条義時追討を命じた。実際の承久の乱では、後鳥羽上皇自身が義時追討の院宣・宣旨を出している。"
+  },
+  {
+   "id": "km_kill_yoshitoki",
+   "title": "追討の的、先に消える",
+   "trigger": {
+    "kind": "kill",
+    "id": "北条義時"
+   },
+   "vars": {
+    "court": 35
+   },
+   "year": 1220,
+   "text": "北条義時が承久の乱より前に倒れた。追討すべき相手がいなくなったのに院の権威は高まるばかり。後鳥羽上皇は後白河院の院宣を先例に掲げ、幕府に圧力をかけ続けた。史実で追討の的になったのは、この義時だった。"
+  },
+  {
+   "id": "km_kill_hideyasu",
+   "title": "院方、総崩れ",
+   "trigger": {
+    "kind": "kill",
+    "id": "藤原秀康"
+   },
+   "force": {
+    "q": "kamakura_muromachi_01",
+    "choice": 2
+   },
+   "text": "院方の大将・藤原秀康が戦う前に倒れ、院の軍勢はあっけなく瓦解した。戦わずに屈した朝廷には荘園の裁判権を守る交渉の余地も残らず、幕府はのちに定めた御成敗式目を公家の荘園にまでそのまま押しつけた。史実の式目は御家人社会向けの法だった。"
+  },
+  {
+   "id": "km_persuade_gotoba_betray",
+   "title": "皇統、割れる",
+   "trigger": {
+    "kind": "persuade",
+    "id": "後鳥羽上皇",
+    "arg": "裏切りを促す"
+   },
+   "vars": {
+    "court": -35,
+    "unity": -25
+   },
+   "year": 1220,
+   "text": "後鳥羽上皇は自分の皇子たちを互いに争わせ、皇位の系統は早くからいくつにも割れた。朝廷の力は衰え、のちに倒幕を企てる系統の天皇が13世紀前半に即位。承久の乱に敗れて隠岐に流されたのは、なんと後醍醐天皇だった。"
+  },
+  {
+   "id": "km_steal_gotoba",
+   "title": "院宣、行方不明",
+   "trigger": {
+    "kind": "steal",
+    "id": "後鳥羽上皇"
+   },
+   "vars": {
+    "court": -30,
+    "unity": -25
+   },
+   "year": 1220,
+   "text": "院宣の束が盗まれ、後鳥羽上皇は命令書を出せなくなった。文書の出ない院政は形ばかりとなり、朝廷の権威は地に落ちる。皇位をめぐる争いが激しくなったせいで、隠岐に流される天皇の顔ぶれまで入れ替わった。"
+  },
+  {
+   "id": "km_bridge_uji",
+   "title": "宇治橋、落ちる",
+   "trigger": {
+    "kind": "destroy",
+    "id": "castle",
+    "type": "gate"
+   },
+   "vars": {
+    "court": 30
+   },
+   "year": 1221,
+   "text": "京の入口を守る門と橋が壊され、承久の乱で宇治川・瀬田川を渡るはずの幕府軍は立ち往生した。院方は京の守りを固め、院と摂関家の権威は強いまま。義時追討の命令は後白河院の院宣を先例として出された。"
+  },
+  {
+   "id": "km_escort_dogen_village",
+   "title": "道元、惣村へ",
+   "trigger": {
+    "kind": "escort",
+    "id": "道元",
+    "to": "village"
+   },
+   "force": {
+    "q": "kamakura_muromachi_05",
+    "choice": 0
+   },
+   "text": "近江の村で田畑に働く人々に囲まれた道元は、「坐禅する暇など民にはない」と悟り、念仏を勧めるようになった。史実の道元は只管打坐（ひたすら坐禅）を説き、越前に永平寺を開いた。"
+  },
+  {
+   "id": "km_escort_eisai_mountain",
+   "title": "栄西、山にこもる",
+   "trigger": {
+    "kind": "escort",
+    "id": "栄西",
+    "to": "mountain"
+   },
+   "force": {
+    "q": "kamakura_muromachi_05",
+    "choice": 3
+   },
+   "text": "吉野の山奥の静けさが、栄西はすっかり気に入った。幕府にも朝廷にも近づかず山中で禅を広めたため、禅は権力者の保護を得られなかった。史実の栄西は北条政子の保護で寿福寺を、京都に建仁寺を開いている。"
+  },
+  {
+   "id": "km_kill_tokiyori",
+   "title": "禅の保護者、消える",
+   "trigger": {
+    "kind": "kill",
+    "id": "北条時頼"
+   },
+   "force": {
+    "q": "kamakura_muromachi_05",
+    "choice": 1
+   },
+   "text": "執権北条時頼が倒れ、宋の禅僧蘭渓道隆を招いて建長寺を開く者はいなかった。比叡山の強訴に押された幕府は「仏法を乱す」と新しい宗派をすべて禁じ、延暦寺や興福寺だけを保護した。"
+  },
+  {
+   "id": "km_forge_tokiyori",
+   "title": "偽の強訴状",
+   "trigger": {
+    "kind": "forge",
+    "id": "北条時頼"
+   },
+   "force": {
+    "q": "kamakura_muromachi_05",
+    "choice": 1
+   },
+   "text": "「新宗派を禁じねば、神輿を担いで鎌倉に押し寄せる」――比叡山の名をかたる偽の書状に時頼は震え上がり、幕府は新しい宗派をすべて禁じた。史実の幕府は禅宗を保護し、日蓮は流罪となったが、この世界では禅寺の鐘さえ鳴らない。"
+  },
+  {
+   "id": "km_sink_song_ship",
+   "title": "宋船、帰らず",
+   "trigger": {
+    "kind": "sink",
+    "min": 1
+   },
+   "vars": {
+    "open_asia": -30,
+    "religion": 35,
+    "centralization": 20
+   },
+   "year": 1250,
+   "text": "博多津の宋船が沈められ、渡来僧も宋の書物も届かなくなった。禅宗は根づかず、旧仏教の大寺院が幕府の宗教政策を握った。大陸の情報も途絶え、のちに元の脅威を軽く見た時宗は九州の御家人を京都大番役に回した。"
+  },
+  {
+   "id": "km_massacre_kamakura",
+   "title": "鎌倉の御家人、総崩れ",
+   "trigger": {
+    "kind": "kill",
+    "type": "soldier",
+    "at": "capital",
+    "min": 12
+   },
+   "vars": {
+    "warrior": -30
+   },
+   "year": 1247,
+   "text": "鎌倉の御家人が謎の怪人に次々と打ち倒され、宝治合戦の前に幕府の武力はがた落ちになった。禅を保護できる有力な武家はいなくなり、栄西が伝えた臨済の禅は後ろ盾を得られず、山中でひっそりと広まるしかなかった。"
+  },
+  {
+   "id": "km_kill_tokimune",
+   "title": "執権不在の元寇",
+   "trigger": {
+    "kind": "kill",
+    "id": "北条時宗",
+    "cause": [
+     "player",
+     "shot",
+     "crossfire",
+     "explosion",
+     "vehicle",
+     "plane",
+     "world"
+    ]
+   },
+   "vars": {
+    "unity": -30,
+    "centralization": -15
+   },
+   "year": 1270,
+   "text": "執権・北条時宗が倒れ、元の国書への返事をめぐって鎌倉は大揉めに。御家人の動員も遅れ、幕府の威信は大きく揺らいだ。御家人の分裂はのちの南北朝の内乱まで尾を引き、国内はなかなかまとまらなかった。"
+  },
+  {
+   "id": "km_kill_tokimune_accident",
+   "title": "時宗、思わぬ事故に",
+   "trigger": {
+    "kind": "kill",
+    "id": "北条時宗",
+    "cause": [
+     "stray",
+     "debris",
+     "fire",
+     "horse"
+    ]
+   },
+   "force": {
+    "q": "kamakura_muromachi_02",
+    "choice": 1
+   },
+   "text": "思わぬ事故で北条時宗が倒れた。若い執権の代わりに評定を仕切ったのは、名執権泰時の路線を受け継ぐ長老たち。朝廷の意向をうかがう彼らは、九州の御家人にまず京都大番役を課した。史実では時宗が異国警固番役を課している。"
+  },
+  {
+   "id": "km_forge_tokimune",
+   "title": "偽の和平の国書",
+   "trigger": {
+    "kind": "forge",
+    "id": "北条時宗"
+   },
+   "force": {
+    "q": "kamakura_muromachi_02",
+    "choice": 2
+   },
+   "text": "「元は日本と仲良くしたいだけ」。偽の国書を信じて安心した時宗は九州の守りを解き、御家人をいつもどおり京都大番役に回した。史実の幕府が課した異国警固番役も、博多湾の石築地も、この世界には存在しない。"
+  },
+  {
+   "id": "km_destroy_hakata",
+   "title": "博多津、壊滅",
+   "trigger": {
+    "kind": "destroy",
+    "id": "port",
+    "value": 300
+   },
+   "vars": {
+    "open_asia": -30,
+    "commerce": -15
+   },
+   "year": 1268,
+   "text": "博多津の町並みが壊され、宋の商人たちは寄りつかなくなった。大陸の情報が途絶えた幕府は元の軍事力を知らず、時宗は九州の御家人を京都の警備に回してしまった。"
+  },
+  {
+   "id": "km_destroy_rokuhara",
+   "title": "六波羅探題、陥落",
+   "trigger": {
+    "kind": "destroy",
+    "id": "castle",
+    "value": 400
+   },
+   "vars": {
+    "court": 30,
+    "warrior": -20
+   },
+   "year": 1222,
+   "text": "京都で朝廷を見張る六波羅探題が崩された。監視の目がなくなったとたん朝廷は息を吹き返し、西国の御家人は幕府の命令を聞かなくなった。"
+  },
+  {
+   "id": "km_destroy_bori",
+   "title": "博多の守り、崩壊",
+   "trigger": {
+    "kind": "destroy",
+    "id": "port",
+    "value": 400
+   },
+   "vars": {
+    "unity": -15,
+    "warrior": -10
+   },
+   "year": 1280,
+   "text": "博多の町と湾岸の守りが壊され、石築地（元寇防塁）を築く人手も資材も失われた。弘安の役では元軍がやすやすと上陸した。御家人たちは命がけで戦ったが恩賞はなく、幕府への不満が爆発した。"
+  },
+  {
+   "id": "km_sink",
+   "title": "博多の貿易船、海の藻屑に",
+   "trigger": {
+    "kind": "sink",
+    "min": 3
+   },
+   "vars": {
+    "open_asia": -30,
+    "commerce": -10
+   },
+   "year": 1270,
+   "text": "博多津の唐船が次々と沈められた。「日本に行く船は帰ってこない」と大陸の商人が博多を避けるようになったので、宋銭も禅僧も届かなくなった。"
+  },
+  {
+   "id": "km_kill_takauji",
+   "title": "尊氏なき建武の新政",
+   "trigger": {
+    "kind": "kill",
+    "id": "足利尊氏"
+   },
+   "force": {
+    "q": "kamakura_muromachi_06",
+    "choice": 1
+   },
+   "text": "足利尊氏が倒れ、後醍醐天皇に背く有力武士はいなくなった。恩賞に不満な武士たちも結集する旗頭がなく、建武の新政はなんだかんだで長続きした。"
+  },
+  {
+   "id": "km_escort_takauji_kamakura",
+   "title": "尊氏、鎌倉に居座る",
+   "trigger": {
+    "kind": "escort",
+    "id": "足利尊氏",
+    "to": "capital"
+   },
+   "force": {
+    "q": "kamakura_muromachi_06",
+    "choice": 3
+   },
+   "text": "鎌倉の御所跡に立った尊氏は、坂東武者に担がれてすっかり居心地がよくなった。京都に戻らず鎌倉で幕府を開いたのはそのためだ。史実の建武式目も、冒頭で「幕府は鎌倉に置くべきか」を論じている。"
+  },
+  {
+   "id": "km_forge_takauji",
+   "title": "偽の綸旨、鎌倉に留まれ",
+   "trigger": {
+    "kind": "forge",
+    "id": "足利尊氏"
+   },
+   "force": {
+    "q": "kamakura_muromachi_06",
+    "choice": 3
+   },
+   "text": "「此比都ニハヤル物、夜討、強盗、謀綸旨」――二条河原落書が笑うほど偽の綸旨はありふれていた。だから「鎌倉にて東国を治めよ」というあなたの偽綸旨も疑われず、尊氏はこれ幸いと鎌倉に幕府を開いて京都へは戻らなかった。"
+  },
+  {
+   "id": "km_kill_yoshisada",
+   "title": "新田義貞、鎌倉に入れず",
+   "trigger": {
+    "kind": "kill",
+    "id": "新田義貞",
+    "cause": [
+     "player",
+     "shot",
+     "crossfire",
+     "explosion",
+     "vehicle",
+     "plane",
+     "world"
+    ]
+   },
+   "force": {
+    "q": "kamakura_muromachi_06",
+    "choice": 3
+   },
+   "text": "新田義貞が倒れ、京で尊氏と張り合う武将はいなくなった。後醍醐天皇は尊氏を東国に封じ込めるしかなく、尊氏は鎌倉に幕府を開いて京都に戻らず全国を治めた。"
+  },
+  {
+   "id": "km_kill_yoshisada_stray",
+   "title": "流れ矢の皮肉",
+   "trigger": {
+    "kind": "kill",
+    "id": "新田義貞",
+    "cause": [
+     "stray",
+     "horse",
+     "fire",
+     "debris"
+    ]
+   },
+   "force": {
+    "q": "kamakura_muromachi_06",
+    "choice": 3
+   },
+   "text": "流れ弾か暴れ馬か、義貞は思わぬ形で倒れた。史実でも義貞は越前藤島で流れ矢に当たり、馬ごと泥田に倒れて最期を遂げている。その最期が早まり、東国の武士は尊氏のもとに一本化。鎌倉の足利幕府が誕生した。"
+  },
+  {
+   "id": "km_kill_masashige",
+   "title": "南朝の名将、散る",
+   "trigger": {
+    "kind": "kill",
+    "id": "楠木正成"
+   },
+   "vars": {
+    "court": -30,
+    "warrior": 35
+   },
+   "year": 1332,
+   "text": "楠木正成が千早城で戦う前に倒れた。幕府の大軍を釘付けにする者がいなくなり、倒幕は東国の武士だけの手柄に。京の朝廷の力は伸びず、恩賞を握った尊氏は鎌倉で幕府を開いた。"
+  },
+  {
+   "id": "km_kill_tadayoshi",
+   "title": "直義なき足利家",
+   "trigger": {
+    "kind": "kill",
+    "id": "足利直義"
+   },
+   "force": {
+    "q": "kamakura_muromachi_06",
+    "choice": 1
+   },
+   "text": "足利直義が倒れ、兄に離反を迫る強硬派はいなくなった。護良親王の殺害も中先代の乱での独断もなく、人のよい尊氏は帝に従い続けた。建武の新政は長く続いた。"
+  },
+  {
+   "id": "km_forge_godaigo",
+   "title": "偽りの先例集",
+   "trigger": {
+    "kind": "forge",
+    "id": "後醍醐天皇"
+   },
+   "force": {
+    "q": "kamakura_muromachi_06",
+    "choice": 0
+   },
+   "text": "後醍醐天皇が理想としたのは醍醐・村上天皇の「延喜・天暦の治」、つまり摂関を置かない親政だった。ところがあなたの渡した偽の先例集には「摂関を置くのが古来の例」とある。先例を重んじる天皇はこれに従って摂政・関白を置き、自らは上皇として院政を行った。"
+  },
+  {
+   "id": "km_escort_godaigo_yoshino",
+   "title": "吉野行き、早すぎた",
+   "trigger": {
+    "kind": "escort",
+    "id": "後醍醐天皇",
+    "to": "mountain"
+   },
+   "vars": {
+    "unity": -35
+   },
+   "year": 1335,
+   "text": "後醍醐天皇が史実より早く吉野の山に入り、そこで朝廷を開いた。南北の朝廷が並び立つ時間が延びた分だけ内乱も長引き、国内はまとまらない。明との交渉に乗り出す余裕のないまま、義満は世を去った。"
+  },
+  {
+   "id": "km_fire_kamakura",
+   "title": "鎌倉、炎上",
+   "trigger": {
+    "kind": "fire",
+    "at": "capital",
+    "min": 5
+   },
+   "vars": {
+    "court": 30,
+    "warrior": -25
+   },
+   "year": 1330,
+   "text": "鎌倉の町が燃え、幕府の御所も御家人の屋敷も焼け落ちた。武家の都を失った武士たちはばらばらになり、京の朝廷の力が強まった。尊氏も天皇に背く理由を見いだせず、建武の新政は天皇親政として長く続いた。"
+  },
+  {
+   "id": "km_kill_yoshimitsu",
+   "title": "勘合貿易、先送り",
+   "trigger": {
+    "kind": "kill",
+    "id": "足利義満",
+    "cause": [
+     "player",
+     "shot",
+     "crossfire",
+     "explosion",
+     "vehicle",
+     "plane",
+     "world",
+     "stray",
+     "horse"
+    ]
+   },
+   "force": {
+    "q": "kamakura_muromachi_03",
+    "choice": 2
+   },
+   "text": "足利義満が倒れ、明との国交は開かれないままに。勘合貿易が始まったのは、くじ引きで将軍になった足利義教の代になってからだった。"
+  },
+  {
+   "id": "km_kill_yoshimitsu_debris",
+   "title": "北山殿の下敷き",
+   "trigger": {
+    "kind": "kill",
+    "id": "足利義満",
+    "cause": [
+     "debris",
+     "fire"
+    ]
+   },
+   "vars": {
+    "open_asia": -35
+   },
+   "year": 1398,
+   "text": "義満は唐物で飾り立てた北山殿の瓦礫の下敷きになった。「唐物は縁起が悪い」と噂が立ち、大陸との関係は冷えきった。国交が開かれたのは、怖いもの知らずの唐物好き・義政の代になってからだった。"
+  },
+  {
+   "id": "km_forge_yoshimitsu",
+   "title": "偽の明の返書",
+   "trigger": {
+    "kind": "forge",
+    "id": "足利義満"
+   },
+   "force": {
+    "q": "kamakura_muromachi_03",
+    "choice": 2
+   },
+   "text": "「日本国王など認めぬ」。明の偽の返書に激怒した義満は国交をあきらめ、子の義持も朝貢を嫌った。日明の国交を開いたのは6代義教である。義持が貿易を中断し、義教が再開したのは史実のとおり。"
+  },
+  {
+   "id": "km_kill_ryoshun",
+   "title": "九州探題、倒れる",
+   "trigger": {
+    "kind": "kill",
+    "id": "今川了俊"
+   },
+   "vars": {
+    "unity": -30
+   },
+   "year": 1380,
+   "text": "九州探題の今川了俊が倒れた。南朝の征西府を押さえ込む者がいなくなったため、懐良親王は大宰府を守り抜く。九州が片づかない将軍に外交の暇はなく、そのうちに義満は世を去った。明との国交は義教の名で開かれた。"
+  },
+  {
+   "id": "km_sink_kenminsen",
+   "title": "遣明船、次々に沈む",
+   "trigger": {
+    "kind": "sink",
+    "min": 5
+   },
+   "vars": {
+    "open_asia": -35
+   },
+   "year": 1395,
+   "text": "「日本の船は海を渡れぬ」――博多津の船があらかた沈められ、明にまで笑われた。大陸との関係が冷えきったため義満の代には国交の機運が生まれず、勘合貿易は唐物好きの義政の代にようやく始まった。"
+  },
+  {
+   "id": "km_massacre_hakata",
+   "title": "博多、無法地帯に",
+   "trigger": {
+    "kind": "kill",
+    "type": "soldier",
+    "at": "port",
+    "min": 8
+   },
+   "vars": {
+    "open_asia": -35
+   },
+   "year": 1400,
+   "text": "博多津を守る兵が次々と打ち倒され、港は倭寇の思うがままになった。「倭寇を取り締まれぬ国とは付き合えぬ」と明が国交を拒んだため、勘合貿易は義政の代まで始まらなかった。"
+  },
+  {
+   "id": "km_destroy_kinkaku",
+   "title": "金閣、倒壊",
+   "trigger": {
+    "kind": "destroy",
+    "id": "temple",
+    "type": "hall",
+    "value": 200
+   },
+   "vars": {
+    "education": -15,
+    "commerce": -10
+   },
+   "year": 1398,
+   "text": "義満の北山殿・金閣が崩れ落ちた。北山文化の象徴を失い、明の使節を迎えた外交の舞台も失われた。"
+  },
+  {
+   "id": "km_fire_sakamoto",
+   "title": "坂本、炎上",
+   "trigger": {
+    "kind": "fire",
+    "at": "village",
+    "min": 5
+   },
+   "vars": {
+    "commoners": -30,
+    "commerce": -15
+   },
+   "year": 1420,
+   "text": "近江の坂本が燃え、馬借たちは荷も馬も失った。蜂起の口火を切る者がいなくなり、正長の土一揆は起こらなかった。"
+  },
+  {
+   "id": "km_destroy_sakamoto",
+   "title": "惣村、壊滅",
+   "trigger": {
+    "kind": "destroy",
+    "id": "village",
+    "value": 200
+   },
+   "vars": {
+    "commoners": -30
+   },
+   "year": 1425,
+   "text": "坂本の惣村が壊され、寄合を開く場所も、一味神水を交わす鎮守の社も消えた。結びつく場のない村では一揆の相談もできない。土一揆が起こったのは、応仁の乱も加賀の一向一揆も過ぎてからのことだった。"
+  },
+  {
+   "id": "km_bridge_bashaku",
+   "title": "馬借の道、途切れる",
+   "trigger": {
+    "kind": "destroy",
+    "id": "village",
+    "value": 150
+   },
+   "vars": {
+    "commoners": -30
+   },
+   "year": 1428,
+   "text": "坂本の馬借の宿と道が壊され、年貢米や荷を運ぶ馬借の道が途切れた。都と村を結ぶ人の流れも止まり、蜂起の知らせも広がらない。正長の土一揆は起こらず、土一揆は応仁の乱の後の出来事になった。"
+  },
+  {
+   "id": "km_forge_yoshinori",
+   "title": "偽の徳政令",
+   "trigger": {
+    "kind": "forge",
+    "id": "足利義教"
+   },
+   "vars": {
+    "commoners": -30
+   },
+   "year": 1427,
+   "text": "借金を先回りで帳消しにする偽の徳政令が、義教の名で出された。蜂起する理由を失った馬借や農民は動かず、徳政を求める土一揆が起こるのは、応仁の乱や加賀の一向一揆よりさらに後のこととなる。"
+  },
+  {
+   "id": "km_massacre",
+   "title": "武士、恐るるに足らず",
+   "trigger": {
+    "kind": "kill",
+    "type": "soldier",
+    "min": 30
+   },
+   "vars": {
+    "commoners": 30,
+    "religion": 30,
+    "unity": -10
+   },
+   "year": 1420,
+   "text": "侍所の武士が謎の怪人に次々と打ち倒されたと聞き、惣村の百姓や一向宗の門徒は「武士も大したことはない」と悟った。守護を倒す一揆が、史実よりずっと早く各地で起こった。"
+  },
+  {
+   "id": "km_escort_rennyo_village",
+   "title": "蓮如、早めの北陸入り",
+   "trigger": {
+    "kind": "escort",
+    "id": "蓮如",
+    "to": "village"
+   },
+   "force": {
+    "q": "kamakura_muromachi_04",
+    "choice": 1
+   },
+   "text": "蓮如が近江の村に入った。史実でも蓮如は近江の堅田などで布教したが、その活動が大きく早まったため北陸の門徒も早くからまとまり、加賀の門徒は応仁の乱より前に守護富樫政親を倒した。"
+  },
+  {
+   "id": "km_kill_togashi",
+   "title": "加賀、守護不在",
+   "trigger": {
+    "kind": "kill",
+    "id": "富樫政親"
+   },
+   "force": {
+    "q": "kamakura_muromachi_04",
+    "choice": 1
+   },
+   "text": "加賀守護の富樫政親が早々に倒れた。守護のいない加賀では一向宗の門徒が国の実権を握り、応仁の乱より前に「百姓ノ持タル国」が生まれてしまった。史実では1488年、門徒が政親を高尾城に攻め滅ぼしている。"
+  },
+  {
+   "id": "km_forge_togashi",
+   "title": "門徒謀反の偽書",
+   "trigger": {
+    "kind": "forge",
+    "id": "富樫政親"
+   },
+   "force": {
+    "q": "kamakura_muromachi_04",
+    "choice": 1
+   },
+   "text": "「門徒が加賀を乗っ取る密議あり」。偽の書状に踊らされた富樫政親は門徒の弾圧を急いだ。追い詰められた門徒は応仁の乱より前に一揆を結び、守護を倒した。"
+  },
+  {
+   "id": "km_kill_onin_lords",
+   "title": "応仁の乱、起こらず？",
+   "trigger": {
+    "kind": "kill",
+    "id": [
+     "細川勝元",
+     "山名宗全"
+    ]
+   },
+   "vars": {
+    "unity": 20,
+    "centralization": 30
+   },
+   "year": 1460,
+   "text": "東軍・西軍の総大将の一人が倒れ、応仁の乱は始まる前にしぼんだ。幕府は有力守護をまとめ直し、京都が焼け野原になることもなかった。"
+  },
+  {
+   "id": "km_forge_katsumoto",
+   "title": "偽の和睦状",
+   "trigger": {
+    "kind": "forge",
+    "id": "細川勝元"
+   },
+   "force": {
+    "q": "kamakura_muromachi_04",
+    "choice": 3
+   },
+   "text": "山名宗全の筆跡をまねた偽の和睦状が、細川勝元の陣に届いた。拍子抜けした勝元が兵を引いたため、将軍家と畠山・斯波家の家督争いは話し合いで先送りに。京を焼くはずの応仁の乱は、加賀の一向一揆より後まで起こらなかった。"
+  },
+  {
+   "id": "km_kill_mitsusuke",
+   "title": "嘉吉の乱、未遂",
+   "trigger": {
+    "kind": "kill",
+    "id": "赤松満祐"
+   },
+   "vars": {
+    "centralization": 30,
+    "unity": 15
+   },
+   "year": 1440,
+   "text": "将軍義教を討つはずの赤松満祐が、先に倒れた。嘉吉の乱が起こらなかったので、守護大名の対立は将軍の専制に抑え込まれたまま。応仁の乱の勃発は大きく遅れ、加賀の一向一揆の後になった。"
+  },
+  {
+   "id": "km_kill_moronao",
+   "title": "観応の擾乱、起こらず",
+   "trigger": {
+    "kind": "kill",
+    "id": "高師直"
+   },
+   "vars": {
+    "centralization": 30,
+    "unity": 20
+   },
+   "year": 1350,
+   "text": "高師直が倒れたため、足利直義と師直の対立から始まる観応の擾乱は起こらなかった。足利兄弟は手を携えて守護をまとめ、幕府の統制は早くから強まる。応仁の乱は、ずっと後まで起こらなかった。"
+  }
+ ]
+}

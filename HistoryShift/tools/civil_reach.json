@@ -1,0 +1,1196 @@
+{
+ "rules": 43,
+ "reachable": 7,
+ "total": 144,
+ "rows": [
+  {
+   "q": "jomon_kofun_01",
+   "year": -3000,
+   "topic": "縄文時代の生活と道具",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "jomon_kofun_01",
+   "year": -3000,
+   "topic": "縄文時代の生活と道具",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "jomon_kofun_01",
+   "year": -3000,
+   "topic": "縄文時代の生活と道具",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "jomon_kofun_02",
+   "year": 57,
+   "topic": "奴国王と金印（後漢書東夷伝）",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "jomon_kofun_02",
+   "year": 57,
+   "topic": "奴国王と金印（後漢書東夷伝）",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "jomon_kofun_02",
+   "year": 57,
+   "topic": "奴国王と金印（後漢書東夷伝）",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "jomon_kofun_03",
+   "year": 239,
+   "topic": "邪馬台国と卑弥呼（魏志倭人伝）",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "jomon_kofun_03",
+   "year": 239,
+   "topic": "邪馬台国と卑弥呼（魏志倭人伝）",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "jomon_kofun_03",
+   "year": 239,
+   "topic": "邪馬台国と卑弥呼（魏志倭人伝）",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "jomon_kofun_04",
+   "year": 478,
+   "topic": "ヤマト政権と東アジア（年代整序）",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "jomon_kofun_04",
+   "year": 478,
+   "topic": "ヤマト政権と東アジア（年代整序）",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "jomon_kofun_04",
+   "year": 478,
+   "topic": "ヤマト政権と東アジア（年代整序）",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "jomon_kofun_05",
+   "year": 513,
+   "topic": "渡来人と大陸文化の受容",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "jomon_kofun_05",
+   "year": 513,
+   "topic": "渡来人と大陸文化の受容",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "jomon_kofun_05",
+   "year": 513,
+   "topic": "渡来人と大陸文化の受容",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "jomon_kofun_06",
+   "year": 538,
+   "topic": "仏教の伝来と崇仏論争",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "jomon_kofun_06",
+   "year": 538,
+   "topic": "仏教の伝来と崇仏論争",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "jomon_kofun_06",
+   "year": 538,
+   "topic": "仏教の伝来と崇仏論争",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "asuka_nara_01",
+   "year": 604,
+   "topic": "憲法十七条",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "asuka_nara_01",
+   "year": 604,
+   "topic": "憲法十七条",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "asuka_nara_01",
+   "year": 604,
+   "topic": "憲法十七条",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "asuka_nara_05",
+   "year": 607,
+   "topic": "遣隋使と東アジア外交",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "asuka_nara_05",
+   "year": 607,
+   "topic": "遣隋使と東アジア外交",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "asuka_nara_05",
+   "year": 607,
+   "topic": "遣隋使と東アジア外交",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "asuka_nara_02",
+   "year": 645,
+   "topic": "乙巳の変と大化改新",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "asuka_nara_02",
+   "year": 645,
+   "topic": "乙巳の変と大化改新",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "asuka_nara_02",
+   "year": 645,
+   "topic": "乙巳の変と大化改新",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "asuka_nara_03",
+   "year": 670,
+   "topic": "7世紀後半の政治と対外関係（年代整序）",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "asuka_nara_03",
+   "year": 670,
+   "topic": "7世紀後半の政治と対外関係（年代整序）",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "asuka_nara_03",
+   "year": 670,
+   "topic": "7世紀後半の政治と対外関係（年代整序）",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "asuka_nara_04",
+   "year": 743,
+   "topic": "奈良時代の土地政策",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "asuka_nara_04",
+   "year": 743,
+   "topic": "奈良時代の土地政策",
+   "choice": 1,
+   "reachable": true,
+   "example": [
+    "cv_an_handen",
+    "cv_an_handen2",
+    "cv_an_unrest"
+   ]
+  },
+  {
+   "q": "asuka_nara_04",
+   "year": 743,
+   "topic": "奈良時代の土地政策",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "asuka_nara_06",
+   "year": 752,
+   "topic": "聖武天皇と鎮護国家",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "asuka_nara_06",
+   "year": 752,
+   "topic": "聖武天皇と鎮護国家",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "asuka_nara_06",
+   "year": 752,
+   "topic": "聖武天皇と鎮護国家",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "heian_01",
+   "year": 792,
+   "topic": "桓武天皇の政治改革",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "heian_01",
+   "year": 792,
+   "topic": "桓武天皇の政治改革",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "heian_01",
+   "year": 792,
+   "topic": "桓武天皇の政治改革",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "heian_02",
+   "year": 894,
+   "topic": "遣唐使の派遣停止",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "heian_02",
+   "year": 894,
+   "topic": "遣唐使の派遣停止",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "heian_02",
+   "year": 894,
+   "topic": "遣唐使の派遣停止",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "heian_05",
+   "year": 939,
+   "topic": "承平・天慶の乱",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "heian_05",
+   "year": 939,
+   "topic": "承平・天慶の乱",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "heian_05",
+   "year": 939,
+   "topic": "承平・天慶の乱",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "heian_03",
+   "year": 1018,
+   "topic": "摂関政治の全盛（望月の歌）",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "heian_03",
+   "year": 1018,
+   "topic": "摂関政治の全盛（望月の歌）",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "heian_03",
+   "year": 1018,
+   "topic": "摂関政治の全盛（望月の歌）",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "heian_06",
+   "year": 1053,
+   "topic": "国風文化と浄土教",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "heian_06",
+   "year": 1053,
+   "topic": "国風文化と浄土教",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "heian_06",
+   "year": 1053,
+   "topic": "国風文化と浄土教",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "heian_04",
+   "year": 1156,
+   "topic": "院政と平氏政権の成立",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "heian_04",
+   "year": 1156,
+   "topic": "院政と平氏政権の成立",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "heian_04",
+   "year": 1156,
+   "topic": "院政と平氏政権の成立",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "kamakura_muromachi_01",
+   "year": 1221,
+   "topic": "承久の乱",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "kamakura_muromachi_01",
+   "year": 1221,
+   "topic": "承久の乱",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "kamakura_muromachi_01",
+   "year": 1221,
+   "topic": "承久の乱",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "kamakura_muromachi_05",
+   "year": 1253,
+   "topic": "鎌倉新仏教",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "kamakura_muromachi_05",
+   "year": 1253,
+   "topic": "鎌倉新仏教",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "kamakura_muromachi_05",
+   "year": 1253,
+   "topic": "鎌倉新仏教",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "kamakura_muromachi_02",
+   "year": 1274,
+   "topic": "蒙古襲来と幕府の防衛体制",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "kamakura_muromachi_02",
+   "year": 1274,
+   "topic": "蒙古襲来と幕府の防衛体制",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "kamakura_muromachi_02",
+   "year": 1274,
+   "topic": "蒙古襲来と幕府の防衛体制",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "kamakura_muromachi_06",
+   "year": 1334,
+   "topic": "建武の新政",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "kamakura_muromachi_06",
+   "year": 1334,
+   "topic": "建武の新政",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "kamakura_muromachi_06",
+   "year": 1334,
+   "topic": "建武の新政",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "kamakura_muromachi_03",
+   "year": 1404,
+   "topic": "日明貿易（勘合貿易）の開始",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "kamakura_muromachi_03",
+   "year": 1404,
+   "topic": "日明貿易（勘合貿易）の開始",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "kamakura_muromachi_03",
+   "year": 1404,
+   "topic": "日明貿易（勘合貿易）の開始",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "kamakura_muromachi_04",
+   "year": 1467,
+   "topic": "室町時代の一揆と応仁の乱",
+   "choice": 0,
+   "reachable": true,
+   "example": [
+    "cv_km_sou",
+    "cv_km_sou2",
+    "cv_km_unrest"
+   ]
+  },
+  {
+   "q": "kamakura_muromachi_04",
+   "year": 1467,
+   "topic": "室町時代の一揆と応仁の乱",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "kamakura_muromachi_04",
+   "year": 1467,
+   "topic": "室町時代の一揆と応仁の乱",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "sengoku_01",
+   "year": 1543,
+   "topic": "鉄砲伝来",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "sengoku_01",
+   "year": 1543,
+   "topic": "鉄砲伝来",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "sengoku_01",
+   "year": 1543,
+   "topic": "鉄砲伝来",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "sengoku_06",
+   "year": 1549,
+   "topic": "キリスト教の伝来と南蛮貿易",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "sengoku_06",
+   "year": 1549,
+   "topic": "キリスト教の伝来と南蛮貿易",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "sengoku_06",
+   "year": 1549,
+   "topic": "キリスト教の伝来と南蛮貿易",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "sengoku_02",
+   "year": 1577,
+   "topic": "楽市令（安土山下町中掟書）",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "sengoku_02",
+   "year": 1577,
+   "topic": "楽市令（安土山下町中掟書）",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "sengoku_02",
+   "year": 1577,
+   "topic": "楽市令（安土山下町中掟書）",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "sengoku_05",
+   "year": 1582,
+   "topic": "本能寺の変と天下統一の担い手",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "sengoku_05",
+   "year": 1582,
+   "topic": "本能寺の変と天下統一の担い手",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "sengoku_05",
+   "year": 1582,
+   "topic": "本能寺の変と天下統一の担い手",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "sengoku_03",
+   "year": 1588,
+   "topic": "豊臣秀吉の政策（年代整序）",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "sengoku_03",
+   "year": 1588,
+   "topic": "豊臣秀吉の政策（年代整序）",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "sengoku_03",
+   "year": 1588,
+   "topic": "豊臣秀吉の政策（年代整序）",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "sengoku_04",
+   "year": 1600,
+   "topic": "関ヶ原の戦い",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "sengoku_04",
+   "year": 1600,
+   "topic": "関ヶ原の戦い",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "sengoku_04",
+   "year": 1600,
+   "topic": "関ヶ原の戦い",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "edo_01",
+   "year": 1635,
+   "topic": "武家諸法度（寛永令）",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "edo_01",
+   "year": 1635,
+   "topic": "武家諸法度（寛永令）",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "edo_01",
+   "year": 1635,
+   "topic": "武家諸法度（寛永令）",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "edo_05",
+   "year": 1639,
+   "topic": "鎖国の完成（ポルトガル船の来航禁止）",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "edo_05",
+   "year": 1639,
+   "topic": "鎖国の完成（ポルトガル船の来航禁止）",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "edo_05",
+   "year": 1639,
+   "topic": "鎖国の完成（ポルトガル船の来航禁止）",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "edo_02",
+   "year": 1722,
+   "topic": "享保の改革（上げ米）",
+   "choice": 0,
+   "reachable": true,
+   "example": [
+    "cv_an_handen",
+    "cv_an_handen2",
+    "cv_an_unrest",
+    "cv_he_unrest"
+   ]
+  },
+  {
+   "q": "edo_02",
+   "year": 1722,
+   "topic": "享保の改革（上げ米）",
+   "choice": 2,
+   "reachable": true,
+   "example": [
+    "cv_ed_nihonbashi",
+    "cv_ed_nihonbashi2",
+    "cv_ed_uchikowashi"
+   ]
+  },
+  {
+   "q": "edo_02",
+   "year": 1722,
+   "topic": "享保の改革（上げ米）",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "edo_06",
+   "year": 1774,
+   "topic": "蘭学の発達（『解体新書』）",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "edo_06",
+   "year": 1774,
+   "topic": "蘭学の発達（『解体新書』）",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "edo_06",
+   "year": 1774,
+   "topic": "蘭学の発達（『解体新書』）",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "edo_03",
+   "year": 1792,
+   "topic": "寛政の改革と対外関係（年代整序）",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "edo_03",
+   "year": 1792,
+   "topic": "寛政の改革と対外関係（年代整序）",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "edo_03",
+   "year": 1792,
+   "topic": "寛政の改革と対外関係（年代整序）",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "edo_04",
+   "year": 1858,
+   "topic": "日米修好通商条約",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "edo_04",
+   "year": 1858,
+   "topic": "日米修好通商条約",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "edo_04",
+   "year": 1858,
+   "topic": "日米修好通商条約",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "meiji_taisho_01",
+   "year": 1873,
+   "topic": "地租改正",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "meiji_taisho_01",
+   "year": 1873,
+   "topic": "地租改正",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "meiji_taisho_01",
+   "year": 1873,
+   "topic": "地租改正",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "meiji_taisho_02",
+   "year": 1889,
+   "topic": "大日本帝国憲法",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "meiji_taisho_02",
+   "year": 1889,
+   "topic": "大日本帝国憲法",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "meiji_taisho_02",
+   "year": 1889,
+   "topic": "大日本帝国憲法",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "meiji_taisho_03",
+   "year": 1902,
+   "topic": "明治後期の外交と条約改正",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "meiji_taisho_03",
+   "year": 1902,
+   "topic": "明治後期の外交と条約改正",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "meiji_taisho_03",
+   "year": 1902,
+   "topic": "明治後期の外交と条約改正",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "meiji_taisho_05",
+   "year": 1905,
+   "topic": "日露戦争とポーツマス条約",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "meiji_taisho_05",
+   "year": 1905,
+   "topic": "日露戦争とポーツマス条約",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "meiji_taisho_05",
+   "year": 1905,
+   "topic": "日露戦争とポーツマス条約",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "meiji_taisho_04",
+   "year": 1916,
+   "topic": "大戦景気",
+   "choice": 0,
+   "reachable": true,
+   "example": [
+    "cv_ed_nihonbashi",
+    "cv_ed_nihonbashi2",
+    "cv_ed_uchikowashi",
+    "cv_ed_uchikowashi2",
+    "cv_mt_silk",
+    "cv_mt_silk2",
+    "cv_mt_unrest",
+    "cv_mt_yokohama"
+   ]
+  },
+  {
+   "q": "meiji_taisho_04",
+   "year": 1916,
+   "topic": "大戦景気",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "meiji_taisho_04",
+   "year": 1916,
+   "topic": "大戦景気",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "meiji_taisho_06",
+   "year": 1925,
+   "topic": "普通選挙法と治安維持法",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "meiji_taisho_06",
+   "year": 1925,
+   "topic": "普通選挙法と治安維持法",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "meiji_taisho_06",
+   "year": 1925,
+   "topic": "普通選挙法と治安維持法",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "showa_01",
+   "year": 1927,
+   "topic": "金融恐慌",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "showa_01",
+   "year": 1927,
+   "topic": "金融恐慌",
+   "choice": 2,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "showa_01",
+   "year": 1927,
+   "topic": "金融恐慌",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "showa_02",
+   "year": 1933,
+   "topic": "国際連盟脱退",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "showa_02",
+   "year": 1933,
+   "topic": "国際連盟脱退",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "showa_02",
+   "year": 1933,
+   "topic": "国際連盟脱退",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "showa_05",
+   "year": 1941,
+   "topic": "太平洋戦争の開戦経緯",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "showa_05",
+   "year": 1941,
+   "topic": "太平洋戦争の開戦経緯",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "showa_05",
+   "year": 1941,
+   "topic": "太平洋戦争の開戦経緯",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "showa_06",
+   "year": 1945,
+   "topic": "ポツダム宣言受諾と終戦",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "showa_06",
+   "year": 1945,
+   "topic": "ポツダム宣言受諾と終戦",
+   "choice": 1,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "showa_06",
+   "year": 1945,
+   "topic": "ポツダム宣言受諾と終戦",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "showa_03",
+   "year": 1946,
+   "topic": "農地改革",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "showa_03",
+   "year": 1946,
+   "topic": "農地改革",
+   "choice": 2,
+   "reachable": true,
+   "example": [
+    "cv_km_sou",
+    "cv_km_sou2",
+    "cv_km_unrest",
+    "cv_sg_unrest"
+   ]
+  },
+  {
+   "q": "showa_03",
+   "year": 1946,
+   "topic": "農地改革",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "showa_04",
+   "year": 1964,
+   "topic": "高度経済成長",
+   "choice": 0,
+   "reachable": false,
+   "example": []
+  },
+  {
+   "q": "showa_04",
+   "year": 1964,
+   "topic": "高度経済成長",
+   "choice": 2,
+   "reachable": true,
+   "example": [
+    "cv_km_sou",
+    "cv_km_sou2",
+    "cv_km_unrest",
+    "cv_sg_unrest"
+   ]
+  },
+  {
+   "q": "showa_04",
+   "year": 1964,
+   "topic": "高度経済成長",
+   "choice": 3,
+   "reachable": false,
+   "example": []
+  }
+ ],
+ "note": "python model (tools/validate_chaos.simulate); war/standing two-stage feedback not modelled"
+}

@@ -1,0 +1,794 @@
+{
+ "eraId": "heian",
+ "figures": [
+  {
+   "name": "平将門",
+   "at": "castle",
+   "guards": 4,
+   "guard": "将門の郎党",
+   "lines": [
+    "坂東は坂東の者が治める。新皇とでも呼んでもらおうか。",
+    "北山の風よ、我に味方せよ。"
+   ]
+  },
+  {
+   "name": "藤原秀郷",
+   "at": "battlefield",
+   "guards": 3,
+   "guard": "秀郷の郎党",
+   "lines": [
+    "将門追討の命、この秀郷が承った。",
+    "大ムカデ退治の俵藤太とはわしのことよ。"
+   ]
+  },
+  {
+   "name": "藤原純友",
+   "at": "port",
+   "guards": 3,
+   "guard": "純友の海賊衆",
+   "lines": [
+    "瀬戸内の海は我らのものよ。",
+    "伊予の掾など、もうやめた。"
+   ]
+  },
+  {
+   "name": "小野好古",
+   "at": "port",
+   "guards": 3,
+   "guard": "追捕使の兵",
+   "lines": [
+    "純友め、博多津で決着をつけてくれる。"
+   ]
+  },
+  {
+   "name": "藤原道長",
+   "at": "capital",
+   "guards": 4,
+   "guard": "道長の随身",
+   "lines": [
+    "この世をば我が世とぞ思ふ……おっと、まだ詠むには早いか。",
+    "娘を二人、后に立てた。次は威子よ。"
+   ]
+  },
+  {
+   "name": "藤原頼通",
+   "at": "village",
+   "guards": 3,
+   "guard": "摂関家の随身",
+   "lines": [
+    "宇治に極楽浄土を写した御堂を建てようと思う。"
+   ]
+  },
+  {
+   "name": "源頼光",
+   "at": "capital",
+   "guards": 4,
+   "guard": "頼光四天王",
+   "lines": [
+    "大江山の鬼を退治したのは我らぞ。",
+    "道長様の警固は源氏にお任せあれ。"
+   ]
+  },
+  {
+   "name": "坂上田村麻呂",
+   "at": "castle",
+   "guards": 3,
+   "guard": "征夷の兵",
+   "lines": [
+    "アテルイは勇士だ。命だけは助けてやりたい。"
+   ]
+  },
+  {
+   "name": "源頼義",
+   "at": "castle",
+   "guards": 3,
+   "guard": "源氏の郎党",
+   "lines": [
+    "安倍貞任、厨川柵で決着をつけるぞ。"
+   ]
+  },
+  {
+   "name": "平清盛",
+   "at": "port",
+   "guards": 4,
+   "guard": "平家の侍",
+   "lines": [
+    "大輪田泊を修築し、宋の船を都の近くまで入れるのだ。"
+   ]
+  },
+  {
+   "name": "源義朝",
+   "at": "battlefield",
+   "guards": 3,
+   "guard": "義朝の郎党",
+   "lines": [
+    "夜討ちこそ勝機。白河北殿に火を放て。"
+   ]
+  }
+ ],
+ "rules": [
+  {
+   "id": "he_kill_momokawa",
+   "title": "光仁天皇、擁立されず",
+   "trigger": {
+    "kind": "kill",
+    "id": "藤原百川"
+   },
+   "force": {
+    "q": "heian_01",
+    "choice": 0
+   },
+   "text": "光仁天皇を擁立するはずの藤原百川が倒れた。道鏡政権の加墾禁止令（765年）は解かれないまま、墾田の永久私有は8世紀末になって桓武天皇がはじめて認めることになった。"
+  },
+  {
+   "id": "he_kill_tanetsugu",
+   "title": "長岡京、造営頓挫",
+   "trigger": {
+    "kind": "kill",
+    "id": "藤原種継"
+   },
+   "force": {
+    "q": "heian_01",
+    "choice": 1
+   },
+   "text": "造長岡宮使の藤原種継が史実より早く倒れ、都づくりは貴族の私財頼みになった。見返りに私有地が黙認され、中央の統制は緩み、桓武天皇は延喜より百年早く荘園整理に踏み切った。"
+  },
+  {
+   "id": "he_forge_kiyomaro",
+   "title": "偽の神託",
+   "trigger": {
+    "kind": "forge",
+    "id": "和気清麻呂"
+   },
+   "vars": {
+    "religion": 35
+   },
+   "year": 769,
+   "text": "和気清麻呂の報告書はすり替えられ、「道鏡を皇位に即けよ」と書かれていた。宇佐八幡神託事件は真逆の結末を迎え、僧が天皇となった国で仏教勢力は圧倒的な力を持った。"
+  },
+  {
+   "id": "he_escort_dokyo",
+   "title": "道鏡、都へ帰る",
+   "trigger": {
+    "kind": "escort",
+    "id": "道鏡",
+    "to": "capital"
+   },
+   "vars": {
+    "religion": 35
+   },
+   "year": 772,
+   "text": "下野の薬師寺へ追放された道鏡をあなたが都へ連れ戻した。称徳天皇の寵愛を受けた僧の復活に南都の大寺院は勢いづき、仏教勢力が強いまま平安時代を迎えた。"
+  },
+  {
+   "id": "he_forge_kanmu",
+   "title": "偽の詔、勅旨田を禁ず",
+   "trigger": {
+    "kind": "forge",
+    "id": "桓武天皇"
+   },
+   "force": {
+    "q": "heian_01",
+    "choice": 1
+   },
+   "text": "内記の清書にまぎれこんだ偽の詔には「勅旨田の開発を禁ず」の一文があった。本物と信じた朝廷がそのまま発布したため、延喜の荘園整理令（902年）が百年以上早く、桓武天皇の名で出された。"
+  },
+  {
+   "id": "he_destroy_farms",
+   "title": "村が荒れ、浮浪が増える",
+   "trigger": {
+    "kind": "destroy",
+    "id": "village",
+    "type": "house",
+    "value": 150
+   },
+   "vars": {
+    "court": 30,
+    "centralization": -25
+   },
+   "year": 780,
+   "text": "宇治の里の家々が壊され、口分田を捨てて逃げ出す浮浪・逃亡の農民が急増した。彼らを抱えこんだ貴族や寺社の私有地は広がり、律令の公地公民は早くから崩れていった。"
+  },
+  {
+   "id": "he_bridge_down",
+   "title": "橋が落ち、調庸が届かない",
+   "trigger": {
+    "kind": "bridge"
+   },
+   "vars": {
+    "court": 30,
+    "centralization": -25
+   },
+   "year": 785,
+   "text": "橋が落ち、諸国から都へ運ばれる調・庸が川岸で立ち往生した。私的な運送手段を持つ院宮王臣家だけが荷を運べたため、貴族は富み、国司の統制は緩んでいった。"
+  },
+  {
+   "id": "he_sink_kentoshi",
+   "title": "遣唐使船、沈む",
+   "trigger": {
+    "kind": "sink",
+    "at": "port",
+    "min": 1
+   },
+   "vars": {
+    "open_asia": -32
+   },
+   "year": 804,
+   "text": "804年に出るはずの遣唐使船が港で沈められた。最澄も空海も唐へ渡れず、天台・真言の教えも唐の最新の文物も伝わらない。大陸との往来はすっかり細り、唐の情勢もつかめなくなった。"
+  },
+  {
+   "id": "he_forge_chukan",
+   "title": "中瓘の偽手紙",
+   "trigger": {
+    "kind": "forge",
+    "id": "中瓘"
+   },
+   "force": {
+    "q": "heian_02",
+    "choice": 1
+   },
+   "text": "在唐僧・中瓘の報告書は史実では「唐は乱れている」と伝えたが、あなたがすり替えた手紙には「唐は日本の使節を受け入れぬ」とあった。遣唐使の停止は唐からの通告で決まった。"
+  },
+  {
+   "id": "he_escort_mabi_port",
+   "title": "真備、三たび唐へ",
+   "trigger": {
+    "kind": "escort",
+    "id": "吉備真備",
+    "to": "port"
+   },
+   "vars": {
+    "open_asia": 32,
+    "education": 22
+   },
+   "year": 760,
+   "text": "港まで送り届けられた吉備真備は、三度目の入唐を果たした。帰国した真備の門下から唐を知る学者が次々に育ち、遣唐使停止の建議も「真備の学統」の名で記録された。"
+  },
+  {
+   "id": "he_escort_takamura",
+   "title": "篁、乗船す",
+   "trigger": {
+    "kind": "escort",
+    "id": "小野篁",
+    "to": "port"
+   },
+   "vars": {
+    "open_asia": 32,
+    "education": 22
+   },
+   "year": 838,
+   "text": "史実では乗船を拒んで隠岐に流される小野篁を、あなたが港まで連れて行った。篁は838年の遣唐使として唐に渡り、詩文の名声とともに大陸との往来を盛り上げた。"
+  },
+  {
+   "id": "he_forge_mabi",
+   "title": "真備の偽遺言",
+   "trigger": {
+    "kind": "forge",
+    "id": "吉備真備"
+   },
+   "force": {
+    "q": "heian_02",
+    "choice": 3
+   },
+   "text": "真備の偽の遺言には「唐はいずれ日本を拒む。そのとき建議せよ」とあった。遺言を守った弟子たちが894年の建議を主導し、唐からも受け入れ停止が通告された。"
+  },
+  {
+   "id": "he_kill_hidesato",
+   "title": "将門、討たれず",
+   "trigger": {
+    "kind": "kill",
+    "id": "藤原秀郷"
+   },
+   "force": {
+    "q": "heian_05",
+    "choice": 1
+   },
+   "text": "将門を討つはずの藤原秀郷が倒れた。朝廷の追討軍は坂東で連戦連敗、新皇・平将門の関東政権は何代も続いた。坂東武者の独立心はここに始まる。"
+  },
+  {
+   "id": "he_kill_sadamori",
+   "title": "貞盛、倒れる",
+   "trigger": {
+    "kind": "kill",
+    "id": "平貞盛"
+   },
+   "force": {
+    "q": "heian_05",
+    "choice": 1
+   },
+   "text": "将門のいとこで宿敵の平貞盛が倒れた。秀郷ひとりでは将門の騎馬軍団に歯が立たず、新皇の関東政権は朝廷の手を離れたまま続いた。"
+  },
+  {
+   "id": "he_kill_masakado",
+   "title": "新皇、現れず",
+   "trigger": {
+    "kind": "kill",
+    "id": "平将門",
+    "cause": [
+     "player",
+     "shot",
+     "crossfire"
+    ]
+   },
+   "vars": {
+    "warrior": -20,
+    "centralization": 30
+   },
+   "year": 935,
+   "text": "平将門が乱の前に倒れ、坂東の武士は朝廷の番犬のまま牙を抜かれた。東国に兵を割かずに済んだ朝廷は、諸国の軍団だけで瀬戸内の純友も鎮め、地方の武士が力を伸ばす流れは大きく遅れた。"
+  },
+  {
+   "id": "he_masakado_accident",
+   "title": "将門の怨霊",
+   "trigger": {
+    "kind": "kill",
+    "id": "平将門",
+    "cause": [
+     "stray",
+     "fire",
+     "explosion",
+     "vehicle",
+     "horse",
+     "plane",
+     "debris",
+     "world"
+    ]
+   },
+   "vars": {
+    "religion": 35,
+    "court": 20
+   },
+   "year": 940,
+   "text": "将門が思わぬ事故で倒れ、人々は「祟りだ」とおびえた。朝廷は怨霊を鎮める祈祷に巨費を投じ、御霊信仰が都を覆った。祟りから一門を守ろうと、寺社と結んだ摂関家は祖・良房を守り神として祀った。望月の歌も良房の名で伝わった。"
+  },
+  {
+   "id": "he_kill_sumitomo",
+   "title": "瀬戸内、静まる",
+   "trigger": {
+    "kind": "kill",
+    "id": "藤原純友"
+   },
+   "vars": {
+    "centralization": 30,
+    "warrior": -20
+   },
+   "year": 939,
+   "text": "海賊を率いる藤原純友が倒れ、瀬戸内の海は朝廷の手に戻った。西に兵を割かずに済んだ朝廷は諸国の軍団を東国へ集め、「やはり律令の世よ」と胸を張って将門も軍団だけで鎮めた。"
+  },
+  {
+   "id": "he_kill_yoshifuru",
+   "title": "追捕使、倒れる",
+   "trigger": {
+    "kind": "kill",
+    "id": "小野好古"
+   },
+   "force": {
+    "q": "heian_05",
+    "choice": 3
+   },
+   "text": "純友追討の追捕使・小野好古が倒れた。博多津で純友を破る者はなく、純友は大宰府を拠点に大陸の商人と手を結び、瀬戸内から九州に海の独立政権を築いた。"
+  },
+  {
+   "id": "he_sink_pursuers",
+   "title": "追討の船団、全滅",
+   "trigger": {
+    "kind": "sink",
+    "at": "port",
+    "min": 4
+   },
+   "force": {
+    "q": "heian_05",
+    "choice": 3
+   },
+   "text": "大輪田泊で朝廷の船が次々に沈められた。海の上で純友の水軍にかなう者はいなくなり、純友は大宰府を押さえて大陸との交易を独占した。"
+  },
+  {
+   "id": "he_rout_masakado_men",
+   "title": "将門の郎党、壊滅",
+   "trigger": {
+    "kind": "kill",
+    "type": "soldier",
+    "at": "castle",
+    "min": 8
+   },
+   "force": {
+    "q": "heian_05",
+    "choice": 2
+   },
+   "text": "将門の郎党が謎の人物に蹴散らされ、新皇の軍は戦う前に崩れた。朝廷は諸国の軍団だけで乱を鎮め、「地方の武士の力は借りなかった」と記録された。"
+  },
+  {
+   "id": "he_rout_pirates",
+   "title": "海賊衆、一掃",
+   "trigger": {
+    "kind": "kill",
+    "type": "soldier",
+    "at": "port",
+    "min": 8
+   },
+   "vars": {
+    "centralization": 30,
+    "warrior": -20
+   },
+   "year": 939,
+   "text": "瀬戸内の海賊衆があなたに一掃され、純友の乱は始まる前に終わった。朝廷は軍団の兵だけで治安を回復し、武士に頼らない体制に自信を深めた。"
+  },
+  {
+   "id": "he_massacre",
+   "title": "検非違使、壊滅",
+   "trigger": {
+    "kind": "kill",
+    "type": "soldier",
+    "min": 30
+   },
+   "vars": {
+    "warrior": 30,
+    "unity": -15,
+    "centralization": -20
+   },
+   "year": 930,
+   "text": "都の治安を守る検非違使が謎の人物に蹴散らされた。貴族たちは身を守るため競って地方の武士を雇い、坂東では武士団が朝廷の言うことを聞かなくなった。"
+  },
+  {
+   "id": "he_destroy_isawa",
+   "title": "胆沢城、陥落",
+   "trigger": {
+    "kind": "destroy",
+    "id": "castle",
+    "value": 300
+   },
+   "vars": {
+    "warrior": 30,
+    "centralization": -20,
+    "unity": -15,
+    "militarism": 15
+   },
+   "year": 802,
+   "text": "坂上田村麻呂が802年に築いた胆沢城が崩れ、東北の戦いが再燃した。朝廷は戦慣れした地方の武人を頼らざるを得ず、武士の力が早くから育った。将門の時代、坂東はもう朝廷の手に負えなかった。"
+  },
+  {
+   "id": "he_kill_michinaga",
+   "title": "道長、宴の前に倒れる",
+   "trigger": {
+    "kind": "kill",
+    "id": "藤原道長",
+    "cause": [
+     "player",
+     "shot",
+     "crossfire"
+    ]
+   },
+   "force": {
+    "q": "heian_03",
+    "choice": 0
+   },
+   "text": "藤原道長が1018年の宴の前に倒れた。娘を次々に后に立てた権勢は息子の頼通が引き継ぎ、立后の宴で「この世をば」の歌を詠んだのは頼通になった。"
+  },
+  {
+   "id": "he_michinaga_accident",
+   "title": "道長の祟り騒ぎ",
+   "trigger": {
+    "kind": "kill",
+    "id": "藤原道長",
+    "cause": [
+     "stray",
+     "fire",
+     "explosion",
+     "vehicle",
+     "horse",
+     "plane",
+     "debris",
+     "world"
+    ]
+   },
+   "vars": {
+    "religion": 35,
+    "court": 20
+   },
+   "year": 1015,
+   "text": "道長が思わぬ事故で倒れ、都は「北家の祖の怒りだ」と大騒ぎ。陰陽師の勧めで藤原良房が神として祀られ、宴のたびに良房をまつる習わしが生まれた。望月の歌も良房の名で記録された。"
+  },
+  {
+   "id": "he_tokihira_accident",
+   "title": "時平の死は道真の祟り",
+   "trigger": {
+    "kind": "kill",
+    "id": "藤原時平",
+    "cause": [
+     "stray",
+     "fire",
+     "explosion",
+     "vehicle",
+     "horse",
+     "plane",
+     "debris",
+     "world"
+    ]
+   },
+   "vars": {
+    "religion": 35,
+    "court": 20
+   },
+   "year": 905,
+   "text": "道真を左遷した時平が、事故であっけなく倒れた。史実でも時平の早死にと930年の清涼殿落雷は道真の祟りとされたが、今回はさらに騒ぎが大きい。御霊信仰が都を覆い、摂関家は祖・良房を神として祀った。"
+  },
+  {
+   "id": "he_escort_michinaga_temple",
+   "title": "道長、一年早く出家",
+   "trigger": {
+    "kind": "escort",
+    "id": "藤原道長",
+    "to": "temple"
+   },
+   "force": {
+    "q": "heian_03",
+    "choice": 0
+   },
+   "text": "寺に連れて行かれた道長は、そのまま出家してしまった。史実では1019年の出家が一年早まったため、1018年の立后の宴を取り仕切ったのは息子の頼通だった。"
+  },
+  {
+   "id": "he_escort_yoshifusa_temple",
+   "title": "良房、寺に祀られる",
+   "trigger": {
+    "kind": "escort",
+    "id": "藤原良房",
+    "to": "temple"
+   },
+   "vars": {
+    "religion": 35,
+    "court": 20
+   },
+   "year": 870,
+   "text": "あなたに寺へ連れて行かれた良房は、そこで仏道に目覚め、死後は寺の守り神として祀られた。摂関家は宴のたびに良房をまつり、望月の歌さえ良房の作として伝わった。"
+  },
+  {
+   "id": "he_forge_sanesuke",
+   "title": "小右記、書き換え",
+   "trigger": {
+    "kind": "forge",
+    "id": "藤原実資"
+   },
+   "force": {
+    "q": "heian_03",
+    "choice": 3
+   },
+   "text": "あなたが『小右記』の写本に筆を入れ、［X］の名を「太閤基経」と書き換えた。後世の歴史家はこの写本を信じ、望月の歌は初代関白・基経の歌として教科書に載った。"
+  },
+  {
+   "id": "he_fire_tsuchimikado",
+   "title": "土御門殿、炎上",
+   "trigger": {
+    "kind": "fire",
+    "at": "capital",
+    "min": 5
+   },
+   "vars": {
+    "warrior": 30,
+    "court": -25
+   },
+   "year": 1016,
+   "text": "都の火事で道長の邸宅・土御門殿が焼け落ちた。史実でも1016年に焼けているが、今回は盗賊が都にあふれ、貴族は武士に守ってもらうしかない。気弱になった道長は早々に実権を頼通に譲った。"
+  },
+  {
+   "id": "he_destroy_dairi",
+   "title": "大内裏、焼亡",
+   "trigger": [
+    {
+     "kind": "destroy",
+     "id": "capital",
+     "type": [
+      "hall",
+      "gate"
+     ],
+     "value": 600
+    },
+    {
+     "kind": "fire",
+     "at": "capital",
+     "min": 12
+    }
+   ],
+   "vars": {
+    "court": -25,
+    "centralization": -15,
+    "warrior": 30
+   },
+   "year": 960,
+   "text": "平安京の大内裏が崩れ落ちた。史実でも960年に内裏が初めて焼けているが、今回は再建の目処も立たない。朝廷の威信は地に落ち、警固の武士だけが頼りになった。"
+  },
+  {
+   "id": "he_kill_yorimichi",
+   "title": "鳳凰堂、建たず",
+   "trigger": {
+    "kind": "kill",
+    "id": "藤原頼通"
+   },
+   "force": {
+    "q": "heian_06",
+    "choice": 0
+   },
+   "text": "藤原頼通が倒れ、宇治の平等院鳳凰堂は建てられなかった。極楽往生を願う人々の心は、貴族の御堂ではなく、ひたすら念仏を唱える新しい教団へと向かっていった。"
+  },
+  {
+   "id": "he_destroy_hoodo",
+   "title": "鳳凰堂、倒壊",
+   "trigger": {
+    "kind": "destroy",
+    "id": "village",
+    "type": "hall"
+   },
+   "force": {
+    "q": "heian_06",
+    "choice": 0
+   },
+   "text": "宇治の御堂が崩れ落ち、定朝の阿弥陀如来像を安置する場所がなくなった。貴族の豪華な御堂に頼れなくなった人々は、念仏さえ唱えれば救われるという教えに飛びついた。"
+  },
+  {
+   "id": "he_fire_uji",
+   "title": "宇治の里、炎上",
+   "trigger": {
+    "kind": "fire",
+    "at": "village",
+    "min": 5
+   },
+   "vars": {
+    "religion": 30,
+    "commoners": 20
+   },
+   "year": 1050,
+   "text": "末法の世が目前に迫るころ、宇治の里が燃えた。「やはり末法だ」とおびえた人々は、身分を問わず念仏にすがった。浄土の教えは村々に根づき、専修念仏が百年早く生まれた。"
+  },
+  {
+   "id": "he_escort_honen_village",
+   "title": "法然、百年早く里へ",
+   "trigger": {
+    "kind": "escort",
+    "id": "法然",
+    "to": "village"
+   },
+   "force": {
+    "q": "heian_06",
+    "choice": 0
+   },
+   "text": "1053年、宇治の里に法然が現れた。「南無阿弥陀仏と唱えるだけでよい」という教えに里人も貴族も殺到し、浄土宗は百年早く開かれて朝廷の保護まで受けた。"
+  },
+  {
+   "id": "he_forge_yorimichi",
+   "title": "偽の宣旨、念仏を禁ず",
+   "trigger": {
+    "kind": "forge",
+    "id": "藤原頼通"
+   },
+   "force": {
+    "q": "heian_06",
+    "choice": 2
+   },
+   "text": "偽の宣旨には「末法を説き世を惑わす念仏を禁ず」とあった。頼通の名で浄土教が禁じられたため、認められたのは南都の諸宗による鎮護国家の祈りだけだった。"
+  },
+  {
+   "id": "he_destroy_toji",
+   "title": "東寺、倒壊",
+   "trigger": [
+    {
+     "kind": "destroy",
+     "id": "temple",
+     "type": "pagoda"
+    },
+    {
+     "kind": "destroy",
+     "id": "temple",
+     "value": 550
+    }
+   ],
+   "vars": {
+    "court": 35,
+    "religion": -25
+   },
+   "year": 823,
+   "text": "空海が嵯峨天皇から賜った東寺が崩れた。真言密教の都の拠点が失われ、再建の費用を朝廷に頼った寺院は、その言いなりになった。朝廷は寺社を思うままに統制し、のちに末法を説く浄土教まで禁じてしまう。"
+  },
+  {
+   "id": "he_burn_hiei",
+   "title": "比叡山、焼き討ち（770年早い）",
+   "trigger": {
+    "kind": "destroy",
+    "id": "mountain",
+    "value": 200
+   },
+   "vars": {
+    "religion": -30,
+    "education": -10,
+    "court": 35
+   },
+   "year": 800,
+   "text": "比叡山延暦寺の根本中堂が崩れ落ちた。織田信長より770年も早い焼き討ちである。強訴する僧兵もいなくなった朝廷は寺社を押さえこみ、末法の世には浄土教を禁じた。法然・親鸞・日蓮を育てる「日本仏教の母山」も存在しない。"
+  },
+  {
+   "id": "he_escort_jojin_port",
+   "title": "成尋、20年早く宋へ",
+   "trigger": {
+    "kind": "escort",
+    "id": "成尋",
+    "to": "port"
+   },
+   "force": {
+    "q": "heian_06",
+    "choice": 3
+   },
+   "text": "成尋が史実の1072年より20年早く宋へ渡った。宋の皇帝が日本を臣下扱いしない国書を託したため、冊封を嫌ってきた朝廷も宋と正式な国交を開く。宋の文物が流れこみ、かな文字はすたれた。"
+  },
+  {
+   "id": "he_escort_kiyomori_capital",
+   "title": "清盛、80年早い上洛",
+   "trigger": {
+    "kind": "escort",
+    "id": "平清盛",
+    "to": "capital"
+   },
+   "force": {
+    "q": "heian_04",
+    "choice": 0
+   },
+   "text": "宋銭と武力を携えた平清盛が、白河天皇の時代の都に現れた。院政が始まる前に武士として初の太政大臣となったため、年表のⅠが先頭に躍り出た。"
+  },
+  {
+   "id": "he_kill_yoriyoshi",
+   "title": "前九年合戦、源氏敗る",
+   "trigger": {
+    "kind": "kill",
+    "id": "源頼義"
+   },
+   "vars": {
+    "warrior": 30,
+    "unity": -25
+   },
+   "year": 1055,
+   "text": "前九年合戦を率いる源頼義が倒れ、奥州の安倍氏は独立を保った。東北・坂東で武士団どうしの争いが激しくなり、都の政争にも武士が引きこまれた。保元の乱は院政の始まる前に起きた。"
+  },
+  {
+   "id": "he_kill_yoshitomo",
+   "title": "源氏の棟梁、倒れる",
+   "trigger": {
+    "kind": "kill",
+    "id": "源義朝"
+   },
+   "vars": {
+    "set": {
+     "ruler": "平氏"
+    }
+   },
+   "year": 1160,
+   "text": "平治の乱の前に源義朝が倒れた。伊豆に流される少年・頼朝の物語も生まれず、平氏の世が長く続いた。承久の乱（1221年）で上皇が討とうとした相手も、鎌倉の北条氏ではなくなっていく。"
+  },
+  {
+   "id": "he_kill_kiyomori",
+   "title": "平氏政権、幻に",
+   "trigger": {
+    "kind": "kill",
+    "id": "平清盛"
+   },
+   "vars": {
+    "warrior": -15,
+    "commerce": -15,
+    "open_asia": -15
+   },
+   "year": 1160,
+   "text": "平清盛が倒れ、武士として初の太政大臣も日宋貿易もまぼろしに。平家の栄華はなく、「平家にあらずんば人にあらず」という言葉も生まれなかった。"
+  },
+  {
+   "id": "he_destroy_owada",
+   "title": "大輪田泊、崩壊",
+   "trigger": {
+    "kind": "destroy",
+    "id": "port",
+    "value": 300
+   },
+   "vars": {
+    "commerce": -20,
+    "open_asia": -15
+   },
+   "year": 1160,
+   "text": "清盛が修築するはずの大輪田泊が壊された。宋の大型船は瀬戸内の奥まで入れず、宋銭も陶磁器も届かない。日宋貿易は細々としたものに終わった。"
+  }
+ ]
+}
