@@ -15,7 +15,7 @@ func _frames(n: int) -> void:
 		await get_tree().process_frame
 
 
-func _shot(name: String, wait := 30) -> void:
+func _shot(name: String, wait := 8) -> void:
 	await _frames(wait)
 	var img := get_viewport().get_texture().get_image()
 	img.save_png(OUT.path_join(name + ".png"))
@@ -59,20 +59,20 @@ func _run() -> void:
 		cam.yaw = atan2(-to.x, -to.z)
 		cam.pitch = -0.12
 		cam.snap()
-		await _shot("skills_%s_workshop_world" % era_id, 90)
+		await _shot("skills_%s_workshop_world" % era_id, 40)
 		# 工房の画面
 		sess.craft.ui.open_workshop(st)
 		await _shot("skills_%s_workshop_ui" % era_id)
 		# 稽古（鍛錬：拍子よく打つ）
 		sess.craft.ui._start_lesson(st.def["lessons"][0])
-		await _shot("skills_%s_lesson_hammer" % era_id, 45)
+		await _shot("skills_%s_lesson_hammer" % era_id, 10)
 		sess.craft.ui.finish_minigame(0.85)
 		await get_tree().create_timer(1.0).timeout
 		await _shot("skills_%s_lesson_result" % era_id, 10)
 		# 焼き入れ
 		if st.def["lessons"].size() > 1:
 			sess.craft.ui._start_lesson(st.def["lessons"][1])
-			await _shot("skills_%s_lesson_heat" % era_id, 50)
+			await _shot("skills_%s_lesson_heat" % era_id, 15)
 			sess.craft.ui.finish_minigame(0.7)
 			await get_tree().create_timer(1.0).timeout
 		# 製作
@@ -98,7 +98,7 @@ func _run() -> void:
 	e.aggro_range = 0.0
 	cam.yaw = 0.0
 	cam.pitch = -0.15
-	await _frames(40)
+	await _frames(15)
 	p.arms._busy_until = 0.0
 	p.arms.swing(true)
 	await _frames(int(Engine.get_frames_per_second() * 0.25) + 2)
@@ -148,7 +148,7 @@ func _run() -> void:
 		cam.yaw = atan2(-to.x, -to.z)
 		cam.pitch = -0.05
 		cam.snap()
-		await _shot("skills_%s_factory_world" % era_id, 150)
+		await _shot("skills_%s_factory_world" % era_id, 50)
 		sess.craft.ui.open_factory(f0)
 		await _shot("skills_%s_factory_panel" % era_id)
 		sess.craft.ui.close()
@@ -158,6 +158,6 @@ func _run() -> void:
 			var to2: Vector3 = f.global_position - p.global_position
 			cam.yaw = atan2(-to2.x, -to2.z)
 			cam.snap()
-			await _shot("skills_%s_railway" % era_id, 150)
+			await _shot("skills_%s_railway" % era_id, 50)
 	Game.profile = saved
 	get_tree().quit()

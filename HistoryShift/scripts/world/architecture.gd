@@ -314,6 +314,25 @@ func reg_interior(type: String, xf: Transform3D, floors: Array, doors: Array, o 
 	for k in o:
 		d[k] = o[k]
 	w.interior_defs.append(d)
+	# 斜面の敷地では地形が 1 階の床から突き出すので、部屋の下の地形を床より下げる（地形メッシュを作る前）
+	var fxf: Transform3D = d["xf"]
+	var inv := fxf.affine_inverse()
+	for f in floors:
+		var r: Rect2 = (f["rect"] as Rect2).grow(t.cell)
+		var ymax: float = fxf.origin.y + float(f["y"]) - 0.08
+		var lo := Vector2(INF, INF)
+		var hi := Vector2(-INF, -INF)
+		for cc in [Vector3(r.position.x, 0, r.position.y), Vector3(r.end.x, 0, r.position.y), Vector3(r.position.x, 0, r.end.y), Vector3(r.end.x, 0, r.end.y)]:
+			var wp: Vector3 = fxf * cc
+			lo = lo.min(Vector2(wp.x, wp.z))
+			hi = hi.max(Vector2(wp.x, wp.z))
+		for j in range(t.gi(lo.y), t.gi(hi.y) + 1):
+			for i in range(t.gi(lo.x), t.gi(hi.x) + 1):
+				var lp := inv * Vector3(t.gx(i), 0, t.gx(j))
+				if r.has_point(Vector2(lp.x, lp.z)):
+					var id := j * TerrainGen.N + i
+					if t.h[id] > ymax:
+						t.h[id] = ymax
 
 
 static func fl(y: float, rect: Rect2, h: float, o := {}) -> Dictionary:

@@ -121,7 +121,7 @@ func ammo_text() -> String:
 		"bow":
 			return "矢 %d" % reserve()
 		"fists":
-			return "素手"
+			return "受け" if blocking else ""
 	return "受け" if blocking else ("刃こぼれ" if broken() else "")
 
 
