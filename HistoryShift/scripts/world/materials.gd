@@ -126,30 +126,42 @@ static func get_mat(key: String) -> Material:
 			"concrete":
 				bm.set_shader_parameter("albedo_mul", 0.97)
 				bm.set_shader_parameter("desat", 0.5)
+				bm.set_shader_parameter("mat_kind", 1.0)
 			"plaster":
-				# 漆喰は白くベタに
-				bm.set_shader_parameter("albedo_mul", 1.06)
-				bm.set_shader_parameter("detail", 0.2)
+				# 漆喰: 白飛びしない落ち着いた白（時代の色味は set_era_look）。雨だれ・裾の汚れは mat_kind=1
+				bm.set_shader_parameter("albedo_mul", 0.94)
+				bm.set_shader_parameter("detail", 0.22)
 				bm.set_shader_parameter("desat", 0.6)
+				bm.set_shader_parameter("mat_kind", 1.0)
 			"rooftile":
-				# 瓦は列のくっきりした明暗を残し、艶の帯
-				bm.set_shader_parameter("detail", 0.9)
+				# 瓦は列のくっきりした明暗を残し、艶の帯＋空の映り込み
+				bm.set_shader_parameter("detail", 0.95)
 				bm.set_shader_parameter("posterize", 3.0)
 				bm.set_shader_parameter("flat_normal", 0.35)
-				bm.set_shader_parameter("shine", 0.18)
-				bm.set_shader_parameter("sat_boost", 1.1)
+				bm.set_shader_parameter("shine", 0.3)
+				bm.set_shader_parameter("sheen", 0.55)
+				bm.set_shader_parameter("sat_boost", 1.15)
+				bm.set_shader_parameter("mat_kind", 3.0)
+				# 写真の瓦はオリーブ色に濁るので、色相は頂点色（いぶし銀の青灰）に任せる
+				bm.set_shader_parameter("desat", 0.85)
+				bm.set_shader_parameter("albedo_mul", 1.1)
 			"thatch":
 				bm.set_shader_parameter("detail", 0.7)
 				bm.set_shader_parameter("flat_normal", 0.5)
+				bm.set_shader_parameter("mat_kind", 5.0)
 			"darkwood", "wood":
-				bm.set_shader_parameter("detail", 0.45)
+				bm.set_shader_parameter("detail", 0.55)
+				bm.set_shader_parameter("posterize", 3.0)
 				bm.set_shader_parameter("window_glow", 1.0)
+				bm.set_shader_parameter("mat_kind", 2.0)
+				bm.set_shader_parameter("sat_boost", 1.3)
 				if key == "darkwood":
 					# 写真の焦げ茶は暗すぎるので、アニメの木部らしい明るさへ
 					bm.set_shader_parameter("albedo_mul", 1.45)
 			"stonewall", "brick", "cobble":
 				bm.set_shader_parameter("detail", 0.75)
 				bm.set_shader_parameter("flat_normal", 0.55)
+				bm.set_shader_parameter("mat_kind", 4.0)
 		m = bm
 	else:
 		match key:
@@ -158,6 +170,7 @@ static func get_mat(key: String) -> Material:
 				var sh := _building_mat("concrete", 0.5, 0.55, 0.75)
 				sh.set_shader_parameter("albedo_tex", null)
 				sh.set_shader_parameter("shine", 0.35)
+				sh.set_shader_parameter("sheen", 0.35)
 				sh.set_shader_parameter("grime", 0.3)
 				m = sh
 			"gold":
@@ -184,6 +197,7 @@ static func get_mat(key: String) -> Material:
 				sh.set_shader_parameter("detail", 0.25)
 				sh.set_shader_parameter("grime", 0.0)
 				sh.set_shader_parameter("sat_boost", 1.35)
+				sh.set_shader_parameter("mat_kind", 6.0)
 				m = sh
 			"emissive":
 				var sh := ShaderMaterial.new()
@@ -202,6 +216,8 @@ static func get_mat(key: String) -> Material:
 				var sh := _building_mat("plaster", 0.5, 1.0, 0.0)
 				sh.set_shader_parameter("albedo_tex", null)
 				m = sh
+	if _era_look.has(key) and m is ShaderMaterial:
+		(m as ShaderMaterial).set_shader_parameter("era_tint", _era_look[key])
 	_mat_cache[key] = m
 	return m
 
@@ -237,6 +253,23 @@ static func set_world_params(height_tex: Texture2D, half_size: float, grid_n: in
 		sh.set_shader_parameter("height_tex", height_tex)
 		sh.set_shader_parameter("half_size", half_size)
 		sh.set_shader_parameter("grid_n", float(grid_n))
+
+
+## 時代ごとの塗りの色味（漆喰の白・木部・瓦）。ワールド生成ごとに EraWorld が呼ぶ（屋内の素材も同じものを使う）
+static var _era_look := {}
+
+
+static func set_era_look(style: Dictionary) -> void:
+	_era_look = {
+		"plaster": style.get("plaster_tint", Color(0.97, 0.95, 0.91)),
+		"concrete": style.get("plaster_tint", Color(0.97, 0.95, 0.91)),
+		"wood": style.get("wood_tint", Color(1, 1, 1)),
+		"darkwood": style.get("wood_tint", Color(1, 1, 1)),
+		"rooftile": style.get("roof_tint", Color(1, 1, 1)),
+	}
+	for k in _era_look:
+		if _mat_cache.has(k):
+			(_mat_cache[k] as ShaderMaterial).set_shader_parameter("era_tint", _era_look[k])
 
 
 static func macro_noise() -> Texture2D:

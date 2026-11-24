@@ -134,12 +134,31 @@ void sky() {
 	// ---- 太陽本体
 	float disk = smoothstep(0.99955 - 0.0004 * sun_size, 0.99975 - 0.0004 * sun_size, mu);
 	col += sglow * disk * 2.5 * day;
-	// ---- 夜の星
+	// ---- 夜の星（大小・色違い）・天の川・月（夜は太陽ライトを月として使う）
 	if (day < 0.99 && y > 0.0) {
+		float nk = (1.0 - day) * smoothstep(0.03, 0.25, y);
 		vec3 sd = floor(d * 380.0);
 		float h = fract(sin(dot(sd, vec3(12.9898, 78.233, 37.719))) * 43758.5453);
-		float star = step(0.9985, h) * (1.0 - day) * smoothstep(0.05, 0.3, y);
-		col += vec3(star) * 1.5;
+		float h2 = fract(h * 91.7);
+		vec3 starc = mix(vec3(0.75, 0.85, 1.0), vec3(1.0, 0.9, 0.75), h2);
+		float star = step(0.9982, h) * mix(0.6, 2.2, h2 * h2);
+		vec3 sd2 = floor(d * 120.0);
+		float hb = fract(sin(dot(sd2, vec3(41.3, 17.7, 63.1))) * 24634.63);
+		star += step(0.9993, hb) * 3.0;
+		// 天の川: 斜めの帯に細かい星と淡い光
+		vec3 gal = normalize(vec3(0.35, 0.25, 0.9));
+		float band = 1.0 - smoothstep(0.0, 0.32, abs(dot(d, gal)));
+		float neb = fbm(d.xz / (y + 0.3) * 0.5 + vec2(0.3, 0.7));
+		col += vec3(0.32, 0.36, 0.6) * band * smoothstep(0.35, 0.75, neb) * 0.35 * nk;
+		vec3 sd3 = floor(d * 700.0);
+		float h3 = fract(sin(dot(sd3, vec3(7.13, 157.1, 113.7))) * 43758.5453);
+		star += step(1.0 - 0.012 * band, h3) * 0.8;
+		col += starc * star * nk;
+		if (night > 0.5) {
+			float md = smoothstep(0.99935, 0.99955, mu);
+			float mglow = pow(max(mu, 0.0), 300.0) * 0.5 + pow(max(mu, 0.0), 20.0) * 0.08;
+			col += vec3(1.0, 0.97, 0.88) * md * 2.2 + vec3(0.55, 0.65, 1.0) * mglow;
+		}
 	}
 	// 地平線より下: 霞〜地面色
 	if (y < 0.0) {

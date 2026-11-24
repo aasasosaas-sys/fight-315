@@ -123,7 +123,35 @@ static func scene(path: String) -> PackedScene:
 		if ps == null:
 			ps = load(path) as PackedScene
 		_scene_cache[path] = ps
+		if ps and path.ends_with(".vrm"):
+			_tag_materials(ps)
 	return ps
+
+## MToon の素材に部位の種類（_HsKind）を記す: 1 髪（天使の輪）/ 2 肌 / 3 顔の肌（影を柔らかく）/ 4 目・眉（リムなし）/ 0 服。
+## VRM の素材はインスタンス間で共有されるので、読み込み時に一度だけ。後から複製される素材（顔・肌色）にも引き継がれる
+static func _tag_materials(ps: PackedScene) -> void:
+	var n := ps.instantiate()
+	for mi: MeshInstance3D in n.find_children("*", "MeshInstance3D", true, false):
+		if mi.mesh == null:
+			continue
+		for si in mi.mesh.get_surface_count():
+			var m := mi.mesh.surface_get_material(si) as ShaderMaterial
+			if m == null:
+				continue
+			var nm := m.resource_name
+			var kind := 0.0
+			if "HAIR" in nm or "Hair" in nm:
+				kind = 1.0
+			elif "Face_00_SKIN" in nm:
+				kind = 3.0
+			elif "SKIN" in nm:
+				kind = 2.0
+			elif "Eye" in nm or "Brow" in nm or "Lash" in nm or "FaceMouth" in nm:
+				kind = 4.0
+			m.set_shader_parameter("_HsKind", kind)
+			if m.next_pass is ShaderMaterial:
+				(m.next_pass as ShaderMaterial).set_shader_parameter("_HsKind", kind)
+	n.free()
 
 
 static var _loading := {}
@@ -461,6 +489,8 @@ static func _cloth_mat(template: Material, lit: Color, shade: Color, outline := 
 			m.set_shader_parameter("_ShadeColor", shade)
 		m.set_shader_parameter("_ShadeToony", 0.85)
 		m.set_shader_parameter("_ShadeShift", -0.1)
+		# 布: 雛形（体の肌）の種類を引き継がない
+		m.set_shader_parameter("_HsKind", 0.0)
 		if not outline:
 			# 細い帯（衿など）は輪郭線が帯より太くなるので付けず、両面を描く
 			m.next_pass = null

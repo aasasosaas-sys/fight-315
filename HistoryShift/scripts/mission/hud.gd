@@ -10,6 +10,7 @@ const INK := Color(0.07, 0.05, 0.1, 0.78)
 const GOLD := Color(0.95, 0.78, 0.35)
 const CYAN := Color(0.37, 0.91, 1.0)
 const RED := Color(0.86, 0.24, 0.2)
+const HP_OK := Color(0.42, 0.9, 0.62)
 
 var target_world: Variant = null   # Vector3 or null
 var target_label := ""
@@ -56,6 +57,13 @@ var _shift_busy := false
 var _weapon: Label                # 手にしている武器（左下）
 var _dur_bar: ProgressBar         # 武器の耐久
 var _money: Label                 # 所持金（右上）
+var _serif: Font
+var _obj_panel: Control
+var _banner_line: Control         # 見出しの飾り線
+var _banner_spread := 0.0
+var _shift_lines: Control         # 改変通知の上下の光の線
+var _shift_col := Color(0.37, 0.91, 1.0)
+var _shift_line_k := 1.0
 
 
 func _ready() -> void:
@@ -63,6 +71,7 @@ func _ready() -> void:
 	layer = 10
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_bold = load("res://assets/fonts/NotoSansJP-Bold.ttf")
+	_serif = load("res://assets/fonts/NotoSerifJP-Bold.ttf")
 	_root = Control.new()
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -93,127 +102,185 @@ func _ready() -> void:
 	_hit.set_anchors_preset(Control.PRESET_CENTER)
 	_hit.position = Vector2(-14, -30)
 
-	# 左下：体力・弾・乗り物
-	var bl := _panel(Vector2(28, -184), Vector2(560, 156), Control.PRESET_BOTTOM_LEFT)
+	# 左下：体力・武器・弾（箱ではなく、左から薄れる帯の上に細いバー）
+	var bl := _strip(Control.PRESET_BOTTOM_LEFT, Vector2(0, -172), Vector2(520, 140))
 	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 2)
 	bl.add_child(v)
+	var hp_row := HBoxContainer.new()
+	hp_row.add_theme_constant_override("separation", 10)
+	v.add_child(hp_row)
+	var hp_tag := _label("体", 15, Color(1, 1, 1, 0.75), hp_row)
+	hp_tag.add_theme_font_override("font", _bold)
+	_shadowed(hp_tag, 4)
 	_hp_bar = ProgressBar.new()
-	_hp_bar.custom_minimum_size = Vector2(380, 18)
+	_hp_bar.custom_minimum_size = Vector2(300, 7)
+	_hp_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_hp_bar.show_percentage = false
-	var fill := StyleBoxFlat.new(); fill.bg_color = Color(0.35, 0.85, 0.5); fill.set_corner_radius_all(6)
-	var bg := StyleBoxFlat.new(); bg.bg_color = Color(1, 1, 1, 0.12); bg.set_corner_radius_all(6)
+	var fill := StyleBoxFlat.new(); fill.bg_color = HP_OK; fill.set_corner_radius_all(4)
+	fill.border_color = Color(1, 1, 1, 0.35); fill.border_width_top = 1
+	var bg := StyleBoxFlat.new(); bg.bg_color = Color(0.05, 0.04, 0.09, 0.45); bg.set_corner_radius_all(4)
+	bg.border_color = Color(1, 1, 1, 0.18); bg.set_border_width_all(1)
 	_hp_bar.add_theme_stylebox_override("fill", fill)
 	_hp_bar.add_theme_stylebox_override("background", bg)
-	v.add_child(_hp_bar)
-	_weapon = _label("", 22, GOLD, v)
-	_weapon.add_theme_font_override("font", _bold)
-	_ammo = _label("30 / ∞", 34, Color.WHITE, v)
+	hp_row.add_child(_hp_bar)
+	var wrow := HBoxContainer.new()
+	wrow.add_theme_constant_override("separation", 14)
+	v.add_child(wrow)
+	_ammo = _label("30 / ∞", 34, Color.WHITE, wrow)
 	_ammo.add_theme_font_override("font", _bold)
+	_shadowed(_ammo, 6)
+	var wcol := VBoxContainer.new()
+	wcol.add_theme_constant_override("separation", 0)
+	wcol.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	wrow.add_child(wcol)
+	_weapon = _label("", 18, GOLD, wcol)
+	_weapon.add_theme_font_override("font", _bold)
+	_shadowed(_weapon, 4)
 	_dur_bar = ProgressBar.new()
-	_dur_bar.custom_minimum_size = Vector2(200, 8)
+	_dur_bar.custom_minimum_size = Vector2(130, 3)
 	_dur_bar.show_percentage = false
 	_dur_bar.max_value = 1.0
-	var dfill := StyleBoxFlat.new(); dfill.bg_color = Color(0.85, 0.8, 0.6); dfill.set_corner_radius_all(3)
-	var dbg := StyleBoxFlat.new(); dbg.bg_color = Color(1, 1, 1, 0.1); dbg.set_corner_radius_all(3)
+	var dfill := StyleBoxFlat.new(); dfill.bg_color = Color(0.92, 0.86, 0.66); dfill.set_corner_radius_all(2)
+	var dbg := StyleBoxFlat.new(); dbg.bg_color = Color(1, 1, 1, 0.15); dbg.set_corner_radius_all(2)
 	_dur_bar.add_theme_stylebox_override("fill", dfill)
 	_dur_bar.add_theme_stylebox_override("background", dbg)
 	_dur_bar.visible = false
-	v.add_child(_dur_bar)
-	_veh = _label("", 22, Color(1, 1, 1, 0.8), v)
-	_tool = _label("", 21, CYAN, v)
+	wcol.add_child(_dur_bar)
+	_veh = _label("", 18, Color(1, 1, 1, 0.85), v)
+	_shadowed(_veh, 4)
+	_tool = _label("", 17, CYAN, v)
+	_shadowed(_tool, 4)
 
-	# 右上：手配度
-	_stars = _label("", 40, GOLD)
+	# 右上：手配度・破壊・所持金（文字だけ、柔らかい影）
+	_stars = _label("", 32, GOLD)
 	_stars.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	_stars.position = Vector2(-330, 24)
-	_stars.custom_minimum_size = Vector2(300, 50)
+	_stars.position = Vector2(-330, 22)
+	_stars.custom_minimum_size = Vector2(300, 44)
 	_stars.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_stars.add_theme_constant_override("outline_size", 8)
-	_stars.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
-	_money = _label("", 22, Color(1, 0.9, 0.6))
+	_shadowed(_stars, 7)
+	_money = _label("", 18, Color(1, 0.92, 0.7))
 	_money.anchor_left = 1.0
 	_money.anchor_right = 1.0
 	_money.offset_left = -660.0
-	_money.offset_right = -30.0
-	_money.offset_top = 116.0
-	_money.offset_bottom = 146.0
+	_money.offset_right = -32.0
+	_money.offset_top = 100.0
+	_money.offset_bottom = 126.0
 	_money.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_money.add_theme_constant_override("outline_size", 6)
-	_money.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
-	_destr = _label("", 22, Color(1, 0.82, 0.6))
+	_shadowed(_money, 5)
+	_destr = _label("", 18, Color(1, 0.84, 0.66))
 	_destr.anchor_left = 1.0
 	_destr.anchor_right = 1.0
 	_destr.offset_left = -660.0
-	_destr.offset_right = -30.0
-	_destr.offset_top = 80.0
-	_destr.offset_bottom = 112.0
+	_destr.offset_right = -32.0
+	_destr.offset_top = 70.0
+	_destr.offset_bottom = 98.0
 	_destr.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_destr.add_theme_constant_override("outline_size", 6)
-	_destr.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+	_shadowed(_destr, 5)
 
-	# 左上：目標
-	var tl := _panel(Vector2(28, 28), Vector2(560, 0), Control.PRESET_TOP_LEFT)
+	# 左上：目標（金の細い縦線＋文字。背景は左から薄れる帯だけ）
+	var tl := _strip(Control.PRESET_TOP_LEFT, Vector2(0, 26), Vector2(500, 0))
+	_obj_panel = tl
+	var th := HBoxContainer.new()
+	th.add_theme_constant_override("separation", 12)
+	tl.add_child(th)
+	var accent := ColorRect.new()
+	accent.color = GOLD
+	accent.custom_minimum_size = Vector2(3, 0)
+	accent.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	th.add_child(accent)
 	var tv := VBoxContainer.new()
-	tv.add_theme_constant_override("separation", 4)
-	tl.add_child(tv)
-	_obj_title = _label("", 22, GOLD, tv)
+	tv.add_theme_constant_override("separation", 1)
+	th.add_child(tv)
+	_obj_title = _label("", 17, GOLD, tv)
 	_obj_title.add_theme_font_override("font", _bold)
-	_obj_text = _label("", 26, Color.WHITE, tv)
+	_shadowed(_obj_title, 4)
+	_obj_text = _label("", 20, Color(1, 1, 1, 0.96), tv)
 	_obj_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_obj_text.custom_minimum_size = Vector2(520, 0)
-	_obj_counter = _label("", 22, CYAN, tv)
-	_timer = _label("", 30, RED, tv)
+	_obj_text.custom_minimum_size = Vector2(430, 0)
+	_obj_text.add_theme_constant_override("line_spacing", -2)
+	_shadowed(_obj_text, 5)
+	_obj_counter = _label("", 17, CYAN, tv)
+	_obj_counter.add_theme_font_override("font", _bold)
+	_shadowed(_obj_counter, 4)
+	_timer = _label("", 24, Color(1, 0.5, 0.45), tv)
 	_timer.add_theme_font_override("font", _bold)
+	_shadowed(_timer, 5)
 
-	# 方位
+	# 方位（細い線と目盛り）
 	_compass = Control.new()
 	_compass.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	_compass.position = Vector2(-360, 18)
-	_compass.custom_minimum_size = Vector2(720, 44)
-	_compass.size = Vector2(720, 44)
+	_compass.position = Vector2(-300, 14)
+	_compass.custom_minimum_size = Vector2(600, 40)
+	_compass.size = Vector2(600, 40)
 	_compass.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_compass.draw.connect(_draw_compass)
 	_root.add_child(_compass)
 
 	_toast_box = VBoxContainer.new()
 	_toast_box.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	_toast_box.position = Vector2(-450, 90)
+	_toast_box.position = Vector2(-450, 78)
 	_toast_box.custom_minimum_size = Vector2(900, 0)
 	_toast_box.alignment = BoxContainer.ALIGNMENT_BEGIN
+	_toast_box.add_theme_constant_override("separation", 6)
 	_toast_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_toast_box)
 
-	_banner = _label("", 72, GOLD)
+	_banner = _label("", 64, GOLD)
 	_banner.set_anchors_preset(Control.PRESET_CENTER)
-	_banner.position = Vector2(-600, -160)
+	_banner.position = Vector2(-600, -190)
 	_banner.custom_minimum_size = Vector2(1200, 100)
+	_banner.pivot_offset = Vector2(600, 50)
 	_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_banner.add_theme_font_override("font", load("res://assets/fonts/NotoSerifJP-Bold.ttf"))
-	_banner.add_theme_constant_override("outline_size", 14)
-	_banner.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	_banner.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_banner.add_theme_font_override("font", _serif)
+	_banner.add_theme_constant_override("outline_size", 10)
+	_banner.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.08, 0.75))
+	_banner.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.45))
+	_banner.add_theme_constant_override("shadow_offset_y", 4)
+	_banner.add_theme_constant_override("shadow_outline_size", 16)
+	_banner.modulate.a = 0.0
+	# 見出しの上下に細い飾り線（左右へ広がる）
+	_banner_line = Control.new()
+	_banner_line.set_anchors_preset(Control.PRESET_CENTER)
+	_banner_line.position = Vector2(-600, -190)
+	_banner_line.size = Vector2(1200, 100)
+	_banner_line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_banner_line.draw.connect(_draw_banner_line)
+	_root.add_child(_banner_line)
+	_root.move_child(_banner_line, _banner.get_index())
 
-	_prompt = _label("", 28, Color.WHITE)
+	_prompt = _label("", 22, Color.WHITE)
 	_prompt.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	_prompt.position = Vector2(-400, -260)
+	_prompt.position = Vector2(-400, -250)
 	_prompt.custom_minimum_size = Vector2(800, 40)
 	_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_prompt.add_theme_constant_override("outline_size", 8)
-	_prompt.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	_prompt.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_prompt.add_theme_font_override("font", _bold)
+	_prompt.add_theme_stylebox_override("normal", _pill(Color(0.05, 0.04, 0.09, 0.55)))
+	_shadowed(_prompt, 4)
 
-	# 会話
+	# 会話（下の帯。名前は金の札）
 	_dialog = PanelContainer.new()
 	_dialog.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	_dialog.position = Vector2(-700, -230)
-	_dialog.custom_minimum_size = Vector2(1400, 190)
-	_dialog.add_theme_stylebox_override("panel", _box(Color(0.06, 0.05, 0.09, 0.9), GOLD))
+	_dialog.position = Vector2(-680, -232)
+	_dialog.custom_minimum_size = Vector2(1360, 176)
+	var dbox := _box(Color(0.05, 0.04, 0.09, 0.8))
+	dbox.set_border_width_all(0)
+	dbox.border_width_top = 2
+	dbox.border_color = Color(GOLD, 0.8)
+	dbox.set_corner_radius_all(6)
+	dbox.content_margin_left = 34; dbox.content_margin_right = 34; dbox.content_margin_top = 14
+	_dialog.add_theme_stylebox_override("panel", dbox)
 	var dv := VBoxContainer.new()
+	dv.add_theme_constant_override("separation", 6)
 	_dialog.add_child(dv)
-	_dialog_name = _label("", 28, GOLD, dv)
-	_dialog_name.add_theme_font_override("font", load("res://assets/fonts/NotoSerifJP-Bold.ttf"))
-	_dialog_text = _label("", 30, Color.WHITE, dv)
+	_dialog_name = _label("", 26, GOLD, dv)
+	_dialog_name.add_theme_font_override("font", _serif)
+	_dialog_text = _label("", 27, Color.WHITE, dv)
 	_dialog_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_dialog_text.custom_minimum_size = Vector2(1340, 90)
-	var hint := _label("E / クリック で次へ", 18, Color(1, 1, 1, 0.5), dv)
+	_dialog_text.custom_minimum_size = Vector2(1290, 84)
+	var hint := _label("E / クリック で次へ  ▼", 16, Color(1, 1, 1, 0.5), dv)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_dialog.visible = false
 	_root.add_child(_dialog)
@@ -236,6 +303,51 @@ func _box(c: Color, border := Color(0, 0, 0, 0)) -> StyleBoxFlat:
 	return s
 
 
+## 丸い札（プロンプト・トースト）
+func _pill(c: Color, border := Color(0, 0, 0, 0)) -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = c
+	s.set_corner_radius_all(40)
+	s.content_margin_left = 22; s.content_margin_right = 22; s.content_margin_top = 4; s.content_margin_bottom = 6
+	if border.a > 0:
+		s.border_color = border
+		s.set_border_width_all(1)
+	return s
+
+
+## 左右どちらかから透明へ薄れる帯（箱の代わり）
+func _fade_box(from_left := true, alpha := 0.5, margin_l := 34.0) -> StyleBoxTexture:
+	var g := Gradient.new()
+	var ink := Color(0.04, 0.03, 0.08)
+	g.set_color(0, Color(ink, alpha))
+	g.set_color(1, Color(ink, 0.0))
+	g.add_point(0.55, Color(ink, alpha * 0.55))
+	if not from_left:
+		g.reverse()
+	var gt := GradientTexture2D.new()
+	gt.gradient = g
+	gt.width = 256
+	gt.height = 4
+	var st := StyleBoxTexture.new()
+	st.texture = gt
+	st.content_margin_left = margin_l
+	st.content_margin_right = 60
+	st.content_margin_top = 10
+	st.content_margin_bottom = 12
+	return st
+
+
+func _strip(preset: int, pos: Vector2, size: Vector2) -> PanelContainer:
+	var p := PanelContainer.new()
+	p.set_anchors_preset(preset)
+	p.position = pos
+	p.custom_minimum_size = size
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	p.add_theme_stylebox_override("panel", _fade_box(true, 0.42))
+	_root.add_child(p)
+	return p
+
+
 func _panel(pos: Vector2, size: Vector2, preset: int) -> PanelContainer:
 	var p := PanelContainer.new()
 	p.set_anchors_preset(preset)
@@ -245,6 +357,16 @@ func _panel(pos: Vector2, size: Vector2, preset: int) -> PanelContainer:
 	p.add_theme_stylebox_override("panel", _box(INK))
 	_root.add_child(p)
 	return p
+
+
+## 背景の上でも読める柔らかい縁取り（黒ではなく墨色）
+func _shadowed(l: Label, outline: int) -> void:
+	l.add_theme_constant_override("outline_size", outline)
+	l.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.08, 0.6))
+	l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.35))
+	l.add_theme_constant_override("shadow_offset_x", 0)
+	l.add_theme_constant_override("shadow_offset_y", 2)
+	l.add_theme_constant_override("shadow_outline_size", outline + 4)
 
 
 func _label(t: String, size: int, c: Color, parent: Node = null) -> Label:
@@ -296,29 +418,93 @@ void fragment() {
 	_shift_fx.material = sm
 	_shift_fx.visible = false
 	_root.add_child(_shift_fx)
+	# 「歴史が揺らいだ」: 画面幅の帯（中央が濃く左右へ薄れる）＋上下の細い光の線。見出しは明朝
 	_shift = PanelContainer.new()
 	_shift.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	_shift.position = Vector2(-560, 200)
-	_shift.custom_minimum_size = Vector2(1120, 0)
+	_shift.position = Vector2(-760, 170)
+	_shift.custom_minimum_size = Vector2(1520, 0)
 	_shift.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_shift.add_theme_stylebox_override("panel", _box(Color(0.05, 0.03, 0.09, 0.9), CYAN))
+	var g := Gradient.new()
+	var ink := Color(0.03, 0.03, 0.08)
+	g.offsets = PackedFloat32Array([0.0, 0.22, 0.5, 0.78, 1.0])
+	g.colors = PackedColorArray([Color(ink, 0.0), Color(ink, 0.62), Color(ink, 0.78), Color(ink, 0.62), Color(ink, 0.0)])
+	var gt := GradientTexture2D.new()
+	gt.gradient = g
+	gt.width = 512
+	gt.height = 4
+	var st := StyleBoxTexture.new()
+	st.texture = gt
+	st.content_margin_left = 260; st.content_margin_right = 260; st.content_margin_top = 18; st.content_margin_bottom = 20
+	_shift.add_theme_stylebox_override("panel", st)
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 6)
+	v.add_theme_constant_override("separation", 4)
 	_shift.add_child(v)
-	_shift_head = _label("歴史が揺らいだ！", 54, CYAN, v)
-	_shift_head.add_theme_font_override("font", load("res://assets/fonts/NotoSerifJP-Bold.ttf"))
+	var kicker := _label("― 時 空 改 変 ―", 15, Color(1, 1, 1, 0.6), v)
+	kicker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	kicker.add_theme_font_override("font", _bold)
+	_shift_head = _label("歴史が揺らいだ！", 46, CYAN, v)
+	_shift_head.add_theme_font_override("font", _serif)
 	_shift_head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_shift_head.add_theme_constant_override("outline_size", 12)
-	_shift_head.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
-	_shift_text = _label("", 25, Color.WHITE, v)
+	_shift_head.add_theme_constant_override("outline_size", 6)
+	_shift_head.add_theme_color_override("font_outline_color", Color(0.02, 0.05, 0.1, 0.8))
+	_shift_head.add_theme_color_override("font_shadow_color", Color(CYAN, 0.35))
+	_shift_head.add_theme_constant_override("shadow_offset_y", 0)
+	_shift_head.add_theme_constant_override("shadow_outline_size", 22)
+	_shift_text = _label("", 21, Color(1, 1, 1, 0.95), v)
 	_shift_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_shift_text.custom_minimum_size = Vector2(1080, 0)
-	_shift_detail = _label("", 23, GOLD, v)
+	_shift_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_shift_text.custom_minimum_size = Vector2(1000, 0)
+	_shadowed(_shift_text, 4)
+	_shift_detail = _label("", 19, GOLD, v)
 	_shift_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_shift_detail.custom_minimum_size = Vector2(1080, 0)
+	_shift_detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_shift_detail.custom_minimum_size = Vector2(1000, 0)
 	_shift_detail.add_theme_font_override("font", _bold)
+	_shadowed(_shift_detail, 4)
 	_shift.visible = false
 	_root.add_child(_shift)
+	_shift_lines = Control.new()
+	_shift_lines.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_shift_lines.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_shift_lines.draw.connect(_draw_shift_lines)
+	_shift.add_child(_shift_lines)
+
+
+func _draw_shift_lines() -> void:
+	# この Control は帯の内側（余白の内）に置かれるので、帯の左上を原点に直して描く
+	var o := -_shift_lines.position
+	var w := _shift.size.x
+	var h := _shift.size.y
+	var c: Color = _shift_col
+	for y in [1.0, h - 1.0]:
+		# 中央が明るく左右へ消える光の線（細い区間を重ねて描く）
+		var n := 24
+		for i in n:
+			var x0 := w * (0.08 + 0.84 * float(i) / n)
+			var x1 := w * (0.08 + 0.84 * float(i + 1) / n)
+			var t := absf((float(i) + 0.5) / n - 0.5) * 2.0
+			_shift_lines.draw_line(o + Vector2(x0, y), o + Vector2(x1, y), Color(c, (1.0 - t * t) * 0.9 * _shift_line_k), 2.0)
+	# 見出しの左右の菱形
+	for sx in [w * 0.5 - 330.0 * _shift_line_k, w * 0.5 + 330.0 * _shift_line_k]:
+		var cy := 64.0
+		_shift_lines.draw_colored_polygon(PackedVector2Array([o + Vector2(sx, cy - 6), o + Vector2(sx + 6, cy), o + Vector2(sx, cy + 6), o + Vector2(sx - 6, cy)]), Color(c, 0.85 * _shift_line_k))
+
+
+func _draw_banner_line() -> void:
+	var k := _banner.modulate.a
+	if k <= 0.01:
+		return
+	var c := _banner.get_theme_color("font_color")
+	var w := _banner_line.size.x
+	var cy := _banner_line.size.y * 0.5
+	var half := 230.0 + 240.0 * _banner_spread
+	for side in [-1.0, 1.0]:
+		var n := 12
+		for i in n:
+			var a0 := 300.0 + (half - 300.0 + 260.0) * float(i) / n
+			var a1 := 300.0 + (half - 300.0 + 260.0) * float(i + 1) / n
+			var t := float(i) / n
+			_banner_line.draw_line(Vector2(w * 0.5 + side * a0, cy + 2), Vector2(w * 0.5 + side * a1, cy + 2), Color(c, (1.0 - t) * 0.8 * k), 2.0)
 
 
 func _build_pause() -> void:
@@ -380,42 +566,48 @@ func show_death(reason: String) -> void:
 
 # ---- 公開 API ----
 func toast(t: String, dur := 3.0) -> void:
-	var l := _label(t, 28, Color.WHITE, _toast_box)
+	_chip(t, Color.WHITE, Color(1, 1, 1, 0.22), false, dur)
+
+
+## トースト 1 枚（中央寄せの丸い札。ふわっと出て消える）
+func _chip(t: String, c: Color, border: Color, bold: bool, dur: float) -> void:
+	var row := CenterContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_toast_box.add_child(row)
+	var l := _label(t, 21, c, row)
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	l.add_theme_constant_override("outline_size", 8)
-	l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
-	var tw := l.create_tween()
+	l.add_theme_stylebox_override("normal", _pill(Color(0.05, 0.04, 0.09, 0.58), border))
+	if bold:
+		l.add_theme_font_override("font", _bold)
+	_shadowed(l, 3)
+	row.modulate.a = 0.0
+	var tw := row.create_tween()
+	tw.tween_property(row, "modulate:a", 1.0, 0.18)
 	tw.tween_interval(dur)
-	tw.tween_property(l, "modulate:a", 0.0, 0.5)
-	tw.tween_callback(l.queue_free)
+	tw.tween_property(row, "modulate:a", 0.0, 0.5)
+	tw.tween_callback(row.queue_free)
 	while _toast_box.get_child_count() > 4:
 		_toast_box.get_child(0).free()
 
 
 ## 技能が上がったときの知らせ（金色）
 func skill_toast(t: String, up := true) -> void:
-	var l := _label(t, 28, GOLD if up else Color(0.8, 0.8, 0.8), _toast_box)
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	l.add_theme_constant_override("outline_size", 8)
-	l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
-	l.add_theme_font_override("font", _bold)
-	var tw := l.create_tween()
-	tw.tween_interval(3.0)
-	tw.tween_property(l, "modulate:a", 0.0, 0.5)
-	tw.tween_callback(l.queue_free)
-	while _toast_box.get_child_count() > 4:
-		_toast_box.get_child(0).free()
+	_chip(("▲ " if up else "") + t, GOLD if up else Color(0.8, 0.8, 0.8), Color(GOLD, 0.55) if up else Color(1, 1, 1, 0.2), true, 3.0)
 
 
 func banner(t: String, color := GOLD, dur := 3.0) -> void:
 	_banner.text = t
 	_banner.add_theme_color_override("font_color", color)
 	_banner.modulate.a = 0.0
-	_banner.scale = Vector2(1.2, 1.2)
+	_banner.scale = Vector2(1.08, 1.08)
+	_banner_spread = 0.0
 	var tw := _banner.create_tween()
-	tw.tween_property(_banner, "modulate:a", 1.0, 0.3)
+	tw.tween_property(_banner, "modulate:a", 1.0, 0.35)
+	tw.parallel().tween_property(_banner, "scale", Vector2.ONE, 0.6).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_method(_set_banner_spread, 0.0, 1.0, 0.8).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tw.tween_interval(dur)
 	tw.tween_property(_banner, "modulate:a", 0.0, 0.6)
+	tw.parallel().tween_method(_set_banner_spread, 1.0, 1.0, 0.6)
 
 
 ## 自由探索の混乱で歴史が変わったときの派手な通知。text の1行目が見出し、detail は設問の ○× 一覧。
@@ -424,6 +616,16 @@ func history_shift(text: String, broke_answer: bool, detail := "") -> void:
 	_shift_queue.append([text, broke_answer, detail])
 	if not _shift_busy:
 		_next_shift()
+
+
+func _set_banner_spread(x: float) -> void:
+	_banner_spread = x
+	_banner_line.queue_redraw()
+
+
+func _set_shift_line(x: float) -> void:
+	_shift_line_k = x
+	_shift_lines.queue_redraw()
 
 
 func is_history_shift_showing() -> bool:
@@ -437,26 +639,26 @@ func _next_shift() -> void:
 	_shift_busy = true
 	var item: Array = _shift_queue.pop_front()
 	var broke: bool = item[1]
-	var col := RED if broke else CYAN
-	_shift_head.text = "歴史が揺らいだ！" + ("　―　解答が崩れた！" if broke else "")
-	_shift_head.add_theme_color_override("font_color", Color(1, 0.45, 0.4) if broke else CYAN)
-	(_shift.get_theme_stylebox("panel") as StyleBoxFlat).border_color = col
+	var col := Color(1, 0.42, 0.38) if broke else CYAN
+	_shift_head.text = "歴史が揺らいだ" + ("　―　解答が崩れた" if broke else "")
+	_shift_head.add_theme_color_override("font_color", col.lightened(0.15))
+	_shift_head.add_theme_color_override("font_shadow_color", Color(col, 0.35))
+	_shift_col = col
 	_shift_text.text = item[0]
 	_shift_detail.text = item[2]
 	_shift_detail.visible = item[2] != ""
 	_shift.visible = true
 	_shift.modulate.a = 0.0
-	_shift.pivot_offset = Vector2(560, 60)
-	_shift.scale = Vector2(1.35, 1.35)
-	var base_x := _shift.position.x
+	_shift.pivot_offset = Vector2(760, 60)
+	_shift.scale = Vector2(1.0, 0.2)
+	_shift_line_k = 0.0
 	var tw := _shift.create_tween()
-	tw.tween_property(_shift, "modulate:a", 1.0, 0.15)
-	tw.parallel().tween_property(_shift, "scale", Vector2.ONE, 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	for i in 6:
-		tw.tween_property(_shift, "position:x", base_x + (14.0 if i % 2 == 0 else -14.0) * (1.0 - i / 6.0), 0.04)
-	tw.tween_property(_shift, "position:x", base_x, 0.04)
+	tw.tween_property(_shift, "modulate:a", 1.0, 0.18)
+	tw.parallel().tween_property(_shift, "scale", Vector2.ONE, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_method(_set_shift_line, 0.0, 1.0, 0.7).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tw.tween_interval(5.5)
 	tw.tween_property(_shift, "modulate:a", 0.0, 0.6)
+	tw.parallel().tween_property(_shift, "scale", Vector2(1.04, 0.9), 0.6)
 	tw.tween_callback(func():
 		_shift.visible = false
 		_next_shift())
@@ -483,19 +685,24 @@ func set_objective(title: String, text: String, counter := "") -> void:
 	_obj_title.text = title
 	_obj_text.text = text
 	_obj_counter.text = counter
-	_obj_title.get_parent().get_parent().visible = title != "" or text != ""
+	_obj_panel.visible = title != "" or text != ""
+	_obj_title.visible = title != ""
+	_obj_counter.visible = counter != ""
 
 
 func set_counter(t: String) -> void:
 	_obj_counter.text = t
+	_obj_counter.visible = t != ""
 
 
 func set_timer(sec: float) -> void:
 	_timer.text = "" if sec < 0 else "残り %d:%02d" % [int(sec) / 60, int(sec) % 60]
+	_timer.visible = sec >= 0
 
 
 func set_prompt(t: String) -> void:
 	_prompt.text = t
+	_prompt.visible = t != ""
 
 
 func dialog(npc_name: String, lines: Array) -> void:
@@ -542,7 +749,7 @@ func _process(dt: float) -> void:
 		_hp_bar.value = p.hp
 		var fill := _hp_bar.get_theme_stylebox("fill") as StyleBoxFlat
 		if fill:
-			fill.bg_color = Color(0.35, 0.85, 0.5) if p.hp > p.max_hp * 0.35 else RED
+			fill.bg_color = HP_OK if p.hp > p.max_hp * 0.35 else RED
 		var in_plane: bool = p.in_vehicle() and p.vehicle.get("kind") == "plane"
 		var arms = p.get("arms")
 		if arms != null and not in_plane:
@@ -679,28 +886,48 @@ func _draw_compass() -> void:
 	if cam == null:
 		return
 	var w := _compass.size.x
-	_compass.draw_rect(Rect2(Vector2.ZERO, _compass.size), Color(0, 0, 0, 0.35))
 	var fwd := -cam.global_basis.z
 	var heading := atan2(fwd.x, -fwd.z)   # 北 = -Z
 	var font := _bold
+	var span := PI / 2.2
+	var ink := Color(0.03, 0.02, 0.06, 0.55)
+	# 細い基線（中央が濃く、左右へ消える）
+	var n := 20
+	for i in n:
+		var t := absf((float(i) + 0.5) / n - 0.5) * 2.0
+		_compass.draw_line(Vector2(w * float(i) / n, 30), Vector2(w * float(i + 1) / n, 30), Color(1, 1, 1, (1.0 - t * t) * 0.55), 1.5)
+	# 目盛り（15° ごと）
+	for k in 24:
+		var a := wrapf(k * PI / 12.0 - heading, -PI, PI)
+		if absf(a) < span:
+			var x := w * 0.5 + a / span * w * 0.5
+			var fade := 1.0 - absf(a) / span
+			var major := k % 6 == 0
+			var h := 9.0 if major else 5.0
+			_compass.draw_line(Vector2(x, 30 - h), Vector2(x, 30), Color(1, 1, 1, 0.7 * fade), 1.5 if major else 1.0)
 	var marks := {"北": 0.0, "東": PI / 2, "南": PI, "西": -PI / 2}
 	for k in marks:
-		var a := wrapf(marks[k] - heading, -PI, PI)
-		if absf(a) < PI / 2.2:
-			var x := w * 0.5 + a / (PI / 2.2) * w * 0.5
-			_compass.draw_string(font, Vector2(x - 12, 32), k, HORIZONTAL_ALIGNMENT_CENTER, 24, 22, Color.WHITE if k != "北" else RED)
+		var a: float = wrapf(marks[k] - heading, -PI, PI)
+		if absf(a) < span:
+			var x := w * 0.5 + a / span * w * 0.5
+			var fade := 1.0 - absf(a) / span * 0.7
+			var col := Color(1.0, 0.45, 0.4, fade) if k == "北" else Color(1, 1, 1, fade)
+			_compass.draw_string_outline(font, Vector2(x - 12, 18), k, HORIZONTAL_ALIGNMENT_CENTER, 24, 18, 5, ink)
+			_compass.draw_string(font, Vector2(x - 12, 18), k, HORIZONTAL_ALIGNMENT_CENTER, 24, 18, col)
+	# 正面の印
+	_compass.draw_colored_polygon(PackedVector2Array([Vector2(w * 0.5, 33), Vector2(w * 0.5 - 4, 39), Vector2(w * 0.5 + 4, 39)]), Color(1, 1, 1, 0.8))
 	var p = Game.player
 	if p == null or not is_instance_valid(p):
 		return
 	for cname in compass_points:
 		var to: Vector3 = compass_points[cname] - p.global_position
 		var a2 := wrapf(atan2(to.x, -to.z) - heading, -PI, PI)
-		if absf(a2) < PI / 2.2:
-			var x2 := w * 0.5 + a2 / (PI / 2.2) * w * 0.5
+		if absf(a2) < span:
+			var x2 := w * 0.5 + a2 / span * w * 0.5
 			var is_t: bool = target_world != null and (compass_points[cname] as Vector3).distance_to(target_world) < 5.0
-			_compass.draw_circle(Vector2(x2, 8), 4, GOLD if is_t else Color(1, 1, 1, 0.5))
+			_compass.draw_circle(Vector2(x2, 30), 3.5 if is_t else 2.5, GOLD if is_t else Color(1, 1, 1, 0.6))
 	if target_world != null:
 		var to2: Vector3 = target_world - p.global_position
 		var a3 := wrapf(atan2(to2.x, -to2.z) - heading, -PI, PI)
-		var x3 := w * 0.5 + clampf(a3 / (PI / 2.2), -1, 1) * w * 0.5
-		_compass.draw_colored_polygon(PackedVector2Array([Vector2(x3, 40), Vector2(x3 - 8, 46), Vector2(x3 + 8, 46)]), GOLD)
+		var x3 := w * 0.5 + clampf(a3 / span, -1, 1) * w * 0.5
+		_compass.draw_colored_polygon(PackedVector2Array([Vector2(x3, 22), Vector2(x3 - 6, 14), Vector2(x3 + 6, 14)]), GOLD)

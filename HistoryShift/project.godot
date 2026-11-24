@@ -73,3 +73,15 @@ destruct_tex={
 "type": "sampler2D",
 "value": ""
 }
+world_sky_color={
+"type": "color",
+"value": Color(0.6, 0.78, 0.96, 1)
+}
+world_sun_color={
+"type": "color",
+"value": Color(1, 0.94, 0.84, 1)
+}
+world_wind={
+"type": "vec4",
+"value": Vector4(0.8, 0.6, 1, 0)
+}

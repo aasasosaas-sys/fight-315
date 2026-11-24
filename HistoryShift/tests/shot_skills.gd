@@ -157,21 +157,29 @@ func _industry_shots(sess: Session, prof: PlayerProfile, era_id: String) -> void
 		await _frames(5)
 	if not made.is_empty():
 		var f0: Node3D = made[0]
-		p.teleport(f0.global_position + Vector3(10, 0, 22))
-		var to := f0.global_position - p.global_position
-		cam.yaw = atan2(-to.x, -to.z)
-		cam.pitch = 0.12
-		cam.snap()
-		await _shot("skills_%s_factory_world" % era_id, 50)
 		for i in 3:
 			f0.produce_once()
 		sess.craft.ui.open_factory(f0)
 		await _shot("skills_%s_factory_panel" % era_id)
 		sess.craft.ui.close()
+	# 町の家並みに隠れないよう、カメラを止めて斜め上から見下ろす（「歴史が揺らいだ」の通知は消す）
+	var hud = sess.hud
+	if hud and "_shift" in hud:
+		hud._shift_queue.clear()
+		hud._shift.visible = false
+	cam.set_process(false)
+	cam.set_physics_process(false)
+	var names := {"kikai_kojo": "factory_world", "boseki": "mill_world", "tetsudo": "railway"}
 	for f in made:
-		if f.bdef.get("visual", "") == "railway":
-			p.teleport(f.global_position + Vector3(10, 0, 18))
-			var to2: Vector3 = f.global_position - p.global_position
-			cam.yaw = atan2(-to2.x, -to2.z)
-			cam.snap()
-			await _shot("skills_%s_railway" % era_id, 50)
+		var key := str(names.get(str(f.rec.get("type", "")), ""))
+		if key == "":
+			continue
+		var c: Vector3 = f.global_position
+		var far := 46.0 if key == "railway" else 26.0
+		cam.global_position = c + Vector3(far * 0.7, far * 0.55, far * 0.7)
+		cam.look_at(c + Vector3(0, 3, 0), Vector3.UP)
+		if hud and "_shift" in hud:
+			hud._shift.visible = false
+		await _shot("skills_%s_%s" % [era_id, key], 40)
+	cam.set_process(true)
+	cam.set_physics_process(true)

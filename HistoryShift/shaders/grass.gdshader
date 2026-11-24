@@ -30,10 +30,18 @@ uniform vec3 grass_b : source_color = vec3(0.24, 0.52, 0.26);
 uniform vec3 grass_c : source_color = vec3(0.62, 0.74, 0.30);
 uniform vec3 tip_light : source_color = vec3(0.78, 0.9, 0.42);
 uniform float anime = 1.0;
+uniform float flowers = 1.0;         // 花の混じる量（0 で無し）
+uniform vec3 flower_a : source_color = vec3(0.98, 0.96, 0.9);
+uniform vec3 flower_b : source_color = vec3(1.0, 0.72, 0.82);
+uniform vec3 flower_c : source_color = vec3(1.0, 0.86, 0.38);
+global uniform vec4 world_wind;      // xy 風向き, z 強さ
 
 varying float v_t;
 varying vec3 v_col;
 varying vec3 v_base;
+varying float v_gust;
+varying float v_flower;
+varying vec3 v_fcol;
 
 float hash12(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -87,13 +95,27 @@ void vertex() {
 	float t = clamp(local.y, 0.0, 1.0);
 	local.y *= hs;
 	float wn = textureLod(noise_tex, pos * 0.012 + vec2(TIME * 0.035, TIME * 0.02), 0.0).r;
-	float sway = (sin(TIME * 1.9 + pos.x * 0.37 + pos.y * 0.23) * 0.35 + (wn - 0.45) * 1.4) * wind;
-	local.x += sway * t * t * hs * 0.55;
-	local.z += sway * t * t * hs * 0.3;
+	// 突風の波: 風下へ流れる帯状のノイズ。草が大きく倒れ、先端が白く光る（草原を渡る風が見える）
+	vec2 wd = normalize(world_wind.xy + vec2(1e-4));
+	float gp = dot(pos, wd);
+	float gq = dot(pos, vec2(-wd.y, wd.x));
+	float gust_n = textureLod(noise_tex, vec2(gp * 0.011 - TIME * 0.09 * world_wind.z, gq * 0.004), 0.0).r;
+	float gust = smoothstep(0.5, 0.78, gust_n) * world_wind.z;
+	float sway = (sin(TIME * 1.9 + pos.x * 0.37 + pos.y * 0.23) * 0.35 + (wn - 0.45) * 1.4 + gust * 1.6) * wind;
+	local.x += sway * t * t * hs * 0.55 * mix(1.0, 0.4, gust) + wd.x * gust * t * t * hs * 0.5 * wind;
+	local.z += sway * t * t * hs * 0.3 * mix(1.0, 0.4, gust) + wd.y * gust * t * t * hs * 0.5 * wind;
+	local.y *= 1.0 - gust * t * 0.18;
 	local *= keep;
 	VERTEX = vec3(pos.x, hgt - 0.03, pos.y) + local;
 	NORMAL = normalize(mix(n, NORMAL, 0.08));
 	v_t = t;
+	v_gust = gust;
+	// 花: 草むらの所々に白・桃・黄の花（先端だけ色を変える）
+	float fh = hash12(cid + 5.31);
+	float fpatch = smoothstep(0.58, 0.74, textureLod(noise_tex, pos * 0.035 + vec2(0.71, 0.13), 0.0).r);
+	v_flower = step(1.0 - 0.22 * flowers * fpatch, fh) * (1.0 - field);
+	float fk = hash12(cid + 9.7);
+	v_fcol = fk < 0.45 ? flower_a : (fk < 0.78 ? flower_b : flower_c);
 	vec3 tipc = mix(tip_color, dry_color, smoothstep(0.55, 0.85, patch2) * 0.7);
 	tipc = mix(tipc, rice_color, field);
 	v_col = tipc * mix(0.85, 1.1, r1);
@@ -119,8 +141,13 @@ void vertex() {
 
 void fragment() {
 	vec3 basec = v_base;
-	ALBEDO = mix(basec, v_col, smoothstep(0.0, 1.0, v_t));
-	ROUGHNESS = 0.9;
+	vec3 c = mix(basec, v_col, smoothstep(0.0, 1.0, v_t));
+	// 突風の先端の照り（明るい黄緑〜白っぽい筋）
+	c = mix(c, tip_light * 1.12 + 0.05, v_gust * smoothstep(0.45, 1.0, v_t) * 0.55);
+	// 花（先端の 30%）
+	c = mix(c, v_fcol, v_flower * smoothstep(0.68, 0.74, v_t));
+	ALBEDO = c;
+	ROUGHNESS = 1.0;
 	SPECULAR = 0.1;
 	AO = mix(0.8, 1.0, v_t);
 }

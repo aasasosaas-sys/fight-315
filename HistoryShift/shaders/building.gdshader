@@ -1,6 +1,8 @@
 shader_type spatial;
 // 建物用アニメ調シェーダ: テクスチャは平均色（ベタ塗り）＋輝度の明暗を少しだけ（手描きの筆ムラ）。
 // セル塗りのライティング（toon.gdshaderinc）。夜は窓（emissive 側）以外も軒下がほんのり暖色に。
+// 手描き背景の塗り: 暖色・寒色の色ムラ、壁の雨だれ・裾の汚れ（色付きの陰り）、瓦の空の映り込みと艶の帯、
+// 木部の木目の筆致、石垣の石ごとの濃淡。材質の種類は mat_kind（materials.gd が設定）。
 render_mode diffuse_burley;
 
 #include "res://shaders/toon.gdshaderinc"
@@ -32,6 +34,11 @@ uniform vec4 base_override : source_color = vec4(0.0);   // a=1 なら地色を�
 uniform float shine = 0.0;          // 金属・瓦の艶（アニメ的な帯ハイライト）
 uniform float glass = 0.0;          // 1: ガラス窓（斜めの映り込み帯、夜は室内灯）
 uniform float window_glow = 0.0;    // 1: 暗い頂点色の面（格子窓・開口部）を夜に灯す
+// 手描き背景の塗り
+uniform float mat_kind = 0.0;       // 0 一般 / 1 漆喰・塗り壁 / 2 木部 / 3 瓦 / 4 石・煉瓦 / 5 茅葺 / 6 布
+uniform vec3 era_tint : source_color = vec3(1.0);   // 時代ごとの色味（漆喰の白を落ち着かせるなど）
+uniform float sheen = 0.0;          // 空の映り込み（瓦・金属）
+uniform float paint = 1.0;          // 筆致の強さ（0 で従来）
 
 varying vec3 v_wpos;
 varying vec3 v_wnrm;
@@ -52,6 +59,12 @@ vec3 saturate_col(vec3 c, float s) {
 	return max(mix(vec3(l), c, s), vec3(0.0));
 }
 
+float hash13(vec3 p) {
+	p = fract(p * 0.1031);
+	p += dot(p, p.zyx + 31.32);
+	return fract((p.x + p.y) * p.z);
+}
+
 void fragment() {
 	vec3 ta = texture(albedo_tex, UV).rgb;
 	// テクスチャの平均色（最小ミップ）= ベタ塗りの地色
@@ -69,12 +82,20 @@ void fragment() {
 	vec3 base = mix(avg, ta, 0.25);
 	base = mix(base, vec3(dot(base, vec3(0.3, 0.59, 0.11))), desat) * albedo_mul;
 	base = mix(base, base_override.rgb, base_override.a);
-	vec3 a = saturate_col(base * mix(1.0, rel, detail), sat_boost) * COLOR.rgb;
+	vec3 a = saturate_col(base * mix(1.0, rel, detail), sat_boost) * COLOR.rgb * era_tint;
+	float vlum = dot(COLOR.rgb, vec3(0.3, 0.59, 0.11));
+	// 壁面に沿った水平座標（雨だれ・木目の向きに使う）
+	vec2 wall_dir = normalize(vec2(-v_wnrm.z, v_wnrm.x) + vec2(1e-4));
+	float wall_u = dot(v_wpos.xz, wall_dir);
+	float vert = 1.0 - smoothstep(0.35, 0.7, abs(v_wnrm.y));   // 1 = 鉛直な面
 	// 筆ムラ（大きめの色ムラ＋斜めのストローク）
 	float m1 = texture(macro_tex, v_wpos.xz * 0.031 + v_wpos.y * 0.017).r;
 	vec2 sp = vec2(dot(v_wpos.xz, vec2(0.8, 0.6)) + v_wpos.y * 0.5, v_wpos.y - dot(v_wpos.xz, vec2(0.3, -0.4)));
 	float stroke = texture(macro_tex, sp * vec2(0.6, 0.09)).r;
 	a *= mix(1.0, mix(0.9, 1.07, m1) * mix(0.95, 1.04, stroke), variation);
+	// 暖色・寒色の色ムラ（手描きの背景画の「色の揺らぎ」）
+	float mh = texture(macro_tex, v_wpos.xz * 0.011 - v_wpos.y * 0.013 + vec2(0.41, 0.17)).r;
+	a *= mix(vec3(1.0), mix(vec3(0.95, 0.98, 1.05), vec3(1.05, 1.0, 0.94), smoothstep(0.3, 0.7, mh)), 0.8 * paint * variation);
 	// 地面際: 色付きの柔らかい陰り（汚れではなく接地感）
 	vec2 huv = (v_wpos.xz + half_size) / (2.0 * half_size);
 	huv = huv * ((grid_n - 1.0) / grid_n) + 0.5 / grid_n;
@@ -82,6 +103,41 @@ void fragment() {
 	float above = v_wpos.y - gh;
 	float g = (1.0 - smoothstep(0.0, 1.2, above)) * grime;
 	a = mix(a, a * vec3(0.78, 0.74, 0.8), g * 0.45);
+	// 壁の下ほど少し沈む大きなグラデーション（環境光の遮蔽の代わり。影色寄りの寒色）
+	float ao_g = (1.0 - smoothstep(0.0, 3.2, above)) * vert * grime * paint * step(mat_kind, 2.5);
+	a *= mix(vec3(1.0), mix(vec3(0.84, 0.84, 0.92), toon_shade_color.rgb * 1.3, 0.25), ao_g * 0.6);
+	if (mat_kind > 0.5 && mat_kind < 1.5) {
+		// 漆喰・塗り壁: 白いほど汚れが見える。雨だれの縦筋（上から）と、裾の泥はね
+		float white = smoothstep(0.55, 0.85, vlum);
+		float big = texture(macro_tex, vec2(wall_u * 0.05, v_wpos.y * 0.06) + vec2(0.13, 0.71)).r;
+		a *= mix(vec3(0.95, 0.94, 0.93), vec3(1.0), smoothstep(0.3, 0.7, big));
+		float drip = texture(macro_tex, vec2(wall_u * 0.42, v_wpos.y * 0.035) + vec2(0.7, 0.2)).r;
+		float drip2 = texture(macro_tex, vec2(wall_u * 1.3, v_wpos.y * 0.09) + vec2(0.2, 0.5)).r;
+		float streak = smoothstep(0.6, 0.78, drip * 0.7 + drip2 * 0.45) * vert;
+		a *= 1.0 - streak * vec3(0.07, 0.065, 0.05) * (0.4 + white) * paint;
+		float splash = (1.0 - smoothstep(0.0, 0.7 + drip * 0.6, above)) * vert;
+		a = mix(a, a * vec3(0.8, 0.74, 0.68), splash * 0.35 * white * paint * grime);
+	} else if (mat_kind > 1.5 && mat_kind < 2.5) {
+		// 木部: 木目の筆致（縦横どちらの材にも馴染むよう、壁沿い方向と高さの両方で細い筋）
+		float gr = texture(macro_tex, vec2(wall_u * 0.06 + v_wpos.y * 0.9, v_wpos.y * 0.05 + wall_u * 0.7) * vec2(1.0, 0.25)).r;
+		float rings = smoothstep(0.45, 0.6, fract(gr * 9.0));
+		a *= mix(1.0, mix(0.92, 1.05, rings), 0.6 * paint);
+		a = saturate_col(a, 1.08);
+	} else if (mat_kind > 2.5 && mat_kind < 3.5) {
+		// 瓦: 列ごとの濃淡（棟から軒へ）。軒先ほど少し明るく、谷は暗く
+		float row = texture(macro_tex, vec2(wall_u * 0.03, v_wpos.y * 0.6) + vec2(0.3, 0.9)).r;
+		a *= mix(0.93, 1.06, row);
+	} else if (mat_kind > 3.5 && mat_kind < 4.5) {
+		// 石・煉瓦: 石ごとの濃淡（ざっくりしたセル）
+		vec3 cell = floor(v_wpos * vec3(1.6, 2.2, 1.6));
+		float h = hash13(cell);
+		a *= mix(0.9, 1.08, h);
+		a = mix(a, a * vec3(0.86, 0.94, 0.8), smoothstep(0.75, 0.95, h) * 0.5 * (1.0 - smoothstep(0.0, 2.0, above)));
+	} else if (mat_kind > 4.5 && mat_kind < 5.5) {
+		// 茅葺: 毛羽立った筆の縦筋
+		float fib = texture(macro_tex, vec2(wall_u * 2.2, v_wpos.y * 0.2)).r;
+		a *= mix(0.88, 1.08, fib);
+	}
 	vec3 d_emis = vec3(0.0);
 	if (v_dstate.g + v_dstate.b > 0.001 || v_dcut.x < 1e5) {
 		vec2 dp = vec2(dot(v_wpos.xz, vec2(0.71, 0.71)) + v_wpos.y * 0.3, v_wpos.y + dot(v_wpos.xz, vec2(0.6, -0.8)) * 0.5);
@@ -92,17 +148,23 @@ void fragment() {
 		}
 		a = destruct_albedo(v_dstate, v_dcut, a, v_wpos, texture(macro_tex, v_wpos.xz * 0.05 + v_wpos.y * 0.07).r, n2, n3, d_emis);
 	}
+	// 瓦・金属: 空の映り込み（浅い角度ほど空の色）。夜は弱く
+	if (sheen > 0.0) {
+		float fres = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 2.5);
+		float up = smoothstep(-0.2, 0.6, v_wnrm.y);
+		a = mix(a, world_sky_color.rgb * 0.85, clamp(fres * up * sheen, 0.0, 0.6) * (1.0 - world_night * 0.7));
+	}
 	ALBEDO = clamp(a, 0.0, 1.0);
 	NORMAL_MAP = mix(texture(normal_tex, UV).rgb, vec3(0.5, 0.5, 1.0), flat_normal);
 	NORMAL_MAP_DEPTH = normal_depth;
 	ROUGHNESS = 0.9;
 	METALLIC = 0.0;
 	SPECULAR = 0.25;
-	float vlum = dot(COLOR.rgb, vec3(0.3, 0.59, 0.11));
 	if (glass > 0.5) {
 		// アニメのガラス: 空色のグラデーション＋斜めのハイライト帯
 		float gy = clamp(fract(v_wpos.y * 0.25), 0.0, 1.0);
-		vec3 gc = mix(vec3(0.42, 0.55, 0.68), vec3(0.75, 0.86, 0.95), gy) * (COLOR.rgb * 0.5 + 0.5);
+		vec3 skyc = mix(vec3(0.42, 0.55, 0.68), world_sky_color.rgb, 0.5);
+		vec3 gc = mix(skyc * 0.75, skyc * 1.15 + 0.08, gy) * (COLOR.rgb * 0.5 + 0.5);
 		float st = fract((v_wpos.x + v_wpos.z) * 0.4 + v_wpos.y * 0.5);
 		gc += vec3(0.35) * (step(0.78, st) * step(st, 0.86) + step(0.9, st) * step(st, 0.93));
 		ALBEDO = gc * (1.0 - world_night * 0.85);
@@ -115,8 +177,10 @@ void fragment() {
 	if (glass < 0.5) {
 		EMISSION = a * vec3(1.0, 0.62, 0.3) * world_night * under * 0.35 + d_emis;
 		if (window_glow > 0.5 && vlum < 0.125 && abs(v_wnrm.y) < 0.3) {
-			// 格子窓・開口部から漏れる灯り
-			EMISSION += vec3(1.0, 0.66, 0.32) * world_night * 1.4;
+			// 格子窓・開口部から漏れる灯り（夜）。昼は奥の暗がりを少し青く沈める
+			float flick = 0.85 + 0.15 * texture(macro_tex, v_wpos.xz * 0.2 + vec2(TIME * 0.05)).r;
+			EMISSION += vec3(1.0, 0.66, 0.32) * world_night * 1.6 * flick;
+			ALBEDO = mix(ALBEDO, ALBEDO * vec3(0.8, 0.85, 1.1), 1.0 - world_night);
 		}
 	}
 }
@@ -125,7 +189,10 @@ void light() {
 	toon_light_common(NORMAL, VIEW, LIGHT, LIGHT_COLOR, ATTENUATION, LIGHT_IS_DIRECTIONAL, 0.0, rim_mul, DIFFUSE_LIGHT);
 	if (shine > 0.0 && LIGHT_IS_DIRECTIONAL) {
 		vec3 h = normalize(VIEW + LIGHT);
-		float s = smoothstep(0.93, 0.96, dot(NORMAL, h)) * smoothstep(0.3, 0.6, ATTENUATION);
+		float nh = dot(NORMAL, h);
+		// くっきりした帯ハイライト＋外側の柔らかいにじみ（アニメの艶）
+		float s = smoothstep(0.93, 0.96, nh) + smoothstep(0.75, 0.9, nh) * 0.18;
+		s *= smoothstep(0.3, 0.6, ATTENUATION);
 		SPECULAR_LIGHT += LIGHT_COLOR / PI * s * shine;
 	}
 }

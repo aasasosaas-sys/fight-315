@@ -121,6 +121,9 @@ void fragment() {
 	float gr = layer_rel(L_GRASS, wp * 0.24, gdx * 0.24, gdy * 0.24);
 	col *= mix(1.0, clamp(posterize(gr, 3.0), 0.75, 1.25), detail * near_k);
 	col *= grass_tint;
+	// 暖色・寒色の色の揺らぎ（日だまりの黄緑・窪みの青緑）
+	float mh = texture(macro_tex, wp * 0.0055 + vec2(0.17, 0.83)).r;
+	col *= mix(vec3(0.94, 0.99, 1.05), vec3(1.05, 1.01, 0.92), smoothstep(0.3, 0.72, mh));
 	float slope = 1.0 - v_wnrm.y;
 	// 斜面の草は少し深い青緑（山肌の森の色）
 	col = mix(col, mix(grass_b, forest_col, 0.45) * mix(0.92, 1.08, stroke), smoothstep(0.1, 0.3, slope) * 0.75);
@@ -191,7 +194,12 @@ void fragment() {
 		// 轍（中央が少し明るい）
 		rc *= mix(0.97, 1.05, stroke);
 		float w = hblend(road_w, m3 + (stroke2 - 0.5) * 0.4, 3.5);
+		// 道の縁: 踏まれて少し濃くなった草と土の境（筆でなぞった縁取り）
+		float edge_b = smoothstep(0.08, 0.3, road_w) * (1.0 - smoothstep(0.38, 0.62, road_w + (stroke2 - 0.5) * 0.2));
+		col = mix(col, col * vec3(0.8, 0.84, 0.76), edge_b * 0.55);
 		col = mix(col, rc, w);
+		// 道の中ほどは日に焼けて明るく
+		col *= 1.0 + 0.05 * smoothstep(0.75, 1.0, road_w) * (1.0 - road_textured);
 		if (road_textured > 0.5) {
 			vec3 n2 = textureGrad(nrm_arr, vec3(uv, L_ROAD), gdx * road_scale, gdy * road_scale).rgb;
 			nrm = mix(nrm, n2, w * 0.4);
@@ -209,7 +217,7 @@ void fragment() {
 	ALBEDO = clamp(col, 0.0, 1.0);
 	NORMAL_MAP = nrm;
 	NORMAL_MAP_DEPTH = nd * (1.0 - smoothstep(60.0, 220.0, dist));
-	ROUGHNESS = 0.95;
+	ROUGHNESS = 1.0;
 	SPECULAR = 0.15;
 }
 

@@ -15,6 +15,7 @@ uniform float translucency = 0.45;
 uniform float blob = 0.62;          // 中央の塊の半径（UV 0..1 に対する比）
 uniform vec3 tip_color : source_color = vec3(0.75, 0.88, 0.4);   // 逆光で透ける色
 uniform float ao_strength = 0.55;
+global uniform vec4 world_wind;
 // 互換（未使用）
 uniform sampler2D leaf_tex : source_color, filter_linear_mipmap, repeat_disable;
 uniform float use_tex = 0.0;
@@ -36,6 +37,10 @@ void vertex() {
 	float hv = hash12(origin.xz * 0.37);
 	float ph = TIME * 1.25 + origin.x * 0.07 + origin.z * 0.09;
 	float bend = (sin(ph) * 0.6 + sin(ph * 2.3 + VERTEX.x) * 0.25) * sway;
+	// 突風（草と同じ向きに流れる帯）で木もときどき大きく揺れる
+	vec2 wd = normalize(world_wind.xy + vec2(1e-4));
+	float gust = smoothstep(0.55, 0.95, sin(dot(origin.xz, wd) * 0.07 - TIME * 0.9 * world_wind.z) * 0.5 + 0.5) * world_wind.z;
+	bend += gust * 0.9 * sway;
 	float fy = max(VERTEX.y, 0.0);
 	VERTEX.x += bend * 0.012 * fy * COLOR.g * (1.0 + fy * 0.05);
 	VERTEX.z += bend * 0.008 * fy * COLOR.g;
@@ -90,7 +95,7 @@ void fragment() {
 	ALBEDO = col;
 	ALPHA = a;
 	ALPHA_SCISSOR_THRESHOLD = 0.5;
-	ROUGHNESS = 0.9;
+	ROUGHNESS = 1.0;
 	SPECULAR = 0.1;
 }
 
@@ -101,5 +106,8 @@ void light() {
 		float back = clamp(dot(-VIEW, LIGHT), 0.0, 1.0);
 		float edge = 1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0);
 		DIFFUSE_LIGHT += LIGHT_COLOR / PI * tip_color * pow(back, 3.0) * edge * translucency * smoothstep(0.3, 0.6, ATTENUATION);
+		// 日の当たる側の塊の縁を明るく（セル塗りの樹冠の縁取り）
+		float sunrim = smoothstep(0.55, 0.85, edge) * smoothstep(0.0, 0.5, dot(NORMAL, LIGHT)) * smoothstep(0.3, 0.6, ATTENUATION);
+		DIFFUSE_LIGHT += LIGHT_COLOR / PI * mix(vec3(1.0), tip_color * 1.4, 0.5) * sunrim * 0.35;
 	}
 }

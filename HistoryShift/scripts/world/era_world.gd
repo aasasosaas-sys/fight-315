@@ -91,6 +91,7 @@ func _tick(label: String) -> void:
 func _build() -> void:
 	_t_last = Time.get_ticks_msec()
 	style = EraStyles.get_style(era_id)
+	WorldMaterials.set_era_look(style)
 	var seed_v := hash(era_id) & 0x7fffffff
 	rng.seed = seed_v
 	terrain = TerrainGen.new(int(style["rot"]), seed_v % 100000)
@@ -259,6 +260,7 @@ func set_time_of_day(hours: float) -> void:
 	if sky_mat:
 		sky_mat.set_shader_parameter("night", 1.0 if elev < -2.0 else 0.0)
 	WorldAtmosphere.apply_toon_globals(style, day)
+	WorldAtmosphere.apply_time_grade(env_nodes, style, day, elev)
 	if is_inside_tree():
 		for l in get_tree().get_nodes_in_group("world_night_light"):
 			if is_ancestor_of(l):

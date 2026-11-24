@@ -315,6 +315,7 @@ static func _material(name: String, tint: Color, skin: Color) -> ShaderMaterial:
 		p["_RimColor"] = Color(0.10, 0.10, 0.16)
 		p["_RimFresnelPower"] = 4.0
 		p["_RimLightingMix"] = 1.0
+		p["_HsKind"] = 1.0
 	elif name.begins_with("skin"):
 		# 月代: 肌色をわずかに青く（剃り跡）
 		var c := skin.lerp(Color(0.60, 0.68, 0.80), 0.25)
@@ -323,6 +324,7 @@ static func _material(name: String, tint: Color, skin: Color) -> ShaderMaterial:
 		p["_ShadeShift"] = -0.6
 		p["_OutlineColor"] = Color(0.27, 0.09, 0.12)
 		p["_OutlineWidth"] = 0.075
+		p["_HsKind"] = 2.0
 	else:
 		var c: Color = ACC_COLORS.get(name, Color(0.8, 0.8, 0.8))
 		p["_Color"] = c

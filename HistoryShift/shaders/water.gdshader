@@ -117,10 +117,18 @@ void fragment() {
 	float see = (1.0 - smoothstep(0.0, 0.25, depth_fac)) * clarity;
 	vec3 col = mix(water_col, under * mix(vec3(1.0), shallow_color * 1.6, 0.5), see * 0.7);
 
-	// 遠く・浅い角度は空色（フレネル）
+	// 遠く・浅い角度は空色（フレネル）。映り込みは地平の色→天頂側の濃い青のグラデーション＋雲の白い揺らぎ
 	float fres = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 4.0);
 	float far_k = smoothstep(80.0, 600.0, water_dist);
-	col = mix(col, sky_color * 1.05, clamp(fres * 0.6 + far_k * 0.35, 0.0, 0.75));
+	vec3 wv = (INV_VIEW_MATRIX * vec4(-VIEW, 0.0)).xyz;
+	vec3 wn = (INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz;
+	vec3 rdir = reflect(wv, wn);
+	vec3 sky_h = mix(sky_color, world_sky_color.rgb, 0.6);
+	vec3 refl = mix(sky_h * 1.08, sky_h * vec3(0.55, 0.72, 1.0) * 0.8, smoothstep(0.05, 0.5, rdir.y));
+	float cl = texture(noise_tex, rdir.xz / max(rdir.y + 0.15, 0.1) * 0.06 + vec2(t * 0.002, 0.0)).r;
+	refl = mix(refl, vec3(1.0, 1.0, 1.02) * (1.0 - world_night * 0.8), smoothstep(0.58, 0.7, cl) * 0.45);
+	refl *= 1.0 - world_night * 0.75;
+	col = mix(col, refl, clamp(fres * 0.7 + far_k * 0.4, 0.0, 0.8));
 
 	// 岸の泡: 岸沿いのベタ帯＋少し沖の細い線（寄せては返す）
 	float fn = texture(noise_tex, v_wpos.xz * 0.12 + vec2(t * 0.03, 0.0)).r;

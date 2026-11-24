@@ -79,6 +79,13 @@ uniform float _UvAnimScrollY = 0;
 uniform float _DebugMode : hint_range(0,3,1) = 0.0;
 
 uniform float _MToonVersion = 33;
+// HistoryShift: 部位の種類（scripts/player/anime_char.gd が設定）0 服 / 1 髪 / 2 肌 / 3 顔の肌 / 4 目・眉
+uniform float _HsKind = 0.0;
+uniform float _HsRim = 1.0;          // 背景と同じ調子のリムライトの強さ
+uniform float _HsRing = 1.0;         // 髪の天使の輪の強さ
+global uniform float world_night;
+global uniform vec4 world_sky_color;
+global uniform vec4 world_sun_color;
 
 // const
 const float PI_2 = 6.283185307180;
@@ -364,8 +371,27 @@ void light() {
 		float lightAttenuation = mix(1.0, length(vec3(ATTENUATION))/length(vec3(1.0)), _ReceiveShadowRate * texture(_ReceiveShadowTexture, mainUv).r);
 
 		vec3 col;
+		float hsDotNL = addDotNL;
+		if (_HsKind > 2.5 && _HsKind < 3.5) {
+			// 顔: 法線の凹凸で斑な影が出ないよう、明暗をほぼ光の向きだけで決める（アニメの顔の影）
+			hsDotNL = mix(addDotNL, 0.45 + 0.35 * addDotNL, 0.75);
+			lightAttenuation = mix(1.0, lightAttenuation, 0.7);
+		}
+		vec4 hsShade = shade;
+		if (_HsKind < 1.5 || _HsKind > 3.5) {
+			// 服・髪の影: 背景の影と同じく空の色を少し帯びる
+			hsShade.rgb = mix(shade.rgb, shade.rgb * (world_sky_color.rgb * 0.6 + 0.55), 0.35);
+		}
 		// shade
-		lighting = calculateLighting(mainUv, addDotNL, lightAttenuation, shade, lit, LIGHT_COLOR, col, lightIntensity);
+		lighting = calculateLighting(mainUv, hsDotNL, lightAttenuation, hsShade, lit, LIGHT_COLOR, col, lightIntensity);
+		if (_HsKind > 1.5 && _HsKind < 3.5) {
+			// 肌: 明暗の境目に赤みの帯（血色）
+			float term = lightIntensity * (1.0 - lightIntensity) * 4.0;
+			col += lit.rgb * vec3(0.16, 0.03, -0.01) * term;
+		} else if (_HsKind < 1.5) {
+			// 服・髪: 深い影の 3 段目（光の反対側だけ一段沈む）
+			col *= mix(0.86, 1.0, smoothstep(-0.65, -0.3, addDotNL));
+		}
 
 		// base light does not darken.
 		diffuse_output = col * lighting + indirectLighting * lit.rgb;
@@ -378,6 +404,29 @@ void light() {
 
 		vec3 rimLighting = mix(staticRimLighting, mixedRimLighting, _RimLightingMix);
 		SPECULAR_LIGHT += mix(rim * rimLighting, vec3(0, 0, 0), isOutline);
+
+		if (isOutline < 0.5) {
+			vec3 hsN = normalize(viewNormal);
+			float hsSh = smoothstep(0.25, 0.65, lightAttenuation);
+			// リムライト（日の当たる側と逆光の縁）: 地の色を明るくした色。目・眉には付けない
+			if (_HsKind < 3.5) {
+				float fres = 1.0 - clamp(dot(hsN, VIEW), 0.0, 1.0);
+				float side = clamp(dot(hsN, LIGHT) * 0.7 + 0.35 + max(dot(-VIEW, LIGHT), 0.0) * 0.8, 0.0, 1.0);
+				float rimk = smoothstep(0.6, 0.85, fres) * side * mix(0.35, 1.0, hsSh);
+				vec3 rimc = mix(lit.rgb, vec3(1.0), 0.5) * mix(vec3(1.0), world_sun_color.rgb, 0.4);
+				SPECULAR_LIGHT += LIGHT_COLOR / PI * rimc * rimk * 0.45 * _HsRim;
+			}
+			// 髪の天使の輪: 頭の上寄り（ビュー空間の法線の高さ）にぎざぎざの光の帯
+			if (_HsKind > 0.5 && _HsKind < 1.5) {
+				float jag = sin(hsN.x * 38.0) * 0.035 + sin(hsN.x * 91.0 + 1.3) * 0.015;
+				float c = 0.5 + jag;
+				float band = smoothstep(c - 0.13, c - 0.05, hsN.y) * (1.0 - smoothstep(c + 0.03, c + 0.11, hsN.y));
+				band *= smoothstep(0.1, 0.4, hsN.z);
+				float lightk = clamp(dot(hsN, LIGHT) * 0.5 + 0.65, 0.0, 1.0) * mix(0.25, 1.0, hsSh);
+				vec3 ringc = lit.rgb * 1.6 + vec3(0.2, 0.21, 0.26);
+				SPECULAR_LIGHT += LIGHT_COLOR / PI * ringc * band * lightk * 0.75 * _HsRing;
+			}
+		}
 
 	} else {
 		vec3 addCol = vec3(0.0);
