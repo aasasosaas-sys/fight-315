@@ -145,7 +145,7 @@ static func _anime(era_id: String) -> Dictionary:
 				"grass_a": Color(0.5, 0.7, 0.32), "grass_b": Color(0.36, 0.6, 0.34), "grass_c": Color(0.76, 0.8, 0.42),
 				"aerial": Color(0.88, 0.84, 0.92), "exposure": 1.0,
 				"plaster_tint": Color(0.96, 0.93, 0.91), "wood_tint": Color(1.02, 0.98, 0.98), "haze_density": 0.004, "glow": 0.75,
-				"grade": {"contrast": 1.06, "sat": 1.0, "green_sat": 0.88, "green_shift": 0.01, "blue_sat": 1.05, "warm_sat": 1.08,
+				"grade": {"contrast": 1.1, "sat": 1.04, "green_sat": 0.98, "green_shift": 0.015, "blue_sat": 1.1, "warm_sat": 1.08,
 					"shadow": Vector3(0.0, -0.012, 0.05), "high": Vector3(0.03, 0.005, 0.015), "lift": Color(0.022, 0.016, 0.03),
 					"vibrance": 0.08}}, true)
 		"kamakura_muromachi":

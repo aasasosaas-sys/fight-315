@@ -42,8 +42,9 @@ void toon_light_common(vec3 N, vec3 V, vec3 L, vec3 lcol, float atten, bool dire
 		tone += rim_col * rim * toon_params.z * rim_mul * mix(0.5, 1.0, sh);
 		diffuse += lcol / PI * tone;
 	} else {
-		// 灯籠・街灯など: 柔らかい半ランバート
+		// 灯籠・街灯・行灯など: 柔らかい半ランバート（白い壁が飛ばないよう、明るい所は頭打ちに）
 		float d = clamp(ndl * 0.5 + 0.5, 0.0, 1.0);
-		diffuse += lcol / PI * atten * smoothstep(0.2, 0.8, d) * 1.2;
+		vec3 add = lcol / PI * atten * smoothstep(0.2, 0.8, d);
+		diffuse += add / (1.0 + add * 0.6);
 	}
 }

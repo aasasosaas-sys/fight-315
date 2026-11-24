@@ -49,6 +49,12 @@ static func apply(w: Node3D) -> Dictionary:
 			u.set_meta("timeline_ruin", true)
 			stats["player"] += 1
 	if stats["absent"] + stats["ruin"] + stats["player"] > 0:
+		# 状態テクスチャをすぐ作り直して全体に渡す（組み上げ直後＝まだ木に入っていないので Destruction._process を待たない）
+		var img: Image = d.get("_img")
+		var tex: ImageTexture = d.get("_tex")
+		if img != null and tex != null:
+			tex.set_image(img)
+			RenderingServer.global_shader_parameter_set("destruct_tex", tex)
 		print("[Timeline] %s %d: absent %d, ruined %d, your ruins %d" % [era_id, year, stats["absent"], stats["ruin"], stats["player"]])
 	return stats
 

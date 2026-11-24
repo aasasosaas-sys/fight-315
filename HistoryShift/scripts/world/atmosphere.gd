@@ -166,10 +166,23 @@ static func set_indoor(nodes: Dictionary, style: Dictionary, k: float) -> void:
 	env.ambient_light_color = (o[0] as Color).lerp(warm, k)
 	env.ambient_light_sky_contribution = lerpf(o[1], 0.1, k)
 	env.ambient_light_energy = lerpf(o[2], float(o[2]) * lerpf(1.5, 0.9, night), k)
-	env.tonemap_exposure = lerpf(o[3], float(o[3]) * 1.12, k)
-	env.ssao_intensity = lerpf(o[4], 1.6, k)
-	env.glow_hdr_threshold = lerpf(o[5], 0.7, k)
+	env.tonemap_exposure = lerpf(o[3], float(o[3]) * 1.04, k)
+	# 屋内は環境光が主なので SSAO が効きすぎ、家具の後ろの壁が黒く櫛状に潰れる。半径・強さを絞る
+	env.ssao_intensity = lerpf(o[4], 0.45, k)
+	env.ssao_radius = lerpf(1.6, 0.45, k)
+	env.glow_hdr_threshold = lerpf(o[5], 0.9, k)
 	RenderingServer.global_shader_parameter_set("world_indoor", k)
+	# 屋内では日の光が薄い壁を抜けて家具の影が壁に伸びる（法線バイアスが大きいため）。
+	# 中にいる間は影の範囲を狭めて解像度を上げ、バイアスを小さくして外殻の影を正しく落とす
+	var sun: DirectionalLight3D = nodes.get("sun")
+	if sun:
+		if not sun.has_meta("out_sh"):
+			sun.set_meta("out_sh", [sun.shadow_normal_bias, sun.shadow_bias, sun.directional_shadow_max_distance])
+		var so: Array = sun.get_meta("out_sh")
+		var inside := k > 0.5
+		sun.shadow_normal_bias = 0.2 if inside else float(so[0])
+		sun.shadow_bias = 0.012 if inside else float(so[1])
+		sun.directional_shadow_max_distance = minf(float(so[2]), 70.0) if inside else float(so[2])
 
 
 # ---------------------------------------------------------------- カラーグレーディング（3D LUT）

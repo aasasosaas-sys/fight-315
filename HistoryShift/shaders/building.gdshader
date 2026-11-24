@@ -168,7 +168,7 @@ void fragment() {
 			a *= vec3(1.06, 1.0, 0.9);
 		}
 		float paper = smoothstep(0.78, 0.92, vlum) * vert * step(mat_kind, 1.5);
-		in_emis = a * vec3(1.0, 0.95, 0.84) * paper * (0.28 * (1.0 - world_night) + 0.12 * world_night);
+		in_emis = a * vec3(1.0, 0.95, 0.84) * paper * (0.09 * (1.0 - world_night) + 0.06 * world_night);
 		a *= mix(1.0, 0.86, smoothstep(-0.3, -0.8, v_wnrm.y));
 	}
 	// 瓦・金属: 空の映り込み（浅い角度ほど空の色）。夜は弱く

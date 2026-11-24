@@ -445,6 +445,9 @@ func commit(name := "Mesh", shadows := true) -> MeshInstance3D:
 	mi.name = name
 	mi.mesh = am
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if shadows and has_units:
+		# 建物（外殻は薄い壁と内天井）: 両面で影を落とし、屋内に日が漏れないように
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_DOUBLE_SIDED
 	return mi
 
 

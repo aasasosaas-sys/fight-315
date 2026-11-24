@@ -374,6 +374,8 @@ func _build(d: Dictionary) -> Node3D:
 		mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 		# 建物シェーダの屋内の塗り（障子の透け・木と畳の暖色）
 		mi.set_instance_shader_parameter("hs_indoor", 1.0)
+		# 家具の影は日の光（低い太陽）で壁に黒く長く伸びて汚く見える。屋内の灯りは無影なので、内装は影を落とさない
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		# 屋内は近くでしか見ないので、遠くでは描かない
 		mi.visibility_range_end = FREE_DIST + 10.0
 		root.add_child(mi)
@@ -399,13 +401,13 @@ func _build(d: Dictionary) -> Node3D:
 		ol.position = l["p"]
 		ol.light_color = l["c"]
 		# 行灯・燭台の暖かい照り返しが部屋に回るよう、少し広く柔らかく
-		ol.light_energy = float(l["e"]) * 1.25
-		ol.omni_range = float(l["r"]) * 1.2
-		ol.omni_attenuation = 0.9
+		ol.light_energy = float(l["e"]) * 0.8
+		ol.omni_range = float(l["r"]) * 1.15
+		ol.omni_attenuation = 1.1
 		ol.shadow_enabled = false
 		ol.light_specular = 0.2
 		ol.visible = false
-		ol.set_meta("e", float(l["e"]) * 1.25)
+		ol.set_meta("e", float(l["e"]) * 0.8)
 		root.add_child(ol)
 		lights.append(ol)
 	root.set_meta("lights", lights)
