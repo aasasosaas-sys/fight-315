@@ -135,8 +135,13 @@ func build(type: String) -> Dictionary:
 	var p: Node3D = Game.player
 	var cam := CameraRig.I
 	var fwd := cam.flat_forward() if cam else -p.global_basis.z
-	var pos := p.global_position + fwd * 10.0
 	var w = Game.world
+	var pos := p.global_position + fwd * 18.0
+	if w and w.has_method("random_ground_point_near"):
+		# 建物・水の上を避けた空き地（前方 18m のあたり）
+		var rng := RandomNumberGenerator.new()
+		rng.seed = hash(type) + prof.next_uid
+		pos = w.random_ground_point_near(pos, 12.0, rng)
 	if w and w.has_method("height_at"):
 		pos.y = w.height_at(pos.x, pos.z)
 	var rec := {"id": "%s_%d" % [type, prof.next_uid], "type": type, "era": era_id, "at": at, "pos": [pos.x, pos.y, pos.z],

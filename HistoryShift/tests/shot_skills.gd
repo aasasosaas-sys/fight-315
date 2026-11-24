@@ -49,7 +49,8 @@ func _run() -> void:
 	var p: Player = sess.player
 	p.god_mode = true
 	var cam: CameraRig = sess.cam
-	var st: CraftStation = sess.craft.find_station("touko")
+	var industry_only := "industry" in args
+	var st: CraftStation = null if industry_only else sess.craft.find_station("touko")
 	if st == null and not sess.craft.stations.is_empty():
 		st = sess.craft.stations[0]
 	if st:
@@ -81,6 +82,11 @@ func _run() -> void:
 		sess.craft.ui._craft_now("r_uchigatana", "forge", 0.9)
 		await _shot("skills_%s_crafted" % era_id)
 		sess.craft.ui.close()
+	if industry_only:
+		await _industry_shots(sess, prof, era_id)
+		Game.profile = saved
+		get_tree().quit()
+		return
 	# 持ち物・技能
 	sess.craft.ui._tab = 0
 	sess.craft.ui.open_inventory()
@@ -109,6 +115,14 @@ func _run() -> void:
 	await _shot("skills_%s_block" % era_id, 10)
 	Input.action_release("aim")
 	p.arms.blocking = false
+	await _industry_shots(sess, prof, era_id)
+	Game.profile = saved
+	get_tree().quit()
+
+
+func _industry_shots(sess: Session, prof: PlayerProfile, era_id: String) -> void:
+	var p: Player = sess.player
+	var cam: CameraRig = sess.cam
 	# 知識の木・建設・施設（江戸で産業革命）
 	Knowledge.read_textbook(prof)
 	for nid in ["m_tatara", "m_hansharo", "p_suisha", "p_jouki", "k_karakuri", "k_senban", "t_teori", "t_boseki", "m_saikutsu", "m_koro", "p_tetsudo"]:
@@ -143,10 +157,10 @@ func _run() -> void:
 		await _frames(5)
 	if not made.is_empty():
 		var f0: Node3D = made[0]
-		p.teleport(f0.global_position + Vector3(14, 0, 26))
+		p.teleport(f0.global_position + Vector3(10, 0, 22))
 		var to := f0.global_position - p.global_position
 		cam.yaw = atan2(-to.x, -to.z)
-		cam.pitch = -0.05
+		cam.pitch = 0.12
 		cam.snap()
 		await _shot("skills_%s_factory_world" % era_id, 50)
 		sess.craft.ui.open_factory(f0)
@@ -159,5 +173,3 @@ func _run() -> void:
 			cam.yaw = atan2(-to2.x, -to2.z)
 			cam.snap()
 			await _shot("skills_%s_railway" % era_id, 50)
-	Game.profile = saved
-	get_tree().quit()
