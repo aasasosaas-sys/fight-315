@@ -157,3 +157,25 @@ v1（tools/SCHEMA.md）の項目はすべてそのまま有効。v2 では以下
 - 1900年の地位が史実より高い（低い）ほど、太平洋戦争の外交・工業・資源の柱が上がる（下がる）。1941年の段階が史実と違う、または1800年までに
   列強になっていた世界では、カテゴリ変数 standing に段階が入り、modern.json の「日本の国際的地位」の分岐が出る。
 - ハブの「国際的地位」ボタンで推移（この世界と史実の棒、史実の根拠、この世界を変えた事業・史実）を見られる。
+
+## data/chaos_civil/<eraId>.json と exclusions.json（設定「民間人への危害（成人向け）」。既定オフ）
+`scripts/core/civil_harm.gd`（CivilHarm：データ・除外・犠牲の記録）、`scripts/mission/civil_runtime.gd`（CivilRuntime：場面・名所・原因の判定）、
+`scripts/mission/civilian.gd`（倒れる処理）、`scripts/core/chaos.gd`（kind "casualty"）。既存の data/chaos は変えない。
+報告・検証：`python3 tools/report_civil_reach.py [-v] [--json tools/civil_reach.json]`、テスト：`godot --headless --path . -s tests/test_civil.gd`。
+- 使える条件：`MatureContent.is_unlocked()`（教育版＝エクスポートの feature "edu" でない、かつ所有確認。将来 Steam の DLC＝`BIsDlcInstalled` を `_dlc_owned()` に入れる）
+  かつ 設定 `civil_harm` がオン。教育版では設定の行を出さず、強制オフで、data/chaos_civil を読まない（教育版のエクスポートプリセットはこのフォルダを書き出さない）。
+- 対象は名もない町人（Civilian）だけ。名のある人物（HistFigure。女性・宗教者・学者・天皇・皇族・外国人などの noncombatant）は設定に関係なく倒れない。
+  プレイヤーが原因の被害（銃・矢・刀・爆発・火・瓦礫・乗り物。間接＝player_indirect も含む）だけで倒れ、敵の流れ弾や自然の火事では倒れない。
+  流血・血痕・遺体・ラグドールは出さない（倒れるアニメ → 約2秒後に薄れて消える）。
+- 倒れると `Game.chaos_event("casualty", 名所, {count, landmark, era, role, cause, pos})`。手配度は最大（★5）になり、その時空跳躍では★4より下がらない。
+  追手は増え（＋3人）手ごわくなる（体力1.5倍）。犠牲者 3・8・15 人で民心離反（町人があなたを見るだけで逃げる範囲が広がる）。
+  HUD は右上に「犠牲者 N人」と静かに出すだけ（撃破数のような演出はしない）。アフター画面・エンディングは犠牲を悲劇・代償として記す。
+- 時代ファイル：`{"eraId", "roles": {名所キーと town → 農民/職人/商人/町人/漁民}, "rules": [...]}`
+  - rule：`id`（cv_ で始まる）/ `title` / `trigger`（kind "casualty"、`at` 名所キー（文字列か配列）、`role`、`min` 人数の合計。at なしは時代全体）/
+    `vars`（数値パラメータのみ、各 ±20 まで）/ `year`（その時代の範囲。昭和は 1937〜45 年を使わない）/ `text` / `basis`（**年の入った史実**）/
+    `recover`（人口・労働力・職人の技の損失は recover 年後に打ち消される＝一、二世代で回復）/ `unrest: true`（一揆・打ちこわし・騒擾と、
+    その時代の為政者が実際にとった対応＝賑給・国司の解任・徳政令・刀狩・救い米・囲米・戒厳・治安立法など。制度の変化なので recover しない）。
+  - **force は使わない**（民間人の犠牲で試験の答えを直接書き換えない）。答えが変わるのは、パラメータの変化が既存の resolve に届いたときだけ。
+- exclusions.json（史実の虐殺・戦災・その鎮圧に重なる場面。ここでは設定を無視し、町人は倒れず、casualty も数えない）：
+  `landmarks` [{era, at, name, basis}]、`missions` [{q, choice?, method?, basis}]（choice・method を省くとその問題のすべて）、`eras`、
+  `reviewed_not_excluded`（検討して除外しなかった場面と理由）。

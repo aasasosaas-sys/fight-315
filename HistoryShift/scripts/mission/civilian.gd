@@ -66,9 +66,9 @@ func take_hit(_a: float, _t: int, point := Vector3.ZERO, _d := Vector3.ZERO) -> 
 func civil_hit(amount: float, team: int, point := Vector3.ZERO, _dir := Vector3.ZERO, unit_cause := "") -> bool:
 	if down:
 		return true
-	if not CivilHarm.player_caused(team, unit_cause):
+	if not CivilRuntime.player_caused(team, unit_cause):
 		return false
-	if not CivilHarm.allowed_here(get_tree(), era_id, global_position):
+	if not CivilRuntime.allowed_here(get_tree(), era_id, global_position):
 		return false
 	_last_cause = {-2: "fire", -3: "debris"}.get(team, "shot" if team == 0 else "explosion")
 	panic(point if point != Vector3.ZERO else global_position + Vector3.FORWARD)
@@ -89,7 +89,7 @@ func _fall() -> void:
 	velocity = Vector3.ZERO
 	if _rig and _rig.has_method("die"):
 		_rig.call("die")
-	CivilHarm.on_casualty(era_id, global_position, _last_cause)
+	CivilRuntime.on_casualty(era_id, global_position, _last_cause)
 	get_tree().call_group("civilian", "panic", global_position)
 	var tw := create_tween()
 	tw.tween_interval(2.2)
@@ -151,7 +151,7 @@ func _physics_process(dt: float) -> void:
 			if down:
 				return
 		# 民心離反：犠牲が出た時代では、町人はあなたを見るだけで逃げる
-		if CivilHarm.unrest_level() >= 1 and Game.player and _panic <= 0.0 and (Game.player as Node3D).global_position.distance_to(global_position) < 8.0 + 6.0 * CivilHarm.unrest_level():
+		if CivilRuntime.unrest_level() >= 1 and Game.player and _panic <= 0.0 and (Game.player as Node3D).global_position.distance_to(global_position) < 8.0 + 6.0 * CivilRuntime.unrest_level():
 			panic((Game.player as Node3D).global_position)
 	var move := Vector3.ZERO
 	var spd := 1.4

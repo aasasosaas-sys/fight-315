@@ -1182,7 +1182,7 @@ func castle(xf: Transform3D, base_w := 40.0, base_h := 11.0, tiers := 5, wall_co
 		if not last and i % 2 == 1:
 			for sgn in [-1.0, 1.0]:
 				var px := xf * Transform3D(Basis(Vector3.UP, PI * 0.5 if sgn > 0 else -PI * 0.5), Vector3(0, ty + hh + 0.3, sgn * (dd * 0.5 + 0.6)))
-				kit.roof(px, 2.2, 1.3, 1.5, 1.0, "rooftile", "plaster", TILE_DARK, 1.1, 0.25, 0.25, PLASTER, "plaster", wall_col)
+				kit.roof(px, 1.3, 1.3, 1.5, 1.0, "rooftile", "plaster", TILE_DARK, 1.1, 0.25, 0.25, PLASTER, "plaster", wall_col)   # 上の層の壁の外に収まる幅
 		if accent and last:
 			for sgn in [-1.0, 1.0]:
 				var hx := ww * 0.5 + 1.6 - (dd * 0.5 + 1.6) + (dd * 0.5 + 1.6) * 0.42

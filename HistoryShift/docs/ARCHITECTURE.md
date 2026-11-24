@@ -76,6 +76,7 @@ main.gd が `Flow` ノードとして生成する。タイトル・試験・採�
   段階: ひび → 屋根崩落（瓦が滑り落ちる）→ 倒壊（`Fracture.slice` で元メッシュを格子に切った破片 RigidBody＋瓦礫の山＋低いコリジョン）。
 - 木は `EraWorld.tree_defs`（MultiMesh のインスタンス）を倒す。火災は木造に延焼（同時 14 棟・ランドマークごと 36 回まで）。
 - 破片 layer は `Game.COLLISION_DEBRIS`(64)。プレイヤー・町人とは当たらない（町人は爆風でも倒れず逃げる）。
+  例外：設定「民間人への危害（成人向け）」（既定オフ・教育版では無効）がオンなら、町人はプレイヤーが原因の被害で倒れる（瓦礫は町人が近くの建物の倒壊を見て判定。`scripts/core/civil_harm.gd`・`scripts/mission/civil_runtime.gd`・`data/chaos_civil/`、tools/SCHEMA_V2.md）。
 - `Game.chaos_event(kind, id, info)`: kind = destroy / sink / fire / bridge / block。id はランドマークのキー（道沿いは "town"、川の橋は "river"、block の橋は橋グループ ID）。
   info = {era, pos, type, cause("player"|"player_indirect"|"enemy"|"world"), ...}
 - ツール（`scripts/player/destruction_tools.gd`）: 1 銃 / 2 焙烙玉 / 3 火薬樽・ダイナマイト / 4 大筒・野砲（設置→砲撃）/ 5 棒火矢、G で焙烙玉、ホイールで切替。

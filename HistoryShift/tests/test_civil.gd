@@ -26,13 +26,29 @@ func _frames(n: int) -> void:
 		await process_frame
 
 
-func _spawn_civ(era := "edo") -> Civilian:
-	var c := Civilian.spawn(root, Vector3(0, 0.5, 0), era, [])
-	return c
+var CivS: GDScript
+var PlS: GDScript
+var WS: GDScript
+var DS: GDScript
+var RT: GDScript
+
+
+func _spawn_civ(era := "edo"):
+	return CivS.spawn(root, Vector3(0, 0.5, 0), era, [])
+
+
+func _wc() -> int:
+	return int(WS.get("civil_count"))
 
 
 func _run() -> void:
 	var game: Node = root.get_node("Game")
+	# Game を参照するクラスは autoload の後で読む（-s のテストはコンパイル時に Game を知らない）
+	CivS = load("res://scripts/mission/civilian.gd")
+	PlS = load("res://scripts/player/player.gd")
+	WS = load("res://scripts/mission/wanted.gd")
+	DS = load("res://scripts/world/destruction.gd")
+	RT = load("res://scripts/mission/civil_runtime.gd")
 	HistoryState.save_path = "user://test_civil_%d.json" % OS.get_process_id()
 	CivilHarm.ledger_path = "user://test_civil_ledger_%d.json" % OS.get_process_id()
 	CivilHarm.reset_ledger()
@@ -42,15 +58,15 @@ func _run() -> void:
 	# ---- 1. オフ
 	GameSettings.values["civil_harm"] = false
 	_check(not CivilHarm.enabled(), "off by default")
-	var c := _spawn_civ()
+	var c = _spawn_civ()
 	await _frames(2)
 	_check(not c.civil_hit(500.0, 0, c.global_position), "off: civil_hit refuses")
 	c.take_hit(500.0, 0, c.global_position)
 	var fake_hit := {"collider": c, "position": c.global_position + Vector3.UP, "normal": Vector3.UP}
-	Player.apply_hit(self, fake_hit, Vector3.FORWARD, 500.0, 0)
+	PlS.apply_hit(self, fake_hit, Vector3.FORWARD, 500.0, 0)
 	await _frames(2)
 	_check(is_instance_valid(c) and not c.down, "off: civilian never goes down")
-	_check(Wanted.civil_count == 0, "off: no casualty counted")
+	_check(_wc() == 0, "off: no casualty counted")
 	c.queue_free()
 
 	# ---- 2. 教育版・未所有
@@ -71,31 +87,31 @@ func _run() -> void:
 	# ---- 3. オン
 	GameSettings.values["civil_harm"] = true
 	_check(CivilHarm.enabled(), "on")
-	var c2 := _spawn_civ()
+	var c2 = _spawn_civ()
 	await _frames(2)
 	_check(not c2.civil_hit(500.0, 1, c2.global_position), "on: enemy stray bullet does not count")
-	Destruction.last_player_t = -99.0
+	DS.set("last_player_t", -99.0)
 	_check(not c2.civil_hit(500.0, -1, c2.global_position), "on: world damage without the player does not count")
-	Player.apply_hit(self, {"collider": c2, "position": c2.global_position + Vector3.UP, "normal": Vector3.UP}, Vector3.FORWARD, 500.0, 0)
+	PlS.apply_hit(self, {"collider": c2, "position": c2.global_position + Vector3.UP, "normal": Vector3.UP}, Vector3.FORWARD, 500.0, 0)
 	_check(c2.down, "on: player's shot downs a civilian")
-	_check(Wanted.civil_count == 1, "on: casualty counted")
-	_check(Wanted.heat >= 5.0, "on: wanted jumps to max")
+	_check(_wc() == 1, "on: casualty counted")
+	_check(float(WS.get("heat")) >= 5.0, "on: wanted jumps to max")
 	_check(CivilHarm.era_total("edo") == 1, "on: ledger")
-	Wanted.clear()
-	_check(Wanted.heat >= Wanted.CIVIL_FLOOR, "on: wanted stays high after clear")
+	WS.clear()
+	_check(float(WS.get("heat")) >= float(WS.get_script_constant_map()["CIVIL_FLOOR"]), "on: wanted stays high after clear")
 	_check(not c2.is_in_group("civilian") and c2.collision_layer == 0, "on: downed civilian is inert")
 	await create_timer(4.4).timeout
 	_check(not is_instance_valid(c2), "on: downed civilian fades and is removed (no corpse)")
 	# 爆発（team 0）・火（-2）・瓦礫（-3、原因つき）
-	var c3 := _spawn_civ()
+	var c3 = _spawn_civ()
 	await _frames(2)
 	c3.take_hit(500.0, 0, c3.global_position)
 	_check(c3.down, "on: explosion downs a civilian")
-	var c4 := _spawn_civ()
+	var c4 = _spawn_civ()
 	await _frames(2)
 	_check(not c4.civil_hit(500.0, -2, c4.global_position, Vector3.ZERO, "world"), "on: natural fire does not count")
 	_check(c4.civil_hit(500.0, -3, c4.global_position, Vector3.ZERO, "player_indirect") and c4.down, "on: player-caused debris counts")
-	_check(CivilHarm.unrest_level() >= 1, "on: unrest level rises")
+	_check(int(RT.unrest_level()) >= 1, "on: unrest level rises")
 
 	# ---- 4. 除外
 	_check(CivilHarm.excluded("showa", "village"), "excl: showa shitamachi (air raid)")
@@ -110,7 +126,7 @@ func _run() -> void:
 	sess.choice = 1
 	sess.mission = {"method": "x"}
 	root.add_child(sess)
-	var c5 := _spawn_civ("showa")
+	var c5 = _spawn_civ("showa")
 	await _frames(2)
 	_check(not c5.civil_hit(500.0, 0, c5.global_position) and not c5.down, "excl: wartime mission civilian unharmed")
 	sess.mode = "backdrop"
@@ -159,6 +175,29 @@ func _run() -> void:
 	t2.record("casualty", "village", {"era": "edo", "landmark": "village", "role": "商人"})
 	_check(not t2.fired.has("cv_ed_nihonbashi"), "threshold not reached with one casualty")
 	_check(t2.record("casualty", "village", {"era": "heian"}).is_empty(), "other era ignored")
+
+	# ---- 5b. tools/report_civil_reach.py の「届く」例を実際の HistoryState で確かめる
+	if FileAccess.file_exists("res://tools/civil_reach.json"):
+		var rep: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tools/civil_reach.json"))
+		var by_id := {}
+		for era in ["jomon_kofun", "asuka_nara", "heian", "kamakura_muromachi", "sengoku", "edo", "meiji_taisho", "showa"]:
+			for r in CivilHarm.rules_for(era):
+				by_id[r["id"]] = [era, r]
+		var n_ok := 0
+		for row in rep.get("rows", []):
+			if not row.get("reachable", false):
+				continue
+			var st := HistoryState.new(game.db)
+			var t := ChaosTracker.new(game.db, st)
+			for rid in row["example"]:
+				var er: Array = by_id[rid]
+				t.begin_session(er[0])
+				t._add_recovery(er[1])
+				st.apply_chaos(er[1], er[0])
+			var q: Dictionary = game.db.by_id[row["q"]]
+			_check(st.world_choice(q) == int(row["choice"]), "reach report: %s c%d via %s (engine gives c%d)" % [row["q"], row["choice"], row["example"], st.world_choice(q)])
+			n_ok += 1
+		print("reach report examples checked: %d" % n_ok)
 
 	# ---- 6. 流血・遺体なし
 	var src := FileAccess.get_file_as_string("res://scripts/mission/civilian.gd") + FileAccess.get_file_as_string("res://scripts/core/civil_harm.gd")
