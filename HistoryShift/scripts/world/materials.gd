@@ -138,13 +138,13 @@ static func get_mat(key: String) -> Material:
 				bm.set_shader_parameter("detail", 0.95)
 				bm.set_shader_parameter("posterize", 3.0)
 				bm.set_shader_parameter("flat_normal", 0.35)
-				bm.set_shader_parameter("shine", 0.3)
-				bm.set_shader_parameter("sheen", 0.55)
+				bm.set_shader_parameter("shine", 0.22)
+				bm.set_shader_parameter("sheen", 0.3)
 				bm.set_shader_parameter("sat_boost", 1.15)
 				bm.set_shader_parameter("mat_kind", 3.0)
 				# 写真の瓦はオリーブ色に濁るので、色相は頂点色（いぶし銀の青灰）に任せる
 				bm.set_shader_parameter("desat", 0.85)
-				bm.set_shader_parameter("albedo_mul", 1.1)
+				bm.set_shader_parameter("albedo_mul", 0.95)
 			"thatch":
 				bm.set_shader_parameter("detail", 0.7)
 				bm.set_shader_parameter("flat_normal", 0.5)

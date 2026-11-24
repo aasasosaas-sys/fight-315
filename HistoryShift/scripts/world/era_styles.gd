@@ -56,7 +56,7 @@ static func get_style(era_id: String) -> Dictionary:
 			}, true)
 		"sengoku":
 			s.merge({
-				"rot": 1, "sky": "hazy", "sun_color": Color(1.0, 0.8, 0.6), "sun_energy": 1.6,
+				"rot": 1, "sky": "hazy", "sun_color": Color(1.0, 0.86, 0.7), "sun_energy": 1.6,
 				"fog_color": Color(0.7, 0.62, 0.55), "fog_density": 0.0015, "vol_fog": 0.010,
 				"vol_albedo": Color(1.0, 0.88, 0.78),
 				"saturation": 1.02, "contrast": 1.12, "brightness": 0.98,
@@ -116,7 +116,7 @@ static func _anime(era_id: String) -> Dictionary:
 		"plaster_tint": Color(0.97, 0.95, 0.9), "wood_tint": Color(1, 1, 1), "roof_tint": Color(1, 1, 1),
 		"haze_height": 4.0, "haze_density": 0.004,
 		# カラーグレーディング（sRGB の LUT。atmosphere.gd の grade_lut）
-		"grade": {"contrast": 1.08, "sat": 1.0, "green_sat": 0.84, "green_shift": 0.015, "blue_sat": 1.1,
+		"grade": {"contrast": 1.12, "sat": 1.02, "green_sat": 0.92, "green_shift": 0.015, "blue_sat": 1.1,
 			"shadow": Vector3(-0.015, 0.0, 0.035), "high": Vector3(0.02, 0.01, -0.015), "lift": Color(0.012, 0.016, 0.035)},
 	}
 	match era_id:
@@ -143,10 +143,10 @@ static func _anime(era_id: String) -> Dictionary:
 				"cloud_shade": Color(0.74, 0.68, 0.86), "cloud_mid": Color(0.96, 0.9, 0.96),
 				"shade_color": Color(0.62, 0.56, 0.86), "shade_strength": 0.56,
 				"grass_a": Color(0.5, 0.7, 0.32), "grass_b": Color(0.36, 0.6, 0.34), "grass_c": Color(0.76, 0.8, 0.42),
-				"aerial": Color(0.92, 0.86, 0.92), "exposure": 1.04,
-				"plaster_tint": Color(0.98, 0.95, 0.93), "wood_tint": Color(1.02, 0.98, 0.98), "haze_density": 0.006, "glow": 0.75,
-				"grade": {"contrast": 0.97, "sat": 0.92, "green_sat": 0.8, "green_shift": 0.01, "blue_sat": 0.96, "warm_sat": 1.05,
-					"shadow": Vector3(0.012, -0.01, 0.04), "high": Vector3(0.03, 0.005, 0.015), "lift": Color(0.05, 0.04, 0.06),
+				"aerial": Color(0.88, 0.84, 0.92), "exposure": 1.0,
+				"plaster_tint": Color(0.96, 0.93, 0.91), "wood_tint": Color(1.02, 0.98, 0.98), "haze_density": 0.004, "glow": 0.75,
+				"grade": {"contrast": 1.06, "sat": 1.0, "green_sat": 0.88, "green_shift": 0.01, "blue_sat": 1.05, "warm_sat": 1.08,
+					"shadow": Vector3(0.0, -0.012, 0.05), "high": Vector3(0.03, 0.005, 0.015), "lift": Color(0.022, 0.016, 0.03),
 					"vibrance": 0.08}}, true)
 		"kamakura_muromachi":
 			# 真夏の昼: 強い日差し、くっきりした積雲
@@ -163,17 +163,17 @@ static func _anime(era_id: String) -> Dictionary:
 				"cloud_light": Color(1.0, 0.92, 0.78), "cloud_mid": Color(0.98, 0.72, 0.56), "cloud_shade": Color(0.56, 0.46, 0.66),
 				"shade_color": Color(0.5, 0.42, 0.72), "shade_strength": 0.52,
 				"grass_a": Color(0.5, 0.62, 0.24), "grass_b": Color(0.36, 0.52, 0.24), "grass_c": Color(0.78, 0.74, 0.32),
-				"aerial": Color(0.98, 0.78, 0.6), "rays": 0.55, "glow": 0.85, "glare": 0.5,
-				"plaster_tint": Color(0.96, 0.9, 0.82), "haze_density": 0.007, "haze_height": 6.0,
-				"grade": {"contrast": 1.14, "sat": 1.06, "green_sat": 0.8, "green_shift": -0.01, "blue_sat": 1.05, "warm_sat": 1.12,
-					"gain": Color(1.04, 1.0, 0.92), "shadow": Vector3(-0.03, 0.0, 0.04), "high": Vector3(0.05, 0.02, -0.035),
+				"aerial": Color(0.9, 0.8, 0.72), "rays": 0.55, "glow": 0.85, "glare": 0.5,
+				"plaster_tint": Color(0.95, 0.93, 0.9), "haze_density": 0.005, "haze_height": 6.0,
+				"grade": {"contrast": 1.18, "sat": 1.04, "green_sat": 0.9, "green_shift": 0.0, "blue_sat": 1.12, "warm_sat": 1.05,
+					"gain": Color(1.0, 1.0, 0.98), "shadow": Vector3(-0.04, 0.0, 0.05), "high": Vector3(0.035, 0.015, -0.025),
 					"lift": Color(0.02, 0.015, 0.04)}}, true)
 		"edo":
 			# 浮世絵の藍の青空と白い雲
 			a.merge({"sun_elev": 46.0, "tower": 0.7, "cloud_cover": 0.5, "cloud_seed": 0.07,
 				"sky_zenith": Color(0.1, 0.36, 0.84), "sky_horizon": Color(0.58, 0.8, 0.98),
 				"shade_color": Color(0.46, 0.52, 0.88), "plaster_tint": Color(0.95, 0.94, 0.9),
-				"grade": {"contrast": 1.12, "sat": 1.02, "green_sat": 0.82, "green_shift": 0.025, "blue_sat": 1.16,
+				"grade": {"contrast": 1.16, "sat": 1.04, "green_sat": 0.92, "green_shift": 0.025, "blue_sat": 1.16,
 					"shadow": Vector3(-0.025, 0.0, 0.045), "high": Vector3(0.018, 0.01, -0.012), "lift": Color(0.008, 0.016, 0.04)}}, true)
 		"meiji_taisho":
 			# ノスタルジックな午後: 少し暖色の光
@@ -184,7 +184,7 @@ static func _anime(era_id: String) -> Dictionary:
 				"aerial": Color(0.88, 0.86, 0.84), "plaster_tint": Color(0.95, 0.91, 0.84), "wood_tint": Color(1.02, 0.97, 0.92),
 				"grade": {"contrast": 1.06, "sat": 0.84, "green_sat": 0.82, "green_shift": -0.01, "blue_sat": 0.92, "warm_sat": 1.05,
 					"gain": Color(1.04, 1.0, 0.92), "shadow": Vector3(0.01, 0.0, 0.01), "high": Vector3(0.045, 0.025, -0.03),
-					"lift": Color(0.045, 0.035, 0.03)}}, true)
+					"lift": Color(0.03, 0.022, 0.018)}}, true)
 		"showa":
 			# 昭和の夕焼け: 茜と紫のグラデーション
 			# 昭和の夏の午後: 大きな入道雲、少し褪せたフィルムの色（持ち上がった黒・青緑の影・暖かい光）
@@ -198,7 +198,7 @@ static func _anime(era_id: String) -> Dictionary:
 				"plaster_tint": Color(0.93, 0.92, 0.88), "haze_density": 0.005,
 				"grade": {"contrast": 1.04, "sat": 0.96, "green_sat": 0.82, "green_shift": 0.035, "blue_sat": 1.04, "warm_sat": 1.04,
 					"gain": Color(1.03, 1.0, 0.95), "shadow": Vector3(-0.025, 0.012, 0.03), "high": Vector3(0.035, 0.02, -0.025),
-					"lift": Color(0.045, 0.05, 0.05), "vibrance": 0.1}}, true)
+					"lift": Color(0.03, 0.035, 0.035), "vibrance": 0.1}}, true)
 	return a
 
 

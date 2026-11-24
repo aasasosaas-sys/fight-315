@@ -110,11 +110,11 @@ void fragment() {
 		// 漆喰・塗り壁: 白いほど汚れが見える。雨だれの縦筋（上から）と、裾の泥はね
 		float white = smoothstep(0.55, 0.85, vlum);
 		float big = texture(macro_tex, vec2(wall_u * 0.05, v_wpos.y * 0.06) + vec2(0.13, 0.71)).r;
-		a *= mix(vec3(0.95, 0.94, 0.93), vec3(1.0), smoothstep(0.3, 0.7, big));
+		a *= mix(vec3(0.9, 0.89, 0.88), vec3(1.0, 0.995, 0.98), smoothstep(0.3, 0.7, big));
 		float drip = texture(macro_tex, vec2(wall_u * 0.42, v_wpos.y * 0.035) + vec2(0.7, 0.2)).r;
 		float drip2 = texture(macro_tex, vec2(wall_u * 1.3, v_wpos.y * 0.09) + vec2(0.2, 0.5)).r;
 		float streak = smoothstep(0.6, 0.78, drip * 0.7 + drip2 * 0.45) * vert;
-		a *= 1.0 - streak * vec3(0.07, 0.065, 0.05) * (0.4 + white) * paint;
+		a *= 1.0 - streak * vec3(0.13, 0.12, 0.09) * (0.4 + white) * paint;
 		float splash = (1.0 - smoothstep(0.0, 0.7 + drip * 0.6, above)) * vert;
 		a = mix(a, a * vec3(0.8, 0.74, 0.68), splash * 0.35 * white * paint * grime);
 	} else if (mat_kind > 1.5 && mat_kind < 2.5) {
@@ -152,7 +152,8 @@ void fragment() {
 	if (sheen > 0.0) {
 		float fres = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 2.5);
 		float up = smoothstep(-0.2, 0.6, v_wnrm.y);
-		a = mix(a, world_sky_color.rgb * 0.85, clamp(fres * up * sheen, 0.0, 0.6) * (1.0 - world_night * 0.7));
+		vec3 sheen_col = mix(world_sky_color.rgb, vec3(0.42, 0.52, 0.72), 0.55) * 0.8;
+		a = mix(a, sheen_col, clamp(fres * up * sheen, 0.0, 0.5) * (1.0 - world_night * 0.7));
 	}
 	ALBEDO = clamp(a, 0.0, 1.0);
 	NORMAL_MAP = mix(texture(normal_tex, UV).rgb, vec3(0.5, 0.5, 1.0), flat_normal);
@@ -175,11 +176,11 @@ void fragment() {
 	// 夜: 軒下・壁面がほのかに暖色（屋内の灯りの照り返し）
 	float under = smoothstep(0.2, -0.6, v_wnrm.y) * 0.5 + (1.0 - abs(v_wnrm.y)) * 0.15;
 	if (glass < 0.5) {
-		EMISSION = a * vec3(1.0, 0.62, 0.3) * world_night * under * 0.35 + d_emis;
+		EMISSION = a * vec3(1.0, 0.62, 0.3) * world_night * under * 0.7 + d_emis;
 		if (window_glow > 0.5 && vlum < 0.125 && abs(v_wnrm.y) < 0.3) {
 			// 格子窓・開口部から漏れる灯り（夜）。昼は奥の暗がりを少し青く沈める
 			float flick = 0.85 + 0.15 * texture(macro_tex, v_wpos.xz * 0.2 + vec2(TIME * 0.05)).r;
-			EMISSION += vec3(1.0, 0.66, 0.32) * world_night * 1.6 * flick;
+			EMISSION += vec3(1.0, 0.66, 0.32) * world_night * 2.6 * flick;
 			ALBEDO = mix(ALBEDO, ALBEDO * vec3(0.8, 0.85, 1.1), 1.0 - world_night);
 		}
 	}
@@ -191,7 +192,7 @@ void light() {
 		vec3 h = normalize(VIEW + LIGHT);
 		float nh = dot(NORMAL, h);
 		// くっきりした帯ハイライト＋外側の柔らかいにじみ（アニメの艶）
-		float s = smoothstep(0.93, 0.96, nh) + smoothstep(0.75, 0.9, nh) * 0.18;
+		float s = smoothstep(0.93, 0.96, nh) + smoothstep(0.8, 0.92, nh) * 0.08;
 		s *= smoothstep(0.3, 0.6, ATTENUATION);
 		SPECULAR_LIGHT += LIGHT_COLOR / PI * s * shine;
 	}

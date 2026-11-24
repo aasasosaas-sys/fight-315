@@ -51,7 +51,7 @@ func _run() -> void:
 	var cam: CameraRig = sess.cam
 	var industry_only := "industry" in args
 	var st: CraftStation = null if industry_only else sess.craft.find_station("touko")
-	if st == null and not sess.craft.stations.is_empty():
+	if st == null and not industry_only and not sess.craft.stations.is_empty():
 		st = sess.craft.stations[0]
 	if st:
 		var front := st.global_position + st.global_basis.z * 6.0

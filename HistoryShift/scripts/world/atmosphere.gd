@@ -22,14 +22,15 @@ static func build_environment(world: Node3D, style: Dictionary) -> Dictionary:
 	env.sky = sky
 	# 環境光: 空（青い影）＋少しの一様光
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	env.ambient_light_sky_contribution = 0.8
-	env.ambient_light_color = (style["sky_horizon"] as Color).lerp(Color.WHITE, 0.4)
+	# 影の中は空の天頂寄りの青（地平の夕焼け色で影が濁らないように一様光を多めに）
+	env.ambient_light_sky_contribution = 0.45
+	env.ambient_light_color = (style["sky_zenith"] as Color).lerp(Color.WHITE, 0.55)
 	env.ambient_light_energy = style["ambient_energy"]
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 
 	# トーンマップ: 明るく鮮やかに（ハイライトだけ柔らかく）。色調は時代ごとの LUT（_grade_lut）で
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	env.tonemap_exposure = float(style["exposure"]) * 1.08
+	env.tonemap_exposure = float(style["exposure"]) * 1.0
 	env.tonemap_white = 6.0
 
 	var q: int = EraWorld.quality
@@ -70,11 +71,11 @@ static func build_environment(world: Node3D, style: Dictionary) -> Dictionary:
 	env.fog_light_color = style["aerial"]
 	env.fog_light_energy = 1.0
 	env.fog_sun_scatter = 0.22
-	env.fog_density = float(style["aerial_density"]) * 0.22
-	env.fog_aerial_perspective = 0.5
+	env.fog_density = float(style["aerial_density"]) * 0.17
+	env.fog_aerial_perspective = 0.4
 	env.fog_sky_affect = 0.0
 	env.fog_height = float(style.get("haze_height", 6.0))
-	env.fog_height_density = float(style.get("haze_density", 0.004))
+	env.fog_height_density = float(style.get("haze_density", 0.004)) * 0.35
 	env.volumetric_fog_enabled = false
 
 	# 色調: Environment の調整は素通しにして、時代ごとのカラーグレーディング LUT（3D）で
@@ -135,7 +136,7 @@ static func apply_time_grade(nodes: Dictionary, style: Dictionary, day: float, e
 	env.adjustment_color_correction = grade_lut(style, day < 0.5)
 	env.glow_hdr_threshold = lerpf(0.75, 0.95, day)
 	env.glow_intensity = float(style["glow"]) * lerpf(1.0, 0.75, day)
-	env.fog_height_density = float(style.get("haze_density", 0.004)) * lerpf(1.6, 1.0, day)
+	env.fog_height_density = float(style.get("haze_density", 0.004)) * 0.35 * lerpf(1.6, 1.0, day)
 	var post: MeshInstance3D = nodes.get("post")
 	if post and post.material_override:
 		var m := post.material_override as ShaderMaterial
@@ -242,7 +243,7 @@ static func set_dof(nodes: Dictionary, focus: float, near_blur := false) -> void
 	ca.dof_blur_near_enabled = near_blur
 	ca.dof_blur_near_distance = maxf(focus * 0.4, 0.3)
 	ca.dof_blur_near_transition = maxf(focus * 0.3, 0.2)
-	ca.dof_blur_amount = 0.08
+	ca.dof_blur_amount = 0.05
 	we.camera_attributes = ca
 
 
